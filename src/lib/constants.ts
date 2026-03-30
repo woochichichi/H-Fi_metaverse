@@ -89,16 +89,42 @@ export type ProfileStatus = (typeof PROFILE_STATUSES)[number];
 // 기분 이모지
 export const MOOD_EMOJIS = ['😆', '😊', '😐', '😰', '🤯', '😴', '🔥', '☕'] as const;
 
-// 메타버스 Zone 정의
+// 메타버스 Zone 정의 (mockup-v3 좌표 기준)
 export const ZONES = [
-  { id: 'voc', label: 'VOC', emoji: '📞', x: 100, y: 150, width: 160, height: 120 },
-  { id: 'kpi', label: 'KPI', emoji: '📊', x: 320, y: 150, width: 160, height: 120 },
-  { id: 'lounge', label: '라운지', emoji: '☕', x: 540, y: 150, width: 160, height: 120 },
-  { id: 'idea', label: '아이디어', emoji: '💡', x: 100, y: 330, width: 160, height: 120 },
-  { id: 'notice', label: '공지게시판', emoji: '📋', x: 320, y: 330, width: 160, height: 120 },
-  { id: 'note', label: '쪽지함', emoji: '✉️', x: 540, y: 330, width: 160, height: 120 },
+  { id: 'mood', label: '마음의소리', emoji: '💭', x: 80, y: 80, width: 340, height: 280 },
+  { id: 'kpi', label: 'KPI 관리실', emoji: '📊', x: 480, y: 80, width: 340, height: 280 },
+  { id: 'voc', label: 'VOC 센터', emoji: '📞', x: 80, y: 500, width: 340, height: 280 },
+  { id: 'idea', label: '아이디어 보드', emoji: '💡', x: 480, y: 500, width: 340, height: 280 },
+  { id: 'lounge', label: '라운지', emoji: '☕', x: 900, y: 80, width: 300, height: 360 },
+  { id: 'note', label: '익명 쪽지함', emoji: '✉️', x: 900, y: 500, width: 300, height: 280 },
 ] as const;
 export type ZoneId = (typeof ZONES)[number]['id'];
+
+// NPC 팀원 데이터
+export const NPC_TEAM = [
+  { name: '우형', color: '#6C5CE7', skin: '#FFE0BD', hair: '#5a3e28', role: '증권ITO', emoji: '😎', status: '재택' as const, team: '증권ITO' },
+  { name: '재철', color: '#FF6B9D', skin: '#FFE0BD', hair: '#333', role: '손보1팀', emoji: '🤓', status: '출근' as const, team: '손보ITO' },
+  { name: '혜림', color: '#FFD93D', skin: '#FFDBB4', hair: '#5a3218', role: '손보2팀', emoji: '😊', status: '출근' as const, team: '손보ITO' },
+  { name: '은지', color: '#95E86B', skin: '#FFE0BD', hair: '#222', role: '생명2팀', emoji: '💪', status: '출근' as const, team: '생명ITO' },
+  { name: '한나', color: '#C49AFF', skin: '#FFDBB4', hair: '#4a2810', role: '생명1팀', emoji: '🌟', status: '재택' as const, team: '생명ITO' },
+  { name: '민수', color: '#FF9A6B', skin: '#FFE0BD', hair: '#333', role: '대리', emoji: '🔥', status: '출근' as const, team: '증권ITO' },
+  { name: '예린', color: '#FF6BCA', skin: '#FFDBB4', hair: '#3a2010', role: '주임', emoji: '🌸', status: '출근' as const, team: '증권ITO' },
+  { name: '동현', color: '#6BFFD4', skin: '#FFE0BD', hair: '#222', role: '대리', emoji: '🎮', status: '출근' as const, team: '한금서' },
+] as const;
+
+// 말풍선 메시지
+export const CHAT_MESSAGES = [
+  '오늘도 화이팅!', '커피 한 잔 ☕', '점심 뭐 먹지?', 'ㅋㅋㅋ',
+  '코드 짜는 중...', '회의 끝!', '칼퇴!', '배포 완료 🚀',
+  '간식 사왔어~', '장애 해결!', '배고파...', 'VOC 처리 중', '아이디어 있어요!',
+] as const;
+
+// 이모지 반응 목록
+export const REACTION_EMOJIS = ['🤘', '👏', '❤️', '😆', '🎉', '🔥'] as const;
+
+// 맵 크기
+export const MAP_WIDTH = 1800;
+export const MAP_HEIGHT = 1200;
 
 // 초대 코드 접두사
 export const INVITE_CODE_PREFIX = 'FITO';

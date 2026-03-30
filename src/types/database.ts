@@ -7,77 +7,95 @@ export interface Database {
         Row: Profile;
         Insert: Omit<Profile, 'created_at' | 'updated_at'>;
         Update: Partial<Omit<Profile, 'id'>>;
+        Relationships: [];
       };
       invite_codes: {
         Row: InviteCode;
         Insert: Omit<InviteCode, 'id' | 'created_at' | 'used_count'>;
         Update: Partial<Omit<InviteCode, 'id'>>;
+        Relationships: [];
       };
       vocs: {
         Row: Voc;
         Insert: Omit<Voc, 'id' | 'created_at' | 'updated_at' | 'status'>;
         Update: Partial<Omit<Voc, 'id'>>;
+        Relationships: [];
       };
       ideas: {
         Row: Idea;
         Insert: Omit<Idea, 'id' | 'created_at' | 'status'>;
         Update: Partial<Omit<Idea, 'id'>>;
+        Relationships: [];
       };
       idea_votes: {
         Row: IdeaVote;
         Insert: IdeaVote;
-        Update: never;
+        Update: Record<string, never>;
+        Relationships: [];
       };
       notices: {
         Row: Notice;
         Insert: Omit<Notice, 'id' | 'created_at'>;
         Update: Partial<Omit<Notice, 'id'>>;
+        Relationships: [];
       };
       notice_reads: {
         Row: NoticeRead;
         Insert: NoticeRead;
-        Update: never;
+        Update: Record<string, never>;
+        Relationships: [];
       };
       kpi_items: {
         Row: KpiItem;
         Insert: Omit<KpiItem, 'id' | 'created_at'>;
         Update: Partial<Omit<KpiItem, 'id'>>;
+        Relationships: [];
       };
       kpi_records: {
         Row: KpiRecord;
         Insert: Omit<KpiRecord, 'id' | 'created_at'>;
         Update: Partial<Omit<KpiRecord, 'id'>>;
+        Relationships: [];
       };
       activities: {
         Row: Activity;
         Insert: Omit<Activity, 'id' | 'created_at'>;
         Update: Partial<Omit<Activity, 'id'>>;
+        Relationships: [];
       };
       notifications: {
         Row: Notification;
         Insert: Omit<Notification, 'id' | 'created_at' | 'read'>;
         Update: Partial<Omit<Notification, 'id'>>;
+        Relationships: [];
       };
       anonymous_notes: {
         Row: AnonymousNote;
         Insert: Omit<AnonymousNote, 'id' | 'created_at' | 'updated_at' | 'status'>;
         Update: Partial<Omit<AnonymousNote, 'id'>>;
+        Relationships: [];
       };
       message_threads: {
         Row: MessageThread;
         Insert: Omit<MessageThread, 'id' | 'created_at'>;
-        Update: never;
+        Update: Record<string, never>;
+        Relationships: [];
       };
       user_activities: {
         Row: UserActivity;
         Insert: Omit<UserActivity, 'id' | 'created_at'>;
-        Update: never;
+        Update: Record<string, never>;
+        Relationships: [];
       };
     };
     Views: {
       idea_with_votes: {
         Row: IdeaWithVotes;
+        Relationships: [];
       };
+    };
+    Functions: {
+      [_ in never]: never;
     };
   };
 }
@@ -128,6 +146,7 @@ export interface Voc {
   assignee_id: string | null;
   resolution: string | null;
   attachment_urls: string[] | null;
+  session_token: string | null;
   created_at: string;
   updated_at: string;
 }
