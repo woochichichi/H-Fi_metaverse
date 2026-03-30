@@ -52,33 +52,38 @@ export default function NoticeForm({ onClose, onCreated }: NoticeFormProps) {
     if (!isValid || submitting || !user) return;
     setSubmitting(true);
 
-    let attachmentUrls: string[] = [];
-    if (files.length > 0) {
-      const results = await upload(files);
-      attachmentUrls = results.map((r) => r.url);
+    try {
+      let attachmentUrls: string[] = [];
+      if (files.length > 0) {
+        const results = await upload(files);
+        attachmentUrls = results.map((r) => r.url);
+      }
+
+      const { error } = await createNotice({
+        title: title.trim(),
+        content: content.trim(),
+        urgency,
+        category,
+        pinned,
+        unit: targetUnit || null,
+        team: targetTeam || null,
+        attachment_urls: attachmentUrls.length > 0 ? attachmentUrls : undefined,
+        author_id: user.id,
+      });
+
+      if (error) {
+        addToast(`공지 등록 실패: ${error}`, 'error');
+        return;
+      }
+
+      addToast('📋 공지가 등록되었습니다', 'success');
+      onCreated();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '알 수 없는 오류';
+      addToast(`공지 등록 실패: ${msg}`, 'error');
+    } finally {
+      setSubmitting(false);
     }
-
-    const { error } = await createNotice({
-      title: title.trim(),
-      content: content.trim(),
-      urgency,
-      category,
-      pinned,
-      unit: targetUnit || null,
-      team: targetTeam || null,
-      attachment_urls: attachmentUrls.length > 0 ? attachmentUrls : undefined,
-      author_id: user.id,
-    });
-
-    setSubmitting(false);
-
-    if (error) {
-      addToast(`공지 등록 실패: ${error}`, 'error');
-      return;
-    }
-
-    addToast('📋 공지가 등록되었습니다', 'success');
-    onCreated();
   };
 
   return (

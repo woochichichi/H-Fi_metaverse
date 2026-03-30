@@ -57,41 +57,45 @@ export default function VocForm({ onClose, onCreated }: VocFormProps) {
     if (!isValid || submitting || !profile) return;
     setSubmitting(true);
 
-    // 파일 업로드
-    let attachmentUrls: string[] = [];
-    if (files.length > 0) {
-      setSubmitStep(`파일 업로드 (0/${files.length})`);
-      const results = await upload(files);
-      attachmentUrls = results.map((r) => r.url);
-      // 파일 업로드 실패해도 VOC 자체는 등록 진행
-      if (results.length < files.length) {
-        addToast('일부 파일 업로드에 실패했습니다. VOC는 등록을 계속합니다.', 'info');
+    try {
+      // 파일 업로드
+      let attachmentUrls: string[] = [];
+      if (files.length > 0) {
+        setSubmitStep(`파일 업로드 (0/${files.length})`);
+        const results = await upload(files);
+        attachmentUrls = results.map((r) => r.url);
+        if (results.length < files.length) {
+          addToast('일부 파일 업로드에 실패했습니다. VOC는 등록을 계속합니다.', 'info');
+        }
       }
+
+      setSubmitStep('VOC 등록 중...');
+
+      const { error } = await createVoc({
+        anonymous,
+        category: category!,
+        title: title.trim(),
+        content: content.trim(),
+        team: profile.team,
+        target_area: targetArea,
+        attachment_urls: attachmentUrls.length > 0 ? attachmentUrls : undefined,
+        author_id: anonymous ? null : user?.id,
+      });
+
+      if (error) {
+        addToast(`VOC 등록 실패: ${error}`, 'error');
+        return;
+      }
+
+      addToast('VOC가 접수되었습니다', 'success');
+      onCreated();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '알 수 없는 오류';
+      addToast(`VOC 등록 실패: ${msg}`, 'error');
+    } finally {
+      setSubmitting(false);
+      setSubmitStep('');
     }
-
-    setSubmitStep('VOC 등록 중...');
-
-    const { error } = await createVoc({
-      anonymous,
-      category: category!,
-      title: title.trim(),
-      content: content.trim(),
-      team: profile.team,
-      target_area: targetArea,
-      attachment_urls: attachmentUrls.length > 0 ? attachmentUrls : undefined,
-      author_id: anonymous ? null : user?.id,
-    });
-
-    setSubmitting(false);
-    setSubmitStep('');
-
-    if (error) {
-      addToast(`VOC 등록 실패: ${error}`, 'error');
-      return;
-    }
-
-    addToast('VOC가 접수되었습니다', 'success');
-    onCreated();
   };
 
   const buttonLabel = submitting

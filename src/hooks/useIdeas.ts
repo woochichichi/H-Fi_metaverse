@@ -230,10 +230,11 @@ export function useIdeas() {
 
   // 사용자 투표 여부 일괄 조회
   const fetchUserVotes = useCallback(async (userId: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('idea_votes')
       .select('idea_id')
       .eq('user_id', userId);
+    if (error) console.error('투표 조회 실패:', error.message);
 
     const votedIds = new Set((data ?? []).map((v) => v.idea_id));
 

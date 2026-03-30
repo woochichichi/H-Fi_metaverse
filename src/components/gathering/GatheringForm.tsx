@@ -32,22 +32,28 @@ export default function GatheringForm({ onClose, onCreated }: GatheringFormProps
     }
 
     setSubmitting(true);
-    const { error } = await createGathering({
-      author_id: user.id,
-      title: title.trim(),
-      description: description.trim(),
-      category,
-      max_members: maxMembers ? parseInt(maxMembers, 10) : null,
-      contact_info: contactInfo.trim() || null,
-      deadline: deadline ? new Date(deadline).toISOString() : null,
-    });
+    try {
+      const { error } = await createGathering({
+        author_id: user.id,
+        title: title.trim(),
+        description: description.trim(),
+        category,
+        max_members: maxMembers ? parseInt(maxMembers, 10) : null,
+        contact_info: contactInfo.trim() || null,
+        deadline: deadline ? new Date(deadline).toISOString() : null,
+      });
 
-    setSubmitting(false);
-    if (error) {
-      addToast(`등록 실패: ${error}`, 'error');
-    } else {
-      addToast('모임이 등록되었습니다', 'success');
-      onCreated();
+      if (error) {
+        addToast(`등록 실패: ${error}`, 'error');
+      } else {
+        addToast('모임이 등록되었습니다', 'success');
+        onCreated();
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '알 수 없는 오류';
+      addToast(`등록 실패: ${msg}`, 'error');
+    } finally {
+      setSubmitting(false);
     }
   };
 

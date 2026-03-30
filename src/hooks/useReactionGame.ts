@@ -85,7 +85,7 @@ export function useReactionGame() {
         setRound(nextRound);
         setPhase('idle');
         // 다음 라운드 자동 시작
-        setTimeout(() => startRound(), 800);
+        timerRef.current = setTimeout(() => startRound(), 800);
       }
       return;
     }
