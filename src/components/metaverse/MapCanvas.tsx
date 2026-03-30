@@ -866,36 +866,49 @@ export default function MapCanvas({ children }: MapCanvasProps) {
       {/* 포탈 아치형 문 */}
       <PortalArch room={room} />
 
-      {/* 미션/비전 바닥 각인 (중앙 광장 전용) */}
+      {/* 미션/비전 바닥 슬로건 — 새마을 운동 레트로 (중앙 광장 전용) */}
       {!room.team && (
         <div
           className="absolute pointer-events-none select-none z-[2]"
           style={{
             left: '50%',
-            top: 855,
+            top: 1010,
             transform: 'translateX(-50%)',
             textAlign: 'center',
-            opacity: 0.13,
             whiteSpace: 'nowrap',
           }}
         >
+          {/* 상단 장식선 ━━ ◆ ━━ */}
+          <div style={{ opacity: 0.25, marginBottom: 8, letterSpacing: 2, fontSize: 11, color: '#C4A36E', fontFamily: "'DungGeunMo', monospace" }}>
+            ━━━━━━━ ◆ ━━━━━━━
+          </div>
+          {/* 미션 (큰 슬로건) */}
           <div style={{
-            color: '#8A7A6E',
-            fontSize: 15,
-            letterSpacing: 3,
+            color: '#D4B87E',
+            fontSize: 18,
+            letterSpacing: 5,
             fontFamily: "'DungGeunMo', 'Galmuri11', monospace",
-            marginBottom: 10,
+            fontWeight: 'bold',
+            opacity: 0.35,
+            textShadow: '0 1px 2px rgba(0,0,0,0.4)',
+            marginBottom: 6,
           }}>
             초지능 · 초융합 · 초연결 기술로 인류를 더 풍요롭고 안전하게
           </div>
+          {/* 비전 (부제) */}
           <div style={{
-            color: '#8A7A6E',
-            fontSize: 12,
-            letterSpacing: 2,
-            fontFamily: "'Galmuri11', monospace",
+            color: '#C4A36E',
+            fontSize: 13,
+            letterSpacing: 3,
+            fontFamily: "'DungGeunMo', 'Galmuri11', monospace",
+            opacity: 0.28,
             textTransform: 'uppercase' as const,
           }}>
             고객사 디지털 전환의 핵심 파트너 — 2030 Global Value Creation Partner
+          </div>
+          {/* 하단 장식선 */}
+          <div style={{ opacity: 0.25, marginTop: 8, letterSpacing: 2, fontSize: 11, color: '#C4A36E', fontFamily: "'DungGeunMo', monospace" }}>
+            ━━━━━━━ ◆ ━━━━━━━
           </div>
         </div>
       )}

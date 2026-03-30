@@ -252,7 +252,7 @@ export const ROOMS_DATA: Record<RoomId, RoomDef> = {
     id: 'plaza',
     label: '중앙 광장',
     theme: { main: '#F8B500', sub: '#FFF8E1', floor: '#2a2a1a', border: '#F8B500' },
-    mapSize: { w: 1600, h: 1000 },
+    mapSize: { w: 1600, h: 1140 },
     spawnPoint: { x: 800, y: 480 },
     zones: [
       { id: 'voc', team: null, label: '📞 VOC 센터', emoji: '📞', x: 60, y: 60, width: 660, height: 380 },
