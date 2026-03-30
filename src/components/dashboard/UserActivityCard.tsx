@@ -90,7 +90,7 @@ export function UserDetailModal({ userName, details, onClose }: UserDetailModalP
     });
   };
 
-  return (
+  return createPortal(
     <>
       <div className="fixed inset-0 z-[300] bg-black/50" onClick={onClose} />
       <div className="fixed left-1/2 top-1/2 z-[301] w-96 max-h-[70vh] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-white/[.08] bg-bg-secondary shadow-2xl flex flex-col">
@@ -128,6 +128,7 @@ export function UserDetailModal({ userName, details, onClose }: UserDetailModalP
           )}
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 }
