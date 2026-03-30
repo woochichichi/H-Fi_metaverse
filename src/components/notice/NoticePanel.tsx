@@ -17,7 +17,7 @@ interface NoticePanelProps {
 
 export default function NoticePanel({ onClose }: NoticePanelProps) {
   const { profile, user } = useAuthStore();
-  const { notices, loading, readIds, fetchNotices, fetchMyReads } = useNotices();
+  const { notices, loading, error, readIds, fetchNotices, fetchMyReads } = useNotices();
 
   const [view, setView] = useState<ViewMode>('list');
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
@@ -161,8 +161,10 @@ export default function NoticePanel({ onClose }: NoticePanelProps) {
         <NoticeList
           notices={notices}
           loading={loading}
+          error={error}
           readIds={readIds}
           onSelect={handleSelect}
+          onRetry={loadNotices}
         />
       </div>
 

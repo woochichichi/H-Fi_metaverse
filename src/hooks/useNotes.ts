@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { withTimeout } from '../lib/utils';
 import { ACTIVITY_POINTS } from '../lib/constants';
 import type { AnonymousNote } from '../types';
 import type { NoteCategory, NoteStatus } from '../lib/constants';
@@ -38,7 +39,7 @@ export function useNotes() {
         ascending: filters.sort === 'oldest',
       });
 
-      const { data, error: fetchError } = await query;
+      const { data, error: fetchError } = await withTimeout(query);
 
       if (fetchError) throw fetchError;
       setNotes(data ?? []);
@@ -57,11 +58,11 @@ export function useNotes() {
     setError(null);
 
     try {
-      const { data, error: fetchError } = await supabase
+      const { data, error: fetchError } = await withTimeout(supabase
         .from('anonymous_notes')
         .select('*')
         .eq('sender_id', userId)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false }));
 
       if (fetchError) throw fetchError;
       setNotes(data ?? []);

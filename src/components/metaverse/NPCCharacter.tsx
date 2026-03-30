@@ -87,8 +87,8 @@ export default function NPCCharacter() {
             </div>
           )}
           <div
-            className="absolute left-1/2 -translate-x-1/2 flex items-center gap-[3px] whitespace-nowrap rounded-lg px-2 py-[2px] text-[9px] font-medium text-text-secondary"
-            style={{ top: -18, background: 'rgba(0,0,0,.55)', backdropFilter: 'blur(2px)' }}
+            className="absolute left-1/2 -translate-x-1/2 flex items-center gap-[3px] whitespace-nowrap rounded-lg px-2 py-[2px] text-[11px] font-medium text-text-secondary"
+            style={{ top: -18, background: 'rgba(0,0,0,.7)' }}
           >
             <span style={{ color: npc.color }}>●</span>
             {npc.name}, {npc.role}

@@ -51,10 +51,11 @@ export default function Sidebar() {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setCtxMenu(null);
     };
-    document.addEventListener('mousedown', handleClick);
+    // click(mouseup 후) 사용 — mousedown 사용 시 메뉴 항목 클릭이 씹힐 수 있음
+    document.addEventListener('click', handleClick);
     document.addEventListener('keydown', handleKey);
     return () => {
-      document.removeEventListener('mousedown', handleClick);
+      document.removeEventListener('click', handleClick);
       document.removeEventListener('keydown', handleKey);
     };
   }, [ctxMenu]);
@@ -69,7 +70,7 @@ export default function Sidebar() {
   const groups: StatusGroup[] = ['online', '재택', 'offline'];
 
   return (
-    <aside className="flex w-[260px] flex-shrink-0 flex-col border-l border-white/[.06]" style={{ background: 'rgba(30,30,48,.97)', backdropFilter: 'blur(16px)' }}>
+    <aside className="flex w-[260px] flex-shrink-0 flex-col border-l border-white/[.06]" style={{ background: 'rgba(42,31,40,.97)', backdropFilter: 'blur(16px)' }}>
       {/* 현재 룸 */}
       <div className="flex items-center justify-center px-4 pt-3 pb-1">
         <span className="rounded-md px-3 py-1 text-[11px] font-bold text-white" style={{ background: `${room.theme.main}66` }}>
@@ -79,7 +80,7 @@ export default function Sidebar() {
       {/* 헤더 */}
       <div className="flex h-10 items-center justify-between px-4 pt-1 pb-1">
         <span className="text-sm font-medium text-text-secondary">피플</span>
-        <span className="font-mono text-xs text-text-muted">
+        <span className="font-mono text-xs text-text-secondary">
           {filtered.filter((p) => p.status !== 'offline').length}명 접속
         </span>
       </div>
@@ -107,7 +108,7 @@ export default function Sidebar() {
             <div key={status} className="mb-2">
               <div className="flex items-center gap-1.5 px-2 py-1">
                 <span className={`h-2 w-2 rounded-full ${STATUS_COLORS[status]}`} />
-                <span className="text-xs font-medium text-text-muted">
+                <span className="text-xs font-medium text-text-secondary">
                   {STATUS_LABELS[status]} ({people.length})
                 </span>
               </div>
@@ -131,7 +132,7 @@ export default function Sidebar() {
                       <span className="truncate text-sm text-text-primary">{getDisplayName(p, isAdmin)}</span>
                       {p.mood && <span className="text-xs">{p.mood}</span>}
                     </div>
-                    <span className="text-xs text-text-muted">{p.team}</span>
+                    <span className="text-xs text-text-secondary">{p.team}</span>
                   </div>
                 </div>
               ))}

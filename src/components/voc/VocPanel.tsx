@@ -21,7 +21,7 @@ interface VocPanelProps {
 export default function VocPanel({ onClose }: VocPanelProps) {
   const { profile } = useAuthStore();
   const { addToast } = useUiStore();
-  const { vocs, loading, fetchVocs } = useVocs();
+  const { vocs, loading, error, fetchVocs } = useVocs();
 
   const [view, setView] = useState<ViewMode>('list');
   const [selectedVoc, setSelectedVoc] = useState<Voc | null>(null);
@@ -219,7 +219,7 @@ export default function VocPanel({ onClose }: VocPanelProps) {
 
       {/* VOC 목록 */}
       <div className="flex-1 overflow-y-auto p-4">
-        <VocList vocs={vocs} loading={loading} onSelect={handleSelectVoc} assigneeNames={assigneeNames} />
+        <VocList vocs={vocs} loading={loading} error={error} onSelect={handleSelectVoc} onRetry={loadVocs} assigneeNames={assigneeNames} />
       </div>
 
       {/* FAB: 새 VOC */}

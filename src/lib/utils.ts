@@ -49,6 +49,16 @@ export function getDisplayName(
   return nick;
 }
 
+/** Supabase 쿼리 타임아웃 래퍼 (기본 8초) */
+export function withTimeout<T>(promise: PromiseLike<T>, ms = 8000): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('요청 시간이 초과되었습니다. 다시 시도해주세요')), ms)
+    ),
+  ]);
+}
+
 /** 초대 코드 생성 (8자리 숫자) */
 export function generateInviteCode(): string {
   return String(Math.floor(10000000 + Math.random() * 90000000));

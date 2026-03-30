@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { withTimeout } from '../lib/utils';
 import type { Voc } from '../types';
 import type { VocCategory, VocStatus } from '../lib/constants';
 
@@ -36,7 +37,7 @@ export function useVocs() {
         ascending: filters.sort === 'oldest',
       });
 
-      const { data, error: fetchError } = await query;
+      const { data, error: fetchError } = await withTimeout(query);
 
       if (fetchError) throw fetchError;
       setVocs(data ?? []);

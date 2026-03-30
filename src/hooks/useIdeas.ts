@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { withTimeout } from '../lib/utils';
 import type { IdeaWithVotes } from '../types';
 import type { IdeaCategory, IdeaStatus } from '../lib/constants';
 
@@ -34,7 +35,7 @@ export function useIdeas() {
         query = query.order('created_at', { ascending: false });
       }
 
-      const { data, error: fetchError } = await query;
+      const { data, error: fetchError } = await withTimeout(query);
 
       if (fetchError) throw fetchError;
       setIdeas((data as IdeaWithVotes[]) ?? []);

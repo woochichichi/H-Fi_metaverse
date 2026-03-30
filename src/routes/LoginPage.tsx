@@ -42,9 +42,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* 로고 */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent/20">
-            <span className="text-3xl">🏡</span>
-          </div>
+          <img src="/favicon.svg" alt="한울타리" className="mx-auto mb-3 h-16 w-16" />
           <h1 className="font-heading text-2xl font-bold text-text-primary">
             한울타리
           </h1>

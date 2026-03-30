@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { withTimeout } from '../lib/utils';
 import type { KpiItem, KpiRecord } from '../types';
 
 export function useKpi() {
@@ -21,7 +22,7 @@ export function useKpi() {
 
       query = query.order('created_at', { ascending: true });
 
-      const { data, error: fetchError } = await query;
+      const { data, error: fetchError } = await withTimeout(query);
 
       if (fetchError) throw fetchError;
       setKpiItems(data ?? []);

@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { withTimeout } from '../lib/utils';
 import type { Notification } from '../types';
 
 // 시급성 순서: 긴급 → 할일 → 참고
@@ -19,11 +20,11 @@ export function useInbox(userId: string | null) {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await withTimeout(supabase
         .from('notifications')
         .select('*')
         .eq('user_id', userId)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false }));
 
       if (error) {
         console.error('수집함 조회 실패:', error.message);

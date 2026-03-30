@@ -97,13 +97,11 @@ export default function TopBar() {
 
   return (
     <>
-      <header className="flex h-12 flex-shrink-0 items-center justify-between border-b border-white/[.06] px-4" style={{ background: 'rgba(30,30,48,.95)', backdropFilter: 'blur(12px)' }}>
+      <header className="flex h-12 flex-shrink-0 items-center justify-between border-b border-white/[.06] px-4" style={{ background: 'rgba(42,31,40,.97)', backdropFilter: 'blur(12px)' }}>
         {/* 왼쪽: 로고 */}
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg text-sm" style={{ background: 'linear-gradient(135deg,#6C5CE7,#a29bfe)' }}>
-            🏡
-          </div>
-          <h1 className="font-heading text-base font-bold tracking-tight text-white">
+          <img src="/favicon.svg" alt="한울타리" className="h-7 w-7" />
+          <h1 className="font-heading text-base font-bold tracking-tight text-text-primary">
             한울타리
           </h1>
         </div>

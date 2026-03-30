@@ -41,7 +41,7 @@ export default function BottomBar() {
     <div className="relative flex h-full flex-shrink-0">
       <div
         className={`flex flex-col border-r border-white/[.06] transition-all duration-200 ${collapsed ? 'w-0 overflow-hidden border-none' : 'w-[160px]'}`}
-        style={{ background: 'rgba(30,30,48,.95)', backdropFilter: 'blur(12px)' }}
+        style={{ background: 'rgba(42,31,40,.95)', backdropFilter: 'blur(12px)' }}
       >
         {!collapsed && (
           <div className="flex flex-1 flex-col justify-between p-3">

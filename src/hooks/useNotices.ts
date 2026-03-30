@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { withTimeout } from '../lib/utils';
 import { ACTIVITY_POINTS } from '../lib/constants';
 import type { Notice, Profile } from '../types';
 import type { UrgencyLevel, NoticeCategory } from '../lib/constants';
@@ -32,7 +33,7 @@ export function useNotices() {
       // 고정 공지 상단 + 최신순
       query = query.order('pinned', { ascending: false }).order('created_at', { ascending: false });
 
-      const { data, error: fetchError } = await query;
+      const { data, error: fetchError } = await withTimeout(query);
 
       if (fetchError) throw fetchError;
       setNotices(data ?? []);

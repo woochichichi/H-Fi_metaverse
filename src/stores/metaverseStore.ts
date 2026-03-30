@@ -15,6 +15,18 @@ interface MoveTarget {
   zoneId: ZoneId;
 }
 
+export interface OtherPlayer {
+  userId: string;
+  name: string;
+  team: string;
+  room: RoomId;
+  x: number;
+  y: number;
+  targetX: number;
+  targetY: number;
+  moodEmoji?: string;
+}
+
 interface MetaverseState {
   activeZone: ZoneId | null;
   nearZone: ZoneId | null;
@@ -24,6 +36,7 @@ interface MetaverseState {
   emojiFloats: EmojiFloat[];
   currentRoom: RoomId;
   nearPortal: PortalDef | null;
+  otherPlayers: Map<string, OtherPlayer>;
   setActiveZone: (zone: ZoneId | null) => void;
   setNearZone: (zone: ZoneId | null) => void;
   setPlayerPosition: (pos: { x: number; y: number }) => void;
@@ -34,6 +47,9 @@ interface MetaverseState {
   setCurrentRoom: (roomId: RoomId) => void;
   setNearPortal: (portal: PortalDef | null) => void;
   enterRoom: (roomId: RoomId, spawnPoint?: { x: number; y: number }) => void;
+  updateOtherPlayer: (player: OtherPlayer) => void;
+  removeOtherPlayer: (userId: string) => void;
+  clearOtherPlayers: () => void;
 }
 
 export const useMetaverseStore = create<MetaverseState>((set, get) => ({
@@ -45,6 +61,7 @@ export const useMetaverseStore = create<MetaverseState>((set, get) => ({
   emojiFloats: [],
   currentRoom: 'stock',
   nearPortal: null,
+  otherPlayers: new Map(),
   setActiveZone: (zone) => set({ activeZone: zone }),
   setNearZone: (zone) => set({ nearZone: zone }),
   setPlayerPosition: (pos) => set({ playerPosition: pos }),
@@ -72,6 +89,25 @@ export const useMetaverseStore = create<MetaverseState>((set, get) => ({
       nearPortal: null,
       activeZone: null,
       moveTarget: null,
+      otherPlayers: new Map(),
     });
   },
+  updateOtherPlayer: (player) =>
+    set((s) => {
+      const next = new Map(s.otherPlayers);
+      const existing = next.get(player.userId);
+      next.set(player.userId, {
+        ...player,
+        x: existing?.x ?? player.targetX,
+        y: existing?.y ?? player.targetY,
+      });
+      return { otherPlayers: next };
+    }),
+  removeOtherPlayer: (userId) =>
+    set((s) => {
+      const next = new Map(s.otherPlayers);
+      next.delete(userId);
+      return { otherPlayers: next };
+    }),
+  clearOtherPlayers: () => set({ otherPlayers: new Map() }),
 }));

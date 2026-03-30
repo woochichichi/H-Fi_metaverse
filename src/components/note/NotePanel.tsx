@@ -19,7 +19,7 @@ interface NotePanelProps {
 export default function NotePanel({ onClose }: NotePanelProps) {
   const { profile, user } = useAuthStore();
   const { addToast, modalContext } = useUiStore();
-  const { notes, loading, fetchNotes, fetchMyNotes } = useNotes();
+  const { notes, loading, error, fetchNotes, fetchMyNotes } = useNotes();
 
   const [view, setView] = useState<ViewMode>(modalContext?.targetName ? 'form' : 'list');
   const [selectedNote, setSelectedNote] = useState<AnonymousNote | null>(null);
@@ -191,7 +191,7 @@ export default function NotePanel({ onClose }: NotePanelProps) {
 
       {/* 쪽지 목록 */}
       <div className="flex-1 overflow-y-auto p-4">
-        <NoteList notes={notes} loading={loading} onSelect={handleSelectNote} />
+        <NoteList notes={notes} loading={loading} error={error} onSelect={handleSelectNote} onRetry={loadNotes} />
       </div>
 
       {/* FAB: 새 쪽지 (멤버용 — 리더도 보내기 가능) */}

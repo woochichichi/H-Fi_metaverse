@@ -1,11 +1,13 @@
 import { useRef, useEffect, useCallback, useMemo } from 'react';
 import MapCanvas from './MapCanvas';
 import PlayerCharacter from './PlayerCharacter';
+import OtherPlayers from './OtherPlayers';
 import NPCCharacter from './NPCCharacter';
 import Zone from './Zone';
 import ChatBubble from './ChatBubble';
 import EmojiFloat from './EmojiFloat';
 import BottomBar from './BottomBar';
+import usePlayerSync from '../../hooks/usePlayerSync';
 import VocPanel from '../voc/VocPanel';
 import IdeaPanel from '../idea/IdeaPanel';
 import NoticePanel from '../notice/NoticePanel';
@@ -60,6 +62,7 @@ export default function MetaverseLayout() {
   const { modalOpen, closeModal, addToast } = useUiStore();
   const { profile } = useAuthStore();
   const mapTheme = useMemo(() => getMapTimeTheme(), []);
+  usePlayerSync();
 
   const room = ROOMS_DATA[currentRoom];
   const mapW = room.mapSize.w;
@@ -123,6 +126,7 @@ export default function MetaverseLayout() {
               <Zone />
               <NPCCharacter />
               <ChatBubble />
+              <OtherPlayers />
               <PlayerCharacter />
               <EmojiFloat />
             </MapCanvas>

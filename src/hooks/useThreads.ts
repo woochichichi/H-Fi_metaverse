@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { withTimeout } from '../lib/utils';
 import type { MessageThread } from '../types';
 
 export function useThreads(refType: 'voc' | 'note', refId: string | null) {
@@ -11,12 +12,12 @@ export function useThreads(refType: 'voc' | 'note', refId: string | null) {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await withTimeout(supabase
         .from('message_threads')
         .select('*')
         .eq('ref_type', refType)
         .eq('ref_id', refId)
-        .order('created_at', { ascending: true });
+        .order('created_at', { ascending: true }));
 
       if (error) {
         console.error('대화 조회 실패:', error.message);

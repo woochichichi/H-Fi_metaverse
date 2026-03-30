@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { withTimeout } from '../lib/utils';
 import type { Gathering, GatheringMember, Profile } from '../types';
 import type { GatheringCategory, GatheringStatus } from '../lib/constants';
 
@@ -30,7 +31,7 @@ export function useGatherings() {
         query = query.eq('status', filters.status);
       }
 
-      const { data, error: fetchError } = await query;
+      const { data, error: fetchError } = await withTimeout(query);
       if (fetchError) throw fetchError;
       setGatherings((data as Gathering[]) ?? []);
     } catch (err) {
