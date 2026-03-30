@@ -196,7 +196,7 @@ export const ROOMS_DATA: Record<RoomId, RoomDef> = {
         id: 'portal-stock-plaza',
         x: 540, y: 830, w: 120, h: 50,
         targetRoom: 'plaza',
-        spawnPoint: { x: 200, y: 120 },
+        spawnPoint: { x: 190, y: 110 },
         label: '중앙 광장',
       },
     ],
@@ -219,7 +219,7 @@ export const ROOMS_DATA: Record<RoomId, RoomDef> = {
         id: 'portal-life-plaza',
         x: 540, y: 830, w: 120, h: 50,
         targetRoom: 'plaza',
-        spawnPoint: { x: 780, y: 850 },
+        spawnPoint: { x: 740, y: 800 },
         label: '중앙 광장',
       },
     ],
@@ -242,7 +242,7 @@ export const ROOMS_DATA: Record<RoomId, RoomDef> = {
         id: 'portal-shield-plaza',
         x: 540, y: 830, w: 120, h: 50,
         targetRoom: 'plaza',
-        spawnPoint: { x: 1400, y: 850 },
+        spawnPoint: { x: 1330, y: 800 },
         label: '중앙 광장',
       },
     ],
@@ -252,33 +252,33 @@ export const ROOMS_DATA: Record<RoomId, RoomDef> = {
     id: 'plaza',
     label: '중앙 광장',
     theme: { main: '#F8B500', sub: '#FFF8E1', floor: '#2a2a1a', border: '#F8B500' },
-    mapSize: { w: 1600, h: 1140 },
-    spawnPoint: { x: 800, y: 480 },
+    mapSize: { w: 1520, h: 1080 },
+    spawnPoint: { x: 760, y: 460 },
     zones: [
-      { id: 'voc', team: null, label: '📞 VOC 센터', emoji: '📞', x: 60, y: 60, width: 660, height: 380 },
-      { id: 'idea', team: null, label: '💡 아이디어 보드', emoji: '💡', x: 860, y: 60, width: 660, height: 380 },
-      { id: 'gathering', team: null, label: '🎉 모임방', emoji: '🎉', x: 60, y: 520, width: 460, height: 300 },
-      { id: 'reaction', team: null, label: '⚡ 반응속도', emoji: '⚡', x: 760, y: 520, width: 340, height: 300 },
-      { id: 'omok', team: null, label: '⚫ 오목 게임방', emoji: '⚫', x: 1140, y: 520, width: 400, height: 300 },
+      { id: 'voc', team: null, label: '📞 VOC 센터', emoji: '📞', x: 60, y: 60, width: 630, height: 360 },
+      { id: 'idea', team: null, label: '💡 아이디어 보드', emoji: '💡', x: 820, y: 60, width: 630, height: 360 },
+      { id: 'gathering', team: null, label: '🎉 모임방', emoji: '🎉', x: 60, y: 490, width: 440, height: 280 },
+      { id: 'reaction', team: null, label: '⚡ 반응속도', emoji: '⚡', x: 720, y: 490, width: 320, height: 280 },
+      { id: 'omok', team: null, label: '⚫ 오목 게임방', emoji: '⚫', x: 1080, y: 490, width: 380, height: 280 },
     ],
     portals: [
       {
         id: 'portal-plaza-stock',
-        x: 100, y: 930, w: 120, h: 50,
+        x: 100, y: 880, w: 110, h: 48,
         targetRoom: 'stock',
         spawnPoint: { x: 600, y: 780 },
         label: '증권ITO',
       },
       {
         id: 'portal-plaza-life',
-        x: 720, y: 930, w: 120, h: 50,
+        x: 680, y: 880, w: 110, h: 48,
         targetRoom: 'life',
         spawnPoint: { x: 600, y: 780 },
         label: '생명ITO',
       },
       {
         id: 'portal-plaza-shield',
-        x: 1340, y: 930, w: 120, h: 50,
+        x: 1270, y: 880, w: 110, h: 48,
         targetRoom: 'shield',
         spawnPoint: { x: 600, y: 780 },
         label: '손보ITO',
@@ -340,13 +340,13 @@ export const REACTION_EMOJIS = [
 ] as const;
 
 /* DEPRECATED: v4 single-map — ROOMS_DATA[roomId].mapSize 사용 */
-export const MAP_WIDTH = 2400;
-export const MAP_HEIGHT = 2000;
+export const MAP_WIDTH = 1920;
+export const MAP_HEIGHT = 1080;
 
 // 초대 코드 (숫자만, 관리자 자유 지정)
 
 // 모바일 브레이크포인트
-export const MOBILE_BREAKPOINT = 968;
+export const MOBILE_BREAKPOINT = 700;
 
 // 파일 업로드 제한
 export const FILE_LIMITS = {
