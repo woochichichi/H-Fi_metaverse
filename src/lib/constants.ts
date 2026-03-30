@@ -346,7 +346,7 @@ export const MAP_HEIGHT = 2000;
 // 초대 코드 (숫자만, 관리자 자유 지정)
 
 // 모바일 브레이크포인트
-export const MOBILE_BREAKPOINT = 1024;
+export const MOBILE_BREAKPOINT = 968;
 
 // 파일 업로드 제한
 export const FILE_LIMITS = {

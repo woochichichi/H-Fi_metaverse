@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback, useMemo } from 'react';
+import { useRef, useEffect, useCallback, useMemo, useState } from 'react';
 import MapCanvas from './MapCanvas';
 import PlayerCharacter from './PlayerCharacter';
 import OtherPlayers from './OtherPlayers';
@@ -7,6 +7,7 @@ import Zone from './Zone';
 import ChatBubble from './ChatBubble';
 import EmojiFloat from './EmojiFloat';
 import BottomBar from './BottomBar';
+import TouchDpad from './TouchDpad';
 import usePlayerSync from '../../hooks/usePlayerSync';
 import VocPanel from '../voc/VocPanel';
 import IdeaPanel from '../idea/IdeaPanel';
@@ -64,6 +65,7 @@ export default function MetaverseLayout() {
   const { modalOpen, closeModal, addToast } = useUiStore();
   const { profile } = useAuthStore();
   const mapTheme = useMemo(() => getMapTimeTheme(), []);
+  const [isTouchDevice] = useState(() => 'ontouchstart' in window || navigator.maxTouchPoints > 0);
   usePlayerSync();
 
   const room = ROOMS_DATA[currentRoom];
@@ -133,6 +135,8 @@ export default function MetaverseLayout() {
               <EmojiFloat />
             </MapCanvas>
           </div>
+
+          {isTouchDevice && !modalOpen && <TouchDpad />}
 
           {PanelComponent && (
             <>
