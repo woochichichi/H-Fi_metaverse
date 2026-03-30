@@ -18,16 +18,16 @@ export default function BottomBar() {
   ];
 
   return (
-    <div className="absolute left-0 top-0 z-[50] flex h-full">
+    <div className="relative flex h-full flex-shrink-0">
       {/* 패널 본체 */}
       <div
-        className={`flex flex-col border-r border-white/[.06] transition-all duration-200 ${collapsed ? 'w-0 overflow-hidden border-none' : 'w-[180px]'}`}
-        style={{ background: 'rgba(30,30,48,.92)', backdropFilter: 'blur(12px)' }}
+        className={`flex flex-col border-r border-white/[.06] transition-all duration-200 ${collapsed ? 'w-0 overflow-hidden border-none' : 'w-[160px]'}`}
+        style={{ background: 'rgba(30,30,48,.95)', backdropFilter: 'blur(12px)' }}
       >
         {!collapsed && (
           <div className="flex flex-1 flex-col justify-between p-3">
             {/* 액션 버튼 */}
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1">
               {actions.map((a) => (
                 <button
                   key={a.id}
@@ -42,10 +42,7 @@ export default function BottomBar() {
 
             {/* 하단: 이모지 + 힌트 */}
             <div className="flex flex-col gap-2">
-              {/* 구분선 */}
               <div className="h-px bg-white/[.06]" />
-
-              {/* 이모지 바 */}
               <div className="flex flex-wrap gap-1">
                 {REACTION_EMOJIS.map((emoji) => (
                   <button
@@ -57,8 +54,6 @@ export default function BottomBar() {
                   </button>
                 ))}
               </div>
-
-              {/* 이동 힌트 */}
               <div className="flex items-center gap-2 text-[9px] text-text-muted">
                 <span><kbd className="rounded bg-white/[.08] px-1 py-0.5 font-mono text-[8px] text-text-secondary">↑↓←→</kbd> 이동</span>
                 <span><kbd className="rounded bg-white/[.08] px-1 py-0.5 font-mono text-[8px] text-text-secondary">Space</kbd> 입장</span>
@@ -71,7 +66,7 @@ export default function BottomBar() {
       {/* 접기/펼치기 토글 */}
       <button
         onClick={() => setCollapsed((v) => !v)}
-        className="my-auto flex h-10 w-4 items-center justify-center rounded-r-md border border-l-0 border-white/[.1] text-text-muted transition-colors hover:bg-white/[.1] hover:text-text-secondary"
+        className="absolute top-1/2 -right-4 z-10 flex h-10 w-4 -translate-y-1/2 items-center justify-center rounded-r-md border border-l-0 border-white/[.1] text-text-muted transition-colors hover:bg-white/[.1] hover:text-text-secondary"
         style={{ background: 'rgba(30,30,48,.85)' }}
         title={collapsed ? '메뉴 열기' : '메뉴 접기'}
       >

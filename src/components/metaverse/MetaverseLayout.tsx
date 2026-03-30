@@ -92,39 +92,41 @@ export default function MetaverseLayout() {
   const PanelComponent = modalOpen ? ZONE_PANELS[modalOpen] : null;
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
+    <div className="flex flex-1 overflow-hidden">
+      {/* 좌측 메뉴 패널 */}
+      <BottomBar />
+
       {/* 맵 컨테이너 */}
-      <div ref={containerRef} className="relative flex-1 overflow-hidden" style={{ background: '#6b8f71' }}>
-        <div ref={viewportRef} className="absolute" style={{ width: MAP_WIDTH, height: MAP_HEIGHT }}>
-          <MapCanvas>
-            <Zone />
-            <NPCCharacter />
-            <ChatBubble />
-            <PlayerCharacter />
-            <EmojiFloat />
-          </MapCanvas>
+      <div className="relative flex-1 flex flex-col overflow-hidden">
+        <div ref={containerRef} className="relative flex-1 overflow-hidden" style={{ background: '#6b8f71' }}>
+          <div ref={viewportRef} className="absolute" style={{ width: MAP_WIDTH, height: MAP_HEIGHT }}>
+            <MapCanvas>
+              <Zone />
+              <NPCCharacter />
+              <ChatBubble />
+              <PlayerCharacter />
+              <EmojiFloat />
+            </MapCanvas>
+          </div>
+
+          {/* Zone 패널 슬라이드 */}
+          {PanelComponent && (
+            <>
+              {/* 백드롭 */}
+              <div
+                className="absolute inset-0 z-[100] bg-black/40"
+                onClick={closeModal}
+              />
+              {/* 슬라이드 패널 */}
+              <div
+                className="absolute right-0 top-0 z-[101] flex h-full w-full max-w-md flex-col bg-bg-primary shadow-2xl animate-[slideInRight_.25s_ease-out]"
+                style={{ borderLeft: '1px solid rgba(255,255,255,.06)' }}
+              >
+                <PanelComponent onClose={closeModal} />
+              </div>
+            </>
+          )}
         </div>
-
-        {/* 좌측 메뉴 패널 */}
-        <BottomBar />
-
-        {/* Zone 패널 슬라이드 */}
-        {PanelComponent && (
-          <>
-            {/* 백드롭 */}
-            <div
-              className="absolute inset-0 z-[100] bg-black/40"
-              onClick={closeModal}
-            />
-            {/* 슬라이드 패널 */}
-            <div
-              className="absolute right-0 top-0 z-[101] flex h-full w-full max-w-md flex-col bg-bg-primary shadow-2xl animate-[slideInRight_.25s_ease-out]"
-              style={{ borderLeft: '1px solid rgba(255,255,255,.06)' }}
-            >
-              <PanelComponent onClose={closeModal} />
-            </div>
-          </>
-        )}
       </div>
     </div>
   );
