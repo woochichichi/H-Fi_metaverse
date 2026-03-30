@@ -9,7 +9,7 @@ interface ValidateInviteResult {
 
 /** 초대 코드 검증 */
 export async function validateInviteCode(code: string): Promise<ValidateInviteResult> {
-  const trimmed = code.trim().toUpperCase();
+  const trimmed = code.trim();
 
   const { data, error } = await supabase
     .from('invite_codes')
