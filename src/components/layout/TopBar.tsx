@@ -11,7 +11,7 @@ import { useInbox } from '../../hooks/useInbox';
 
 export default function TopBar() {
   const { profile, user, logout } = useAuthStore();
-  const { sidebarOpen, toggleSidebar, openModal, closeModal, modalOpen } = useUiStore();
+  const { sidebarOpen, toggleSidebar, openModal, closeModal } = useUiStore();
   const { fetchUnreadCount } = useNotices();
   const { items, loading: inboxLoading, unreadCount: inboxUnread, markAsRead, markAllAsRead } = useInbox(user?.id ?? null);
   const mode = useDeviceMode();
