@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { ChevronRight } from 'lucide-react';
 import type { UserStat, UserDetailActivity } from '../../hooks/useUserActivities';
 import type { CustomEvalItem } from '../../types';

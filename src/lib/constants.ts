@@ -257,8 +257,9 @@ export const ROOMS_DATA: Record<RoomId, RoomDef> = {
     zones: [
       { id: 'voc', team: null, label: '📞 VOC 센터', emoji: '📞', x: 60, y: 60, width: 660, height: 380 },
       { id: 'idea', team: null, label: '💡 아이디어 보드', emoji: '💡', x: 860, y: 60, width: 660, height: 380 },
-      { id: 'gathering', team: null, label: '🎉 모임방', emoji: '🎉', x: 60, y: 520, width: 400, height: 300 },
-      { id: 'omok', team: null, label: '⚫ 오목 게임방', emoji: '⚫', x: 540, y: 520, width: 500, height: 300 },
+      { id: 'gathering', team: null, label: '🎉 모임방', emoji: '🎉', x: 60, y: 520, width: 460, height: 300 },
+      { id: 'reaction', team: null, label: '⚡ 반응속도', emoji: '⚡', x: 760, y: 520, width: 340, height: 300 },
+      { id: 'omok', team: null, label: '⚫ 오목 게임방', emoji: '⚫', x: 1140, y: 520, width: 400, height: 300 },
     ],
     portals: [
       {

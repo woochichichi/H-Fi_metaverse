@@ -39,7 +39,7 @@ export function useNotes() {
         ascending: filters.sort === 'oldest',
       });
 
-      const { data, error: fetchError } = await withTimeout(query);
+      const { data, error: fetchError } = await withTimeout(query, 8000, 'notes');
 
       if (fetchError) throw fetchError;
       setNotes(data ?? []);
@@ -62,7 +62,7 @@ export function useNotes() {
         .from('anonymous_notes')
         .select('*')
         .eq('sender_id', userId)
-        .order('created_at', { ascending: false }));
+        .order('created_at', { ascending: false }), 8000, 'myNotes');
 
       if (fetchError) throw fetchError;
       setNotes(data ?? []);

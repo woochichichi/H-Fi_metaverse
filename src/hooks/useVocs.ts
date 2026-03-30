@@ -37,7 +37,7 @@ export function useVocs() {
         ascending: filters.sort === 'oldest',
       });
 
-      const { data, error: fetchError } = await withTimeout(query);
+      const { data, error: fetchError } = await withTimeout(query, 8000, 'vocs');
 
       if (fetchError) throw fetchError;
       setVocs(data ?? []);

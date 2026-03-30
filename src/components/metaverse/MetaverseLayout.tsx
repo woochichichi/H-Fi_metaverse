@@ -16,6 +16,7 @@ import NotePanel from '../note/NotePanel';
 import LobbyPanel from './LobbyPanel';
 import GatheringPanel from '../gathering/GatheringPanel';
 import OmokPanel from '../game/OmokPanel';
+import ReactionPanel from '../game/ReactionPanel';
 import { useMetaverseStore } from '../../stores/metaverseStore';
 import { useUiStore } from '../../stores/uiStore';
 import { ROOMS_DATA, TEAM_ZONES } from '../../lib/constants';
@@ -37,6 +38,7 @@ function getZonePanel(zoneId: string, userTeam: string | undefined): React.FC<{ 
   if (zoneId === 'note') return NotePanel;
   if (zoneId === 'gathering') return GatheringPanel;
   if (zoneId === 'omok') return OmokPanel;
+  if (zoneId === 'reaction') return ReactionPanel;
   return null;
 }
 

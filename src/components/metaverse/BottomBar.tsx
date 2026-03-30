@@ -21,7 +21,7 @@ export default function BottomBar() {
       const kpiZoneId = `${ROOMS_DATA[myRoom].id}-kpi`;
       if (currentRoom !== myRoom) enterRoom(myRoom);
       openModal(kpiZoneId);
-    } else if (actionId === 'voc' || actionId === 'idea' || actionId === 'gathering' || actionId === 'omok') {
+    } else if (actionId === 'voc' || actionId === 'idea' || actionId === 'gathering' || actionId === 'omok' || actionId === 'reaction') {
       if (currentRoom !== 'plaza') enterRoom('plaza');
       openModal(actionId);
     } else {

@@ -24,7 +24,7 @@ export function useInbox(userId: string | null) {
         .from('notifications')
         .select('*')
         .eq('user_id', userId)
-        .order('created_at', { ascending: false }));
+        .order('created_at', { ascending: false }), 8000, 'inbox');
 
       if (error) {
         console.error('수집함 조회 실패:', error.message);

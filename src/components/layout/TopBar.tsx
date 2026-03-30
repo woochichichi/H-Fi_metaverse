@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Bell, Inbox, Users, LogOut, Settings, Pencil } from 'lucide-react';
 import InboxPanel from '../inbox/InboxPanel';
 import InboxBadge from '../inbox/InboxBadge';
@@ -201,11 +202,12 @@ export default function TopBar() {
         </div>
       </header>
 
-      {/* 기분/감정 표현 드롭다운 — header 밖에 렌더링 (backdrop-filter가 z-index 깨뜨림) */}
-      {showMood && (
+      {/* 기분/감정 표현 드롭다운 — createPortal로 body에 렌더링 (backdrop-filter stacking context 회피) */}
+      {showMood && createPortal(
         <div ref={moodRef} className="fixed z-[200]" style={{ top: 48, right: 80 }}>
           <MoodPicker onClose={() => setShowMood(false)} />
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* 별명 변경 모달 */}
@@ -213,8 +215,8 @@ export default function TopBar() {
         <NicknameEditor onClose={() => setShowNicknameEditor(false)} />
       )}
 
-      {/* 관리자 패널 모달 — header 밖에 렌더링 (backdrop-filter가 fixed 포지션 깨뜨림) */}
-      {showAdmin && (
+      {/* 관리자 패널 모달 — createPortal로 body에 렌더링 (backdrop-filter stacking context 회피) */}
+      {showAdmin && createPortal(
         <>
           <div
             className="fixed inset-0 z-[200] bg-black/40"
@@ -226,7 +228,8 @@ export default function TopBar() {
           >
             <AdminPanel onClose={() => setShowAdmin(false)} />
           </div>
-        </>
+        </>,
+        document.body
       )}
     </>
   );

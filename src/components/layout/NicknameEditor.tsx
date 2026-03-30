@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Pencil } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuthStore } from '../../stores/authStore';
@@ -64,7 +65,7 @@ export default function NicknameEditor({ onClose }: NicknameEditorProps) {
     onClose();
   };
 
-  return (
+  return createPortal(
     <>
       <div className="fixed inset-0 z-[300] bg-black/40" onClick={onClose} />
       <div className="fixed left-1/2 top-1/2 z-[301] w-80 -translate-x-1/2 -translate-y-1/2 rounded-xl border border-white/[.08] bg-bg-secondary p-5 shadow-2xl">
@@ -131,6 +132,7 @@ export default function NicknameEditor({ onClose }: NicknameEditorProps) {
           </div>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 }

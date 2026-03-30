@@ -22,7 +22,7 @@ export function useKpi() {
 
       query = query.order('created_at', { ascending: true });
 
-      const { data, error: fetchError } = await withTimeout(query);
+      const { data, error: fetchError } = await withTimeout(query, 8000, 'kpi');
 
       if (fetchError) throw fetchError;
       setKpiItems(data ?? []);

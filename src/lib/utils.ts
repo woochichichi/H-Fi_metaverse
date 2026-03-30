@@ -50,11 +50,28 @@ export function getDisplayName(
 }
 
 /** Supabase 쿼리 타임아웃 래퍼 (기본 8초) */
-export function withTimeout<T>(promise: PromiseLike<T>, ms = 8000): Promise<T> {
+export function withTimeout<T>(promise: PromiseLike<T>, ms = 8000, label?: string): Promise<T> {
+  const tag = label || 'query';
+  const start = performance.now();
+
   return Promise.race([
-    promise,
+    Promise.resolve(promise).then(
+      (result) => {
+        const elapsed = (performance.now() - start).toFixed(0);
+        console.log(`[DB:${tag}] ✅ ${elapsed}ms`);
+        return result;
+      },
+      (err) => {
+        const elapsed = (performance.now() - start).toFixed(0);
+        console.error(`[DB:${tag}] ❌ ${elapsed}ms —`, err?.message || err);
+        throw err;
+      },
+    ),
     new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('요청 시간이 초과되었습니다. 다시 시도해주세요')), ms)
+      setTimeout(() => {
+        console.error(`[DB:${tag}] ⏱️ TIMEOUT ${ms}ms — online=${navigator.onLine}`);
+        reject(new Error(`요청 시간이 초과되었습니다 (${tag}). 다시 시도해주세요`));
+      }, ms)
     ),
   ]);
 }

@@ -31,7 +31,7 @@ export function useGatherings() {
         query = query.eq('status', filters.status);
       }
 
-      const { data, error: fetchError } = await withTimeout(query);
+      const { data, error: fetchError } = await withTimeout(query, 8000, 'gatherings');
       if (fetchError) throw fetchError;
       setGatherings((data as Gathering[]) ?? []);
     } catch (err) {

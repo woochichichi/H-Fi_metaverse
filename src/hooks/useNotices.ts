@@ -33,7 +33,7 @@ export function useNotices() {
       // 고정 공지 상단 + 최신순
       query = query.order('pinned', { ascending: false }).order('created_at', { ascending: false });
 
-      const { data, error: fetchError } = await withTimeout(query);
+      const { data, error: fetchError } = await withTimeout(query, 8000, 'notices');
 
       if (fetchError) throw fetchError;
       setNotices(data ?? []);

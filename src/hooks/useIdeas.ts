@@ -35,7 +35,7 @@ export function useIdeas() {
         query = query.order('created_at', { ascending: false });
       }
 
-      const { data, error: fetchError } = await withTimeout(query);
+      const { data, error: fetchError } = await withTimeout(query, 8000, 'ideas');
 
       if (fetchError) throw fetchError;
       setIdeas((data as IdeaWithVotes[]) ?? []);

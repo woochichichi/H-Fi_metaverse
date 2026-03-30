@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Search, ChevronDown } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useUiStore } from '../../stores/uiStore';
@@ -199,8 +200,8 @@ export default function UserManager() {
         총 {filtered.length}명 {filterTeam && `(${filterTeam})`}
       </div>
 
-      {/* 확인 모달 */}
-      {confirmModal && (
+      {/* 확인 모달 — createPortal로 body에 렌더링 (backdrop-filter stacking context 회피) */}
+      {confirmModal && createPortal(
         <>
           <div className="fixed inset-0 z-[300] bg-black/50" onClick={() => setConfirmModal(null)} />
           <div className="fixed left-1/2 top-1/2 z-[301] w-80 -translate-x-1/2 -translate-y-1/2 rounded-xl border border-white/[.08] bg-bg-secondary p-5 shadow-2xl">
@@ -227,7 +228,8 @@ export default function UserManager() {
               </button>
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
     </div>
   );

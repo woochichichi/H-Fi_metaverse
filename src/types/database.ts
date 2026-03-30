@@ -111,6 +111,12 @@ export interface Database {
         Update: Record<string, never>;
         Relationships: [];
       };
+      reaction_records: {
+        Row: ReactionRecord;
+        Insert: Omit<ReactionRecord, 'id' | 'created_at'>;
+        Update: Record<string, never>;
+        Relationships: [];
+      };
     };
     Views: {
       idea_with_votes: {
@@ -119,6 +125,10 @@ export interface Database {
       };
       omok_ranking: {
         Row: OmokRanking;
+        Relationships: [];
+      };
+      reaction_ranking: {
+        Row: ReactionRanking;
         Relationships: [];
       };
     };
@@ -356,6 +366,24 @@ export interface OmokRanking {
   losses: number;
   total: number;
   win_rate: number;
+}
+
+export interface ReactionRecord {
+  id: string;
+  user_id: string;
+  avg_ms: number;
+  best_ms: number;
+  created_at: string;
+}
+
+export interface ReactionRanking {
+  id: string;
+  name: string;
+  nickname: string | null;
+  team: string;
+  best_avg_ms: number;
+  best_single_ms: number;
+  play_count: number;
 }
 
 export interface UnitActivity {

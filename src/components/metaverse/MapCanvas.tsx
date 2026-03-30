@@ -732,41 +732,51 @@ function PlazaFurniture() {
       <PixelPlant90s x={1440} y={80} />
       <PixelPlant90s x={1440} y={380} size="small" />
 
-      {/* ═══ 모임방 Zone (60,520 ~ 460,820) ═══ */}
+      {/* ═══ 모임방 Zone (60,520 ~ 520,820) ═══ */}
       {/* 긴 테이블 + 의자 */}
       <PixelDesk90s x={120} y={620} />
       <PixelDesk90s x={240} y={620} />
+      <PixelDesk90s x={360} y={620} />
       <PixelChair90s x={140} y={580} />
       <PixelChair90s x={200} y={580} />
       <PixelChair90s x={260} y={580} />
       <PixelChair90s x={320} y={580} />
+      <PixelChair90s x={380} y={580} />
       <PixelChair90s x={140} y={700} />
       <PixelChair90s x={200} y={700} />
       <PixelChair90s x={260} y={700} />
       <PixelChair90s x={320} y={700} />
+      <PixelChair90s x={380} y={700} />
       <PixelSofa90s x={100} y={760} color="#8B6914" />
       <PixelPlant90s x={80} y={540} />
-      <PixelPlant90s x={380} y={540} size="small" />
-      <PixelVending90s x={400} y={600} />
-      <PixelWaterCooler x={400} y={720} />
+      <PixelPlant90s x={440} y={540} size="small" />
+      <PixelVending90s x={460} y={640} />
+      <PixelWaterCooler x={460} y={740} />
 
-      {/* ═══ 오목 Zone (540,520 ~ 1040,820) ═══ */}
-      <PixelOmokTable x={640} y={580} />
-      <PixelChair90s x={620} y={560} />
-      <PixelChair90s x={770} y={560} />
-      <PixelChair90s x={620} y={720} />
-      <PixelChair90s x={770} y={720} />
-      {/* 관전석 */}
-      <PixelSofa90s x={860} y={600} color="#555" />
-      <PixelSofa90s x={860} y={700} color="#555" />
-      <PixelFileCabinet x={560} y={560} />
-      <PixelVending90s x={980} y={580} />
-      <PixelPlant90s x={550} y={740} size="small" />
-      <PixelPlant90s x={960} y={740} size="small" />
+      {/* ═══ 반응속도 Zone (760,520 ~ 1100,820) ═══ */}
+      <PixelDesk90s x={820} y={620} />
+      <PixelCRT x={850} y={590} screen="#22C55E" />
+      <PixelChair90s x={850} y={700} />
+      <PixelDesk90s x={940} y={620} />
+      <PixelCRT x={970} y={590} screen="#EF4444" />
+      <PixelChair90s x={970} y={700} />
+      <PixelSofa90s x={800} y={760} color="#555" />
+      <PixelPlant90s x={780} y={540} size="small" />
+      <PixelPlant90s x={1060} y={540} size="small" />
+
+      {/* ═══ 오목 Zone (1140,520 ~ 1540,820) ═══ */}
+      <PixelOmokTable x={1240} y={580} />
+      <PixelChair90s x={1220} y={560} />
+      <PixelChair90s x={1370} y={560} />
+      <PixelChair90s x={1220} y={720} />
+      <PixelChair90s x={1370} y={720} />
+      <PixelSofa90s x={1160} y={740} color="#555" />
+      <PixelFileCabinet x={1160} y={560} />
+      <PixelVending90s x={1480} y={580} />
+      <PixelPlant90s x={1150} y={540} size="small" />
+      <PixelPlant90s x={1500} y={740} size="small" />
 
       {/* 광장 추가 가구 */}
-      <PixelVending90s x={1480} y={500} />
-      <PixelVending90s x={1530} y={500} />
       <PixelPlant90s x={1460} y={880} />
       <PixelPlant90s x={100} y={880} />
     </>
