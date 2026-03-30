@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { REACTION_EMOJIS } from '../../lib/constants';
 import { useMetaverseStore } from '../../stores/metaverseStore';
 import { useUiStore } from '../../stores/uiStore';
@@ -18,71 +18,62 @@ export default function BottomBar() {
   ];
 
   return (
-    <div className="flex-shrink-0 border-t border-white/[.06]" style={{ background: 'rgba(30,30,48,.95)', backdropFilter: 'blur(12px)' }}>
-      {/* 접힌 상태: 토글 버튼만 */}
-      {collapsed ? (
-        <div className="flex h-8 items-center px-3">
-          <button
-            onClick={() => setCollapsed(false)}
-            className="flex items-center gap-1 rounded-md px-2 py-1 text-[10px] text-text-muted transition-colors hover:bg-white/[.08] hover:text-text-secondary"
-          >
-            <ChevronUp size={14} />
-            메뉴 열기
-          </button>
-        </div>
-      ) : (
-        <div className="flex h-[52px] items-center gap-[14px] px-[18px]">
-          {/* 액션 버튼 (좌측) */}
-          <div className="flex gap-[6px]">
+    <div
+      className="absolute left-0 top-1/2 z-[50] flex -translate-y-1/2 items-start"
+    >
+      {/* 패널 본체 */}
+      <div
+        className={`flex flex-col gap-2 rounded-r-xl border border-l-0 border-white/[.06] p-2 transition-all duration-200 ${collapsed ? 'w-0 overflow-hidden border-none p-0' : ''}`}
+        style={{ background: 'rgba(30,30,48,.92)', backdropFilter: 'blur(12px)' }}
+      >
+        {!collapsed && (
+          <>
+            {/* 액션 버튼 */}
             {actions.map((a) => (
               <button
                 key={a.id}
                 onClick={() => openModal(a.id)}
-                className="flex items-center gap-[5px] rounded-[10px] border border-white/[.06] bg-white/[.06] px-4 py-[7px] text-[11px] font-semibold text-text-secondary transition-all duration-150 hover:border-accent/30 hover:bg-accent/20 hover:text-accent-light"
+                className="flex items-center gap-2 rounded-lg border border-white/[.06] bg-white/[.06] px-3 py-2 text-[11px] font-semibold text-text-secondary transition-all duration-150 hover:border-accent/30 hover:bg-accent/20 hover:text-accent-light"
               >
-                {a.emoji} {a.label}
+                <span className="text-base">{a.emoji}</span>
+                {a.label}
               </button>
             ))}
-          </div>
 
-          {/* 구분선 */}
-          <div className="h-6 w-px bg-white/[.08]" />
+            {/* 구분선 */}
+            <div className="mx-1 h-px bg-white/[.08]" />
 
-          {/* 이동 힌트 */}
-          <div className="flex items-center gap-[5px] text-[10px] text-text-muted">
-            <span className="rounded-[5px] bg-white/[.08] px-[7px] py-[3px] font-mono text-[9px] font-bold text-text-secondary">
-              ↑↓←→
-            </span>
-            이동
-            <span className="ml-1 rounded-[5px] bg-white/[.08] px-[7px] py-[3px] font-mono text-[9px] font-bold text-text-secondary">
-              Space
-            </span>
-            입장
-          </div>
+            {/* 이모지 바 */}
+            <div className="flex flex-wrap gap-1 px-0.5">
+              {REACTION_EMOJIS.map((emoji) => (
+                <button
+                  key={emoji}
+                  onClick={() => addEmojiFloat(emoji)}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[.06] bg-white/[.06] text-sm transition-all duration-150 hover:border-accent/30 hover:bg-accent/20 active:scale-[.92]"
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
 
-          {/* 이모지 바 */}
-          <div className="flex gap-1">
-            {REACTION_EMOJIS.map((emoji) => (
-              <button
-                key={emoji}
-                onClick={() => addEmojiFloat(emoji)}
-                className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-white/[.06] bg-white/[.06] text-lg transition-all duration-150 hover:border-accent/30 hover:bg-accent/20 active:scale-[.92]"
-              >
-                {emoji}
-              </button>
-            ))}
-          </div>
+            {/* 이동 힌트 */}
+            <div className="flex flex-col gap-0.5 px-1 text-[9px] text-text-muted">
+              <span><kbd className="rounded bg-white/[.08] px-1 py-0.5 font-mono text-[8px] font-bold text-text-secondary">↑↓←→</kbd> 이동</span>
+              <span><kbd className="rounded bg-white/[.08] px-1 py-0.5 font-mono text-[8px] font-bold text-text-secondary">Space</kbd> 입장</span>
+            </div>
+          </>
+        )}
+      </div>
 
-          {/* 접기 버튼 */}
-          <button
-            onClick={() => setCollapsed(true)}
-            className="ml-auto flex h-7 w-7 items-center justify-center rounded-md text-text-muted transition-colors hover:bg-white/[.08] hover:text-text-secondary"
-            title="하단바 접기"
-          >
-            <ChevronDown size={16} />
-          </button>
-        </div>
-      )}
+      {/* 접기/펼치기 토글 */}
+      <button
+        onClick={() => setCollapsed((v) => !v)}
+        className="mt-2 flex h-8 w-5 items-center justify-center rounded-r-md border border-l-0 border-white/[.1] text-text-muted transition-colors hover:bg-white/[.1] hover:text-text-secondary"
+        style={{ background: 'rgba(30,30,48,.85)' }}
+        title={collapsed ? '메뉴 열기' : '메뉴 접기'}
+      >
+        {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+      </button>
     </div>
   );
 }

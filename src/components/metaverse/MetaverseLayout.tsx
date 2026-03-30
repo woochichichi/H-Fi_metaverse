@@ -95,6 +95,9 @@ export default function MetaverseLayout() {
           </MapCanvas>
         </div>
 
+        {/* 좌측 메뉴 패널 */}
+        <BottomBar />
+
         {/* Zone 패널 슬라이드 */}
         {PanelComponent && (
           <>
@@ -113,9 +116,6 @@ export default function MetaverseLayout() {
           </>
         )}
       </div>
-
-      {/* 하단 바 */}
-      <BottomBar />
     </div>
   );
 }
