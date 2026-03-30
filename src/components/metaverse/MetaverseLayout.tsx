@@ -2,7 +2,7 @@ import { useRef, useEffect, useCallback, useMemo, useState } from 'react';
 import MapCanvas from './MapCanvas';
 import PlayerCharacter from './PlayerCharacter';
 import OtherPlayers from './OtherPlayers';
-import NPCCharacter from './NPCCharacter';
+// import NPCCharacter from './NPCCharacter';
 import Zone from './Zone';
 import ChatBubble from './ChatBubble';
 import EmojiFloat from './EmojiFloat';
