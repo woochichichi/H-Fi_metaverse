@@ -26,7 +26,11 @@ export default function LoginPage() {
     setLoading(false);
 
     if (loginError) {
-      setError('이메일 또는 비밀번호가 올바르지 않습니다');
+      if (loginError.includes('Email not confirmed')) {
+        setError('이메일 인증이 필요합니다. 관리자에게 문의하세요.');
+      } else {
+        setError('이메일 또는 비밀번호가 올바르지 않습니다');
+      }
       return;
     }
 

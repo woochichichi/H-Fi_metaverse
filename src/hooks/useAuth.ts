@@ -49,7 +49,7 @@ interface SignUpParams {
 
 /** 회원가입 (Supabase Auth + invite_codes.used_count 증가) */
 export async function signUp({ email, password, name, team, role, inviteCodeId }: SignUpParams): Promise<{ error: string | null }> {
-  const { error: authError } = await supabase.auth.signUp({
+  const { data, error: authError } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -61,19 +61,35 @@ export async function signUp({ email, password, name, team, role, inviteCodeId }
     return { error: authError.message };
   }
 
-  // invite_codes.used_count += 1 (read-then-write)
-  const { data: current } = await supabase
-    .from('invite_codes')
-    .select('used_count')
-    .eq('id', inviteCodeId)
-    .single();
+  // autoconfirm이 꺼져있으면 세션이 없을 수 있음 → 명시적 로그인
+  if (!data.session) {
+    const { error: loginError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (loginError) {
+      // 이메일 인증이 필요한 경우
+      return { error: '가입은 완료되었으나 이메일 인증이 필요합니다. 관리자에게 문의하세요.' };
+    }
+  }
 
-  if (current) {
-    const count = (current as { used_count: number }).used_count;
-    await supabase
+  // invite_codes.used_count += 1 (read-then-write)
+  try {
+    const { data: current } = await supabase
       .from('invite_codes')
-      .update({ used_count: count + 1 } as never)
-      .eq('id', inviteCodeId);
+      .select('used_count')
+      .eq('id', inviteCodeId)
+      .single();
+
+    if (current) {
+      const count = (current as { used_count: number }).used_count;
+      await supabase
+        .from('invite_codes')
+        .update({ used_count: count + 1 } as never)
+        .eq('id', inviteCodeId);
+    }
+  } catch {
+    // used_count 증가 실패해도 가입은 정상 완료
   }
 
   return { error: null };

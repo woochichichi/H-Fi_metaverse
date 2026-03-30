@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, Check, Eye, EyeOff, Ticket, Mail, Lock, UserCirc
 import { TEAMS } from '../lib/constants';
 import { isAllowedEmail } from '../lib/utils';
 import { validateInviteCode, signUp } from '../hooks/useAuth';
+import { useAuthStore } from '../stores/authStore';
 import type { InviteCode } from '../types';
 
 const STEPS = [
@@ -15,6 +16,7 @@ const STEPS = [
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const { initialize } = useAuthStore();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -111,6 +113,8 @@ export default function RegisterPage() {
       return;
     }
 
+    // authStore 세션 동기화 후 메인으로 이동
+    await initialize();
     navigate('/', { replace: true });
   };
 
