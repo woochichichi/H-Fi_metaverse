@@ -20,10 +20,7 @@ export function useNotices() {
     setError(null);
 
     try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 10000);
-
-      let query = supabase.from('notices').select('*').abortSignal(controller.signal);
+      let query = supabase.from('notices').select('*');
 
       if (filters.urgency) {
         query = query.eq('urgency', filters.urgency);
@@ -36,14 +33,11 @@ export function useNotices() {
       query = query.order('pinned', { ascending: false }).order('created_at', { ascending: false });
 
       const { data, error: fetchError } = await query;
-      clearTimeout(timeout);
 
       if (fetchError) throw fetchError;
       setNotices(data ?? []);
     } catch (err) {
-      const msg = err instanceof DOMException && err.name === 'AbortError'
-        ? '데이터를 불러올 수 없습니다. 새로고침해주세요'
-        : err instanceof Error ? err.message : '데이터를 불러올 수 없습니다';
+      const msg = err instanceof Error ? err.message : '데이터를 불러올 수 없습니다';
       console.error('공지 조회 실패:', msg);
       setError(msg);
     } finally {

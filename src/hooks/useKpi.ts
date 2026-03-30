@@ -13,10 +13,7 @@ export function useKpi() {
     setError(null);
 
     try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 10000);
-
-      let query = supabase.from('kpi_items').select('*').abortSignal(controller.signal);
+      let query = supabase.from('kpi_items').select('*');
 
       if (unit) {
         query = query.eq('unit', unit);
@@ -25,14 +22,11 @@ export function useKpi() {
       query = query.order('created_at', { ascending: true });
 
       const { data, error: fetchError } = await query;
-      clearTimeout(timeout);
 
       if (fetchError) throw fetchError;
       setKpiItems(data ?? []);
     } catch (err) {
-      const msg = err instanceof DOMException && err.name === 'AbortError'
-        ? '데이터를 불러올 수 없습니다. 새로고침해주세요'
-        : err instanceof Error ? err.message : '데이터를 불러올 수 없습니다';
+      const msg = err instanceof Error ? err.message : '데이터를 불러올 수 없습니다';
       console.error('KPI 항목 조회 실패:', msg);
       setError(msg);
     } finally {

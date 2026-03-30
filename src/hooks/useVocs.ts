@@ -20,10 +20,7 @@ export function useVocs() {
     setError(null);
 
     try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 10000);
-
-      let query = supabase.from('vocs').select('*').eq('is_deleted', false).abortSignal(controller.signal);
+      let query = supabase.from('vocs').select('*').eq('is_deleted', false);
 
       if (filters.category) {
         query = query.eq('category', filters.category);
@@ -40,14 +37,11 @@ export function useVocs() {
       });
 
       const { data, error: fetchError } = await query;
-      clearTimeout(timeout);
 
       if (fetchError) throw fetchError;
       setVocs(data ?? []);
     } catch (err) {
-      const msg = err instanceof DOMException && err.name === 'AbortError'
-        ? '데이터를 불러올 수 없습니다. 새로고침해주세요'
-        : err instanceof Error ? err.message : '데이터를 불러올 수 없습니다';
+      const msg = err instanceof Error ? err.message : '데이터를 불러올 수 없습니다';
       console.error('VOC 조회 실패:', msg);
       setError(msg);
     } finally {

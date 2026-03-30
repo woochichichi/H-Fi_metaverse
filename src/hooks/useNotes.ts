@@ -22,10 +22,7 @@ export function useNotes() {
     setError(null);
 
     try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 10000);
-
-      let query = supabase.from('anonymous_notes').select('*').abortSignal(controller.signal);
+      let query = supabase.from('anonymous_notes').select('*');
 
       if (filters.category) {
         query = query.eq('category', filters.category);
@@ -42,14 +39,11 @@ export function useNotes() {
       });
 
       const { data, error: fetchError } = await query;
-      clearTimeout(timeout);
 
       if (fetchError) throw fetchError;
       setNotes(data ?? []);
     } catch (err) {
-      const msg = err instanceof DOMException && err.name === 'AbortError'
-        ? '데이터를 불러올 수 없습니다. 새로고침해주세요'
-        : err instanceof Error ? err.message : '데이터를 불러올 수 없습니다';
+      const msg = err instanceof Error ? err.message : '데이터를 불러올 수 없습니다';
       console.error('쪽지 조회 실패:', msg);
       setError(msg);
     } finally {
@@ -63,23 +57,16 @@ export function useNotes() {
     setError(null);
 
     try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 10000);
-
       const { data, error: fetchError } = await supabase
         .from('anonymous_notes')
         .select('*')
         .eq('sender_id', userId)
-        .order('created_at', { ascending: false })
-        .abortSignal(controller.signal);
-      clearTimeout(timeout);
+        .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
       setNotes(data ?? []);
     } catch (err) {
-      const msg = err instanceof DOMException && err.name === 'AbortError'
-        ? '데이터를 불러올 수 없습니다. 새로고침해주세요'
-        : err instanceof Error ? err.message : '데이터를 불러올 수 없습니다';
+      const msg = err instanceof Error ? err.message : '데이터를 불러올 수 없습니다';
       console.error('내 쪽지 조회 실패:', msg);
       setError(msg);
     } finally {
