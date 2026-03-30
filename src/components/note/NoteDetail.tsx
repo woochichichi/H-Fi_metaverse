@@ -44,7 +44,11 @@ export default function NoteDetail({ note, onBack, onUpdated }: NoteDetailProps)
   // 답변 시 자동으로 '답변완료' 처리 + 실명 작성자에게 notification
   const handleThreadReply = async () => {
     if (note.status !== '답변완료') {
-      const { data } = await updateNoteStatus(note.id, '답변완료');
+      const { data, error } = await updateNoteStatus(note.id, '답변완료');
+      if (error) {
+        addToast(`상태 변경 실패: ${error}`, 'error');
+        return;
+      }
       if (data) onUpdated(data);
     }
 

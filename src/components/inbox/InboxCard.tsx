@@ -6,8 +6,9 @@ const TYPE_CONFIG: Record<string, { icon: string; color: string }> = {
   'new_notice_긴급': { icon: '🔴', color: '#ef4444' },
   'new_notice_할일': { icon: '🟡', color: '#f59e0b' },
   'new_notice_참고': { icon: '🔵', color: '#3b82f6' },
+  'new_voc': { icon: '📞', color: '#22c55e' },
+  'new_idea': { icon: '💡', color: '#f59e0b' },
   'new_note': { icon: '✉️', color: '#a29bfe' },
-  'note_reply': { icon: '✉️', color: '#a29bfe' },
   'voc_status': { icon: '📞', color: '#22c55e' },
   'idea_status': { icon: '💡', color: '#f59e0b' },
 };

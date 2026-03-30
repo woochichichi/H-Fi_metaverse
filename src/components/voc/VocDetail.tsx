@@ -34,7 +34,7 @@ export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDeta
 
   useEffect(() => {
     if (isLeader) {
-      fetchAssignees(voc.team).then(setAssignees);
+      fetchAssignees(voc.team).then(setAssignees).catch(() => setAssignees([]));
     }
   }, [isLeader, voc.team, fetchAssignees]);
   const canReplyAsAuthor = voc.anonymous
