@@ -430,11 +430,11 @@ function Ground() {
       <rect x={stock.x + stock.w / 2 - 30} y={stock.y + stock.h} width="60" height={plaza.y - stock.y - stock.h} fill="url(#path-tile)" />
 
       {/* 도로: 생명↔중앙광장 (대각선 근사 — 꺾인 도로) */}
-      <rect x={life.x + life.w} y={plaza.y + plaza.h / 2 - 30} width={plaza.x - life.x - life.w} height="60" fill="url(#path-tile)" />
+      <rect x={life.x + life.w - 50} y={plaza.y + plaza.h / 2 - 30} width={plaza.x - life.x - life.w + 100} height="60" fill="url(#path-tile)" />
       <rect x={life.x + life.w / 2 - 30} y={life.y - 60} width="60" height={plaza.y + plaza.h / 2 - life.y + 90} fill="url(#path-tile)" />
 
       {/* 도로: 손보↔중앙광장 */}
-      <rect x={plaza.x + plaza.w} y={plaza.y + plaza.h / 2 - 30} width={shield.x - plaza.x - plaza.w} height="60" fill="url(#path-tile)" />
+      <rect x={plaza.x + plaza.w - 50} y={plaza.y + plaza.h / 2 - 30} width={shield.x - plaza.x - plaza.w + 100} height="60" fill="url(#path-tile)" />
       <rect x={shield.x + shield.w / 2 - 30} y={shield.y - 60} width="60" height={plaza.y + plaza.h / 2 - shield.y + 90} fill="url(#path-tile)" />
 
       {/* 도로: 중앙광장↔모임방 (세로) */}
