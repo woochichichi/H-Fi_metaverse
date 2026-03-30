@@ -1,17 +1,18 @@
 -- 가입 시 profiles 자동 생성
-CREATE OR REPLACE FUNCTION handle_new_user()
+CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
-  INSERT INTO profiles (id, name, team, role)
+  INSERT INTO public.profiles (id, name, team, role, nickname)
   VALUES (
     NEW.id,
     NEW.raw_user_meta_data->>'name',
     NEW.raw_user_meta_data->>'team',
-    COALESCE(NEW.raw_user_meta_data->>'role', 'member')
+    COALESCE(NEW.raw_user_meta_data->>'role', 'member'),
+    NEW.raw_user_meta_data->>'nickname'
   );
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
