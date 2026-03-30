@@ -38,22 +38,34 @@ export async function validateInviteCode(code: string): Promise<ValidateInviteRe
   return { valid: true, inviteCode: invite };
 }
 
+/** 별명 중복 체크 */
+export async function checkNicknameAvailable(nickname: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('nickname', nickname)
+    .maybeSingle();
+  if (error) return false;
+  return !data;
+}
+
 interface SignUpParams {
   email: string;
   password: string;
   name: string;
+  nickname: string;
   team: string;
   role: string;
   inviteCodeId: string;
 }
 
 /** 회원가입 (Supabase Auth + invite_codes.used_count 증가) */
-export async function signUp({ email, password, name, team, role, inviteCodeId }: SignUpParams): Promise<{ error: string | null }> {
+export async function signUp({ email, password, name, nickname, team, role, inviteCodeId }: SignUpParams): Promise<{ error: string | null }> {
   const { data, error: authError } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: { name, team, role },
+      data: { name, nickname, team, role },
     },
   });
 

@@ -172,7 +172,7 @@ export function useVocs() {
   const fetchAssignees = useCallback(async (team: string) => {
     const { data } = await supabase
       .from('profiles')
-      .select('id, name, role, team')
+      .select('id, name, nickname, role, team')
       .in('role', ['leader', 'admin'])
       .eq('team', team);
     return data ?? [];

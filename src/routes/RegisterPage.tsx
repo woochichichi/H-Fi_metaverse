@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, Eye, EyeOff, Ticket, Mail, Lock, UserCircle } from 'lucide-react';
 import { TEAMS } from '../lib/constants';
 import { isAllowedEmail } from '../lib/utils';
-import { validateInviteCode, signUp } from '../hooks/useAuth';
+import { validateInviteCode, signUp, checkNicknameAvailable } from '../hooks/useAuth';
 import { useAuthStore } from '../stores/authStore';
 import type { InviteCode } from '../types';
 
@@ -28,6 +28,8 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [name, setName] = useState('');
+  const [nickname, setNickname] = useState('');
+  const [nicknameStatus, setNicknameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
   const [team, setTeam] = useState('');
 
   const goNext = () => {
@@ -85,10 +87,34 @@ export default function RegisterPage() {
     goNext();
   };
 
+  // 별명 중복 체크
+  const handleCheckNickname = async (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed || trimmed.length < 1 || trimmed.length > 10) {
+      setNicknameStatus('idle');
+      return;
+    }
+    setNicknameStatus('checking');
+    const available = await checkNicknameAvailable(trimmed);
+    setNicknameStatus(available ? 'available' : 'taken');
+  };
+
   // Step 4: 가입 완료
   const handleSignUp = async () => {
     if (!name.trim()) {
       setError('이름을 입력해주세요');
+      return;
+    }
+    if (!nickname.trim()) {
+      setError('별명을 입력해주세요');
+      return;
+    }
+    if (nickname.trim().length > 10) {
+      setError('별명은 10자 이하로 입력해주세요');
+      return;
+    }
+    if (nicknameStatus === 'taken') {
+      setError('이미 사용 중인 별명입니다');
       return;
     }
     if (!team) {
@@ -102,6 +128,7 @@ export default function RegisterPage() {
       email,
       password,
       name: name.trim(),
+      nickname: nickname.trim(),
       team,
       role: inviteData?.role ?? 'member',
       inviteCodeId: inviteData!.id,
@@ -212,11 +239,21 @@ export default function RegisterPage() {
             </div>
           )}
 
-          {/* Step 4: 이름 + 팀 */}
+          {/* Step 4: 이름 + 별명 + 팀 */}
           {step === 3 && (
             <div className="space-y-4">
+              {/* 별명 안내 */}
+              <div className="rounded-lg bg-accent/10 border border-accent/20 px-3 py-2.5">
+                <p className="text-xs text-accent font-medium mb-1">별명 안내</p>
+                <p className="text-[11px] text-text-secondary leading-relaxed">
+                  이 공간에서는 <strong className="text-accent-light">별명</strong>으로 활동합니다.
+                  실명 대신 별명이 표시되어 자유롭게 의견을 나눌 수 있어요.
+                  별명은 나중에 변경할 수 있습니다.
+                </p>
+              </div>
+
               <div>
-                <label className="mb-1.5 block text-xs text-text-muted">이름</label>
+                <label className="mb-1.5 block text-xs text-text-muted">이름 (실명)</label>
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -224,7 +261,42 @@ export default function RegisterPage() {
                   className="w-full rounded-lg bg-bg-primary px-3 py-2.5 text-sm text-text-primary placeholder-text-muted outline-none ring-1 ring-bg-tertiary transition-colors focus:ring-accent"
                   autoFocus
                 />
+                <p className="mt-1 text-[10px] text-text-muted">관리자에게만 표시됩니다</p>
               </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs text-text-muted">별명 (1~10자)</label>
+                <div className="relative">
+                  <input
+                    value={nickname}
+                    onChange={(e) => {
+                      setNickname(e.target.value);
+                      setNicknameStatus('idle');
+                    }}
+                    onBlur={() => handleCheckNickname(nickname)}
+                    placeholder="메타버스에서 사용할 별명"
+                    maxLength={10}
+                    className={`w-full rounded-lg bg-bg-primary px-3 py-2.5 text-sm text-text-primary placeholder-text-muted outline-none ring-1 transition-colors focus:ring-accent ${
+                      nicknameStatus === 'taken'
+                        ? 'ring-danger'
+                        : nicknameStatus === 'available'
+                          ? 'ring-success'
+                          : 'ring-bg-tertiary'
+                    }`}
+                  />
+                  {nicknameStatus === 'checking' && (
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-text-muted">확인 중...</span>
+                  )}
+                  {nicknameStatus === 'available' && (
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-success">사용 가능</span>
+                  )}
+                  {nicknameStatus === 'taken' && (
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-danger">이미 사용 중</span>
+                  )}
+                </div>
+                <p className="mt-1 text-[10px] text-text-muted">다른 멤버에게 이 별명으로 표시됩니다</p>
+              </div>
+
               <div>
                 <label className="mb-1.5 block text-xs text-text-muted">팀</label>
                 <select

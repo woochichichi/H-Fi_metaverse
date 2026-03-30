@@ -1,16 +1,19 @@
 import { useState } from 'react';
 import { Search } from 'lucide-react';
 import { useUiStore } from '../../stores/uiStore';
+import { useAuthStore } from '../../stores/authStore';
+import { getDisplayName } from '../../lib/utils';
 
 // 하드코딩 피플 데이터 (Sprint 2에서 DB 연동)
+// 하드코딩 피플 데이터 — Sprint 2에서 DB 연동 시 nickname 사용
 const MOCK_PEOPLE = [
-  { id: '1', name: '김민수', team: '증권ITO', status: 'online' as const, mood: '🔥', avatar_color: '#6C5CE7', avatar_emoji: '😎' },
-  { id: '2', name: '이서연', team: '생명ITO', status: 'online' as const, mood: '😊', avatar_color: '#E91E63', avatar_emoji: '🦊' },
-  { id: '3', name: '박준혁', team: '손보ITO', status: 'online' as const, mood: '☕', avatar_color: '#FF9800', avatar_emoji: '🐻' },
-  { id: '4', name: '최유진', team: '한금서', status: '재택' as const, mood: '😴', avatar_color: '#5DC878', avatar_emoji: '🐱' },
-  { id: '5', name: '정하늘', team: '증권ITO', status: '재택' as const, mood: '😊', avatar_color: '#6BC5FF', avatar_emoji: '🐶' },
-  { id: '6', name: '한지우', team: '생명ITO', status: 'offline' as const, mood: null, avatar_color: '#a29bfe', avatar_emoji: '🐰' },
-  { id: '7', name: '윤도현', team: '손보ITO', status: 'offline' as const, mood: null, avatar_color: '#FF9800', avatar_emoji: '🦁' },
+  { id: '1', name: '김민수', nickname: '불꽃민수', team: '증권ITO', status: 'online' as const, mood: '🔥', avatar_color: '#6C5CE7', avatar_emoji: '😎' },
+  { id: '2', name: '이서연', nickname: '여우서연', team: '생명ITO', status: 'online' as const, mood: '😊', avatar_color: '#E91E63', avatar_emoji: '🦊' },
+  { id: '3', name: '박준혁', nickname: '곰탱이', team: '손보ITO', status: 'online' as const, mood: '☕', avatar_color: '#FF9800', avatar_emoji: '🐻' },
+  { id: '4', name: '최유진', nickname: '고양이유진', team: '한금서', status: '재택' as const, mood: '😴', avatar_color: '#5DC878', avatar_emoji: '🐱' },
+  { id: '5', name: '정하늘', nickname: '하늘이', team: '증권ITO', status: '재택' as const, mood: '😊', avatar_color: '#6BC5FF', avatar_emoji: '🐶' },
+  { id: '6', name: '한지우', nickname: '토끼지우', team: '생명ITO', status: 'offline' as const, mood: null, avatar_color: '#a29bfe', avatar_emoji: '🐰' },
+  { id: '7', name: '윤도현', nickname: '사자왕', team: '손보ITO', status: 'offline' as const, mood: null, avatar_color: '#FF9800', avatar_emoji: '🦁' },
 ];
 
 type StatusGroup = 'online' | '재택' | 'offline';
@@ -29,13 +32,16 @@ const STATUS_COLORS: Record<StatusGroup, string> = {
 
 export default function Sidebar() {
   const { sidebarOpen } = useUiStore();
+  const { profile: myProfile } = useAuthStore();
+  const isAdmin = myProfile?.role === 'admin';
   const [search, setSearch] = useState('');
 
   if (!sidebarOpen) return null;
 
-  const filtered = MOCK_PEOPLE.filter((p) =>
-    p.name.includes(search) || p.team.includes(search)
-  );
+  const filtered = MOCK_PEOPLE.filter((p) => {
+    const display = getDisplayName(p, isAdmin);
+    return display.includes(search) || p.team.includes(search);
+  });
 
   const groups: StatusGroup[] = ['online', '재택', 'offline'];
 
@@ -89,7 +95,7 @@ export default function Sidebar() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1">
-                      <span className="truncate text-sm text-text-primary">{p.name}</span>
+                      <span className="truncate text-sm text-text-primary">{getDisplayName(p, isAdmin)}</span>
                       {p.mood && <span className="text-xs">{p.mood}</span>}
                     </div>
                     <span className="text-xs text-text-muted">{p.team}</span>

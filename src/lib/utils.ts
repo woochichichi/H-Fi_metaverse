@@ -37,6 +37,18 @@ export function isAllowedEmail(email: string): boolean {
   return ALLOWED_EMAIL_DOMAINS.some((d) => domain === d);
 }
 
+/** 별명 기반 표시명 반환 — 관리자는 "별명(실명)" 형식 */
+export function getDisplayName(
+  profile: { nickname?: string | null; name: string },
+  viewerIsAdmin = false,
+): string {
+  const nick = profile.nickname || profile.name;
+  if (viewerIsAdmin && profile.nickname) {
+    return `${profile.nickname}(${profile.name})`;
+  }
+  return nick;
+}
+
 /** 초대 코드 생성 (8자리 숫자) */
 export function generateInviteCode(): string {
   return String(Math.floor(10000000 + Math.random() * 90000000));

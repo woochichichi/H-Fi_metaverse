@@ -3,7 +3,7 @@ import { ArrowLeft, Paperclip, Users } from 'lucide-react';
 import UrgencyBadge from '../common/UrgencyBadge';
 import { useNotices } from '../../hooks/useNotices';
 import { useAuthStore } from '../../stores/authStore';
-import { formatRelativeTime } from '../../lib/utils';
+import { formatRelativeTime, getDisplayName } from '../../lib/utils';
 import type { Notice, Profile } from '../../types';
 
 interface NoticeDetailProps {
@@ -124,7 +124,7 @@ export default function NoticeDetail({ notice, onBack }: NoticeDetailProps) {
                     >
                       {r.avatar_emoji}
                     </span>
-                    {r.name}
+                    {getDisplayName(r, isLeader)}
                   </span>
                 ))}
               </div>

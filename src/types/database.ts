@@ -106,6 +106,7 @@ export interface Profile {
   id: string;
   emp_no: string | null;
   name: string;
+  nickname: string | null;
   team: '증권ITO' | '생명ITO' | '손보ITO' | '한금서';
   role: 'admin' | 'leader' | 'member';
   unit: '조직' | '품질' | '전략' | 'AX' | null;

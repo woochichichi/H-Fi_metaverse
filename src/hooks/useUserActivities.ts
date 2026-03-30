@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { getDisplayName } from '../lib/utils';
 import { TEAMS, ACTIVITY_POINTS } from '../lib/constants';
 import type { ActivityType } from '../lib/constants';
 import type { UserActivity, Profile } from '../types';
@@ -147,11 +148,11 @@ export function useUserActivities() {
 
     const userMap = new Map<string, UserStat>();
 
-    // 프로필 기반 초기화
+    // 프로필 기반 초기화 — 평가 대시보드는 리더/관리자 전용이므로 별명(실명) 표시
     (profiles ?? []).forEach((p: Profile) => {
       userMap.set(p.id, {
         userId: p.id,
-        name: p.name,
+        name: getDisplayName(p, true),
         team: p.team,
         voc_submit: 0,
         idea_submit: 0,

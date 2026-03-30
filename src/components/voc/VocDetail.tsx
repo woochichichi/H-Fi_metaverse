@@ -25,7 +25,7 @@ export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDeta
   const [status, setStatus] = useState<VocStatus>(voc.status);
   const [resolution, setResolution] = useState(voc.resolution || '');
   const [assigneeId, setAssigneeId] = useState<string | null>(voc.assignee_id);
-  const [assignees, setAssignees] = useState<{ id: string; name: string; role: string; team: string }[]>([]);
+  const [assignees, setAssignees] = useState<{ id: string; name: string; nickname?: string | null; role: string; team: string }[]>([]);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -199,7 +199,7 @@ export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDeta
                 <option value="">미배정</option>
                 {assignees.map((a) => (
                   <option key={a.id} value={a.id}>
-                    {a.name} ({a.role})
+                    {a.nickname || a.name} ({a.role})
                   </option>
                 ))}
               </select>

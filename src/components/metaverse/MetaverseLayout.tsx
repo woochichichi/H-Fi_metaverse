@@ -78,6 +78,16 @@ export default function MetaverseLayout() {
     return () => window.removeEventListener('resize', centerCamera);
   }, [centerCamera]);
 
+  // ESC 키로 패널 닫기
+  useEffect(() => {
+    if (!modalOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeModal();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [modalOpen, closeModal]);
+
   // 현재 열린 패널 컴포넌트 결정
   const PanelComponent = modalOpen ? ZONE_PANELS[modalOpen] : null;
 

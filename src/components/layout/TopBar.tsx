@@ -3,6 +3,7 @@ import { Bell, Inbox, Users, LogOut, Settings } from 'lucide-react';
 import InboxPanel from '../inbox/InboxPanel';
 import InboxBadge from '../inbox/InboxBadge';
 import AdminPanel from '../admin/AdminPanel';
+import MoodPicker from './MoodPicker';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
 import { useDeviceMode } from '../../hooks/useDeviceMode';
@@ -18,7 +19,9 @@ export default function TopBar() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [showInbox, setShowInbox] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [showMood, setShowMood] = useState(false);
   const inboxRef = useRef<HTMLDivElement>(null);
+  const moodRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (user) {
@@ -71,6 +74,19 @@ export default function TopBar() {
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [showInbox]);
+
+  // 바깥 클릭으로 기분 선택 닫기
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (moodRef.current && !moodRef.current.contains(e.target as Node)) {
+        setShowMood(false);
+      }
+    };
+    if (showMood) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showMood]);
 
   return (
     <>
@@ -148,15 +164,21 @@ export default function TopBar() {
             </button>
           )}
 
-          {/* 프로필 아바타 + 로그아웃 */}
+          {/* 프로필 아바타 (기분 선택) + 로그아웃 */}
           {profile && (
             <div className="flex items-center gap-2 ml-1">
-              <div
-                className="flex h-8 w-8 items-center justify-center rounded-full text-sm"
-                style={{ backgroundColor: profile.avatar_color }}
-                title={profile.name}
-              >
-                {profile.avatar_emoji}
+              <div ref={moodRef} className="relative">
+                <button
+                  onClick={() => setShowMood((v) => !v)}
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-sm transition-all duration-200 hover:ring-2 hover:ring-accent/50"
+                  style={{ backgroundColor: profile.avatar_color }}
+                  title="기분 변경"
+                >
+                  {profile.mood_emoji || profile.avatar_emoji}
+                </button>
+                {showMood && (
+                  <MoodPicker onClose={() => setShowMood(false)} />
+                )}
               </div>
               <button
                 onClick={logout}

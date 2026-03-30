@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
+import { getDisplayName } from '../../lib/utils';
+import { useAuthStore } from '../../stores/authStore';
 import type { UserActivity } from '../../types';
 
 const TYPE_ICONS: Record<string, string> = {
@@ -27,6 +29,8 @@ interface ActivityWithName extends UserActivity {
 }
 
 export default function ActivityTimeline() {
+  const { profile: myProfile } = useAuthStore();
+  const isAdmin = myProfile?.role === 'admin';
   const [activities, setActivities] = useState<ActivityWithName[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -51,9 +55,9 @@ export default function ActivityTimeline() {
     if (userIds.length > 0) {
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, name')
+        .select('id, name, nickname')
         .in('id', userIds);
-      (profiles ?? []).forEach((p) => nameMap.set(p.id, p.name));
+      (profiles ?? []).forEach((p) => nameMap.set(p.id, getDisplayName(p, isAdmin)));
     }
 
     const withNames: ActivityWithName[] = (data ?? []).map((a) => ({

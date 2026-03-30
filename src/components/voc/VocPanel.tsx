@@ -40,9 +40,9 @@ export default function VocPanel({ onClose }: VocPanelProps) {
   useEffect(() => {
     const ids = [...new Set(vocs.map((v) => v.assignee_id).filter(Boolean))] as string[];
     if (ids.length === 0) return;
-    supabase.from('profiles').select('id, name').in('id', ids).then(({ data }) => {
+    supabase.from('profiles').select('id, name, nickname').in('id', ids).then(({ data }) => {
       const map: Record<string, string> = {};
-      (data ?? []).forEach((p) => { map[p.id] = p.name; });
+      (data ?? []).forEach((p) => { map[p.id] = p.nickname || p.name; });
       setAssigneeNames(map);
     });
   }, [vocs]);

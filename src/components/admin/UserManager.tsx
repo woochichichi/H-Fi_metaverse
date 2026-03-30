@@ -3,6 +3,7 @@ import { Search, ChevronDown } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useUiStore } from '../../stores/uiStore';
 import { TEAMS } from '../../lib/constants';
+import { getDisplayName } from '../../lib/utils';
 import type { Profile } from '../../types';
 
 export default function UserManager() {
@@ -37,18 +38,19 @@ export default function UserManager() {
   }, [fetchUsers]);
 
   const filtered = users.filter((u) => {
-    if (search && !u.name.includes(search) && !u.team.includes(search)) return false;
+    const display = getDisplayName(u, true);
+    if (search && !display.includes(search) && !u.name.includes(search) && !u.team.includes(search)) return false;
     if (filterTeam && u.team !== filterTeam) return false;
     return true;
   });
 
-  const handleRoleChange = (userId: string, userName: string, newRole: string) => {
-    setConfirmModal({ userId, field: 'role', value: newRole, userName });
+  const handleRoleChange = (userId: string, user: Profile, newRole: string) => {
+    setConfirmModal({ userId, field: 'role', value: newRole, userName: getDisplayName(user, true) });
   };
 
-  const handleStatusToggle = (userId: string, userName: string, currentStatus: string) => {
+  const handleStatusToggle = (userId: string, user: Profile, currentStatus: string) => {
     const newStatus = currentStatus === 'offline' ? 'online' : 'offline';
-    setConfirmModal({ userId, field: 'status', value: newStatus, userName });
+    setConfirmModal({ userId, field: 'status', value: newStatus, userName: getDisplayName(user, true) });
   };
 
   const confirmAction = async () => {
@@ -88,7 +90,7 @@ export default function UserManager() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="이름 또는 팀 검색"
+            placeholder="별명, 이름 또는 팀 검색"
             className="w-full rounded-lg border border-white/[.1] bg-bg-primary py-2 pl-8 pr-3 text-xs text-text-primary placeholder:text-text-muted"
           />
         </div>
@@ -133,7 +135,7 @@ export default function UserManager() {
                       >
                         {u.avatar_emoji}
                       </div>
-                      <span className="text-text-primary">{u.name}</span>
+                      <span className="text-text-primary">{getDisplayName(u, true)}</span>
                     </div>
                   </td>
                   <td className="px-3 py-2 text-text-secondary">{u.team}</td>
@@ -141,7 +143,7 @@ export default function UserManager() {
                     <div className="relative inline-block">
                       <select
                         value={u.role}
-                        onChange={(e) => handleRoleChange(u.id, u.name, e.target.value)}
+                        onChange={(e) => handleRoleChange(u.id, u, e.target.value)}
                         className="appearance-none rounded-md border border-white/[.1] bg-bg-primary px-2 py-0.5 pr-5 text-[11px] text-text-primary"
                       >
                         <option value="member">멤버</option>
@@ -169,7 +171,7 @@ export default function UserManager() {
                   </td>
                   <td className="px-3 py-2 text-center">
                     <button
-                      onClick={() => handleStatusToggle(u.id, u.name, u.status)}
+                      onClick={() => handleStatusToggle(u.id, u, u.status)}
                       className={`rounded-md px-2 py-0.5 text-[10px] font-semibold transition-colors ${
                         u.status === 'offline'
                           ? 'bg-success/10 text-success hover:bg-success/20'

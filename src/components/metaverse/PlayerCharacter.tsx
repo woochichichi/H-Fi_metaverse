@@ -82,7 +82,7 @@ export default function PlayerCharacter() {
     posRef.current = playerPosition;
   }, [playerPosition]);
 
-  const displayName = profile?.name || 'You';
+  const displayName = profile?.nickname || profile?.name || 'You';
 
   return (
     <div
