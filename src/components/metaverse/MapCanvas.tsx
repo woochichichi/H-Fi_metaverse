@@ -1,4 +1,4 @@
-import { type ReactNode, useMemo } from 'react';
+import { type ReactNode, type JSX, useMemo } from 'react';
 import { ROOMS_DATA } from '../../lib/constants';
 import type { RoomDef } from '../../lib/constants';
 import { getMapTimeTheme, type MapTimeTheme } from '../../lib/utils';
@@ -559,14 +559,74 @@ function PortalArch({ room }: { room: RoomDef }) {
   );
 }
 
+// ═══ 팀별 픽셀 장식 (증권-차트, 생명-하트, 손보-자동차) ═══
+function PixelTeamDeco({ x, y, type }: { x: number; y: number; type: 'chart' | 'heart' | 'car' }) {
+  const decos: Record<string, JSX.Element> = {
+    chart: (
+      <svg width="56" height="44" viewBox="0 0 14 11" style={{ imageRendering: 'pixelated' }}>
+        <rect x="1" y="6" width="3" height="5" fill="#00D68F" />
+        <rect x="2" y="3" width="1" height="3" fill="#00D68F" />
+        <rect x="5" y="1" width="3" height="8" fill="#FF4757" />
+        <rect x="6" y="0" width="1" height="1" fill="#FF4757" />
+        <rect x="6" y="9" width="1" height="2" fill="#FF4757" />
+        <rect x="9" y="4" width="3" height="7" fill="#00D68F" />
+        <rect x="10" y="1" width="1" height="3" fill="#00D68F" />
+      </svg>
+    ),
+    heart: (
+      <svg width="52" height="52" viewBox="0 0 13 13" style={{ imageRendering: 'pixelated' }}>
+        <rect x="1" y="0" width="4" height="2" fill="#FFC312" />
+        <rect x="8" y="0" width="4" height="2" fill="#FFC312" />
+        <rect x="0" y="2" width="6" height="2" fill="#6C5CE7" />
+        <rect x="7" y="2" width="6" height="2" fill="#6C5CE7" />
+        <rect x="0" y="4" width="13" height="2" fill="#6C5CE7" />
+        <rect x="0" y="6" width="13" height="2" fill="#7d6df7" />
+        <rect x="1" y="8" width="11" height="1" fill="#7d6df7" />
+        <rect x="2" y="9" width="9" height="1" fill="#6C5CE7" />
+        <rect x="3" y="10" width="7" height="1" fill="#6C5CE7" />
+        <rect x="4" y="11" width="5" height="1" fill="#6C5CE7" />
+        <rect x="5" y="12" width="3" height="1" fill="#6C5CE7" />
+      </svg>
+    ),
+    car: (
+      <svg width="56" height="44" viewBox="0 0 14 11" style={{ imageRendering: 'pixelated' }}>
+        <rect x="4" y="0" width="6" height="2" fill="#3498db" />
+        <rect x="3" y="2" width="8" height="1" fill="#3498db" />
+        <rect x="4" y="2" width="3" height="1" fill="#85C1E9" />
+        <rect x="8" y="2" width="2" height="1" fill="#85C1E9" />
+        <rect x="1" y="3" width="12" height="2" fill="#0984E3" />
+        <rect x="0" y="5" width="14" height="2" fill="#0984E3" />
+        <rect x="0" y="5" width="2" height="1" fill="#FFC312" />
+        <rect x="12" y="5" width="2" height="1" fill="#FD7272" />
+        <rect x="2" y="7" width="3" height="3" fill="#333" />
+        <rect x="9" y="7" width="3" height="3" fill="#333" />
+        <rect x="3" y="8" width="1" height="1" fill="#888" />
+        <rect x="10" y="8" width="1" height="1" fill="#888" />
+      </svg>
+    ),
+  };
+  return (
+    <div className="absolute z-[6] pointer-events-none" style={{ left: x, top: y }}>
+      {decos[type]}
+    </div>
+  );
+}
+
 // ═══ 팀 타운 가구 배치 (1200x900, 로컬좌표) ═══
-function TeamTownFurniture(_props: { teamColor: string; theme: string }) {
+function TeamTownFurniture({ teamColor, theme }: { teamColor: string; theme: string }) {
+  const decoType = theme === 'stock' ? 'chart' : theme === 'life' ? 'heart' : 'car';
   return (
     <>
+      {/* ═══ 팀별 픽셀 장식 (곳곳에 배치) ═══ */}
+      <PixelTeamDeco x={500} y={70} type={decoType} />
+      <PixelTeamDeco x={1100} y={70} type={decoType} />
+      <PixelTeamDeco x={800} y={470} type={decoType} />
+      <PixelTeamDeco x={280} y={340} type={decoType} />
+
       {/* ═══ 로비 Zone (60,60 ~ 560,400) — 편안한 휴식 공간 ═══ */}
-      <PixelSofa90s x={100} y={120} color="#8B6914" />
-      <PixelSofa90s x={300} y={120} color="#8B6914" />
-      <PixelSofa90s x={100} y={240} color="#8B6914" />
+      <PixelSofa90s x={100} y={120} color={teamColor} />
+      <PixelSofa90s x={300} y={120} color={teamColor} />
+      <PixelSofa90s x={100} y={240} color={teamColor} />
       <PixelRoundTable x={240} y={180} size={72} />
       <PixelRoundTable x={400} y={180} size={72} />
       <PixelWaterCooler x={80} y={80} />
@@ -671,33 +731,6 @@ function PlazaFurniture() {
       <PixelPlant90s x={1440} y={80} />
       <PixelPlant90s x={1440} y={380} size="small" />
 
-      {/* ═══ 분수대 + 이정표 (중앙) ═══ */}
-      <div
-        className="absolute z-[6] rounded-full"
-        style={{
-          left: 700, top: 460,
-          width: 140, height: 80,
-          background: 'radial-gradient(ellipse, #6bc5ff44, #6bc5ff22, transparent)',
-          border: '3px solid #6bc5ff66',
-          boxShadow: '0 0 40px rgba(107,197,255,.25)',
-        }}
-      >
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ width: 40, height: 24, background: 'radial-gradient(ellipse, #6bc5ffaa, transparent)', animation: 'pulse 2s infinite' }} />
-      </div>
-      {/* 이정표 */}
-      <div className="absolute z-[7]" style={{ left: 755, top: 445 }}>
-        <div style={{ width: 6, height: 50, background: 'linear-gradient(180deg,#a07030,#8B6914)', margin: '0 auto', borderRadius: 2 }} />
-        <div className="absolute text-[11px] font-bold whitespace-nowrap" style={{ top: -4, left: 16, background: '#00D68Fcc', color: '#fff', padding: '2px 8px', borderRadius: 4, boxShadow: '0 1px 4px rgba(0,0,0,.3)' }}>
-          ↑ 증권ITO
-        </div>
-        <div className="absolute text-[11px] font-bold whitespace-nowrap" style={{ top: 14, right: 16, background: '#6C5CE7cc', color: '#fff', padding: '2px 8px', borderRadius: 4, boxShadow: '0 1px 4px rgba(0,0,0,.3)' }}>
-          ← 생명ITO
-        </div>
-        <div className="absolute text-[11px] font-bold whitespace-nowrap" style={{ top: 32, left: 16, background: '#0984E3cc', color: '#fff', padding: '2px 8px', borderRadius: 4, boxShadow: '0 1px 4px rgba(0,0,0,.3)' }}>
-          → 손보ITO
-        </div>
-      </div>
-
       {/* ═══ 모임방 Zone (60,520 ~ 460,820) ═══ */}
       {/* 긴 테이블 + 의자 */}
       <PixelDesk90s x={120} y={620} />
@@ -769,18 +802,48 @@ export default function MapCanvas({ children }: MapCanvasProps) {
           border: `3px solid ${room.theme.border}33`,
           background: `${room.theme.border}06`,
         }}
-      >
+      />
+
+      {/* 레트로 팀명 배너 (팀 룸 전용) */}
+      {room.team && (
         <div
-          className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg px-6 py-1.5 text-sm font-bold text-white pointer-events-none"
-          style={{
-            background: `${room.theme.border}dd`,
-            boxShadow: `0 2px 10px ${room.theme.border}44`,
-            letterSpacing: '1px',
-          }}
+          className="absolute z-[20] left-1/2 -translate-x-1/2 pointer-events-none"
+          style={{ top: 8 }}
         >
-          {room.label}
+          <div
+            className="relative px-8 py-2 text-center"
+            style={{
+              background: 'linear-gradient(180deg, #2a2018, #1a1208)',
+              border: `3px solid ${room.theme.border}`,
+              borderRadius: 6,
+              boxShadow: `0 4px 16px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.08), 0 0 20px ${room.theme.border}33`,
+            }}
+          >
+            {/* 장식 리벳 */}
+            <div className="absolute top-1 left-2 w-2 h-2 rounded-full" style={{ background: room.theme.border, opacity: 0.6 }} />
+            <div className="absolute top-1 right-2 w-2 h-2 rounded-full" style={{ background: room.theme.border, opacity: 0.6 }} />
+            <div className="absolute bottom-1 left-2 w-2 h-2 rounded-full" style={{ background: room.theme.border, opacity: 0.6 }} />
+            <div className="absolute bottom-1 right-2 w-2 h-2 rounded-full" style={{ background: room.theme.border, opacity: 0.6 }} />
+            {/* 팀명 */}
+            <div
+              className="text-[18px] font-black tracking-[3px]"
+              style={{
+                color: room.theme.border,
+                textShadow: `0 0 8px ${room.theme.border}66, 0 2px 4px rgba(0,0,0,.5)`,
+                fontFamily: "'Space Grotesk', 'Courier New', monospace",
+              }}
+            >
+              {room.label}
+            </div>
+            <div
+              className="text-[9px] tracking-[2px] mt-0.5 uppercase"
+              style={{ color: 'rgba(255,255,255,.35)', fontFamily: "'Courier New', monospace" }}
+            >
+              {room.team} OFFICE
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 가구 */}
       {room.team ? (
