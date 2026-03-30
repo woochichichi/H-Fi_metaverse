@@ -75,8 +75,7 @@ export function useIdeas() {
             category: input.category,
           })
           .select()
-          .single()
-          .abortSignal(controller.signal);
+          .single();
 
         clearTimeout(timeout);
         console.log('[createIdea] 응답:', { data, error: insertError });
