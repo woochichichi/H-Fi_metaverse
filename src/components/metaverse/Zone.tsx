@@ -29,12 +29,10 @@ export default function Zone() {
       {zones.map((z) => (
         <div
           key={z.id}
-          className="absolute z-[2] cursor-pointer rounded-md transition-all duration-200"
+          className="absolute z-[2] cursor-pointer rounded-md transition-all duration-300"
           style={{
             left: z.x, top: z.y, width: z.width, height: z.height,
-            outline: hoveredZone === z.id ? '3px solid rgba(108,92,231,.5)' : 'none',
-            outlineOffset: hoveredZone === z.id ? 2 : 0,
-            background: hoveredZone === z.id ? 'rgba(108,92,231,.04)' : 'transparent',
+            background: hoveredZone === z.id ? 'rgba(255,255,255,0.04)' : 'transparent',
           }}
           onClick={() => handleZoneClick(z.id, z.x, z.y, z.width, z.height)}
           onMouseEnter={() => setHoveredZone(z.id)}
@@ -42,12 +40,11 @@ export default function Zone() {
         >
           {hoveredZone === z.id && (
             <div
-              className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-0.5 text-[10px] font-medium text-white/80 pointer-events-none animate-[fadeIn_.15s]"
+              className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-0.5 text-[11px] font-medium text-white/90 pointer-events-none animate-[fadeIn_.15s]"
               style={{
                 bottom: -24,
                 zIndex: 100,
-                background: 'rgba(30,30,48,.85)',
-                backdropFilter: 'blur(4px)',
+                background: 'rgba(30,30,48,.9)',
               }}
             >
               클릭하여 입장
@@ -67,12 +64,11 @@ export default function Zone() {
               left: playerPosition.x + 17,
               top: playerPosition.y + 58,
               transform: 'translateX(-50%)',
-              background: 'rgba(108,92,231,.9)',
+              background: 'rgba(108,92,231,.92)',
               boxShadow: '0 3px 12px rgba(108,92,231,.35)',
-              backdropFilter: 'blur(6px)',
             }}
           >
-            <span className="rounded bg-white/20 px-[6px] py-[1px] font-mono text-[9px] font-semibold text-white/90">
+            <span className="rounded bg-white/20 px-[6px] py-[1px] font-mono text-[10px] font-semibold text-white/90">
               Space
             </span>
             {zone.emoji} {zone.label} 입장
@@ -88,12 +84,11 @@ export default function Zone() {
             left: playerPosition.x + 17,
             top: playerPosition.y + 58,
             transform: 'translateX(-50%)',
-            background: 'rgba(248,181,0,.9)',
+            background: 'rgba(248,181,0,.92)',
             boxShadow: '0 3px 12px rgba(248,181,0,.35)',
-            backdropFilter: 'blur(6px)',
           }}
         >
-          <span className="rounded bg-white/20 px-[6px] py-[1px] font-mono text-[9px] font-semibold text-white/90">
+          <span className="rounded bg-white/20 px-[6px] py-[1px] font-mono text-[10px] font-semibold text-white/90">
             Space
           </span>
           {nearPortal.label}

@@ -1,473 +1,419 @@
-import { type ReactNode, type JSX, useMemo } from 'react';
+import { type ReactNode, useMemo } from 'react';
 import { ROOMS_DATA } from '../../lib/constants';
 import type { RoomDef } from '../../lib/constants';
 import { getMapTimeTheme, type MapTimeTheme } from '../../lib/utils';
 import { useMetaverseStore } from '../../stores/metaverseStore';
 
-// ═══ SVG Plants (픽셀 스타일) ═══
-function PlantSmall({ x, y }: { x: number; y: number }) {
-  return (
-    <div className="absolute z-[6]" style={{ left: x, top: y }}>
-      <svg width="22" height="30" viewBox="0 0 22 30">
-        <rect x="7" y="22" width="8" height="8" rx="2" fill="#c49a5a" />
-        <ellipse cx="11" cy="18" rx="8" ry="10" fill="#4CAF50" />
-        <ellipse cx="7" cy="14" rx="5" ry="8" fill="#66BB6A" />
-        <ellipse cx="15" cy="15" rx="4" ry="7" fill="#388E3C" />
-      </svg>
-    </div>
-  );
-}
+// ═══════════════════════════════════════════════════════
+// 90년대 사무실 아이소메트릭 픽셀 가구 (게더타운 스타일)
+// ═══════════════════════════════════════════════════════
 
-function PlantLarge({ x, y }: { x: number; y: number }) {
-  return (
-    <div className="absolute z-[6]" style={{ left: x, top: y }}>
-      <svg width="40" height="56" viewBox="0 0 40 56">
-        <rect x="14" y="40" width="12" height="16" rx="3" fill="#b8904e" />
-        <rect x="16" y="42" width="8" height="12" rx="2" fill="#c49a5a" />
-        <ellipse cx="20" cy="30" rx="16" ry="20" fill="#43A047" />
-        <ellipse cx="12" cy="24" rx="8" ry="14" fill="#66BB6A" />
-        <ellipse cx="28" cy="26" rx="7" ry="12" fill="#388E3C" />
-        <ellipse cx="20" cy="18" rx="6" ry="10" fill="#4CAF50" />
-      </svg>
-    </div>
-  );
-}
-
-// ═══ Furniture Components ═══
-function Desk({ x, y, w = 84, h = 46 }: { x: number; y: number; w?: number; h?: number }) {
+// 90년대 사무 책상 (아이소메트릭 탑다운, 서랍 2개, 베이지 상판)
+function PixelDesk90s({ x, y }: { x: number; y: number }) {
   return (
     <div className="absolute z-[4]" style={{ left: x, top: y }}>
-      <div
-        className="rounded"
-        style={{
-          width: w, height: h,
-          background: 'linear-gradient(180deg,#dbb88a,#c4a06e)',
-          border: '2px solid #b8904e',
-          boxShadow: '0 3px 0 #a07844, inset 0 1px 0 rgba(255,255,255,.2)',
-        }}
-      />
+      <svg width="120" height="72" viewBox="0 0 30 18" style={{ imageRendering: 'pixelated' }}>
+        {/* 그림자 */}
+        <ellipse cx="15" cy="17" rx="13" ry="2" fill="rgba(0,0,0,0.12)" />
+        {/* 다리 */}
+        <rect x="2" y="12" width="2" height="5" fill="#8B7355" />
+        <rect x="26" y="12" width="2" height="5" fill="#8B7355" />
+        {/* 서랍함 본체 (우측) */}
+        <rect x="20" y="7" width="8" height="10" fill="#A8895A" />
+        <rect x="21" y="8" width="6" height="3" fill="#BFA87A" />
+        <rect x="23" y="9" width="2" height="1" fill="#8B7355" />
+        <rect x="21" y="12" width="6" height="3" fill="#BFA87A" />
+        <rect x="23" y="13" width="2" height="1" fill="#8B7355" />
+        {/* 상판 */}
+        <rect x="0" y="5" width="30" height="3" rx="1" fill="#C4A36E" />
+        <rect x="1" y="5" width="28" height="1" fill="#D4B87E" />
+        {/* 상판 위 키보드 */}
+        <rect x="4" y="3" width="10" height="3" rx="1" fill="#D4D0C8" />
+        <rect x="5" y="4" width="8" height="1" fill="#C0BCB0" />
+      </svg>
     </div>
   );
 }
 
-function Monitor({ x, y }: { x: number; y: number }) {
+// CRT 모니터 (볼록 화면, 두꺼운 몸체)
+function PixelCRT({ x, y, screen = '#2C3E50' }: { x: number; y: number; screen?: string }) {
   return (
     <div className="absolute z-[5]" style={{ left: x, top: y }}>
-      <div
-        className="rounded-sm"
-        style={{
-          width: 28, height: 22,
-          background: 'linear-gradient(180deg,#2a2a3e,#1e1e30)',
-          border: '2px solid #444',
-          boxShadow: '0 2px 0 #222',
-        }}
-      >
-        <div
-          className="absolute rounded-sm animate-[screenGlow_3s_infinite_alternate]"
-          style={{ top: 2, left: 2, right: 2, bottom: 4 }}
-        />
-      </div>
+      <svg width="48" height="52" viewBox="0 0 12 13" style={{ imageRendering: 'pixelated' }}>
+        {/* 몸체 (두꺼움) */}
+        <rect x="1" y="1" width="10" height="8" rx="1" fill="#D4D0C8" />
+        <rect x="1" y="8" width="10" height="1" fill="#B8B4A8" />
+        {/* 화면 */}
+        <rect x="2" y="2" width="8" height="5" fill={screen} />
+        <rect x="3" y="3" width="2" height="1" fill="#4CAF50" opacity="0.8" />
+        <rect x="3" y="4" width="4" height="1" fill="#4CAF50" opacity="0.5" />
+        <rect x="3" y="5" width="3" height="1" fill="#4CAF50" opacity="0.3" />
+        {/* 화면 반사 */}
+        <rect x="7" y="2" width="2" height="1" fill="rgba(255,255,255,0.15)" />
+        {/* 버튼 */}
+        <rect x="8" y="7" width="1" height="1" fill="#4CAF50" />
+        <rect x="9" y="7" width="1" height="1" fill="#F44336" />
+        {/* 받침대 */}
+        <rect x="4" y="9" width="4" height="2" fill="#B8B4A8" />
+        <rect x="3" y="11" width="6" height="1" fill="#A09C90" />
+      </svg>
     </div>
   );
 }
 
-function Chair({ x, y }: { x: number; y: number }) {
+// 바퀴 의자 (검정 가죽, 5발)
+function PixelChair90s({ x, y }: { x: number; y: number }) {
   return (
     <div className="absolute z-[4]" style={{ left: x, top: y }}>
-      <div
-        className="rounded-full"
-        style={{
-          width: 24, height: 24,
-          background: 'radial-gradient(circle,#666,#555)',
-          border: '2px solid #444',
-          boxShadow: '0 2px 0 #333',
-        }}
-      />
+      <svg width="36" height="40" viewBox="0 0 9 10" style={{ imageRendering: 'pixelated' }}>
+        {/* 바퀴 (5방향) */}
+        <rect x="0" y="9" width="2" height="1" fill="#555" />
+        <rect x="7" y="9" width="2" height="1" fill="#555" />
+        <rect x="2" y="8" width="1" height="1" fill="#555" />
+        <rect x="6" y="8" width="1" height="1" fill="#555" />
+        {/* 기둥 */}
+        <rect x="4" y="6" width="1" height="3" fill="#666" />
+        {/* 좌판 */}
+        <rect x="1" y="4" width="7" height="3" rx="1" fill="#2C2C2C" />
+        <rect x="2" y="5" width="5" height="1" fill="#3A3A3A" />
+        {/* 등받이 */}
+        <rect x="2" y="1" width="5" height="4" rx="1" fill="#2C2C2C" />
+        <rect x="3" y="2" width="3" height="2" fill="#3A3A3A" />
+        {/* 팔걸이 */}
+        <rect x="0" y="3" width="2" height="1" fill="#4A4A4A" />
+        <rect x="7" y="3" width="2" height="1" fill="#4A4A4A" />
+      </svg>
     </div>
   );
 }
 
-function RoundTable({ x, y, size = 60 }: { x: number; y: number; size?: number }) {
+// 갈색 가죽 소파 (쿠션 3개)
+function PixelSofa90s({ x, y, color = '#8B6914' }: { x: number; y: number; color?: string }) {
   return (
-    <div
-      className="absolute z-[4] rounded-full"
-      style={{
-        left: x, top: y, width: size, height: size,
-        background: 'radial-gradient(circle,#f0f0f0,#ddd)',
-        border: '3px solid #bbb',
-        boxShadow: '0 4px 0 rgba(0,0,0,.1), inset 0 1px 0 rgba(255,255,255,.5)',
-      }}
-    />
-  );
-}
-
-function SofaH({ x, y, color = '#8b7bc4' }: { x: number; y: number; color?: string }) {
-  return (
-    <div
-      className="absolute z-[4] rounded-lg"
-      style={{
-        left: x, top: y, width: 76, height: 34,
-        background: `linear-gradient(180deg,${color},${color}dd)`,
-        border: `2px solid ${color}`,
-        boxShadow: '0 3px 0 rgba(0,0,0,.15)',
-      }}
-    >
-      <div className="absolute rounded" style={{ top: 4, left: 4, right: 4, bottom: 4, background: 'rgba(255,255,255,.08)' }} />
+    <div className="absolute z-[4]" style={{ left: x, top: y }}>
+      <svg width="120" height="56" viewBox="0 0 30 14" style={{ imageRendering: 'pixelated' }}>
+        <ellipse cx="15" cy="13" rx="13" ry="2" fill="rgba(0,0,0,0.1)" />
+        {/* 뒷면 */}
+        <rect x="1" y="1" width="28" height="4" rx="1" fill={color} />
+        <rect x="2" y="2" width="26" height="2" fill={`${color}dd`} />
+        {/* 좌판 */}
+        <rect x="0" y="5" width="30" height="6" rx="1" fill={color} />
+        {/* 쿠션 구분 */}
+        <rect x="1" y="6" width="8" height="4" rx="1" fill={`${color}ee`} />
+        <rect x="11" y="6" width="8" height="4" rx="1" fill={`${color}ee`} />
+        <rect x="21" y="6" width="8" height="4" rx="1" fill={`${color}ee`} />
+        {/* 하이라이트 */}
+        <rect x="2" y="6" width="6" height="1" fill="rgba(255,255,255,0.1)" />
+        <rect x="12" y="6" width="6" height="1" fill="rgba(255,255,255,0.1)" />
+        <rect x="22" y="6" width="6" height="1" fill="rgba(255,255,255,0.1)" />
+        {/* 팔걸이 */}
+        <rect x="0" y="3" width="3" height="9" rx="1" fill={color} />
+        <rect x="27" y="3" width="3" height="9" rx="1" fill={color} />
+      </svg>
     </div>
   );
 }
 
-function Whiteboard({ x, y, w = 90 }: { x: number; y: number; w?: number }) {
-  return (
-    <div
-      className="absolute z-[5] rounded-sm"
-      style={{
-        left: x, top: y, width: w, height: 10,
-        background: 'linear-gradient(180deg,#f5f5f5,#e8e8e8)',
-        border: '3px solid #bbb',
-        boxShadow: '0 2px 0 rgba(0,0,0,.1)',
-      }}
-    />
-  );
-}
-
-function Bookshelf({ x, y }: { x: number; y: number }) {
-  const bookColors = ['#e74c3c', '#3498db', '#f39c12', '#2ecc71', '#9b59b6', '#e67e22'];
-  const bookWidths = [4, 3, 5, 3, 4, 3];
+// 화이트보드 (마커 자국 + 지우개)
+function PixelWhiteboard({ x, y, w = 120 }: { x: number; y: number; w?: number }) {
+  const vw = w / 4; // viewBox 비율
   return (
     <div className="absolute z-[5]" style={{ left: x, top: y }}>
-      <div
-        className="rounded-sm"
-        style={{
-          width: 54, height: 40,
-          background: 'linear-gradient(180deg,#a07030,#8B6914)',
-          border: '2px solid #6d5310',
-          boxShadow: '0 2px 0 rgba(0,0,0,.15)',
-        }}
-      >
-        <div className="absolute flex gap-px" style={{ top: 3, left: 3 }}>
-          {bookColors.map((c, i) => (
-            <div key={i} className="rounded-sm" style={{ width: bookWidths[i], height: 14, background: c }} />
-          ))}
-        </div>
-      </div>
+      <svg width={w} height="80" viewBox={`0 0 ${vw} 20`} style={{ imageRendering: 'pixelated' }}>
+        {/* 프레임 */}
+        <rect x="0" y="0" width={vw} height="18" rx="1" fill="#E8E8E8" stroke="#AAAAAA" strokeWidth="0.5" />
+        {/* 보드 */}
+        <rect x="1" y="1" width={vw - 2} height="14" fill="#F5F5F0" />
+        {/* 마커 자국 */}
+        <rect x="3" y="3" width={vw * 0.5} height="1" fill="#E74C3C" opacity="0.6" />
+        <rect x="3" y="5" width={vw * 0.4} height="1" fill="#3498DB" opacity="0.5" />
+        <rect x="3" y="7" width={vw * 0.6} height="1" fill="#2ECC71" opacity="0.4" />
+        <rect x="3" y="9" width={vw * 0.3} height="1" fill="#E74C3C" opacity="0.3" />
+        {/* 트레이 */}
+        <rect x="2" y="16" width={vw - 4} height="2" fill="#CCCCCC" />
+        {/* 마커 */}
+        <rect x="4" y="16" width="2" height="1.5" fill="#E74C3C" />
+        <rect x="7" y="16" width="2" height="1.5" fill="#3498DB" />
+        {/* 지우개 */}
+        <rect x={vw - 8} y="16" width="4" height="1.5" fill="#888" />
+      </svg>
     </div>
   );
 }
 
-function VendingMachine({ x, y }: { x: number; y: number }) {
+// 파일 캐비넷 (금속 3단 서랍)
+function PixelFileCabinet({ x, y }: { x: number; y: number }) {
   return (
-    <div
-      className="absolute z-[5] rounded"
-      style={{
-        left: x, top: y, width: 30, height: 44,
-        background: 'linear-gradient(180deg,#e74c3c,#c0392b)',
-        border: '2px solid #a93226',
-        boxShadow: '0 3px 0 rgba(0,0,0,.15)',
-      }}
-    >
-      <div className="absolute rounded-sm" style={{ top: 6, left: 4, right: 4, height: 20, background: '#1a1a2e' }} />
+    <div className="absolute z-[5]" style={{ left: x, top: y }}>
+      <svg width="48" height="72" viewBox="0 0 12 18" style={{ imageRendering: 'pixelated' }}>
+        <ellipse cx="6" cy="17" rx="5" ry="1.5" fill="rgba(0,0,0,0.1)" />
+        {/* 본체 */}
+        <rect x="0" y="0" width="12" height="16" fill="#8C8C8C" />
+        <rect x="1" y="0" width="10" height="1" fill="#9C9C9C" />
+        {/* 서랍 1 */}
+        <rect x="1" y="1" width="10" height="4" fill="#A0A0A0" />
+        <rect x="4" y="2.5" width="4" height="1" fill="#6C6C6C" />
+        {/* 서랍 2 */}
+        <rect x="1" y="6" width="10" height="4" fill="#A0A0A0" />
+        <rect x="4" y="7.5" width="4" height="1" fill="#6C6C6C" />
+        {/* 서랍 3 */}
+        <rect x="1" y="11" width="10" height="4" fill="#A0A0A0" />
+        <rect x="4" y="12.5" width="4" height="1" fill="#6C6C6C" />
+        {/* 엣지 하이라이트 */}
+        <rect x="0" y="0" width="1" height="16" fill="rgba(255,255,255,0.1)" />
+      </svg>
     </div>
   );
 }
 
-// ═══ 팀별 픽셀 장식 ═══
-function PixelDecoration({ x, y, type }: { x: number; y: number; type: 'chart' | 'heart' | 'car' | 'bulb' | 'phone' }) {
-  const decos: Record<string, JSX.Element> = {
-    chart: (
-      <svg width="40" height="32" viewBox="0 0 10 8" style={{ imageRendering: 'pixelated' }}>
-        <rect x="1" y="4" width="2" height="4" fill="#00D68F" />
-        <rect x="1.5" y="2" width="1" height="2" fill="#00D68F" />
-        <rect x="4" y="1" width="2" height="5" fill="#FF4757" />
-        <rect x="4.5" y="0" width="1" height="1" fill="#FF4757" />
-        <rect x="4.5" y="6" width="1" height="2" fill="#FF4757" />
-        <rect x="7" y="3" width="2" height="5" fill="#00D68F" />
-        <rect x="7.5" y="1" width="1" height="2" fill="#00D68F" />
+// 종이컵 커피 자판기
+function PixelVending90s({ x, y }: { x: number; y: number }) {
+  return (
+    <div className="absolute z-[5]" style={{ left: x, top: y }}>
+      <svg width="52" height="80" viewBox="0 0 13 20" style={{ imageRendering: 'pixelated' }}>
+        <ellipse cx="6.5" cy="19" rx="5.5" ry="1.5" fill="rgba(0,0,0,0.1)" />
+        {/* 본체 */}
+        <rect x="0" y="0" width="13" height="18" rx="1" fill="#C0392B" />
+        <rect x="1" y="1" width="11" height="16" fill="#E74C3C" />
+        {/* 상단 로고 */}
+        <rect x="3" y="2" width="7" height="2" fill="#FFFFFF" opacity="0.3" />
+        {/* 디스플레이 */}
+        <rect x="2" y="5" width="9" height="5" fill="#1a1a2e" />
+        <rect x="3" y="6" width="3" height="1" fill="#4CAF50" opacity="0.7" />
+        <rect x="3" y="8" width="5" height="1" fill="#FFC107" opacity="0.5" />
+        {/* 버튼 */}
+        <rect x="3" y="11" width="2" height="2" rx="0.5" fill="#FFA726" />
+        <rect x="6" y="11" width="2" height="2" rx="0.5" fill="#66BB6A" />
+        <rect x="9" y="11" width="2" height="2" rx="0.5" fill="#42A5F5" />
+        {/* 투출구 */}
+        <rect x="4" y="14" width="5" height="3" fill="#333" />
+        <rect x="5" y="15" width="3" height="1" fill="#555" />
       </svg>
-    ),
-    heart: (
-      <svg width="36" height="36" viewBox="0 0 9 9" style={{ imageRendering: 'pixelated' }}>
-        <rect x="1" y="0" width="2" height="1" fill="#FFC312" />
-        <rect x="6" y="0" width="2" height="1" fill="#FFC312" />
-        <rect x="0" y="1" width="4" height="1" fill="#6C5CE7" />
-        <rect x="5" y="1" width="4" height="1" fill="#6C5CE7" />
-        <rect x="0" y="2" width="9" height="1" fill="#6C5CE7" />
-        <rect x="0" y="3" width="9" height="1" fill="#7d6df7" />
-        <rect x="1" y="4" width="7" height="1" fill="#7d6df7" />
-        <rect x="2" y="5" width="5" height="1" fill="#6C5CE7" />
-        <rect x="3" y="6" width="3" height="1" fill="#6C5CE7" />
-        <rect x="4" y="7" width="1" height="1" fill="#6C5CE7" />
+    </div>
+  );
+}
+
+// 큰 잎 화분 (테라코타 화분, 넓은 잎)
+function PixelPlant90s({ x, y, size = 'large' }: { x: number; y: number; size?: 'large' | 'small' }) {
+  if (size === 'small') {
+    return (
+      <div className="absolute z-[6]" style={{ left: x, top: y }}>
+        <svg width="32" height="44" viewBox="0 0 8 11" style={{ imageRendering: 'pixelated' }}>
+          <ellipse cx="4" cy="10" rx="3.5" ry="1" fill="rgba(0,0,0,0.1)" />
+          <rect x="2" y="7" width="4" height="3" fill="#C2703E" />
+          <rect x="1" y="7" width="6" height="1" fill="#D4834E" />
+          <ellipse cx="4" cy="5" rx="3" ry="4" fill="#4CAF50" />
+          <ellipse cx="2.5" cy="4" rx="2" ry="3" fill="#66BB6A" />
+          <ellipse cx="5.5" cy="4.5" rx="2" ry="2.5" fill="#388E3C" />
+        </svg>
+      </div>
+    );
+  }
+  return (
+    <div className="absolute z-[6]" style={{ left: x, top: y }}>
+      <svg width="56" height="76" viewBox="0 0 14 19" style={{ imageRendering: 'pixelated' }}>
+        <ellipse cx="7" cy="18" rx="5" ry="1.5" fill="rgba(0,0,0,0.12)" />
+        {/* 화분 */}
+        <rect x="3" y="13" width="8" height="5" fill="#C2703E" />
+        <rect x="2" y="13" width="10" height="2" fill="#D4834E" />
+        <rect x="4" y="16" width="6" height="1" fill="#B8632E" />
+        {/* 넓은 잎 */}
+        <ellipse cx="7" cy="8" rx="5" ry="7" fill="#43A047" />
+        <ellipse cx="4" cy="6" rx="3" ry="5" fill="#66BB6A" />
+        <ellipse cx="10" cy="7" rx="3" ry="4" fill="#388E3C" />
+        <ellipse cx="7" cy="4" rx="3" ry="4" fill="#4CAF50" />
+        {/* 잎 디테일 */}
+        <rect x="6" y="3" width="2" height="6" fill="rgba(255,255,255,0.08)" />
       </svg>
-    ),
-    car: (
-      <svg width="40" height="32" viewBox="0 0 10 8" style={{ imageRendering: 'pixelated' }}>
-        <rect x="3" y="0" width="4" height="1" fill="#3498db" />
-        <rect x="2" y="1" width="6" height="1" fill="#3498db" />
-        <rect x="3" y="1" width="2" height="1" fill="#85C1E9" />
-        <rect x="6" y="1" width="1" height="1" fill="#85C1E9" />
-        <rect x="1" y="2" width="8" height="1" fill="#0984E3" />
-        <rect x="0" y="3" width="10" height="1" fill="#0984E3" />
-        <rect x="0" y="4" width="10" height="1" fill="#0984E3" />
-        <rect x="0" y="3" width="1" height="1" fill="#FFC312" />
-        <rect x="9" y="3" width="1" height="1" fill="#FD7272" />
-        <rect x="1" y="5" width="2" height="2" fill="#333" />
-        <rect x="7" y="5" width="2" height="2" fill="#333" />
-        <rect x="1.5" y="5.5" width="1" height="1" fill="#888" />
-        <rect x="7.5" y="5.5" width="1" height="1" fill="#888" />
+    </div>
+  );
+}
+
+// 사무실 파티션 (회색 패브릭, H자형)
+function PixelPartition({ x, y, w = 120 }: { x: number; y: number; w?: number }) {
+  const vw = w / 4;
+  return (
+    <div className="absolute z-[5]" style={{ left: x, top: y }}>
+      <svg width={w} height="60" viewBox={`0 0 ${vw} 15`} style={{ imageRendering: 'pixelated' }}>
+        {/* 프레임 */}
+        <rect x="0" y="0" width="1" height="15" fill="#C0C0C0" />
+        <rect x={vw - 1} y="0" width="1" height="15" fill="#C0C0C0" />
+        {/* 패브릭 */}
+        <rect x="1" y="0" width={vw - 2} height="13" fill="#A0A0A0" />
+        <rect x="1" y="0" width={vw - 2} height="1" fill="#B0B0B0" />
+        {/* 텍스처 */}
+        <rect x="2" y="2" width={vw - 4} height="1" fill="rgba(255,255,255,0.05)" />
+        <rect x="2" y="5" width={vw - 4} height="1" fill="rgba(255,255,255,0.05)" />
+        <rect x="2" y="8" width={vw - 4} height="1" fill="rgba(255,255,255,0.05)" />
+        {/* 발 */}
+        <rect x="1" y="13" width="2" height="2" fill="#888" />
+        <rect x={vw - 3} y="13" width="2" height="2" fill="#888" />
       </svg>
-    ),
-    bulb: (
-      <svg width="28" height="36" viewBox="0 0 7 9" style={{ imageRendering: 'pixelated' }}>
-        <rect x="2" y="0" width="3" height="1" fill="#FDCB6E" />
-        <rect x="1" y="1" width="5" height="1" fill="#FDCB6E" />
-        <rect x="1" y="2" width="5" height="1" fill="#FFC312" />
-        <rect x="1" y="3" width="5" height="1" fill="#FDCB6E" />
-        <rect x="2" y="4" width="3" height="1" fill="#FDCB6E" />
-        <rect x="2" y="5" width="3" height="1" fill="#aaa" />
-        <rect x="2" y="6" width="3" height="1" fill="#888" />
-        <rect x="3" y="7" width="1" height="1" fill="#666" />
+    </div>
+  );
+}
+
+// 복사기
+function PixelCopier({ x, y }: { x: number; y: number }) {
+  return (
+    <div className="absolute z-[5]" style={{ left: x, top: y }}>
+      <svg width="64" height="72" viewBox="0 0 16 18" style={{ imageRendering: 'pixelated' }}>
+        <ellipse cx="8" cy="17" rx="7" ry="1.5" fill="rgba(0,0,0,0.1)" />
+        {/* 본체 */}
+        <rect x="1" y="4" width="14" height="12" fill="#E0E0E0" />
+        <rect x="1" y="4" width="14" height="1" fill="#EEEEEE" />
+        {/* 상판 (스캐너) */}
+        <rect x="0" y="1" width="16" height="4" fill="#CCCCCC" />
+        <rect x="1" y="2" width="14" height="2" fill="#DDDDDD" />
+        {/* 디스플레이 */}
+        <rect x="10" y="6" width="4" height="3" fill="#1a1a2e" />
+        <rect x="11" y="7" width="2" height="1" fill="#4CAF50" opacity="0.7" />
+        {/* 용지함 */}
+        <rect x="3" y="12" width="10" height="3" fill="#D0D0D0" />
+        <rect x="4" y="13" width="8" height="1" fill="#F5F5F0" />
+        {/* 버튼 */}
+        <rect x="3" y="7" width="2" height="1" fill="#4CAF50" />
+        <rect x="3" y="9" width="2" height="1" fill="#F44336" />
       </svg>
-    ),
-    phone: (
+    </div>
+  );
+}
+
+// 코르크 게시판 (포스트잇 붙어있음)
+function PixelCorkboard({ x, y }: { x: number; y: number }) {
+  return (
+    <div className="absolute z-[5]" style={{ left: x, top: y }}>
+      <svg width="96" height="72" viewBox="0 0 24 18" style={{ imageRendering: 'pixelated' }}>
+        {/* 프레임 */}
+        <rect x="0" y="0" width="24" height="18" fill="#8B6914" />
+        {/* 코르크 */}
+        <rect x="1" y="1" width="22" height="16" fill="#D4A06E" />
+        <rect x="2" y="2" width="20" height="14" fill="#C4966A" />
+        {/* 포스트잇 */}
+        <rect x="3" y="3" width="5" height="5" fill="#FDCB6E" />
+        <rect x="3" y="3" width="5" height="1" fill="#F0B830" />
+        <rect x="10" y="2" width="5" height="5" fill="#FF6B9D" />
+        <rect x="10" y="2" width="5" height="1" fill="#E05580" />
+        <rect x="17" y="4" width="4" height="4" fill="#74B9FF" />
+        <rect x="17" y="4" width="4" height="1" fill="#5AA0E8" />
+        <rect x="5" y="10" width="5" height="4" fill="#55EFC4" />
+        <rect x="5" y="10" width="5" height="1" fill="#3DD8A8" />
+        <rect x="13" y="9" width="6" height="5" fill="#FFF3B0" />
+        <rect x="13" y="9" width="6" height="1" fill="#E8DC98" />
+        {/* 핀 */}
+        <circle cx="5" cy="3" r="0.7" fill="#E74C3C" />
+        <circle cx="12" cy="2" r="0.7" fill="#3498DB" />
+        <circle cx="19" cy="4" r="0.7" fill="#2ECC71" />
+      </svg>
+    </div>
+  );
+}
+
+// 정수기
+function PixelWaterCooler({ x, y }: { x: number; y: number }) {
+  return (
+    <div className="absolute z-[5]" style={{ left: x, top: y }}>
+      <svg width="32" height="68" viewBox="0 0 8 17" style={{ imageRendering: 'pixelated' }}>
+        <ellipse cx="4" cy="16" rx="3.5" ry="1" fill="rgba(0,0,0,0.1)" />
+        {/* 물통 */}
+        <rect x="2" y="0" width="4" height="5" rx="1" fill="#74B9FF" />
+        <rect x="2.5" y="1" width="3" height="3" fill="#A8D8FF" opacity="0.5" />
+        {/* 본체 */}
+        <rect x="1" y="5" width="6" height="10" fill="#E0E0E0" />
+        <rect x="1" y="5" width="6" height="1" fill="#F0F0F0" />
+        {/* 수도꼭지 */}
+        <rect x="0" y="8" width="2" height="1" fill="#E74C3C" />
+        <rect x="6" y="8" width="2" height="1" fill="#3498DB" />
+        {/* 종이컵 홀더 */}
+        <rect x="0" y="10" width="2" height="3" fill="#DDD" />
+        <rect x="0" y="10" width="2" height="1" fill="#CCC" />
+      </svg>
+    </div>
+  );
+}
+
+// 라운드 테이블 (탑다운)
+function PixelRoundTable({ x, y, size = 72 }: { x: number; y: number; size?: number }) {
+  const s = size / 4;
+  return (
+    <div className="absolute z-[4]" style={{ left: x, top: y }}>
+      <svg width={size} height={size} viewBox={`0 0 ${s} ${s}`} style={{ imageRendering: 'pixelated' }}>
+        <ellipse cx={s / 2} cy={s - 1} rx={s / 2 - 1} ry={2} fill="rgba(0,0,0,0.1)" />
+        <ellipse cx={s / 2} cy={s / 2} rx={s / 2 - 1} ry={s / 2 - 2} fill="#C4A36E" />
+        <ellipse cx={s / 2} cy={s / 2 - 0.5} rx={s / 2 - 2} ry={s / 2 - 3} fill="#D4B87E" />
+        <ellipse cx={s / 2 - 1} cy={s / 2 - 1} rx={2} ry={1.5} fill="rgba(255,255,255,0.1)" />
+      </svg>
+    </div>
+  );
+}
+
+// 벽시계
+function PixelWallClock({ x, y }: { x: number; y: number }) {
+  return (
+    <div className="absolute z-[6]" style={{ left: x, top: y }}>
       <svg width="28" height="28" viewBox="0 0 7 7" style={{ imageRendering: 'pixelated' }}>
-        <rect x="1" y="0" width="5" height="1" fill="#E84393" />
-        <rect x="0" y="1" width="7" height="1" fill="#E84393" />
-        <rect x="0" y="2" width="1" height="3" fill="#E84393" />
-        <rect x="6" y="2" width="1" height="3" fill="#E84393" />
-        <rect x="2" y="2" width="3" height="2" fill="#333" />
-        <rect x="1" y="5" width="5" height="1" fill="#E84393" />
-        <rect x="2" y="6" width="3" height="1" fill="#c0392b" />
+        <circle cx="3.5" cy="3.5" r="3" fill="#F5F5F0" stroke="#666" strokeWidth="0.5" />
+        <circle cx="3.5" cy="3.5" r="0.5" fill="#333" />
+        {/* 시침 */}
+        <rect x="3.25" y="1.5" width="0.5" height="2" fill="#333" />
+        {/* 분침 */}
+        <rect x="3.5" y="2" width="2" height="0.4" fill="#333" />
       </svg>
-    ),
-  };
-
-  return (
-    <div className="absolute z-[6] pointer-events-none" style={{ left: x, top: y }}>
-      {decos[type]}
     </div>
   );
 }
 
-// ═══ Room with walls ═══
-function Room({ x, y, w, h, floor, label, teamLabel, borderColor }: {
-  x: number; y: number; w: number; h: number; floor: string; label: string; teamLabel: string; borderColor?: string;
-}) {
-  const wallColor = borderColor || '#5d6d7d';
+// 오목판 테이블
+function PixelOmokTable({ x, y }: { x: number; y: number }) {
   return (
-    <>
-      <div
-        className="absolute z-[15] -translate-x-1/2 whitespace-nowrap rounded-lg px-4 py-1 text-[13px] font-semibold text-white pointer-events-none"
-        style={{
-          left: x + w / 2, top: y - 26,
-          background: `${wallColor}cc`,
-          backdropFilter: 'blur(6px)',
-          boxShadow: `0 2px 8px ${wallColor}33`,
-          letterSpacing: '0.3px',
-        }}
-      >
-        {label}
-      </div>
-      <div
-        className="absolute z-[15] whitespace-nowrap rounded px-2 py-[2px] text-[10px] font-medium pointer-events-none"
-        style={{
-          left: x + 10, top: y + 10,
-          color: 'rgba(255,255,255,.5)',
-          background: 'rgba(0,0,0,.35)',
-        }}
-      >
-        {teamLabel}
-      </div>
-      <div className="absolute overflow-hidden" style={{ left: x, top: y, width: w, height: h, boxShadow: `4px 4px 0px rgba(0,0,0,.3)`, border: `2px solid ${wallColor}` }}>
-        <div className="absolute inset-0" style={{ background: floor }} />
-        <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse at 10% 10%, ${wallColor}18, transparent 50%)` }} />
-        <div className="absolute inset-0 opacity-[0.06]" style={{
-          backgroundImage: 'linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px)',
-          backgroundSize: '32px 32px',
-        }} />
-      </div>
-      {/* 벽 */}
-      <div className="absolute z-[3] rounded-sm" style={{ left: x, top: y, width: w, height: 8, background: `linear-gradient(180deg,${wallColor},${wallColor}aa)`, boxShadow: '0 2px 0 rgba(0,0,0,.1)' }} />
-      <div className="absolute z-[3] rounded-sm" style={{ left: x, top: y + h, width: w, height: 8, background: `linear-gradient(180deg,${wallColor}ee,${wallColor}88)`, boxShadow: '0 2px 0 rgba(0,0,0,.1)' }} />
-      <div className="absolute z-[3] rounded-sm" style={{ left: x, top: y, width: 8, height: h, background: `linear-gradient(90deg,${wallColor},${wallColor}aa)`, boxShadow: '2px 0 0 rgba(0,0,0,.1)' }} />
-      <div className="absolute z-[3] rounded-sm" style={{ left: x + w, top: y, width: 8, height: h, background: `linear-gradient(90deg,${wallColor}ee,${wallColor}88)`, boxShadow: '2px 0 0 rgba(0,0,0,.1)' }} />
-    </>
+    <div className="absolute z-[4]" style={{ left: x, top: y }}>
+      <svg width="140" height="140" viewBox="0 0 35 35" style={{ imageRendering: 'pixelated' }}>
+        <ellipse cx="17.5" cy="34" rx="15" ry="2" fill="rgba(0,0,0,0.12)" />
+        {/* 테이블 */}
+        <rect x="2" y="2" width="31" height="31" rx="1" fill="#DEB887" />
+        <rect x="3" y="3" width="29" height="29" fill="#C4A06E" />
+        <rect x="2" y="2" width="31" height="1" fill="#E8CCA0" />
+        {/* 격자 */}
+        {[0,1,2,3,4,5,6,7,8].map(i => (
+          <rect key={`gh${i}`} x="5" y={5 + i * 3} width="25" height="0.5" fill="#8B7355" opacity="0.6" />
+        ))}
+        {[0,1,2,3,4,5,6,7,8].map(i => (
+          <rect key={`gv${i}`} x={5 + i * 3} y="5" width="0.5" height="25" fill="#8B7355" opacity="0.6" />
+        ))}
+        {/* 돌 */}
+        <circle cx="11" cy="11" r="1.5" fill="#111" />
+        <circle cx="20" cy="14" r="1.5" fill="#FFF" stroke="#CCC" strokeWidth="0.3" />
+        <circle cx="14" cy="20" r="1.5" fill="#111" />
+        <circle cx="23" cy="23" r="1.5" fill="#FFF" stroke="#CCC" strokeWidth="0.3" />
+        <circle cx="17" cy="17" r="1.5" fill="#111" />
+      </svg>
+    </div>
   );
 }
 
-// ═══ 팀 타운 가구 배치 (로컬 좌표 0,0 기준) ═══
-function TeamTownFurniture({ teamColor, theme }: { teamColor: string; theme: string }) {
-  const decoType = theme === 'stock' ? 'chart' : theme === 'life' ? 'heart' : 'car';
-  return (
-    <>
-      {/* 로비 (좌측 Zone: 40,40 ~ 360,280) */}
-      <SofaH x={60} y={80} color={teamColor} />
-      <SofaH x={200} y={80} color={teamColor} />
-      <RoundTable x={130} y={130} size={50} />
-      <RoundTable x={260} y={130} size={50} />
-      <PlantLarge x={10} y={10} />
-      <PlantSmall x={310} y={10} />
+// ═══ Zone 바닥 색상 매핑 ═══
+const ZONE_FLOOR_COLORS: Record<string, string> = {
+  // 팀 룸 Zone
+  'lobby': '#3a3020',   // 밝은 나무 바닥
+  'kpi': '#1a2a3a',     // 푸른 바닥
+  'notice': '#2a1a1a',  // 붉은 바닥
+  // 광장 Zone
+  'voc': '#2a1a2a',     // 분홍 톤
+  'idea': '#2a2a1a',    // 노란 톤
+  'gathering': '#2a2010', // 주황 톤
+  'omok': '#1a2a1a',    // 녹색 톤
+};
 
-      {/* KPI실 (우측 Zone: 440,40 ~ 760,280) */}
-      {[0, 1, 2].map((i) => (
-        <span key={`kpi-${i}`}>
-          <Desk x={410 + i * 105} y={60} />
-          <Monitor x={430 + i * 105} y={50} />
-          <Chair x={430 + i * 105} y={112} />
-        </span>
-      ))}
-      {[0, 1, 2].map((i) => (
-        <span key={`kpi2-${i}`}>
-          <Desk x={410 + i * 105} y={160} />
-          <Monitor x={430 + i * 105} y={150} />
-          <Chair x={430 + i * 105} y={212} />
-        </span>
-      ))}
-      <Whiteboard x={450} y={20} />
-
-      {/* 공지게시판 (하단 Zone: 230,320 ~ 550,560) */}
-      <Whiteboard x={200} y={310} w={120} />
-      <Whiteboard x={360} y={310} w={100} />
-      <Bookshelf x={170} y={340} />
-      <Bookshelf x={170} y={390} />
-      <Chair x={280} y={380} />
-      <Chair x={340} y={380} />
-      <Chair x={400} y={380} />
-      <Desk x={260} y={420} w={120} />
-      <PlantSmall x={170} y={450} />
-      <PlantSmall x={500} y={310} />
-
-      {/* 팀별 장식 */}
-      <PixelDecoration x={340} y={30} type={decoType} />
-      <PixelDecoration x={730} y={30} type={decoType} />
-      <PixelDecoration x={540} y={500} type={decoType} />
-    </>
-  );
+function getZoneFloorColor(zoneId: string): string {
+  for (const [key, color] of Object.entries(ZONE_FLOOR_COLORS)) {
+    if (zoneId.includes(key)) return color;
+  }
+  return '#1a1a1a';
 }
 
-// ═══ 중앙 광장 가구 (로컬 좌표 0,0 기준) ═══
-function PlazaFurniture() {
-  return (
-    <>
-      {/* VOC 센터 (좌측: 40,40 ~ 420,320) */}
-      <Desk x={60} y={80} />
-      <Monitor x={80} y={70} />
-      <Chair x={80} y={132} />
-      <Desk x={190} y={80} />
-      <Monitor x={210} y={70} />
-      <Chair x={210} y={132} />
-      <Desk x={60} y={170} />
-      <Monitor x={80} y={160} />
-      <Chair x={80} y={222} />
-      <Desk x={190} y={170} />
-      <Monitor x={210} y={160} />
-      <Chair x={210} y={222} />
-      <Whiteboard x={80} y={40} />
-      <PlantLarge x={10} y={30} />
-      <PlantSmall x={300} y={30} />
-      <PixelDecoration x={310} y={200} type="phone" />
-
-      {/* 아이디어 보드 (우측: 540,40 ~ 920,320) */}
-      <RoundTable x={560} y={80} size={56} />
-      <RoundTable x={700} y={80} size={56} />
-      <RoundTable x={560} y={180} size={56} />
-      <RoundTable x={700} y={180} size={56} />
-      <SofaH x={540} y={50} color="#FDCB6E" />
-      <SofaH x={680} y={50} color="#FDCB6E" />
-      <SofaH x={540} y={140} color="#FDCB6E" />
-      <SofaH x={680} y={140} color="#FDCB6E" />
-      <Whiteboard x={570} y={24} w={140} />
-      <Bookshelf x={800} y={60} />
-      <Bookshelf x={800} y={120} />
-      <PlantLarge x={520} y={30} />
-      <PlantSmall x={840} y={30} />
-      <PixelDecoration x={830} y={200} type="bulb" />
-
-      {/* 분수대 (중앙 장식) */}
-      <div
-        className="absolute z-[6] rounded-full"
-        style={{
-          left: 440, top: 310,
-          width: 100, height: 100,
-          background: 'radial-gradient(circle, #6bc5ff55, #6bc5ff33, #6bc5ff11, transparent)',
-          border: '4px solid #6bc5ff88',
-          boxShadow: '0 0 30px rgba(107,197,255,.3), inset 0 0 20px rgba(107,197,255,.2)',
-        }}
-      >
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ width: 30, height: 30, background: 'radial-gradient(circle, #6bc5ffaa, transparent)', animation: 'pulse 2s infinite' }} />
-      </div>
-      {/* 이정표 */}
-      <div className="absolute z-[7]" style={{ left: 475, top: 255 }}>
-        <div style={{ width: 6, height: 46, background: 'linear-gradient(180deg,#a07030,#8B6914)', margin: '0 auto', borderRadius: 1 }} />
-        <div className="absolute text-[10px] font-semibold whitespace-nowrap" style={{ top: -2, left: 14, background: '#00D68Fbb', color: '#fff', padding: '2px 6px', borderRadius: 3 }}>
-          ↑ 증권
-        </div>
-        <div className="absolute text-[10px] font-semibold whitespace-nowrap" style={{ top: 14, right: 14, background: '#6C5CE7bb', color: '#fff', padding: '2px 6px', borderRadius: 3 }}>
-          ↙ 생명
-        </div>
-        <div className="absolute text-[10px] font-semibold whitespace-nowrap" style={{ top: 30, left: 14, background: '#0984E3bb', color: '#fff', padding: '2px 6px', borderRadius: 3 }}>
-          ↘ 손보
-        </div>
-      </div>
-
-      <VendingMachine x={930} y={380} />
-      <VendingMachine x={960} y={380} />
-
-      {/* 모임방 가구 (40,370 ~ 340,550) */}
-      <RoundTable x={80} y={400} size={50} />
-      <RoundTable x={190} y={400} size={50} />
-      <RoundTable x={80} y={470} size={50} />
-      <RoundTable x={190} y={470} size={50} />
-      <SofaH x={60} y={380} color="#FF9800" />
-      <SofaH x={170} y={380} color="#FF9800" />
-      <PlantSmall x={50} y={360} />
-      <PlantSmall x={280} y={360} />
-
-      {/* 오목 게임방 가구 (400,370 ~ 700,550) */}
-      <div
-        className="absolute z-[4] rounded"
-        style={{
-          left: 480, top: 400, width: 100, height: 100,
-          background: 'linear-gradient(180deg,#DEB887,#C4A06E)',
-          border: '3px solid #8B6914',
-          boxShadow: '0 4px 0 rgba(0,0,0,.15), inset 0 1px 0 rgba(255,255,255,.2)',
-        }}
-      >
-        <div className="absolute" style={{ top: 8, left: 8, right: 8, bottom: 8 }}>
-          {[0, 1, 2, 3, 4, 5, 6].map(i => (
-            <div key={`h${i}`} className="absolute" style={{ top: i * 12, left: 0, right: 0, height: 1, background: '#333' }} />
-          ))}
-          {[0, 1, 2, 3, 4, 5, 6].map(i => (
-            <div key={`v${i}`} className="absolute" style={{ left: i * 12, top: 0, bottom: 0, width: 1, background: '#333' }} />
-          ))}
-          <div className="absolute rounded-full" style={{ left: 10, top: 10, width: 8, height: 8, background: '#111' }} />
-          <div className="absolute rounded-full" style={{ left: 34, top: 22, width: 8, height: 8, background: '#fff', border: '1px solid #ccc' }} />
-          <div className="absolute rounded-full" style={{ left: 22, top: 34, width: 8, height: 8, background: '#111' }} />
-          <div className="absolute rounded-full" style={{ left: 46, top: 46, width: 8, height: 8, background: '#fff', border: '1px solid #ccc' }} />
-        </div>
-      </div>
-      <Chair x={500} y={380} />
-      <Chair x={560} y={380} />
-      <Chair x={500} y={506} />
-      <Chair x={560} y={506} />
-      <Bookshelf x={420} y={380} />
-      <VendingMachine x={660} y={400} />
-      <PlantSmall x={410} y={360} />
-      <PlantSmall x={670} y={360} />
-
-      {/* 광장 장식 아이콘 */}
-      <PixelDecoration x={20} y={240} type="phone" />
-      <PixelDecoration x={440} y={20} type="phone" />
-      <PixelDecoration x={520} y={240} type="bulb" />
-      <PixelDecoration x={840} y={20} type="bulb" />
-    </>
-  );
-}
-
-// ═══ Room Ground (룸별 바닥) ═══
+// ═══ Room Ground (룸별 바닥 — Zone 영역은 바닥색으로만 구분) ═══
 function RoomGround({ room, theme }: { room: RoomDef; theme: MapTimeTheme }) {
   const { w, h } = room.mapSize;
-  const floorColor = room.theme.floor;
-  const borderColor = room.theme.border;
 
   return (
     <svg width={w} height={h} className="absolute left-0 top-0">
@@ -476,6 +422,7 @@ function RoomGround({ room, theme }: { room: RoomDef; theme: MapTimeTheme }) {
           <rect width="16" height="16" fill={theme.grass} />
           <circle cx="4" cy="4" r="1" fill={theme.grassDark} opacity="0.5" />
           <circle cx="12" cy="12" r="1" fill={theme.grassLight} opacity="0.4" />
+          <circle cx="8" cy="10" r="0.5" fill={theme.grassDark} opacity="0.3" />
         </pattern>
         <linearGradient id={`sky-${room.id}`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={theme.skyGradient[0]} stopOpacity={theme.skyOpacity} />
@@ -483,35 +430,75 @@ function RoomGround({ room, theme }: { room: RoomDef; theme: MapTimeTheme }) {
           <stop offset="100%" stopColor={theme.skyGradient[2]} stopOpacity={0} />
         </linearGradient>
       </defs>
-      {/* 잔디 */}
       <rect width={w} height={h} fill={`url(#grass-${room.id})`} />
-      {/* 하늘 */}
       <rect width={w} height={h} fill={`url(#sky-${room.id})`} />
-      {/* Zone 바닥 하이라이트 */}
+      {/* Zone 바닥 (테두리 없이, 색상으로만 영역 구분) */}
       {room.zones.map((z) => (
-        <rect
-          key={z.id}
-          x={z.x} y={z.y} width={z.width} height={z.height}
-          fill={floorColor}
-          opacity="0.6"
-          rx="4"
-        />
-      ))}
-      {/* 포탈 바닥 하이라이트 */}
-      {room.portals.map((p) => (
-        <g key={p.id}>
-          <rect x={p.x} y={p.y} width={p.w} height={p.h} fill={borderColor} opacity="0.3" rx="4" />
-          <rect x={p.x + 2} y={p.y + 2} width={p.w - 4} height={p.h - 4} fill={borderColor} opacity="0.15" rx="3">
-            <animate attributeName="opacity" values="0.15;0.35;0.15" dur="2s" repeatCount="indefinite" />
-          </rect>
+        <g key={z.id}>
+          <rect
+            x={z.x} y={z.y} width={z.width} height={z.height}
+            fill={getZoneFloorColor(z.id)}
+            opacity="0.85"
+            rx="6"
+          />
+          {/* 타일 패턴 */}
+          <rect
+            x={z.x} y={z.y} width={z.width} height={z.height}
+            fill="none" rx="6"
+            style={{ filter: 'url(#tile-pattern)' }}
+          />
+          {/* Zone 내부 격자 (미묘한 타일) */}
+          <g opacity="0.04">
+            {Array.from({ length: Math.floor(z.width / 32) + 1 }, (_, i) => (
+              <line key={`v${z.id}${i}`} x1={z.x + i * 32} y1={z.y} x2={z.x + i * 32} y2={z.y + z.height} stroke="white" strokeWidth="0.5" />
+            ))}
+            {Array.from({ length: Math.floor(z.height / 32) + 1 }, (_, i) => (
+              <line key={`h${z.id}${i}`} x1={z.x} y1={z.y + i * 32} x2={z.x + z.width} y2={z.y + i * 32} stroke="white" strokeWidth="0.5" />
+            ))}
+          </g>
         </g>
       ))}
     </svg>
   );
 }
 
-// ═══ Portal 오브젝트 렌더링 ═══
-function PortalObjects({ room }: { room: RoomDef }) {
+// ═══ Zone 표지판 (떠있는 텍스트 대신 작은 나무 표지판) ═══
+function ZoneSigns({ room }: { room: RoomDef }) {
+  return (
+    <>
+      {room.zones.map((z) => (
+        <div
+          key={`sign-${z.id}`}
+          className="absolute z-[16] pointer-events-none"
+          style={{ left: z.x + z.width / 2, top: z.y - 8, transform: 'translateX(-50%)' }}
+        >
+          {/* 나무 표지판 */}
+          <div className="relative">
+            <div
+              className="whitespace-nowrap rounded-md px-3 py-1 text-[12px] font-bold text-white"
+              style={{
+                background: 'linear-gradient(180deg, #A07030, #8B6914)',
+                border: '1px solid #6d5310',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                letterSpacing: '0.5px',
+              }}
+            >
+              {z.label}
+            </div>
+            {/* 기둥 */}
+            <div
+              className="mx-auto"
+              style={{ width: 4, height: 10, background: 'linear-gradient(180deg, #8B6914, #6d5310)' }}
+            />
+          </div>
+        </div>
+      ))}
+    </>
+  );
+}
+
+// ═══ 포탈 아치형 문 ═══
+function PortalArch({ room }: { room: RoomDef }) {
   return (
     <>
       {room.portals.map((p) => (
@@ -520,25 +507,51 @@ function PortalObjects({ room }: { room: RoomDef }) {
           className="absolute z-[16] pointer-events-none"
           style={{ left: p.x, top: p.y, width: p.w, height: p.h }}
         >
-          {/* 포탈 프레임 */}
+          <svg width={p.w} height={p.h + 30} viewBox="0 0 120 80" preserveAspectRatio="none">
+            <defs>
+              <radialGradient id={`portal-glow-${p.id}`} cx="50%" cy="50%">
+                <stop offset="0%" stopColor={room.theme.border} stopOpacity="0.5">
+                  <animate attributeName="stop-opacity" values="0.3;0.6;0.3" dur="2s" repeatCount="indefinite" />
+                </stop>
+                <stop offset="100%" stopColor={room.theme.border} stopOpacity="0.05" />
+              </radialGradient>
+            </defs>
+            {/* 발판 */}
+            <rect x="5" y="65" width="110" height="8" rx="2" fill="#8B7355" />
+            <rect x="10" y="65" width="100" height="3" fill="#A08060" />
+            {/* 문 프레임 (아치) */}
+            <rect x="10" y="15" width="10" height="55" fill="#8B6914" />
+            <rect x="100" y="15" width="10" height="55" fill="#8B6914" />
+            <rect x="10" y="10" width="100" height="10" rx="4" fill="#A07030" />
+            <rect x="15" y="12" width="90" height="6" fill="#B8843A" />
+            {/* 포탈 안쪽 빛 */}
+            <rect x="20" y="20" width="80" height="48" rx="4" fill={`url(#portal-glow-${p.id})`} />
+            <rect x="25" y="25" width="70" height="38" rx="3" fill={room.theme.border} opacity="0.08">
+              <animate attributeName="opacity" values="0.05;0.15;0.05" dur="2s" repeatCount="indefinite" />
+            </rect>
+            {/* 빛 파티클 */}
+            <circle cx="40" cy="35" r="1.5" fill={room.theme.border} opacity="0.4">
+              <animate attributeName="cy" values="35;28;35" dur="3s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.4;0.1;0.4" dur="3s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="70" cy="40" r="1" fill={room.theme.border} opacity="0.3">
+              <animate attributeName="cy" values="40;32;40" dur="2.5s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="55" cy="50" r="1.2" fill={room.theme.border} opacity="0.35">
+              <animate attributeName="cy" values="50;42;50" dur="2.8s" repeatCount="indefinite" />
+            </circle>
+          </svg>
+          {/* 행선지 표지판 */}
           <div
-            className="absolute inset-0 rounded-lg"
+            className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md px-3 py-1 text-[11px] font-bold text-white"
             style={{
-              border: `2px solid ${room.theme.border}`,
-              background: `linear-gradient(180deg, ${room.theme.border}44, ${room.theme.border}22)`,
-              boxShadow: `0 0 12px ${room.theme.border}44`,
-            }}
-          />
-          {/* 포탈 라벨 */}
-          <div
-            className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded px-2 py-[2px] text-[10px] font-semibold text-white"
-            style={{
-              top: -18,
-              background: `${room.theme.border}cc`,
-              letterSpacing: '0.3px',
+              top: -20,
+              background: 'linear-gradient(180deg, #A07030, #8B6914)',
+              border: '1px solid #6d5310',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.4)',
             }}
           >
-            {p.label}
+            {p.label} →
           </div>
         </div>
       ))}
@@ -546,46 +559,187 @@ function PortalObjects({ room }: { room: RoomDef }) {
   );
 }
 
-// ═══ 룸 내부 방(Zone) 렌더링 ═══
-function RoomZones({ room }: { room: RoomDef }) {
-  const zoneFloors: Record<string, { floor: string; borderColor: string }> = {};
-  if (room.team) {
-    // 팀 룸: 모든 Zone 같은 테마
-    for (const z of room.zones) {
-      zoneFloors[z.id] = { floor: room.theme.floor, borderColor: room.theme.border };
-    }
-  } else {
-    // 광장: Zone별 다른 색
-    const colors: Record<string, { floor: string; borderColor: string }> = {
-      voc: { floor: '#2e1520', borderColor: '#E84393' },
-      idea: { floor: '#2a2510', borderColor: '#FDCB6E' },
-      gathering: { floor: '#1a2a1a', borderColor: '#FF9800' },
-      omok: { floor: '#1a1a1a', borderColor: '#8B6914' },
-    };
-    for (const z of room.zones) {
-      zoneFloors[z.id] = colors[z.id] || { floor: room.theme.floor, borderColor: room.theme.border };
-    }
-  }
-
+// ═══ 팀 타운 가구 배치 (1200x900, 로컬좌표) ═══
+function TeamTownFurniture(_props: { teamColor: string; theme: string }) {
   return (
     <>
-      {room.zones.map((z) => {
-        const { floor, borderColor } = zoneFloors[z.id] || { floor: room.theme.floor, borderColor: room.theme.border };
-        return (
-          <Room
-            key={z.id}
-            x={z.x} y={z.y} w={z.width} h={z.height}
-            floor={floor}
-            label={z.label}
-            teamLabel={room.team || '공용'}
-            borderColor={borderColor}
-          />
-        );
-      })}
+      {/* ═══ 로비 Zone (60,60 ~ 560,400) — 편안한 휴식 공간 ═══ */}
+      <PixelSofa90s x={100} y={120} color="#8B6914" />
+      <PixelSofa90s x={300} y={120} color="#8B6914" />
+      <PixelSofa90s x={100} y={240} color="#8B6914" />
+      <PixelRoundTable x={240} y={180} size={72} />
+      <PixelRoundTable x={400} y={180} size={72} />
+      <PixelWaterCooler x={80} y={80} />
+      <PixelCorkboard x={160} y={72} />
+      <PixelPlant90s x={480} y={80} />
+      <PixelPlant90s x={70} y={320} size="small" />
+      <PixelWallClock x={350} y={70} />
+
+      {/* ═══ KPI Zone (640,60 ~ 1140,400) — 업무 공간 ═══ */}
+      <PixelPartition x={660} y={80} w={100} />
+      <PixelPartition x={820} y={80} w={100} />
+      <PixelPartition x={980} y={80} w={100} />
+      {/* 책상 2x3 배치 */}
+      {[0, 1, 2].map((i) => (
+        <span key={`kd1-${i}`}>
+          <PixelDesk90s x={660 + i * 160} y={140} />
+          <PixelCRT x={690 + i * 160} y={110} />
+          <PixelChair90s x={700 + i * 160} y={220} />
+        </span>
+      ))}
+      {[0, 1, 2].map((i) => (
+        <span key={`kd2-${i}`}>
+          <PixelDesk90s x={660 + i * 160} y={280} />
+          <PixelCRT x={690 + i * 160} y={250} />
+          <PixelChair90s x={700 + i * 160} y={360} />
+        </span>
+      ))}
+      <PixelWhiteboard x={700} y={68} w={160} />
+      <PixelFileCabinet x={1080} y={100} />
+      <PixelFileCabinet x={1080} y={200} />
+      <PixelCopier x={1060} y={320} />
+      <PixelPlant90s x={640} y={340} size="small" />
+
+      {/* ═══ 공지 Zone (350,460 ~ 850,760) — 열람 공간 ═══ */}
+      <PixelCorkboard x={380} y={480} />
+      <PixelCorkboard x={560} y={480} />
+      <PixelWhiteboard x={400} y={560} w={140} />
+      <PixelFileCabinet x={370} y={600} />
+      <PixelFileCabinet x={370} y={680} />
+      {/* 열람 벤치 */}
+      <PixelSofa90s x={540} y={620} color="#666" />
+      <PixelSofa90s x={540} y={690} color="#666" />
+      <PixelRoundTable x={700} y={600} size={60} />
+      <PixelChair90s x={720} y={670} />
+      <PixelChair90s x={770} y={620} />
+      <PixelPlant90s x={820} y={480} />
+      <PixelPlant90s x={360} y={740} size="small" />
     </>
   );
 }
 
+// ═══ 중앙 광장 가구 (1600x1000, 로컬좌표) ═══
+function PlazaFurniture() {
+  return (
+    <>
+      {/* ═══ VOC Zone (60,60 ~ 720,440) — 접수 공간 ═══ */}
+      {/* L자형 접수 데스크 */}
+      <PixelDesk90s x={120} y={140} />
+      <PixelDesk90s x={240} y={140} />
+      <PixelDesk90s x={360} y={140} />
+      <PixelCRT x={150} y={110} />
+      <PixelCRT x={270} y={110} />
+      <PixelCRT x={390} y={110} />
+      <PixelChair90s x={160} y={220} />
+      <PixelChair90s x={280} y={220} />
+      <PixelChair90s x={400} y={220} />
+      {/* 하단 열 */}
+      <PixelDesk90s x={120} y={290} />
+      <PixelDesk90s x={240} y={290} />
+      <PixelCRT x={150} y={260} />
+      <PixelCRT x={270} y={260} />
+      <PixelChair90s x={160} y={370} />
+      <PixelChair90s x={280} y={370} />
+      <PixelFileCabinet x={530} y={120} />
+      <PixelFileCabinet x={530} y={220} />
+      <PixelFileCabinet x={530} y={320} />
+      <PixelWhiteboard x={100} y={80} w={160} />
+      <PixelPartition x={500} y={100} w={80} />
+      <PixelCopier x={600} y={140} />
+      <PixelPlant90s x={80} y={80} />
+      <PixelPlant90s x={620} y={340} size="small" />
+      <PixelWaterCooler x={660} y={120} />
+
+      {/* ═══ 아이디어 Zone (860,60 ~ 1520,440) — 브레인스토밍 ═══ */}
+      <PixelRoundTable x={920} y={140} size={80} />
+      <PixelRoundTable x={1100} y={140} size={80} />
+      <PixelRoundTable x={920} y={300} size={80} />
+      <PixelRoundTable x={1100} y={300} size={80} />
+      <PixelChair90s x={900} y={230} />
+      <PixelChair90s x={1000} y={180} />
+      <PixelChair90s x={1080} y={230} />
+      <PixelChair90s x={1180} y={180} />
+      <PixelChair90s x={900} y={380} />
+      <PixelChair90s x={1000} y={340} />
+      <PixelChair90s x={1080} y={380} />
+      <PixelChair90s x={1180} y={340} />
+      <PixelWhiteboard x={920} y={80} w={180} />
+      <PixelWhiteboard x={1200} y={80} w={140} />
+      <PixelCorkboard x={1350} y={140} />
+      <PixelCorkboard x={1350} y={260} />
+      <PixelPlant90s x={880} y={80} />
+      <PixelPlant90s x={1440} y={80} />
+      <PixelPlant90s x={1440} y={380} size="small" />
+
+      {/* ═══ 분수대 + 이정표 (중앙) ═══ */}
+      <div
+        className="absolute z-[6] rounded-full"
+        style={{
+          left: 700, top: 460,
+          width: 140, height: 80,
+          background: 'radial-gradient(ellipse, #6bc5ff44, #6bc5ff22, transparent)',
+          border: '3px solid #6bc5ff66',
+          boxShadow: '0 0 40px rgba(107,197,255,.25)',
+        }}
+      >
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ width: 40, height: 24, background: 'radial-gradient(ellipse, #6bc5ffaa, transparent)', animation: 'pulse 2s infinite' }} />
+      </div>
+      {/* 이정표 */}
+      <div className="absolute z-[7]" style={{ left: 755, top: 445 }}>
+        <div style={{ width: 6, height: 50, background: 'linear-gradient(180deg,#a07030,#8B6914)', margin: '0 auto', borderRadius: 2 }} />
+        <div className="absolute text-[11px] font-bold whitespace-nowrap" style={{ top: -4, left: 16, background: '#00D68Fcc', color: '#fff', padding: '2px 8px', borderRadius: 4, boxShadow: '0 1px 4px rgba(0,0,0,.3)' }}>
+          ↑ 증권ITO
+        </div>
+        <div className="absolute text-[11px] font-bold whitespace-nowrap" style={{ top: 14, right: 16, background: '#6C5CE7cc', color: '#fff', padding: '2px 8px', borderRadius: 4, boxShadow: '0 1px 4px rgba(0,0,0,.3)' }}>
+          ← 생명ITO
+        </div>
+        <div className="absolute text-[11px] font-bold whitespace-nowrap" style={{ top: 32, left: 16, background: '#0984E3cc', color: '#fff', padding: '2px 8px', borderRadius: 4, boxShadow: '0 1px 4px rgba(0,0,0,.3)' }}>
+          → 손보ITO
+        </div>
+      </div>
+
+      {/* ═══ 모임방 Zone (60,520 ~ 460,820) ═══ */}
+      {/* 긴 테이블 + 의자 */}
+      <PixelDesk90s x={120} y={620} />
+      <PixelDesk90s x={240} y={620} />
+      <PixelChair90s x={140} y={580} />
+      <PixelChair90s x={200} y={580} />
+      <PixelChair90s x={260} y={580} />
+      <PixelChair90s x={320} y={580} />
+      <PixelChair90s x={140} y={700} />
+      <PixelChair90s x={200} y={700} />
+      <PixelChair90s x={260} y={700} />
+      <PixelChair90s x={320} y={700} />
+      <PixelSofa90s x={100} y={760} color="#8B6914" />
+      <PixelPlant90s x={80} y={540} />
+      <PixelPlant90s x={380} y={540} size="small" />
+      <PixelVending90s x={400} y={600} />
+      <PixelWaterCooler x={400} y={720} />
+
+      {/* ═══ 오목 Zone (540,520 ~ 1040,820) ═══ */}
+      <PixelOmokTable x={640} y={580} />
+      <PixelChair90s x={620} y={560} />
+      <PixelChair90s x={770} y={560} />
+      <PixelChair90s x={620} y={720} />
+      <PixelChair90s x={770} y={720} />
+      {/* 관전석 */}
+      <PixelSofa90s x={860} y={600} color="#555" />
+      <PixelSofa90s x={860} y={700} color="#555" />
+      <PixelFileCabinet x={560} y={560} />
+      <PixelVending90s x={980} y={580} />
+      <PixelPlant90s x={550} y={740} size="small" />
+      <PixelPlant90s x={960} y={740} size="small" />
+
+      {/* 광장 추가 가구 */}
+      <PixelVending90s x={1480} y={500} />
+      <PixelVending90s x={1530} y={500} />
+      <PixelPlant90s x={1460} y={880} />
+      <PixelPlant90s x={100} y={880} />
+    </>
+  );
+}
+
+// ═══ Main MapCanvas ═══
 interface MapCanvasProps {
   children?: ReactNode;
 }
@@ -601,29 +755,27 @@ export default function MapCanvas({ children }: MapCanvasProps) {
     : '';
 
   return (
-    <div className="absolute" style={{ width: mapW, height: mapH, imageRendering: 'pixelated' }}>
+    <div className="absolute" style={{ width: mapW, height: mapH }}>
       <RoomGround room={room} theme={theme} />
 
-      {/* Zone 방 렌더링 */}
-      <RoomZones room={room} />
+      {/* Zone 표지판 */}
+      <ZoneSigns room={room} />
 
       {/* 룸 외곽 테두리 */}
       <div
         className="absolute z-[1] rounded-xl pointer-events-none"
         style={{
           left: 0, top: 0, width: mapW, height: mapH,
-          border: `3px dashed ${room.theme.border}55`,
-          background: `${room.theme.border}0a`,
-          boxShadow: `inset 0 0 60px ${room.theme.border}08`,
+          border: `3px solid ${room.theme.border}33`,
+          background: `${room.theme.border}06`,
         }}
       >
         <div
-          className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg px-5 py-1 text-sm font-bold text-white pointer-events-none"
+          className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg px-6 py-1.5 text-sm font-bold text-white pointer-events-none"
           style={{
-            background: `${room.theme.border}cc`,
+            background: `${room.theme.border}dd`,
             boxShadow: `0 2px 10px ${room.theme.border}44`,
-            letterSpacing: '0.5px',
-            fontFamily: "'Space Grotesk', sans-serif",
+            letterSpacing: '1px',
           }}
         >
           {room.label}
@@ -637,8 +789,8 @@ export default function MapCanvas({ children }: MapCanvasProps) {
         <PlazaFurniture />
       )}
 
-      {/* 포탈 오브젝트 */}
-      <PortalObjects room={room} />
+      {/* 포탈 아치형 문 */}
+      <PortalArch room={room} />
 
       {children}
     </div>
