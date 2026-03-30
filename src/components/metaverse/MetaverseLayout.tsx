@@ -128,7 +128,7 @@ export default function MetaverseLayout() {
           <div ref={viewportRef} className="absolute" style={{ width: mapW, height: mapH }}>
             <MapCanvas>
               <Zone />
-              <NPCCharacter />
+              {/* <NPCCharacter /> */}
               <ChatBubble />
               <OtherPlayers />
               <PlayerCharacter />
