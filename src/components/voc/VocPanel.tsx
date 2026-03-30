@@ -7,6 +7,7 @@ import VocStats from './VocStats';
 import { useVocs, useVocRealtime } from '../../hooks/useVocs';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
+import { supabase } from '../../lib/supabase';
 import { VOC_CATEGORIES, VOC_STATUSES, TEAMS } from '../../lib/constants';
 import type { Voc } from '../../types';
 import type { VocCategory, VocStatus } from '../../lib/constants';
@@ -31,8 +32,20 @@ export default function VocPanel({ onClose }: VocPanelProps) {
   const [filterTeam, setFilterTeam] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [showFilters, setShowFilters] = useState(false);
+  const [assigneeNames, setAssigneeNames] = useState<Record<string, string>>({});
 
   const isLeader = profile?.role === 'admin' || profile?.role === 'leader';
+
+  // 담당자 이름 맵 로드
+  useEffect(() => {
+    const ids = [...new Set(vocs.map((v) => v.assignee_id).filter(Boolean))] as string[];
+    if (ids.length === 0) return;
+    supabase.from('profiles').select('id, name').in('id', ids).then(({ data }) => {
+      const map: Record<string, string> = {};
+      (data ?? []).forEach((p) => { map[p.id] = p.name; });
+      setAssigneeNames(map);
+    });
+  }, [vocs]);
 
   const loadVocs = useCallback(() => {
     fetchVocs({
@@ -198,7 +211,7 @@ export default function VocPanel({ onClose }: VocPanelProps) {
 
       {/* VOC 목록 */}
       <div className="flex-1 overflow-y-auto p-4">
-        <VocList vocs={vocs} loading={loading} onSelect={handleSelectVoc} />
+        <VocList vocs={vocs} loading={loading} onSelect={handleSelectVoc} assigneeNames={assigneeNames} />
       </div>
 
       {/* FAB: 새 VOC */}

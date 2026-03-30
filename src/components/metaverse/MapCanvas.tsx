@@ -364,6 +364,21 @@ function Furniture() {
       <PlantSmall x={910} y={740} />
       <PlantSmall x={1190} y={740} />
 
+      {/* ── 공지게시판 room ── */}
+      <Whiteboard x={120} y={848} w={120} />
+      <Whiteboard x={280} y={848} w={100} />
+      <Bookshelf x={70} y={880} />
+      <Bookshelf x={70} y={930} />
+      <Chair x={180} y={920} />
+      <Chair x={240} y={920} />
+      <Chair x={300} y={920} />
+      <Desk x={160} y={960} w={120} />
+      <Chair x={180} y={1010} />
+      <Chair x={240} y={1010} />
+      <PlantSmall x={70} y={1020} />
+      <PlantSmall x={388} y={840} />
+      <PlantSmall x={388} y={1020} />
+
       {/* ── 회의실 ── */}
       <Desk x={980} y={890} w={140} h={54} />
       {[0, 1, 2, 3].map((i) => <Chair key={`conf-top-${i}`} x={990 + i * 35} y={870} />)}
@@ -385,6 +400,7 @@ const ROOMS = [
   { x: 900, y: 60, w: 320, h: 380, floor: '#e8e4f0', label: '☕ 라운지', team: '자유 공간' },
   { x: 900, y: 480, w: 320, h: 300, floor: '#e4f0ec', label: '✉️ 쪽지함', team: '익명' },
   { x: 900, y: 840, w: 320, h: 180, floor: '#e4e8f0', label: '🏢 회의실', team: '조직유닛' },
+  { x: 60, y: 840, w: 360, h: 220, floor: '#f0e8e4', label: '📢 공지게시판', team: '전체' },
 ];
 
 interface MapCanvasProps {

@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { ACTIVITY_POINTS } from '../lib/constants';
 import type { AnonymousNote } from '../types';
 import type { NoteCategory, NoteStatus } from '../lib/constants';
 
@@ -114,6 +115,29 @@ export function useNotes() {
 
       // 수신 대상 리더에게 notification 생성
       await createNoteNotification(data, input.recipient_role, input.recipient_team ?? null);
+
+      // user_activities 기록 (트리거 미커버 항목)
+      try {
+        const senderId = input.anonymous ? null : input.sender_id;
+        if (senderId) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('team')
+            .eq('id', senderId)
+            .single();
+          if (profile) {
+            await supabase.from('user_activities').insert({
+              user_id: senderId,
+              team: profile.team,
+              activity_type: 'note_send',
+              points: ACTIVITY_POINTS.note_send,
+              ref_id: data.id,
+            });
+          }
+        }
+      } catch {
+        // 활동 기록 실패해도 쪽지 발송은 정상 완료
+      }
 
       return { data, error: null };
     },

@@ -5,6 +5,7 @@ interface VocListProps {
   vocs: Voc[];
   loading: boolean;
   onSelect: (voc: Voc) => void;
+  assigneeNames?: Record<string, string>;
 }
 
 function Skeleton() {
@@ -20,7 +21,7 @@ function Skeleton() {
   );
 }
 
-export default function VocList({ vocs, loading, onSelect }: VocListProps) {
+export default function VocList({ vocs, loading, onSelect, assigneeNames = {} }: VocListProps) {
   if (loading) {
     return (
       <div className="flex flex-col gap-2">
@@ -43,7 +44,7 @@ export default function VocList({ vocs, loading, onSelect }: VocListProps) {
   return (
     <div className="flex flex-col gap-2">
       {vocs.map((voc) => (
-        <VocCard key={voc.id} voc={voc} onClick={() => onSelect(voc)} />
+        <VocCard key={voc.id} voc={voc} onClick={() => onSelect(voc)} assigneeName={voc.assignee_id ? assigneeNames[voc.assignee_id] : null} />
       ))}
     </div>
   );

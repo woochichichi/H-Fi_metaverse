@@ -156,6 +156,23 @@ export function useIdeas() {
         return { data: null, error: updateError.message };
       }
 
+      // 상태 변경 시 작성자에게 notification
+      if (data.author_id) {
+        try {
+          await supabase.from('notifications').insert({
+            user_id: data.author_id,
+            type: 'idea_status',
+            urgency: '할일' as const,
+            title: `💡 아이디어 '${data.title}'이 ${status}되었습니다`,
+            body: (data.description ?? '').slice(0, 100),
+            link: `/idea/${data.id}`,
+            channel: 'in_app',
+          });
+        } catch {
+          // notification 실패해도 상태 변경은 정상 완료
+        }
+      }
+
       setIdeas((prev) =>
         prev.map((idea) => (idea.id === id ? { ...idea, status: data.status } : idea))
       );

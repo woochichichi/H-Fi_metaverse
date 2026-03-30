@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, EyeOff, User, Paperclip } from 'lucide-react';
 import StatusBadge from '../common/StatusBadge';
 import ThreadPanel from '../thread/ThreadPanel';
@@ -18,14 +18,22 @@ interface VocDetailProps {
 
 export default function VocDetail({ voc, onBack, onUpdated }: VocDetailProps) {
   const { profile } = useAuthStore();
-  const { updateVoc, isAnonymousAuthor } = useVocs();
+  const { updateVoc, isAnonymousAuthor, fetchAssignees } = useVocs();
   const { addToast } = useUiStore();
 
   const [status, setStatus] = useState<VocStatus>(voc.status);
   const [resolution, setResolution] = useState(voc.resolution || '');
+  const [assigneeId, setAssigneeId] = useState<string | null>(voc.assignee_id);
+  const [assignees, setAssignees] = useState<{ id: string; name: string; role: string; team: string }[]>([]);
   const [saving, setSaving] = useState(false);
 
   const isLeader = profile?.role === 'admin' || profile?.role === 'leader';
+
+  useEffect(() => {
+    if (isLeader) {
+      fetchAssignees(voc.team).then(setAssignees);
+    }
+  }, [isLeader, voc.team, fetchAssignees]);
   const canReplyAsAuthor = voc.anonymous
     ? isAnonymousAuthor(voc.id, voc.session_token)
     : voc.author_id === profile?.id;
@@ -43,6 +51,7 @@ export default function VocDetail({ voc, onBack, onUpdated }: VocDetailProps) {
     const { data, error } = await updateVoc(voc.id, {
       status,
       resolution: resolution.trim() || null,
+      assignee_id: assigneeId,
     });
 
     setSaving(false);
@@ -145,6 +154,23 @@ export default function VocDetail({ voc, onBack, onUpdated }: VocDetailProps) {
         {isLeader && (
           <div className="space-y-3 rounded-xl border border-accent/20 bg-accent/[.06] p-3">
             <h4 className="text-xs font-semibold text-accent">관리자 처리</h4>
+
+            {/* 담당자 배정 */}
+            <div>
+              <label className="text-[11px] text-text-muted mb-1 block">담당자</label>
+              <select
+                value={assigneeId ?? ''}
+                onChange={(e) => setAssigneeId(e.target.value || null)}
+                className="w-full rounded-lg bg-white/[.08] px-3 py-1.5 text-sm text-text-primary outline-none focus:ring-1 focus:ring-accent"
+              >
+                <option value="">미배정</option>
+                {assignees.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name} ({a.role})
+                  </option>
+                ))}
+              </select>
+            </div>
 
             {/* 상태 변경 */}
             <div>

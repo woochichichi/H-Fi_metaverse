@@ -97,6 +97,7 @@ export const ZONES = [
   { id: 'idea', label: '아이디어 보드', emoji: '💡', x: 480, y: 500, width: 340, height: 280 },
   { id: 'lounge', label: '라운지', emoji: '☕', x: 900, y: 80, width: 300, height: 360 },
   { id: 'note', label: '익명 쪽지함', emoji: '✉️', x: 900, y: 500, width: 300, height: 280 },
+  { id: 'notice', label: '공지게시판', emoji: '📢', x: 80, y: 860, width: 340, height: 200 },
 ] as const;
 export type ZoneId = (typeof ZONES)[number]['id'];
 

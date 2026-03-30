@@ -115,6 +115,23 @@ export function useVocs() {
         return { data: null, error: updateError.message };
       }
 
+      // 상태 변경 시 실명 작성자에게 notification
+      if (updates.status && data.author_id) {
+        try {
+          await supabase.from('notifications').insert({
+            user_id: data.author_id,
+            type: 'voc_status',
+            urgency: '참고' as const,
+            title: `📞 VOC 상태가 '${updates.status}'로 변경되었습니다`,
+            body: data.title,
+            link: `/voc/${data.id}`,
+            channel: 'in_app',
+          });
+        } catch {
+          // notification 실패해도 상태 변경은 정상 완료
+        }
+      }
+
       setVocs((prev) => prev.map((v) => (v.id === id ? data : v)));
       return { data, error: null };
     },
@@ -128,6 +145,16 @@ export function useVocs() {
     return tokens[vocId] === vocSessionToken;
   }, []);
 
+  // 같은 팀의 리더/관리자 목록 (담당자 배정용)
+  const fetchAssignees = useCallback(async (team: string) => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, name, role, team')
+      .in('role', ['leader', 'admin'])
+      .eq('team', team);
+    return data ?? [];
+  }, []);
+
   return {
     vocs,
     loading,
@@ -136,6 +163,7 @@ export function useVocs() {
     createVoc,
     updateVoc,
     isAnonymousAuthor,
+    fetchAssignees,
   };
 }
 

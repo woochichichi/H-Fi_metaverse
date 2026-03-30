@@ -15,9 +15,10 @@ const CATEGORY_CONFIG: Record<VocCategory, { color: string; bg: string }> = {
 interface VocCardProps {
   voc: Voc;
   onClick: () => void;
+  assigneeName?: string | null;
 }
 
-export default function VocCard({ voc, onClick }: VocCardProps) {
+export default function VocCard({ voc, onClick, assigneeName }: VocCardProps) {
   const catConfig = CATEGORY_CONFIG[voc.category];
 
   return (
@@ -54,6 +55,12 @@ export default function VocCard({ voc, onClick }: VocCardProps) {
         <span>{voc.team}</span>
         <span>·</span>
         <span>{formatRelativeTime(voc.created_at)}</span>
+        {assigneeName && (
+          <>
+            <span>·</span>
+            <span className="text-accent">{assigneeName}</span>
+          </>
+        )}
         {voc.attachment_urls && voc.attachment_urls.length > 0 && (
           <>
             <span>·</span>

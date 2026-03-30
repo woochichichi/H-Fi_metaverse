@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { ACTIVITY_POINTS } from '../lib/constants';
 import type { Notice, Profile } from '../types';
 import type { UrgencyLevel, NoticeCategory } from '../lib/constants';
 
@@ -129,6 +130,26 @@ export function useNotices() {
       // 이미 읽은 경우 (unique constraint) 무시
       if (error && !error.message.includes('duplicate')) {
         console.error('읽음 처리 실패:', error.message);
+      }
+
+      // user_activities 기록 (트리거 미커버 항목)
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('team')
+          .eq('id', userId)
+          .single();
+        if (profile) {
+          await supabase.from('user_activities').insert({
+            user_id: userId,
+            team: profile.team,
+            activity_type: 'notice_read',
+            points: ACTIVITY_POINTS.notice_read,
+            ref_id: noticeId,
+          });
+        }
+      } catch {
+        // 활동 기록 실패해도 읽음 처리는 정상 완료
       }
     },
     [readIds]
