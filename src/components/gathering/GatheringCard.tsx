@@ -40,8 +40,9 @@ function deadlineLabel(deadline: string | null): string | null {
 }
 
 export default function GatheringCard({ gathering, joined, onClick }: GatheringCardProps) {
-  const isRecruiting = gathering.status === 'recruiting';
-  const statusLabel = GATHERING_STATUS_LABELS[gathering.status];
+  const isDeadlinePassed = gathering.deadline ? new Date(gathering.deadline) < new Date() : false;
+  const isRecruiting = gathering.status === 'recruiting' && !isDeadlinePassed;
+  const statusLabel = isDeadlinePassed && gathering.status === 'recruiting' ? '기한 마감' : GATHERING_STATUS_LABELS[gathering.status];
   const dl = deadlineLabel(gathering.deadline);
 
   return (

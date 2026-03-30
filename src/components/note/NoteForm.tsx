@@ -3,7 +3,7 @@ import { X } from 'lucide-react';
 import { useNotes } from '../../hooks/useNotes';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
-import { NOTE_CATEGORIES, TEAMS } from '../../lib/constants';
+import { NOTE_CATEGORIES } from '../../lib/constants';
 import type { NoteCategory } from '../../lib/constants';
 
 interface NoteFormProps {
@@ -12,12 +12,6 @@ interface NoteFormProps {
   targetName?: string | null;
 }
 
-const RECIPIENT_OPTIONS = [
-  { value: 'leader', label: '유닛 리더' },
-  { value: 'admin', label: '관리자 (우형)' },
-  { value: 'team_leaders', label: '팀 전체 리더' },
-] as const;
-
 export default function NoteForm({ onClose, onCreated, targetName }: NoteFormProps) {
   const { profile, user } = useAuthStore();
   const { createNote } = useNotes();
@@ -25,8 +19,6 @@ export default function NoteForm({ onClose, onCreated, targetName }: NoteFormPro
 
   const [anonymous, setAnonymous] = useState(true);
   const [category, setCategory] = useState<NoteCategory | null>(null);
-  const [recipientRole, setRecipientRole] = useState<'leader' | 'admin' | 'team_leaders'>('leader');
-  const [recipientTeam, setRecipientTeam] = useState<string | null>(null);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -40,8 +32,8 @@ export default function NoteForm({ onClose, onCreated, targetName }: NoteFormPro
     try {
       const { error } = await createNote({
         anonymous,
-        recipient_role: recipientRole,
-        recipient_team: recipientRole === 'team_leaders' ? recipientTeam : null,
+        recipient_role: 'leader',
+        recipient_team: null,
         category: category!,
         title: title.trim(),
         content: content.trim(),
@@ -106,42 +98,6 @@ export default function NoteForm({ onClose, onCreated, targetName }: NoteFormPro
               }`}
             />
           </button>
-        </div>
-
-        {/* 수신 대상 */}
-        <div>
-          <label className="text-xs font-medium text-text-muted mb-1.5 block">
-            누구에게 보낼까요? <span className="text-danger">*</span>
-          </label>
-          <div className="flex flex-wrap gap-1.5">
-            {RECIPIENT_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => setRecipientRole(opt.value)}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors duration-200 ${
-                  recipientRole === opt.value
-                    ? 'bg-accent text-white'
-                    : 'bg-white/[.06] text-text-secondary hover:bg-white/10'
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-
-          {/* 팀 선택 (팀 전체 리더 선택 시) */}
-          {recipientRole === 'team_leaders' && (
-            <select
-              value={recipientTeam ?? ''}
-              onChange={(e) => setRecipientTeam(e.target.value || null)}
-              className="mt-2 w-full rounded-lg bg-white/[.06] px-3 py-2 text-sm text-text-secondary outline-none focus:ring-1 focus:ring-accent"
-            >
-              <option value="">전체 팀</option>
-              {TEAMS.map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
-          )}
         </div>
 
         {/* 카테고리 */}

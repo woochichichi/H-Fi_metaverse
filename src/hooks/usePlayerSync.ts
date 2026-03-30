@@ -8,7 +8,7 @@ const BROADCAST_INTERVAL = 150; // ms
 
 export default function usePlayerSync() {
   const { profile, user } = useAuthStore();
-  const { currentRoom, playerPosition, updateOtherPlayer, removeOtherPlayer, clearOtherPlayers } =
+  const { currentRoom, playerPosition } =
     useMetaverseStore();
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const lastSentRef = useRef(0);
@@ -39,7 +39,7 @@ export default function usePlayerSync() {
   useEffect(() => {
     if (!user?.id) return;
 
-    clearOtherPlayers();
+    useMetaverseStore.getState().clearOtherPlayers();
 
     const channel = supabase.channel(`room-${currentRoom}`, {
       config: { presence: { key: user.id } },
@@ -53,7 +53,7 @@ export default function usePlayerSync() {
     });
 
     channel.on('presence', { event: 'leave' }, ({ key }) => {
-      removeOtherPlayer(key);
+      useMetaverseStore.getState().removeOtherPlayer(key);
     });
 
     // Broadcast: 위치 수신
@@ -61,7 +61,7 @@ export default function usePlayerSync() {
       if (payload.userId === user.id) return;
       if (payload.room !== useMetaverseStore.getState().currentRoom) return;
 
-      updateOtherPlayer({
+      useMetaverseStore.getState().updateOtherPlayer({
         userId: payload.userId,
         name: payload.name,
         team: payload.team,
@@ -76,10 +76,11 @@ export default function usePlayerSync() {
 
     channel.subscribe(async (status) => {
       if (status === 'SUBSCRIBED') {
+        const p = useAuthStore.getState().profile;
         await channel.track({
           user_id: user.id,
-          name: profile?.nickname || profile?.name || '???',
-          team: profile?.team || '',
+          name: p?.nickname || p?.name || '???',
+          team: p?.team || '',
           room: currentRoom,
         });
       }
@@ -91,6 +92,6 @@ export default function usePlayerSync() {
       supabase.removeChannel(channel);
       channelRef.current = null;
     };
-  }, [user?.id, currentRoom, profile?.nickname, profile?.name, profile?.team, updateOtherPlayer, removeOtherPlayer, clearOtherPlayers]);
+  }, [user?.id, currentRoom]);
 
 }

@@ -8,13 +8,19 @@ export function useReactionRanking() {
 
   const fetchRanking = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from('reaction_ranking')
-      .select('*')
-      .order('best_avg_ms', { ascending: true })
-      .limit(20);
-    setRanking(data ?? []);
-    setLoading(false);
+    try {
+      const { data, error } = await supabase
+        .from('reaction_ranking')
+        .select('*')
+        .order('best_avg_ms', { ascending: true })
+        .limit(20);
+      if (error) {
+        console.error('반응속도 랭킹 조회 실패:', error.message);
+      }
+      setRanking(data ?? []);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {

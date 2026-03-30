@@ -77,7 +77,9 @@ export function useReactionGame() {
         if (profile && !savedRef.current) {
           savedRef.current = true;
           const best = Math.min(...newTimes);
-          saveReactionResult(profile.id, avg, best);
+          saveReactionResult(profile.id, avg, best).catch(() => {
+            savedRef.current = false; // 실패 시 재시도 가능하도록
+          });
         }
       } else {
         setRound(nextRound);

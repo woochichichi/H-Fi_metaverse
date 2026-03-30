@@ -44,7 +44,7 @@ export function useKpi() {
 
     query = query.order('month', { ascending: true });
 
-    const { data, error: fetchError } = await query;
+    const { data, error: fetchError } = await withTimeout(query, 8000, 'kpiRecords');
 
     if (fetchError) {
       console.error('KPI 실적 조회 실패:', fetchError.message);
@@ -57,11 +57,14 @@ export function useKpi() {
   const fetchAllRecords = useCallback(async (kpiItemIds: string[]) => {
     if (kpiItemIds.length === 0) return;
 
-    const { data, error: fetchError } = await supabase
-      .from('kpi_records')
-      .select('*')
-      .in('kpi_item_id', kpiItemIds)
-      .order('month', { ascending: true });
+    const { data, error: fetchError } = await withTimeout(
+      supabase
+        .from('kpi_records')
+        .select('*')
+        .in('kpi_item_id', kpiItemIds)
+        .order('month', { ascending: true }),
+      8000, 'kpiAllRecords'
+    );
 
     if (fetchError) {
       console.error('KPI 실적 일괄 조회 실패:', fetchError.message);

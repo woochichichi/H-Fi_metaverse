@@ -84,6 +84,35 @@ export function useVocs() {
         return { data: null, error: insertError.message };
       }
 
+      // 리더/관리자에게 새 VOC 알림
+      if (data) {
+        try {
+          const { data: leaders } = await supabase
+            .from('profiles')
+            .select('id')
+            .in('role', ['leader', 'admin'])
+            .eq('team', input.team);
+          if (leaders && leaders.length > 0) {
+            const notifications = leaders
+              .filter((l) => l.id !== input.author_id)
+              .map((l) => ({
+                user_id: l.id,
+                type: 'new_voc',
+                urgency: '할일' as const,
+                title: `📞 새 VOC: ${data.title}`,
+                body: data.content.slice(0, 100),
+                link: `/voc/${data.id}`,
+                channel: 'in_app',
+              }));
+            if (notifications.length > 0) {
+              await supabase.from('notifications').insert(notifications);
+            }
+          }
+        } catch {
+          // notification 실패해도 VOC 등록은 정상 완료
+        }
+      }
+
       // 익명 VOC → localStorage에 session_token 저장
       if (input.anonymous && data && sessionToken) {
         const tokens = JSON.parse(sessionStorage.getItem('voc_tokens') || '{}');
@@ -165,11 +194,12 @@ export function useVocs() {
 
   // 같은 팀의 리더/관리자 목록 (담당자 배정용)
   const fetchAssignees = useCallback(async (team: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('profiles')
       .select('id, name, nickname, role, team')
       .in('role', ['leader', 'admin'])
       .eq('team', team);
+    if (error) console.error('담당자 조회 실패:', error.message);
     return data ?? [];
   }, []);
 

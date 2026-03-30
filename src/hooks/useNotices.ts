@@ -48,10 +48,11 @@ export function useNotices() {
 
   // 현재 사용자의 읽음 상태 조회
   const fetchMyReads = useCallback(async (userId: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('notice_reads')
       .select('notice_id')
       .eq('user_id', userId);
+    if (error) console.error('읽음 상태 조회 실패:', error.message);
 
     const ids = new Set((data ?? []).map((r) => r.notice_id));
     setReadIds(ids);

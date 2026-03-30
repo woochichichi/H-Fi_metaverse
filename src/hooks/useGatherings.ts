@@ -147,11 +147,11 @@ export function useGatherings() {
 
   // 내가 참여한 모임 ID 세트
   const fetchMyJoins = useCallback(async (userId: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('gathering_members')
       .select('gathering_id')
       .eq('user_id', userId);
-
+    if (error) console.error('참여 목록 조회 실패:', error.message);
     return new Set((data ?? []).map((m) => m.gathering_id));
   }, []);
 
@@ -171,10 +171,11 @@ export function useGatherings() {
     if (members.length === 0) return { members, profiles: [] };
 
     const userIds = members.map((m) => m.user_id);
-    const { data: profiles } = await supabase
+    const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
       .select('id, name, nickname, team, avatar_emoji, avatar_color')
       .in('id', userIds);
+    if (profilesError) console.error('참여자 프로필 조회 실패:', profilesError.message);
 
     return { members, profiles: (profiles ?? []) as Pick<Profile, 'id' | 'name' | 'nickname' | 'team' | 'avatar_emoji' | 'avatar_color'>[] };
   }, []);

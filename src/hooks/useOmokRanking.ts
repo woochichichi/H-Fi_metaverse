@@ -8,13 +8,19 @@ export function useOmokRanking() {
 
   const fetchRanking = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from('omok_ranking')
-      .select('*')
-      .order('wins', { ascending: false })
-      .limit(20);
-    setRanking(data ?? []);
-    setLoading(false);
+    try {
+      const { data, error } = await supabase
+        .from('omok_ranking')
+        .select('*')
+        .order('wins', { ascending: false })
+        .limit(20);
+      if (error) {
+        console.error('오목 랭킹 조회 실패:', error.message);
+      }
+      setRanking(data ?? []);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {

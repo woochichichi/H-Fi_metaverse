@@ -80,6 +80,34 @@ export function useIdeas() {
           return { data: null, error: insertError.message };
         }
 
+        // 전체 리더/관리자에게 새 아이디어 알림
+        if (data) {
+          try {
+            const { data: leaders } = await supabase
+              .from('profiles')
+              .select('id')
+              .in('role', ['leader', 'admin']);
+            if (leaders && leaders.length > 0) {
+              const notifications = leaders
+                .filter((l) => l.id !== input.author_id)
+                .map((l) => ({
+                  user_id: l.id,
+                  type: 'new_idea',
+                  urgency: '참고' as const,
+                  title: `💡 새 아이디어: ${data.title}`,
+                  body: (data.description ?? '').slice(0, 100),
+                  link: `/idea/${data.id}`,
+                  channel: 'in_app',
+                }));
+              if (notifications.length > 0) {
+                await supabase.from('notifications').insert(notifications);
+              }
+            }
+          } catch {
+            // notification 실패해도 아이디어 등록은 정상 완료
+          }
+        }
+
         return { data, error: null };
       } catch (err) {
         clearTimeout(timeout);

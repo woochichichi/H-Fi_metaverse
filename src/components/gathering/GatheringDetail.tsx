@@ -30,7 +30,8 @@ export default function GatheringDetail({ gathering, joined, isAuthor, onClose, 
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [acting, setActing] = useState(false);
 
-  const isClosed = gathering.status !== 'recruiting';
+  const isDeadlinePassed = gathering.deadline ? new Date(gathering.deadline) < new Date() : false;
+  const isClosed = gathering.status !== 'recruiting' || isDeadlinePassed;
   const canSeeMembers = isClosed && (joined || isAuthor);
   const canSeeContact = isClosed && (joined || isAuthor);
 

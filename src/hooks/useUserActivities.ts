@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
-import { getDisplayName } from '../lib/utils';
+import { getDisplayName, withTimeout } from '../lib/utils';
 import { TEAMS, ACTIVITY_POINTS } from '../lib/constants';
 import type { ActivityType } from '../lib/constants';
 import type { UserActivity, Profile, CustomEvalItem } from '../types';
@@ -87,19 +87,23 @@ export function useUserActivities() {
         query = query.eq('team', team);
       }
 
-      const { data: activities, error } = await query;
+      const { data: activities, error } = await withTimeout(query, 8000, 'teamStats');
       if (error) {
         console.error('활동 통계 조회 실패:', error.message);
         return;
       }
 
       // 프로필에서 팀별 인원수
-      const { data: profiles } = await supabase.from('profiles').select('id, team');
+      const { data: profiles, error: profilesError } = await withTimeout(
+        supabase.from('profiles').select('id, team'), 8000, 'teamProfiles'
+      );
+      if (profilesError) console.error('프로필 조회 실패:', profilesError.message);
 
       // 커스텀 평가 항목 조회
       let customQuery = supabase.from('custom_eval_items').select('*').eq('active', true);
       if (team) customQuery = customQuery.eq('team', team);
-      const { data: customItems } = await customQuery;
+      const { data: customItems, error: customError } = await withTimeout(customQuery, 8000, 'customEval');
+      if (customError) console.error('커스텀 항목 조회 실패:', customError.message);
       setCustomEvalItems(customItems ?? []);
 
       const stats: TeamStat[] = TEAMS.map((t) => {
@@ -160,7 +164,7 @@ export function useUserActivities() {
         activityQuery = activityQuery.eq('team', team);
       }
 
-      const { data: activities, error } = await activityQuery;
+      const { data: activities, error } = await withTimeout(activityQuery, 8000, 'userStats');
       if (error) {
         console.error('개인 통계 조회 실패:', error.message);
         return;
@@ -170,7 +174,8 @@ export function useUserActivities() {
       if (team) {
         profileQuery = profileQuery.eq('team', team);
       }
-      const { data: profiles } = await profileQuery;
+      const { data: profiles, error: profilesError } = await withTimeout(profileQuery, 8000, 'userProfiles');
+      if (profilesError) console.error('프로필 조회 실패:', profilesError.message);
 
       const userMap = new Map<string, UserStat>();
 
@@ -205,7 +210,7 @@ export function useUserActivities() {
               (stat[type] as number) += 1;
             }
           }
-          stat.totalPoints += a.points;
+          stat.totalPoints += (a.points ?? 0);
         }
       });
 
@@ -220,13 +225,16 @@ export function useUserActivities() {
   // 개인 활동 상세
   const fetchUserDetail = useCallback(async (userId: string, period: string) => {
     const { from, to } = getPeriodRange(period);
-    const { data, error } = await supabase
-      .from('user_activities')
-      .select('*')
-      .eq('user_id', userId)
-      .gte('created_at', from)
-      .lte('created_at', to)
-      .order('created_at', { ascending: false });
+    const { data, error } = await withTimeout(
+      supabase
+        .from('user_activities')
+        .select('*')
+        .eq('user_id', userId)
+        .gte('created_at', from)
+        .lte('created_at', to)
+        .order('created_at', { ascending: false }),
+      8000, 'userDetail'
+    );
 
     if (error) {
       console.error('상세 활동 조회 실패:', error.message);
@@ -239,10 +247,11 @@ export function useUserActivities() {
       .map((a) => a.ref_id!);
     let customNameMap: Record<string, string> = {};
     if (customRefIds.length > 0) {
-      const { data: ciData } = await supabase
+      const { data: ciData, error: ciError } = await supabase
         .from('custom_eval_items')
         .select('id, name')
         .in('id', customRefIds);
+      if (ciError) console.error('커스텀 항목명 조회 실패:', ciError.message);
       (ciData ?? []).forEach((ci) => { customNameMap[ci.id] = ci.name; });
     }
 

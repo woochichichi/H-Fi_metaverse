@@ -49,31 +49,43 @@ export function getDisplayName(
   return nick;
 }
 
-/** Supabase 쿼리 타임아웃 래퍼 (기본 8초) */
-export function withTimeout<T>(promise: PromiseLike<T>, ms = 8000, label?: string): Promise<T> {
-  const tag = label || 'query';
-  const start = performance.now();
+/** Supabase 쿼리 타임아웃 + 자동 재시도 래퍼 */
+export function withTimeout<T>(
+  queryOrFn: PromiseLike<T> | (() => PromiseLike<T>),
+  ms = 8000,
+  label = 'query',
+): Promise<T> {
+  const run = (attempt: number): Promise<T> => {
+    const start = performance.now();
+    const promise = typeof queryOrFn === 'function' ? queryOrFn() : queryOrFn;
 
-  return Promise.race([
-    Promise.resolve(promise).then(
-      (result) => {
-        const elapsed = (performance.now() - start).toFixed(0);
-        console.log(`[DB:${tag}] ✅ ${elapsed}ms`);
-        return result;
-      },
-      (err) => {
-        const elapsed = (performance.now() - start).toFixed(0);
-        console.error(`[DB:${tag}] ❌ ${elapsed}ms —`, err?.message || err);
-        throw err;
-      },
-    ),
-    new Promise<never>((_, reject) =>
-      setTimeout(() => {
-        console.error(`[DB:${tag}] ⏱️ TIMEOUT ${ms}ms — online=${navigator.onLine}`);
-        reject(new Error(`요청 시간이 초과되었습니다 (${tag}). 다시 시도해주세요`));
-      }, ms)
-    ),
-  ]);
+    return Promise.race([
+      Promise.resolve(promise).then(
+        (result) => {
+          const elapsed = (performance.now() - start).toFixed(0);
+          console.warn(`[DB:${label}] ✅ ${elapsed}ms${attempt > 1 ? ` (retry #${attempt - 1})` : ''}`);
+          return result;
+        },
+        (err) => {
+          const elapsed = (performance.now() - start).toFixed(0);
+          console.error(`[DB:${label}] ❌ ${elapsed}ms —`, err?.message || err);
+          throw err;
+        },
+      ),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => {
+          console.error(`[DB:${label}] ⏱️ TIMEOUT ${ms}ms (attempt ${attempt}) — online=${navigator.onLine}`);
+          reject(new Error(`요청 시간 초과 (${label})`));
+        }, ms),
+      ),
+    ]);
+  };
+
+  // 첫 시도 실패 시 1회 자동 재시도
+  return run(1).catch(() => {
+    console.warn(`[DB:${label}] 🔄 자동 재시도...`);
+    return run(2);
+  });
 }
 
 /** 초대 코드 생성 (8자리 숫자) */

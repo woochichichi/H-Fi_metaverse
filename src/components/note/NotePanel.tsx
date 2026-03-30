@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, X, Filter } from 'lucide-react';
+import { X, Filter, MousePointerClick } from 'lucide-react';
 import NoteList from './NoteList';
 import NoteForm from './NoteForm';
 import NoteDetail from './NoteDetail';
@@ -194,15 +194,15 @@ export default function NotePanel({ onClose }: NotePanelProps) {
         <NoteList notes={notes} loading={loading} error={error} onSelect={handleSelectNote} onRetry={loadNotes} />
       </div>
 
-      {/* FAB: 새 쪽지 (멤버용 — 리더도 보내기 가능) */}
-      <button
-        onClick={() => setView('form')}
-        className="absolute bottom-6 right-6 flex h-12 w-12 items-center justify-center rounded-full bg-accent text-white shadow-lg transition-colors duration-200 hover:bg-accent/80"
-        style={{ boxShadow: '0 4px 20px rgba(108,92,231,.4)' }}
-        title="마음의 편지 쓰기"
-      >
-        <Plus size={22} />
-      </button>
+      {/* 온보딩: 편지 보내기 안내 */}
+      <div className="border-t border-white/[.06] px-4 py-3">
+        <div className="flex items-center gap-2.5 rounded-xl bg-accent/10 px-4 py-3">
+          <MousePointerClick size={18} className="flex-shrink-0 text-accent-light" />
+          <p className="text-xs leading-relaxed text-text-secondary">
+            편지를 보내려면 <span className="font-semibold text-accent-light">우측 피플 목록</span>에서 상대방을 <span className="font-semibold text-accent-light">우클릭</span>하세요
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

@@ -62,11 +62,12 @@ export function useOmokGame() {
       const state = channel.presenceState();
       const users: OmokPlayer[] = Object.values(state)
         .flat()
+        .filter((u: any) => u.user_id)
         .map((u: any) => ({
           id: u.user_id as string,
-          name: u.name as string,
-          realName: u.real_name as string,
-          team: u.team as string,
+          name: (u.name as string) ?? '???',
+          realName: (u.real_name as string) ?? '',
+          team: (u.team as string) ?? '',
         }));
       setPlayers(users);
 
@@ -82,6 +83,16 @@ export function useOmokGame() {
         setWinner(null);
         setLastMove(null);
       }
+
+      // 상대방 퇴장 감지: 게임 중에 1명만 남으면 승리 처리
+      if (users.length < 2 && gameStartedRef.current && !winner) {
+        setStatus('finished');
+        // 남은 사람이 나면 → 상대 퇴장으로 승리
+        const me = users.find((u) => u.id === profile.id);
+        if (me && myColor) {
+          setWinner(myColor);
+        }
+      }
     });
 
     channel.on('broadcast', { event: 'move' }, ({ payload }) => {
@@ -90,6 +101,8 @@ export function useOmokGame() {
       };
       setBoard((prev) => {
         const next = prev.map((r) => [...r]);
+        // 이미 돌이 놓여있으면 무시 (동시 착수 방지)
+        if (next[row][col] !== 0) return prev;
         next[row][col] = stone;
         return next;
       });
@@ -107,6 +120,7 @@ export function useOmokGame() {
       setWinner(null);
       setLastMove(null);
       setStatus('playing');
+      resultSavedRef.current = false;
     });
 
     channel.subscribe(async (st) => {
@@ -122,9 +136,17 @@ export function useOmokGame() {
 
     channelRef.current = channel;
 
+    // beforeunload: 브라우저 닫기 시 forfeit broadcast
+    const handleUnload = () => {
+      channel.send({ type: 'broadcast', event: 'forfeit', payload: { userId: profile.id } });
+    };
+    window.addEventListener('beforeunload', handleUnload);
+
     return () => {
+      window.removeEventListener('beforeunload', handleUnload);
       gameStartedRef.current = false;
-      channel.unsubscribe();
+      supabase.removeChannel(channel);
+      channelRef.current = null;
     };
   }, [profile]);
 
