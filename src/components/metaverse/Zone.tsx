@@ -43,7 +43,7 @@ export default function Zone() {
         if (!zone) return null;
         return (
           <div
-            className="fixed bottom-16 left-1/2 z-[90] flex -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-[14px] px-[18px] py-2 text-xs font-semibold text-white animate-[fadeIn_.2s]"
+            className="fixed bottom-6 left-1/2 z-[90] flex -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-[14px] px-[18px] py-2 text-xs font-semibold text-white animate-[fadeIn_.2s]"
             style={{
               background: 'rgba(108,92,231,.92)',
               boxShadow: '0 6px 20px rgba(108,92,231,.3)',
