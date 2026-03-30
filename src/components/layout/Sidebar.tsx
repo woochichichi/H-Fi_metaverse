@@ -6,18 +6,8 @@ import { useAuthStore } from '../../stores/authStore';
 import { useMetaverseStore } from '../../stores/metaverseStore';
 import { ROOMS_DATA } from '../../lib/constants';
 import { getDisplayName } from '../../lib/utils';
-
-// 하드코딩 피플 데이터 (Sprint 2에서 DB 연동)
-// 하드코딩 피플 데이터 — Sprint 2에서 DB 연동 시 nickname 사용
-const MOCK_PEOPLE = [
-  { id: '1', name: '김민수', nickname: '불꽃민수', team: '증권ITO', status: 'online' as const, mood: '🔥', avatar_color: '#6C5CE7', avatar_emoji: '😎' },
-  { id: '2', name: '이서연', nickname: '여우서연', team: '생명ITO', status: 'online' as const, mood: '😊', avatar_color: '#E91E63', avatar_emoji: '🦊' },
-  { id: '3', name: '박준혁', nickname: '곰탱이', team: '손보ITO', status: 'online' as const, mood: '☕', avatar_color: '#FF9800', avatar_emoji: '🐻' },
-  { id: '4', name: '최유진', nickname: '고양이유진', team: '한금서', status: '재택' as const, mood: '😴', avatar_color: '#5DC878', avatar_emoji: '🐱' },
-  { id: '5', name: '정하늘', nickname: '하늘이', team: '증권ITO', status: '재택' as const, mood: '😊', avatar_color: '#6BC5FF', avatar_emoji: '🐶' },
-  { id: '6', name: '한지우', nickname: '토끼지우', team: '생명ITO', status: 'offline' as const, mood: null, avatar_color: '#a29bfe', avatar_emoji: '🐰' },
-  { id: '7', name: '윤도현', nickname: '사자왕', team: '손보ITO', status: 'offline' as const, mood: null, avatar_color: '#FF9800', avatar_emoji: '🦁' },
-];
+import { supabase } from '../../lib/supabase';
+import type { Profile } from '../../types/database';
 
 type StatusGroup = 'online' | '재택' | 'offline';
 
@@ -35,13 +25,37 @@ const STATUS_COLORS: Record<StatusGroup, string> = {
 
 export default function Sidebar() {
   const { sidebarOpen, openModal } = useUiStore();
-  const { profile: myProfile } = useAuthStore();
+  const { profile: myProfile, user } = useAuthStore();
   const currentRoom = useMetaverseStore((s) => s.currentRoom);
+  const otherPlayers = useMetaverseStore((s) => s.otherPlayers);
   const room = ROOMS_DATA[currentRoom];
   const isAdmin = myProfile?.role === 'admin' || myProfile?.role === 'director';
   const [search, setSearch] = useState('');
-  const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; person: typeof MOCK_PEOPLE[0] } | null>(null);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; person: Profile } | null>(null);
   const ctxRef = useRef<HTMLDivElement>(null);
+
+  // 프로필 목록 가져오기
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('name');
+      if (data) setProfiles(data);
+    };
+    fetchProfiles();
+
+    // 실시간 변경 구독
+    const channel = supabase
+      .channel('sidebar-profiles')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+        fetchProfiles();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, []);
 
   // 컨텍스트 메뉴 외부 클릭/ESC 닫기
   useEffect(() => {
@@ -52,7 +66,6 @@ export default function Sidebar() {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setCtxMenu(null);
     };
-    // click(mouseup 후) 사용 — mousedown 사용 시 메뉴 항목 클릭이 씹힐 수 있음
     document.addEventListener('click', handleClick);
     document.addEventListener('keydown', handleKey);
     return () => {
@@ -63,7 +76,18 @@ export default function Sidebar() {
 
   if (!sidebarOpen) return null;
 
-  const filtered = MOCK_PEOPLE.filter((p) => {
+  // 온라인 유저: 현재 Realtime presence에 있는 유저들
+  const onlinePlayerIds = new Set<string>();
+  otherPlayers.forEach((_, id) => onlinePlayerIds.add(id));
+  if (user?.id) onlinePlayerIds.add(user.id);
+
+  // 프로필에 실시간 상태 반영
+  const peopleWithStatus = profiles.map((p) => ({
+    ...p,
+    status: onlinePlayerIds.has(p.id) ? ('online' as const) : ('offline' as const),
+  }));
+
+  const filtered = peopleWithStatus.filter((p) => {
     const display = getDisplayName(p, isAdmin);
     return display.includes(search) || p.team.includes(search);
   });
@@ -83,7 +107,7 @@ export default function Sidebar() {
       <div className="flex h-10 items-center justify-between px-4 pt-1 pb-1">
         <span className="text-sm font-medium text-text-secondary">피플</span>
         <span className="font-mono text-xs text-text-secondary">
-          {filtered.filter((p) => p.status !== 'offline').length}명 접속
+          {filtered.filter((p) => p.status === 'online').length}명 접속
         </span>
       </div>
 
@@ -131,8 +155,11 @@ export default function Sidebar() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1">
-                      <span className="truncate text-sm text-text-primary">{getDisplayName(p, isAdmin)}</span>
-                      {p.mood && <span className="text-xs">{p.mood}</span>}
+                      <span className="truncate text-sm text-text-primary">
+                        {getDisplayName(p, isAdmin)}
+                        {p.id === user?.id && <span className="ml-1 text-xs text-accent">(나)</span>}
+                      </span>
+                      {p.mood_emoji && <span className="text-xs">{p.mood_emoji}</span>}
                     </div>
                     <span className="text-xs text-text-secondary">{p.team}</span>
                   </div>
