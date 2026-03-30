@@ -19,10 +19,7 @@ export function useIdeas() {
     setError(null);
 
     try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 10000);
-
-      let query = supabase.from('idea_with_votes').select('*').abortSignal(controller.signal);
+      let query = supabase.from('idea_with_votes').select('*');
 
       if (filters.category) {
         query = query.eq('category', filters.category);
@@ -38,14 +35,11 @@ export function useIdeas() {
       }
 
       const { data, error: fetchError } = await query;
-      clearTimeout(timeout);
 
       if (fetchError) throw fetchError;
       setIdeas((data as IdeaWithVotes[]) ?? []);
     } catch (err) {
-      const msg = err instanceof DOMException && err.name === 'AbortError'
-        ? '데이터를 불러올 수 없습니다. 새로고침해주세요'
-        : err instanceof Error ? err.message : '데이터를 불러올 수 없습니다';
+      const msg = err instanceof Error ? err.message : '데이터를 불러올 수 없습니다';
       console.error('아이디어 조회 실패:', msg);
       setError(msg);
     } finally {
