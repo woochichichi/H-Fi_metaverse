@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { Search, Heart } from 'lucide-react';
 import { useUiStore } from '../../stores/uiStore';
 import { useAuthStore } from '../../stores/authStore';
+import { useMetaverseStore } from '../../stores/metaverseStore';
+import { ROOMS_DATA } from '../../lib/constants';
 import { getDisplayName } from '../../lib/utils';
 
 // 하드코딩 피플 데이터 (Sprint 2에서 DB 연동)
@@ -33,6 +35,8 @@ const STATUS_COLORS: Record<StatusGroup, string> = {
 export default function Sidebar() {
   const { sidebarOpen, openModal } = useUiStore();
   const { profile: myProfile } = useAuthStore();
+  const currentRoom = useMetaverseStore((s) => s.currentRoom);
+  const room = ROOMS_DATA[currentRoom];
   const isAdmin = myProfile?.role === 'admin' || myProfile?.role === 'director';
   const [search, setSearch] = useState('');
   const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; person: typeof MOCK_PEOPLE[0] } | null>(null);
@@ -66,8 +70,14 @@ export default function Sidebar() {
 
   return (
     <aside className="flex w-[260px] flex-shrink-0 flex-col border-l border-white/[.06]" style={{ background: 'rgba(30,30,48,.97)', backdropFilter: 'blur(16px)' }}>
+      {/* 현재 룸 */}
+      <div className="flex items-center justify-center px-4 pt-3 pb-1">
+        <span className="rounded-md px-3 py-1 text-[11px] font-bold text-white" style={{ background: `${room.theme.main}66` }}>
+          📍 {room.label}
+        </span>
+      </div>
       {/* 헤더 */}
-      <div className="flex h-10 items-center justify-between px-4 pt-3 pb-1">
+      <div className="flex h-10 items-center justify-between px-4 pt-1 pb-1">
         <span className="text-sm font-medium text-text-secondary">피플</span>
         <span className="font-mono text-xs text-text-muted">
           {filtered.filter((p) => p.status !== 'offline').length}명 접속

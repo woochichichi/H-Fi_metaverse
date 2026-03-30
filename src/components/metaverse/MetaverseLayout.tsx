@@ -16,7 +16,7 @@ import GatheringPanel from '../gathering/GatheringPanel';
 import OmokPanel from '../game/OmokPanel';
 import { useMetaverseStore } from '../../stores/metaverseStore';
 import { useUiStore } from '../../stores/uiStore';
-import { MAP_WIDTH, MAP_HEIGHT, TEAM_ZONES } from '../../lib/constants';
+import { ROOMS_DATA, TEAM_ZONES } from '../../lib/constants';
 import { getMapTimeTheme } from '../../lib/utils';
 import { useAuthStore } from '../../stores/authStore';
 
@@ -44,25 +44,26 @@ function checkZoneAccess(zoneId: string, userTeam: string | undefined): { allowe
   if (!zone) return { allowed: true }; // 공용 zone (voc, idea) 또는 old zone
   if (!userTeam) return { allowed: false, message: '팀 정보가 없습니다' };
 
-  // 같은 팀이면 허용
   if (zone.team === userTeam) return { allowed: true };
 
-  // 타 팀 KPI/공지 → 잠금
   if (zoneId.endsWith('-kpi') || zoneId.endsWith('-notice')) {
     return { allowed: false, message: `🔒 이 공간은 [${zone.team}] 팀 전용입니다` };
   }
 
-  // 타 팀 라운지 → 읽기 전용으로 허용
   return { allowed: true };
 }
 
 export default function MetaverseLayout() {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
-  const { playerPosition } = useMetaverseStore();
+  const { playerPosition, currentRoom } = useMetaverseStore();
   const { modalOpen, closeModal, addToast } = useUiStore();
   const { profile } = useAuthStore();
   const mapTheme = useMemo(() => getMapTimeTheme(), []);
+
+  const room = ROOMS_DATA[currentRoom];
+  const mapW = room.mapSize.w;
+  const mapH = room.mapSize.h;
 
   const centerCamera = useCallback(() => {
     const container = containerRef.current;
@@ -74,12 +75,11 @@ export default function MetaverseLayout() {
     let ox = cw / 2 - playerPosition.x - 17;
     let oy = ch / 2 - playerPosition.y - 22;
 
-    // 맵 가장자리에서 카메라 고정 (빈 공간 노출 방지)
-    ox = Math.min(0, Math.max(ox, cw - MAP_WIDTH));
-    oy = Math.min(0, Math.max(oy, ch - MAP_HEIGHT));
+    ox = Math.min(0, Math.max(ox, cw - mapW));
+    oy = Math.min(0, Math.max(oy, ch - mapH));
 
     viewport.style.transform = `translate(${ox}px, ${oy}px)`;
-  }, [playerPosition]);
+  }, [playerPosition, mapW, mapH]);
 
   useEffect(() => {
     centerCamera();
@@ -110,18 +110,15 @@ export default function MetaverseLayout() {
     }
   }, [modalOpen, profile?.team, closeModal, addToast]);
 
-  // 현재 열린 패널 컴포넌트 결정
   const PanelComponent = modalOpen ? getZonePanel(modalOpen, profile?.team) : null;
 
   return (
     <div className="flex flex-1 overflow-hidden">
-      {/* 좌측 메뉴 패널 */}
       <BottomBar />
 
-      {/* 맵 컨테이너 */}
       <div className="relative flex-1 flex flex-col overflow-hidden">
         <div ref={containerRef} className="relative flex-1 overflow-hidden" style={{ background: mapTheme.outerBg }}>
-          <div ref={viewportRef} className="absolute" style={{ width: MAP_WIDTH, height: MAP_HEIGHT }}>
+          <div ref={viewportRef} className="absolute" style={{ width: mapW, height: mapH }}>
             <MapCanvas>
               <Zone />
               <NPCCharacter />
@@ -131,15 +128,12 @@ export default function MetaverseLayout() {
             </MapCanvas>
           </div>
 
-          {/* Zone 패널 슬라이드 */}
           {PanelComponent && (
             <>
-              {/* 백드롭 */}
               <div
                 className="absolute inset-0 z-[100] bg-black/40"
                 onClick={closeModal}
               />
-              {/* 슬라이드 패널 */}
               <div
                 className="absolute right-0 top-0 z-[101] flex h-full w-full max-w-md flex-col bg-bg-primary shadow-2xl animate-[slideInRight_.25s_ease-out]"
                 style={{ borderLeft: '1px solid rgba(255,255,255,.06)' }}

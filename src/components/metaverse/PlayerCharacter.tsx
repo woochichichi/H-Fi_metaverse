@@ -2,8 +2,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import CharacterSVG from './CharacterSVG';
 import { useMetaverseStore } from '../../stores/metaverseStore';
 import { useUiStore } from '../../stores/uiStore';
-import { ZONES, MAP_WIDTH, MAP_HEIGHT, TEAM_CONFIGS } from '../../lib/constants';
-import type { ZoneId, TeamConfigKey } from '../../lib/constants';
+import { ROOMS_DATA, TEAM_TO_ROOM } from '../../lib/constants';
 import { useAuthStore } from '../../stores/authStore';
 
 const SPEED = 4;
@@ -11,7 +10,7 @@ const CHAR_W = 34;
 const CHAR_H = 46;
 
 export default function PlayerCharacter() {
-  const { playerPosition, setPlayerPosition, setNearZone, nearZone, moveTarget, setMoveTarget } = useMetaverseStore();
+  const { playerPosition, setPlayerPosition, setNearZone, nearZone, moveTarget, setMoveTarget, currentRoom, setNearPortal, enterRoom } = useMetaverseStore();
   const { modalOpen, openModal } = useUiStore();
   const { profile } = useAuthStore();
   const keysRef = useRef<Set<string>>(new Set());
@@ -19,18 +18,16 @@ export default function PlayerCharacter() {
   const posRef = useRef(playerPosition);
   const spawnedRef = useRef(false);
 
-  // 팀 기반 스폰
+  // 팀 기반 스폰 → 해당 룸으로 진입
   useEffect(() => {
     if (spawnedRef.current) return;
-    const team = profile?.team as TeamConfigKey | undefined;
-    const cfg = team ? TEAM_CONFIGS[team] : null;
-    if (cfg) {
-      const spawn = cfg.spawn;
-      posRef.current = spawn;
-      setPlayerPosition(spawn);
+    const team = profile?.team;
+    if (team) {
+      const roomId = TEAM_TO_ROOM[team] || 'stock';
+      enterRoom(roomId);
     }
     spawnedRef.current = true;
-  }, [profile?.team, setPlayerPosition]);
+  }, [profile?.team, enterRoom]);
 
   // 키 이벤트
   useEffect(() => {
@@ -39,7 +36,12 @@ export default function PlayerCharacter() {
       keysRef.current.add(e.key);
       if (e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();
-        if (nearZone) openModal(nearZone);
+        const portal = useMetaverseStore.getState().nearPortal;
+        if (portal) {
+          enterRoom(portal.targetRoom, portal.spawnPoint);
+        } else if (nearZone) {
+          openModal(nearZone);
+        }
       }
     };
     const handleKeyUp = (e: KeyboardEvent) => {
@@ -51,21 +53,34 @@ export default function PlayerCharacter() {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [modalOpen, nearZone, openModal]);
+  }, [modalOpen, nearZone, openModal, enterRoom]);
 
-  // Zone 체크
-  const checkZone = useCallback((px: number, py: number) => {
+  // Zone + Portal 체크
+  const checkZoneAndPortal = useCallback((px: number, py: number) => {
+    const room = ROOMS_DATA[currentRoom];
     const cx = px + CHAR_W / 2;
     const cy = py + CHAR_H / 2;
-    let found: ZoneId | null = null;
-    for (const z of ZONES) {
+
+    // Zone 체크
+    let foundZone: string | null = null;
+    for (const z of room.zones) {
       if (cx > z.x && cx < z.x + z.width && cy > z.y && cy < z.y + z.height) {
-        found = z.id;
+        foundZone = z.id;
         break;
       }
     }
-    setNearZone(found);
-  }, [setNearZone]);
+    setNearZone(foundZone);
+
+    // Portal 체크
+    let foundPortal = null;
+    for (const p of room.portals) {
+      if (cx > p.x && cx < p.x + p.w && cy > p.y && cy < p.y + p.h) {
+        foundPortal = p;
+        break;
+      }
+    }
+    setNearPortal(foundPortal);
+  }, [currentRoom, setNearZone, setNearPortal]);
 
   const moveTargetRef = useRef(moveTarget);
   useEffect(() => { moveTargetRef.current = moveTarget; }, [moveTarget]);
@@ -85,26 +100,27 @@ export default function PlayerCharacter() {
     const ARRIVE_DIST = 6;
     const loop = () => {
       if (!modalOpen) {
+        const room = ROOMS_DATA[currentRoom];
+        const mapW = room.mapSize.w;
+        const mapH = room.mapSize.h;
         const target = moveTargetRef.current;
+
         if (target) {
-          // 자동 이동 모드
           const diffX = target.x - posRef.current.x;
           const diffY = target.y - posRef.current.y;
           const dist = Math.sqrt(diffX * diffX + diffY * diffY);
           if (dist < ARRIVE_DIST) {
-            // 도착 → Zone 입장
-            checkZone(posRef.current.x, posRef.current.y);
+            checkZoneAndPortal(posRef.current.x, posRef.current.y);
             setMoveTarget(null);
             openModal(target.zoneId);
           } else {
-            const nx = Math.max(20, Math.min(MAP_WIDTH - 40, posRef.current.x + (diffX / dist) * AUTO_SPEED));
-            const ny = Math.max(20, Math.min(MAP_HEIGHT - 40, posRef.current.y + (diffY / dist) * AUTO_SPEED));
+            const nx = Math.max(20, Math.min(mapW - 40, posRef.current.x + (diffX / dist) * AUTO_SPEED));
+            const ny = Math.max(20, Math.min(mapH - 40, posRef.current.y + (diffY / dist) * AUTO_SPEED));
             posRef.current = { x: nx, y: ny };
             setPlayerPosition(posRef.current);
-            checkZone(nx, ny);
+            checkZoneAndPortal(nx, ny);
           }
         } else {
-          // 키보드 이동 모드
           const keys = keysRef.current;
           let dx = 0, dy = 0;
           if (keys.has('ArrowUp') || keys.has('w') || keys.has('W')) dy = -SPEED;
@@ -112,11 +128,11 @@ export default function PlayerCharacter() {
           if (keys.has('ArrowLeft') || keys.has('a') || keys.has('A')) dx = -SPEED;
           if (keys.has('ArrowRight') || keys.has('d') || keys.has('D')) dx = SPEED;
           if (dx || dy) {
-            const nx = Math.max(20, Math.min(MAP_WIDTH - 40, posRef.current.x + dx));
-            const ny = Math.max(20, Math.min(MAP_HEIGHT - 40, posRef.current.y + dy));
+            const nx = Math.max(20, Math.min(mapW - 40, posRef.current.x + dx));
+            const ny = Math.max(20, Math.min(mapH - 40, posRef.current.y + dy));
             posRef.current = { x: nx, y: ny };
             setPlayerPosition(posRef.current);
-            checkZone(nx, ny);
+            checkZoneAndPortal(nx, ny);
           }
         }
       }
@@ -124,7 +140,7 @@ export default function PlayerCharacter() {
     };
     rafRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [modalOpen, setPlayerPosition, checkZone, setMoveTarget, openModal]);
+  }, [modalOpen, currentRoom, setPlayerPosition, checkZoneAndPortal, setMoveTarget, openModal]);
 
   // posRef sync
   useEffect(() => {
@@ -142,7 +158,6 @@ export default function PlayerCharacter() {
         filter: 'drop-shadow(0 3px 2px rgba(0,0,0,.25))',
       }}
     >
-      {/* 기분 이모지 */}
       {profile?.mood_emoji && (
         <div
           className="absolute left-1/2 -translate-x-1/2 text-sm"
@@ -151,7 +166,6 @@ export default function PlayerCharacter() {
           {profile.mood_emoji}
         </div>
       )}
-      {/* 이름표 */}
       <div
         className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1 whitespace-nowrap rounded-[10px] px-[10px] py-[2px] text-[10px] font-semibold text-white"
         style={{

@@ -105,13 +105,13 @@ export type ProfileStatus = (typeof PROFILE_STATUSES)[number];
 export const MOOD_EMOJIS = ['😆', '😊', '😐', '😰', '🤯', '😴', '🔥', '☕'] as const;
 
 // ═══ 팀별 설정 (v4) ═══
+/* DEPRECATED: v4 single-map — ROOMS_DATA 사용 권장 */
 export const TEAM_CONFIGS = {
   증권ITO: {
     theme: 'stock',
     color: '#00D68F',
     subColor: '#FF4757',
     floor: '#0d2818',
-    // 타운 위치 (삼각형 상단 중앙)
     town: { x: 800, y: 50, w: 800, h: 600 },
     spawn: { x: 1200, y: 300 },
   },
@@ -120,7 +120,6 @@ export const TEAM_CONFIGS = {
     color: '#6C5CE7',
     subColor: '#FFC312',
     floor: '#1a0d2e',
-    // 타운 위치 (좌하)
     town: { x: 50, y: 900, w: 800, h: 600 },
     spawn: { x: 450, y: 1200 },
   },
@@ -129,44 +128,176 @@ export const TEAM_CONFIGS = {
     color: '#0984E3',
     subColor: '#FD7272',
     floor: '#0d1a2e',
-    // 타운 위치 (우하)
     town: { x: 1550, y: 900, w: 800, h: 600 },
     spawn: { x: 1950, y: 1200 },
   },
 } as const;
 export type TeamConfigKey = keyof typeof TEAM_CONFIGS;
 
-// 중앙 광장
+/* DEPRECATED: v4 single-map */
 export const CENTRAL_PLAZA = { x: 800, y: 650, w: 800, h: 500 } as const;
 
-// ═══ v4 Zone 정의 — 팀별 + 공용 ═══
-export const TEAM_ZONES = [
-  // 증권ITO 타운
-  { id: 'stock-lobby', team: '증권ITO' as const, label: '🏠 증권 로비', emoji: '💭', x: 840, y: 90, width: 340, height: 240 },
-  { id: 'stock-kpi', team: '증권ITO' as const, label: '📊 증권 KPI', emoji: '📊', x: 1220, y: 90, width: 340, height: 240 },
-  { id: 'stock-notice', team: '증권ITO' as const, label: '📢 증권 공지', emoji: '📢', x: 1030, y: 370, width: 340, height: 240 },
+// ═══ v5 멀티룸 구조 ═══
 
-  // 생명ITO 타운
-  { id: 'life-lobby', team: '생명ITO' as const, label: '🏠 생명 로비', emoji: '💭', x: 90, y: 940, width: 340, height: 240 },
-  { id: 'life-kpi', team: '생명ITO' as const, label: '📊 생명 KPI', emoji: '📊', x: 470, y: 940, width: 340, height: 240 },
-  { id: 'life-notice', team: '생명ITO' as const, label: '📢 생명 공지', emoji: '📢', x: 280, y: 1220, width: 340, height: 240 },
+export type RoomId = 'stock' | 'life' | 'shield' | 'plaza';
 
-  // 손보ITO 타운
-  { id: 'shield-lobby', team: '손보ITO' as const, label: '🏠 손보 로비', emoji: '💭', x: 1590, y: 940, width: 340, height: 240 },
-  { id: 'shield-kpi', team: '손보ITO' as const, label: '📊 손보 KPI', emoji: '📊', x: 1970, y: 940, width: 340, height: 240 },
-  { id: 'shield-notice', team: '손보ITO' as const, label: '📢 손보 공지', emoji: '📢', x: 1780, y: 1220, width: 340, height: 240 },
-] as const;
+export interface PortalDef {
+  id: string;
+  x: number; y: number; w: number; h: number;
+  targetRoom: RoomId;
+  spawnPoint: { x: number; y: number };
+  label: string;
+}
 
-export const SHARED_ZONES = [
-  { id: 'voc', team: null, label: '📞 VOC 센터', emoji: '📞', x: 840, y: 700, width: 340, height: 240 },
-  { id: 'idea', team: null, label: '💡 아이디어 보드', emoji: '💡', x: 1220, y: 700, width: 340, height: 240 },
-  { id: 'gathering', team: null, label: '🎉 모임방', emoji: '🎉', x: 1030, y: 1550, width: 340, height: 240 },
-  { id: 'omok', team: null, label: '⚫ 오목 게임방', emoji: '⚫', x: 560, y: 1550, width: 340, height: 240 },
-] as const;
+export interface ZoneDef {
+  id: string;
+  team: string | null;
+  label: string;
+  emoji: string;
+  x: number; y: number;
+  width: number; height: number;
+}
 
-// 전체 Zone (하위 호환용)
-export const ZONES = [...TEAM_ZONES, ...SHARED_ZONES] as const;
-export type ZoneId = (typeof ZONES)[number]['id'];
+export interface RoomDef {
+  id: RoomId;
+  label: string;
+  team?: string;
+  theme: { main: string; sub: string; floor: string; border: string };
+  mapSize: { w: number; h: number };
+  spawnPoint: { x: number; y: number };
+  zones: ZoneDef[];
+  portals: PortalDef[];
+  npcTeams: string[];
+}
+
+export const ROOMS_DATA: Record<RoomId, RoomDef> = {
+  stock: {
+    id: 'stock',
+    label: '증권ITO',
+    team: '증권ITO',
+    theme: { main: '#00D68F', sub: '#FF4757', floor: '#0d2818', border: '#00D68F' },
+    mapSize: { w: 800, h: 600 },
+    spawnPoint: { x: 400, y: 100 },
+    zones: [
+      { id: 'stock-lobby', team: '증권ITO', label: '🏠 증권 로비', emoji: '💭', x: 40, y: 40, width: 320, height: 240 },
+      { id: 'stock-kpi', team: '증권ITO', label: '📊 증권 KPI', emoji: '📊', x: 440, y: 40, width: 320, height: 240 },
+      { id: 'stock-notice', team: '증권ITO', label: '📢 증권 공지', emoji: '📢', x: 230, y: 320, width: 320, height: 240 },
+    ],
+    portals: [
+      {
+        id: 'portal-stock-plaza',
+        x: 360, y: 555, w: 80, h: 35,
+        targetRoom: 'plaza',
+        spawnPoint: { x: 140, y: 80 },
+        label: '🚪 중앙 광장',
+      },
+    ],
+    npcTeams: ['증권ITO'],
+  },
+  life: {
+    id: 'life',
+    label: '생명ITO',
+    team: '생명ITO',
+    theme: { main: '#6C5CE7', sub: '#FFC312', floor: '#1a0d2e', border: '#6C5CE7' },
+    mapSize: { w: 800, h: 600 },
+    spawnPoint: { x: 400, y: 100 },
+    zones: [
+      { id: 'life-lobby', team: '생명ITO', label: '🏠 생명 로비', emoji: '💭', x: 40, y: 40, width: 320, height: 240 },
+      { id: 'life-kpi', team: '생명ITO', label: '📊 생명 KPI', emoji: '📊', x: 440, y: 40, width: 320, height: 240 },
+      { id: 'life-notice', team: '생명ITO', label: '📢 생명 공지', emoji: '📢', x: 230, y: 320, width: 320, height: 240 },
+    ],
+    portals: [
+      {
+        id: 'portal-life-plaza',
+        x: 360, y: 555, w: 80, h: 35,
+        targetRoom: 'plaza',
+        spawnPoint: { x: 500, y: 480 },
+        label: '🚪 중앙 광장',
+      },
+    ],
+    npcTeams: ['생명ITO'],
+  },
+  shield: {
+    id: 'shield',
+    label: '손보ITO',
+    team: '손보ITO',
+    theme: { main: '#0984E3', sub: '#FD7272', floor: '#0d1a2e', border: '#0984E3' },
+    mapSize: { w: 800, h: 600 },
+    spawnPoint: { x: 400, y: 100 },
+    zones: [
+      { id: 'shield-lobby', team: '손보ITO', label: '🏠 손보 로비', emoji: '💭', x: 40, y: 40, width: 320, height: 240 },
+      { id: 'shield-kpi', team: '손보ITO', label: '📊 손보 KPI', emoji: '📊', x: 440, y: 40, width: 320, height: 240 },
+      { id: 'shield-notice', team: '손보ITO', label: '📢 손보 공지', emoji: '📢', x: 230, y: 320, width: 320, height: 240 },
+    ],
+    portals: [
+      {
+        id: 'portal-shield-plaza',
+        x: 360, y: 555, w: 80, h: 35,
+        targetRoom: 'plaza',
+        spawnPoint: { x: 860, y: 480 },
+        label: '🚪 중앙 광장',
+      },
+    ],
+    npcTeams: ['손보ITO'],
+  },
+  plaza: {
+    id: 'plaza',
+    label: '중앙 광장',
+    theme: { main: '#F8B500', sub: '#FFF8E1', floor: '#2a2a1a', border: '#F8B500' },
+    mapSize: { w: 1000, h: 600 },
+    spawnPoint: { x: 500, y: 300 },
+    zones: [
+      { id: 'voc', team: null, label: '📞 VOC 센터', emoji: '📞', x: 40, y: 40, width: 380, height: 280 },
+      { id: 'idea', team: null, label: '💡 아이디어 보드', emoji: '💡', x: 540, y: 40, width: 380, height: 280 },
+      { id: 'gathering', team: null, label: '🎉 모임방', emoji: '🎉', x: 40, y: 370, width: 300, height: 180 },
+      { id: 'omok', team: null, label: '⚫ 오목 게임방', emoji: '⚫', x: 400, y: 370, width: 300, height: 180 },
+    ],
+    portals: [
+      {
+        id: 'portal-plaza-stock',
+        x: 80, y: 10, w: 100, h: 35,
+        targetRoom: 'stock',
+        spawnPoint: { x: 400, y: 520 },
+        label: '🚪 증권ITO',
+      },
+      {
+        id: 'portal-plaza-life',
+        x: 440, y: 555, w: 100, h: 35,
+        targetRoom: 'life',
+        spawnPoint: { x: 400, y: 520 },
+        label: '🚪 생명ITO',
+      },
+      {
+        id: 'portal-plaza-shield',
+        x: 800, y: 555, w: 100, h: 35,
+        targetRoom: 'shield',
+        spawnPoint: { x: 400, y: 520 },
+        label: '🚪 손보ITO',
+      },
+    ],
+    npcTeams: ['한금서'],
+  },
+};
+
+// 팀 → 룸 매핑
+export const TEAM_TO_ROOM: Record<string, RoomId> = {
+  '증권ITO': 'stock',
+  '생명ITO': 'life',
+  '손보ITO': 'shield',
+  '한금서': 'plaza',
+};
+
+// ═══ v4 Zone 정의 (하위 호환) — ROOMS_DATA.zones 기반 동적 생성 ═══
+export const TEAM_ZONES = Object.values(ROOMS_DATA)
+  .filter((r) => r.team)
+  .flatMap((r) => r.zones);
+
+export const SHARED_ZONES = Object.values(ROOMS_DATA)
+  .filter((r) => !r.team)
+  .flatMap((r) => r.zones);
+
+export const ZONES = [...TEAM_ZONES, ...SHARED_ZONES];
+export type ZoneId = string;
 
 // NPC 팀원 데이터
 export const NPC_TEAM = [
@@ -199,7 +330,7 @@ export const REACTION_EMOJIS = [
   '🎉', '🔥', '👏', '❤️',
 ] as const;
 
-// 맵 크기 (v4: 2400x2000)
+/* DEPRECATED: v4 single-map — ROOMS_DATA[roomId].mapSize 사용 */
 export const MAP_WIDTH = 2400;
 export const MAP_HEIGHT = 2000;
 

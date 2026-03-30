@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import type { ZoneId } from '../lib/constants';
+import type { ZoneId, RoomId, PortalDef } from '../lib/constants';
+import { ROOMS_DATA } from '../lib/constants';
 
 interface EmojiFloat {
   id: string;
@@ -21,6 +22,8 @@ interface MetaverseState {
   moveTarget: MoveTarget | null;
   onlineUsers: string[];
   emojiFloats: EmojiFloat[];
+  currentRoom: RoomId;
+  nearPortal: PortalDef | null;
   setActiveZone: (zone: ZoneId | null) => void;
   setNearZone: (zone: ZoneId | null) => void;
   setPlayerPosition: (pos: { x: number; y: number }) => void;
@@ -28,15 +31,20 @@ interface MetaverseState {
   setOnlineUsers: (users: string[]) => void;
   addEmojiFloat: (emoji: string) => void;
   removeEmojiFloat: (id: string) => void;
+  setCurrentRoom: (roomId: RoomId) => void;
+  setNearPortal: (portal: PortalDef | null) => void;
+  enterRoom: (roomId: RoomId, spawnPoint?: { x: number; y: number }) => void;
 }
 
 export const useMetaverseStore = create<MetaverseState>((set, get) => ({
   activeZone: null,
   nearZone: null,
-  playerPosition: { x: 1200, y: 300 },
+  playerPosition: { x: 400, y: 100 },
   moveTarget: null,
   onlineUsers: [],
   emojiFloats: [],
+  currentRoom: 'stock',
+  nearPortal: null,
   setActiveZone: (zone) => set({ activeZone: zone }),
   setNearZone: (zone) => set({ nearZone: zone }),
   setPlayerPosition: (pos) => set({ playerPosition: pos }),
@@ -52,4 +60,18 @@ export const useMetaverseStore = create<MetaverseState>((set, get) => ({
   },
   removeEmojiFloat: (id) =>
     set((s) => ({ emojiFloats: s.emojiFloats.filter((e) => e.id !== id) })),
+  setCurrentRoom: (roomId) => set({ currentRoom: roomId }),
+  setNearPortal: (portal) => set({ nearPortal: portal }),
+  enterRoom: (roomId, spawnPoint) => {
+    const room = ROOMS_DATA[roomId];
+    const spawn = spawnPoint || room.spawnPoint;
+    set({
+      currentRoom: roomId,
+      playerPosition: spawn,
+      nearZone: null,
+      nearPortal: null,
+      activeZone: null,
+      moveTarget: null,
+    });
+  },
 }));
