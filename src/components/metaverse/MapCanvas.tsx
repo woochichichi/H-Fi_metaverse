@@ -401,6 +401,7 @@ const ZONE_FLOOR_COLORS: Record<string, string> = {
   'voc': '#2a1a2a',     // 분홍 톤
   'idea': '#2a2a1a',    // 노란 톤
   'gathering': '#2a2010', // 주황 톤
+  'reaction': '#2a1a2e', // 보라 톤
   'omok': '#1a2a1a',    // 녹색 톤
 };
 
@@ -854,6 +855,40 @@ export default function MapCanvas({ children }: MapCanvasProps) {
 
       {/* 포탈 아치형 문 */}
       <PortalArch room={room} />
+
+      {/* 미션/비전 바닥 각인 (중앙 광장 전용) */}
+      {!room.team && (
+        <div
+          className="absolute pointer-events-none select-none z-[2]"
+          style={{
+            left: '50%',
+            top: 855,
+            transform: 'translateX(-50%)',
+            textAlign: 'center',
+            opacity: 0.13,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          <div style={{
+            color: '#8A7A6E',
+            fontSize: 15,
+            letterSpacing: 3,
+            fontFamily: "'DungGeunMo', 'Galmuri11', monospace",
+            marginBottom: 10,
+          }}>
+            초지능 · 초융합 · 초연결 기술로 인류를 더 풍요롭고 안전하게
+          </div>
+          <div style={{
+            color: '#8A7A6E',
+            fontSize: 12,
+            letterSpacing: 2,
+            fontFamily: "'Galmuri11', monospace",
+            textTransform: 'uppercase' as const,
+          }}>
+            고객사 디지털 전환의 핵심 파트너 — 2030 Global Value Creation Partner
+          </div>
+        </div>
+      )}
 
       {children}
     </div>
