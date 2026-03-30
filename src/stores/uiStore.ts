@@ -16,7 +16,7 @@ export const useUiStore = create<UiState>((set) => ({
   modalOpen: null,
   toasts: [],
   toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
-  openModal: (id) => set({ modalOpen: id }),
+  openModal: (id) => set({ modalOpen: id, sidebarOpen: false }),
   closeModal: () => set({ modalOpen: null }),
   addToast: (message, type = 'info') =>
     set((s) => ({

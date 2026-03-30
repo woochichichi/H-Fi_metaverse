@@ -220,15 +220,16 @@ function Room({ x, y, w, h, floor, label, teamLabel }: {
 }) {
   return (
     <>
+      {/* 방 라벨 — overflow-hidden 밖에 배치 */}
+      <div className="absolute z-[15] -translate-x-1/2 whitespace-nowrap rounded-[10px] px-3 py-[3px] text-[11px] font-semibold text-white pointer-events-none" style={{ left: x + w / 2, top: y - 22, background: 'rgba(0,0,0,.55)', backdropFilter: 'blur(4px)' }}>
+        {label}
+      </div>
+      <div className="absolute z-[15] whitespace-nowrap rounded-lg px-[10px] py-[2px] text-[10px] font-medium text-white/60 pointer-events-none" style={{ left: x + 10, top: y + 8, background: 'rgba(0,0,0,.35)' }}>
+        {teamLabel}
+      </div>
       {/* 방 바닥 */}
       <div className="absolute overflow-hidden rounded-sm" style={{ left: x, top: y, width: w, height: h, boxShadow: '0 2px 0 rgba(0,0,0,.15)' }}>
         <div className="absolute inset-0" style={{ background: floor }} />
-        <div className="absolute left-1/2 z-[15] -translate-x-1/2 whitespace-nowrap rounded-[10px] px-3 py-[3px] text-[11px] font-semibold text-white pointer-events-none" style={{ top: -22, background: 'rgba(0,0,0,.55)', backdropFilter: 'blur(4px)' }}>
-          {label}
-        </div>
-        <div className="absolute left-[10px] z-[15] whitespace-nowrap rounded-lg px-[10px] py-[2px] text-[10px] font-semibold text-white pointer-events-none" style={{ top: -22, background: 'rgba(0,0,0,.5)' }}>
-          {teamLabel}
-        </div>
       </div>
       {/* 벽 — 상/하/좌/우 */}
       <div className="absolute z-[3] rounded-sm" style={{ left: x, top: y, width: w, height: 8, background: 'linear-gradient(180deg,#7a8a9a,#5d6d7d)', boxShadow: '0 2px 0 rgba(0,0,0,.1)' }} />

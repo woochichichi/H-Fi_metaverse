@@ -80,7 +80,11 @@ export function useThreads(refType: 'voc' | 'note', refId: string | null) {
           });
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR') {
+          console.error('Thread Realtime 구독 에러 — 자동 재연결 시도');
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);

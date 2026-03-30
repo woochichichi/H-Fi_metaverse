@@ -42,7 +42,7 @@ export default function BottomBar() {
       </div>
 
       {/* 액션 버튼 */}
-      <div className="ml-auto flex gap-[6px]">
+      <div className="flex gap-[6px]">
         {actions.map((a) => (
           <button
             key={a.id}

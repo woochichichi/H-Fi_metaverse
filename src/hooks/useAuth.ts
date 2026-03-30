@@ -73,20 +73,11 @@ export async function signUp({ email, password, name, team, role, inviteCodeId }
     }
   }
 
-  // invite_codes.used_count += 1 (read-then-write)
+  // invite_codes.used_count += 1 (원자적 증가 — 동시 가입 시 race condition 방지)
   try {
-    const { data: current } = await supabase
-      .from('invite_codes')
-      .select('used_count')
-      .eq('id', inviteCodeId)
-      .single();
-
-    if (current) {
-      const count = (current as { used_count: number }).used_count;
-      await supabase
-        .from('invite_codes')
-        .update({ used_count: count + 1 } as never)
-        .eq('id', inviteCodeId);
+    const { data: success } = await supabase.rpc('increment_invite_usage', { code_id: inviteCodeId });
+    if (success === false) {
+      console.warn('초대 코드 사용 횟수 초과 또는 만료');
     }
   } catch {
     // used_count 증가 실패해도 가입은 정상 완료

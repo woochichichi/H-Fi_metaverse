@@ -50,15 +50,19 @@ export default function NoteDetail({ note, onBack, onUpdated }: NoteDetailProps)
 
     // 실명 쪽지 작성자에게 답변 알림
     if (!note.anonymous && note.sender_id) {
-      await supabase.from('notifications').insert({
-        user_id: note.sender_id,
-        type: 'note_reply',
-        urgency: '할일',
-        title: '쪽지에 답변이 도착했습니다',
-        body: note.title,
-        link: `/note/${note.id}`,
-        channel: 'in_app',
-      });
+      try {
+        await supabase.from('notifications').insert({
+          user_id: note.sender_id,
+          type: 'note_reply',
+          urgency: '할일',
+          title: '쪽지에 답변이 도착했습니다',
+          body: note.title,
+          link: `/note/${note.id}`,
+          channel: 'in_app',
+        });
+      } catch {
+        // notification 실패해도 답변은 정상 완료
+      }
     }
   };
 

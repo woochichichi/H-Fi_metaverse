@@ -11,7 +11,7 @@ import { useInbox } from '../../hooks/useInbox';
 
 export default function TopBar() {
   const { profile, user, logout } = useAuthStore();
-  const { toggleSidebar, openModal } = useUiStore();
+  const { sidebarOpen, toggleSidebar, openModal, closeModal, modalOpen } = useUiStore();
   const { fetchUnreadCount } = useNotices();
   const { items, loading: inboxLoading, unreadCount: inboxUnread, markAsRead, markAllAsRead } = useInbox(user?.id ?? null);
   const mode = useDeviceMode();
@@ -29,6 +29,35 @@ export default function TopBar() {
       return () => clearInterval(interval);
     }
   }, [user, fetchUnreadCount]);
+
+  // 패널 간 상호 배타 처리
+  const handleToggleSidebar = () => {
+    setShowInbox(false);
+    setShowAdmin(false);
+    closeModal();
+    toggleSidebar();
+  };
+
+  const handleToggleInbox = () => {
+    setShowAdmin(false);
+    closeModal();
+    if (sidebarOpen) toggleSidebar();
+    setShowInbox((v) => !v);
+  };
+
+  const handleOpenNotice = () => {
+    setShowInbox(false);
+    setShowAdmin(false);
+    if (sidebarOpen) toggleSidebar();
+    openModal('notice');
+  };
+
+  const handleOpenAdmin = () => {
+    setShowInbox(false);
+    closeModal();
+    if (sidebarOpen) toggleSidebar();
+    setShowAdmin(true);
+  };
 
   // 바깥 클릭으로 수집함 닫기
   useEffect(() => {
@@ -60,7 +89,7 @@ export default function TopBar() {
         {/* PC 전용: 피플 토글 */}
         {mode === 'metaverse' && (
           <button
-            onClick={toggleSidebar}
+            onClick={handleToggleSidebar}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary transition-colors duration-200 hover:bg-bg-tertiary hover:text-text-primary"
             title="피플 목록"
           >
@@ -71,7 +100,7 @@ export default function TopBar() {
         {/* 수집함 */}
         <div ref={inboxRef} className="relative">
           <button
-            onClick={() => setShowInbox(!showInbox)}
+            onClick={handleToggleInbox}
             className="relative flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary transition-colors duration-200 hover:bg-bg-tertiary hover:text-text-primary"
             title="수집함"
           >
@@ -95,7 +124,7 @@ export default function TopBar() {
 
         {/* 알림 (공지 안읽은 수) */}
         <button
-          onClick={() => openModal('notice')}
+          onClick={handleOpenNotice}
           className="relative flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary transition-colors duration-200 hover:bg-bg-tertiary hover:text-text-primary"
           title="공지사항"
         >
@@ -110,7 +139,7 @@ export default function TopBar() {
         {/* 관리자 패널 (admin만) */}
         {profile?.role === 'admin' && (
           <button
-            onClick={() => setShowAdmin(true)}
+            onClick={handleOpenAdmin}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary transition-colors duration-200 hover:bg-bg-tertiary hover:text-text-primary"
             title="관리자 패널"
           >

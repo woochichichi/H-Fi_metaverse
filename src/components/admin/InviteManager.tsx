@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, Copy, ToggleLeft, ToggleRight, RefreshCw } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
 import { TEAMS } from '../../lib/constants';
 import type { InviteCode } from '../../types';
@@ -10,6 +11,7 @@ function generateCode(): string {
 }
 
 export default function InviteManager() {
+  const { user } = useAuthStore();
   const { addToast } = useUiStore();
   const [codes, setCodes] = useState<InviteCode[]>([]);
   const [loading, setLoading] = useState(false);
@@ -49,7 +51,7 @@ export default function InviteManager() {
       max_uses: formMaxUses,
       expires_at: formExpires || null,
       active: true,
-      created_by: null,
+      created_by: user?.id ?? null,
     });
     if (error) {
       addToast('코드 생성 실패: ' + error.message, 'error');

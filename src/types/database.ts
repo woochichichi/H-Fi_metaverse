@@ -147,6 +147,7 @@ export interface Voc {
   resolution: string | null;
   attachment_urls: string[] | null;
   session_token: string | null;
+  is_deleted: boolean;
   created_at: string;
   updated_at: string;
 }

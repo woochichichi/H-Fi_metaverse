@@ -19,29 +19,36 @@ export function useNotices() {
     setLoading(true);
     setError(null);
 
-    let query = supabase.from('notices').select('*');
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
 
-    if (filters.urgency) {
-      query = query.eq('urgency', filters.urgency);
-    }
-    if (filters.category) {
-      query = query.eq('category', filters.category);
-    }
+      let query = supabase.from('notices').select('*').abortSignal(controller.signal);
 
-    // 고정 공지 상단 + 최신순
-    query = query.order('pinned', { ascending: false }).order('created_at', { ascending: false });
+      if (filters.urgency) {
+        query = query.eq('urgency', filters.urgency);
+      }
+      if (filters.category) {
+        query = query.eq('category', filters.category);
+      }
 
-    const { data, error: fetchError } = await query;
+      // 고정 공지 상단 + 최신순
+      query = query.order('pinned', { ascending: false }).order('created_at', { ascending: false });
 
-    if (fetchError) {
-      console.error('공지 조회 실패:', fetchError.message);
-      setError(fetchError.message);
+      const { data, error: fetchError } = await query;
+      clearTimeout(timeout);
+
+      if (fetchError) throw fetchError;
+      setNotices(data ?? []);
+    } catch (err) {
+      const msg = err instanceof DOMException && err.name === 'AbortError'
+        ? '데이터를 불러올 수 없습니다. 새로고침해주세요'
+        : err instanceof Error ? err.message : '데이터를 불러올 수 없습니다';
+      console.error('공지 조회 실패:', msg);
+      setError(msg);
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setNotices(data ?? []);
-    setLoading(false);
   }, []);
 
   // 현재 사용자의 읽음 상태 조회
@@ -91,23 +98,27 @@ export function useNotices() {
 
       // 대상 유저 전체에게 notification 생성
       if (data) {
-        const { data: allProfiles } = await supabase
-          .from('profiles')
-          .select('id')
-          .neq('id', input.author_id);
+        try {
+          const { data: allProfiles } = await supabase
+            .from('profiles')
+            .select('id')
+            .neq('id', input.author_id);
 
-        if (allProfiles && allProfiles.length > 0) {
-          const notifications = allProfiles.map((p) => ({
-            user_id: p.id,
-            type: 'new_notice',
-            urgency: input.urgency,
-            title: `새 공지: ${data.title}`,
-            body: data.content.slice(0, 100),
-            link: `/notice/${data.id}`,
-            channel: 'in_app',
-          }));
+          if (allProfiles && allProfiles.length > 0) {
+            const notifications = allProfiles.map((p) => ({
+              user_id: p.id,
+              type: 'new_notice',
+              urgency: input.urgency,
+              title: `새 공지: ${data.title}`,
+              body: data.content.slice(0, 100),
+              link: `/notice/${data.id}`,
+              channel: 'in_app',
+            }));
 
-          await supabase.from('notifications').insert(notifications);
+            await supabase.from('notifications').insert(notifications);
+          }
+        } catch {
+          // notification 실패해도 공지 등록은 정상 완료
         }
       }
 

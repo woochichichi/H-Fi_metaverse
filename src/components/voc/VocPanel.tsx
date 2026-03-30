@@ -105,6 +105,7 @@ export default function VocPanel({ onClose }: VocPanelProps) {
         voc={selectedVoc}
         onBack={handleBack}
         onUpdated={handleVocUpdated}
+        onDeleted={handleBack}
       />
     );
   }

@@ -5,6 +5,7 @@ import MainPage from './routes/MainPage';
 import LoginPage from './routes/LoginPage';
 import RegisterPage from './routes/RegisterPage';
 import Toast from './components/common/Toast';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuthStore();
@@ -53,6 +54,7 @@ export default function App() {
   }, [initialize]);
 
   return (
+    <ErrorBoundary>
     <BrowserRouter>
       <Toast />
       <Routes>
@@ -82,5 +84,6 @@ export default function App() {
         />
       </Routes>
     </BrowserRouter>
+    </ErrorBoundary>
   );
 }

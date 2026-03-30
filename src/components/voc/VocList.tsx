@@ -1,10 +1,14 @@
+import { useState, useEffect } from 'react';
+import { RefreshCw } from 'lucide-react';
 import VocCard from './VocCard';
 import type { Voc } from '../../types';
 
 interface VocListProps {
   vocs: Voc[];
   loading: boolean;
+  error?: string | null;
   onSelect: (voc: Voc) => void;
+  onRetry?: () => void;
   assigneeNames?: Record<string, string>;
 }
 
@@ -21,7 +25,46 @@ function Skeleton() {
   );
 }
 
-export default function VocList({ vocs, loading, onSelect, assigneeNames = {} }: VocListProps) {
+export default function VocList({ vocs, loading, error, onSelect, onRetry, assigneeNames = {} }: VocListProps) {
+  const [skeletonTimeout, setSkeletonTimeout] = useState(false);
+
+  useEffect(() => {
+    if (!loading) {
+      setSkeletonTimeout(false);
+      return;
+    }
+    const timer = setTimeout(() => setSkeletonTimeout(true), 10000);
+    return () => clearTimeout(timer);
+  }, [loading]);
+
+  if (loading && skeletonTimeout) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12">
+        <span className="text-3xl mb-2">⚠️</span>
+        <p className="text-sm text-text-muted mb-3">로딩에 실패했습니다. 새로고침해주세요</p>
+        {onRetry && (
+          <button onClick={onRetry} className="flex items-center gap-1.5 rounded-lg bg-accent/20 px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent/30">
+            <RefreshCw size={13} /> 새로고침
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12">
+        <span className="text-3xl mb-2">⚠️</span>
+        <p className="text-sm text-text-muted mb-3">{error}</p>
+        {onRetry && (
+          <button onClick={onRetry} className="flex items-center gap-1.5 rounded-lg bg-accent/20 px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent/30">
+            <RefreshCw size={13} /> 새로고침
+          </button>
+        )}
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex flex-col gap-2">

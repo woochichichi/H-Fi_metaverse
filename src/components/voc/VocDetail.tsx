@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, EyeOff, User, Paperclip } from 'lucide-react';
+import { ArrowLeft, EyeOff, User, Paperclip, Trash2 } from 'lucide-react';
 import StatusBadge from '../common/StatusBadge';
 import ThreadPanel from '../thread/ThreadPanel';
 import { useVocs } from '../../hooks/useVocs';
@@ -14,11 +14,12 @@ interface VocDetailProps {
   voc: Voc;
   onBack: () => void;
   onUpdated: (voc: Voc) => void;
+  onDeleted?: () => void;
 }
 
-export default function VocDetail({ voc, onBack, onUpdated }: VocDetailProps) {
+export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDetailProps) {
   const { profile } = useAuthStore();
-  const { updateVoc, isAnonymousAuthor, fetchAssignees } = useVocs();
+  const { updateVoc, deleteVoc, isAnonymousAuthor, fetchAssignees } = useVocs();
   const { addToast } = useUiStore();
 
   const [status, setStatus] = useState<VocStatus>(voc.status);
@@ -26,8 +27,10 @@ export default function VocDetail({ voc, onBack, onUpdated }: VocDetailProps) {
   const [assigneeId, setAssigneeId] = useState<string | null>(voc.assignee_id);
   const [assignees, setAssignees] = useState<{ id: string; name: string; role: string; team: string }[]>([]);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const isLeader = profile?.role === 'admin' || profile?.role === 'leader';
+  const isAdmin = profile?.role === 'admin';
 
   useEffect(() => {
     if (isLeader) {
@@ -37,6 +40,26 @@ export default function VocDetail({ voc, onBack, onUpdated }: VocDetailProps) {
   const canReplyAsAuthor = voc.anonymous
     ? isAnonymousAuthor(voc.id, voc.session_token)
     : voc.author_id === profile?.id;
+
+  // 삭제 권한: 본인(실명 작성자 또는 익명 세션 토큰 일치) + 관리자
+  const canDelete = isAdmin || canReplyAsAuthor;
+
+  const handleDelete = async () => {
+    if (deleting) return;
+    if (!confirm('이 VOC를 삭제하시겠습니까?')) return;
+    setDeleting(true);
+
+    const { error } = await deleteVoc(voc.id);
+    setDeleting(false);
+
+    if (error) {
+      addToast(`삭제 실패: ${error}`, 'error');
+      return;
+    }
+
+    addToast('VOC가 삭제되었습니다', 'success');
+    onDeleted?.();
+  };
 
   const needsResolution = status === '완료' || status === '보류';
 
@@ -78,6 +101,16 @@ export default function VocDetail({ voc, onBack, onUpdated }: VocDetailProps) {
         <h2 className="flex-1 font-heading text-base font-bold text-text-primary truncate">
           VOC 상세
         </h2>
+        {canDelete && (
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-danger/20 hover:text-danger disabled:opacity-40"
+            title="삭제"
+          >
+            <Trash2 size={15} />
+          </button>
+        )}
         <StatusBadge status={voc.status} size="md" />
       </div>
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, X, Filter, TrendingUp, Clock } from 'lucide-react';
+import { Plus, X, Filter, TrendingUp, Clock, RefreshCw } from 'lucide-react';
 import IdeaCard from './IdeaCard';
 import IdeaForm from './IdeaForm';
 import { useIdeas } from '../../hooks/useIdeas';
@@ -17,9 +17,10 @@ interface IdeaPanelProps {
 export default function IdeaPanel({ onClose }: IdeaPanelProps) {
   const { profile, user } = useAuthStore();
   const { addToast } = useUiStore();
-  const { ideas, loading, fetchIdeas, toggleVote, updateIdeaStatus, fetchUserVotes } = useIdeas();
+  const { ideas, loading, error, fetchIdeas, toggleVote, updateIdeaStatus, fetchUserVotes } = useIdeas();
 
   const [view, setView] = useState<ViewMode>('list');
+  const [skeletonTimeout, setSkeletonTimeout] = useState(false);
   const [sortMode, setSortMode] = useState<'newest' | 'popular'>('newest');
   const [filterCategory, setFilterCategory] = useState<IdeaCategory | null>(null);
   const [filterStatus, setFilterStatus] = useState<IdeaStatus | null>(null);
@@ -36,6 +37,15 @@ export default function IdeaPanel({ onClose }: IdeaPanelProps) {
   useEffect(() => {
     loadIdeas();
   }, [loadIdeas]);
+
+  useEffect(() => {
+    if (!loading) {
+      setSkeletonTimeout(false);
+      return;
+    }
+    const timer = setTimeout(() => setSkeletonTimeout(true), 10000);
+    return () => clearTimeout(timer);
+  }, [loading]);
 
   // 사용자 투표 상태 로드
   useEffect(() => {
@@ -149,7 +159,15 @@ export default function IdeaPanel({ onClose }: IdeaPanelProps) {
 
       {/* 아이디어 목록 */}
       <div className="flex-1 overflow-y-auto p-4">
-        {loading ? (
+        {(loading && skeletonTimeout) || error ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <span className="text-3xl mb-2">⚠️</span>
+            <p className="text-sm text-text-muted mb-3">{error || '로딩에 실패했습니다. 새로고침해주세요'}</p>
+            <button onClick={loadIdeas} className="flex items-center gap-1.5 rounded-lg bg-accent/20 px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent/30">
+              <RefreshCw size={13} /> 새로고침
+            </button>
+          </div>
+        ) : loading ? (
           <div className="flex flex-col gap-2">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="flex flex-col gap-2 rounded-xl border border-white/[.06] bg-white/[.03] p-3 animate-pulse">

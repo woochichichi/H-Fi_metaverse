@@ -18,32 +18,39 @@ export function useIdeas() {
     setLoading(true);
     setError(null);
 
-    let query = supabase.from('idea_with_votes').select('*');
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
 
-    if (filters.category) {
-      query = query.eq('category', filters.category);
-    }
-    if (filters.status) {
-      query = query.eq('status', filters.status);
-    }
+      let query = supabase.from('idea_with_votes').select('*').abortSignal(controller.signal);
 
-    if (filters.sort === 'popular') {
-      query = query.order('vote_count', { ascending: false });
-    } else {
-      query = query.order('created_at', { ascending: false });
-    }
+      if (filters.category) {
+        query = query.eq('category', filters.category);
+      }
+      if (filters.status) {
+        query = query.eq('status', filters.status);
+      }
 
-    const { data, error: fetchError } = await query;
+      if (filters.sort === 'popular') {
+        query = query.order('vote_count', { ascending: false });
+      } else {
+        query = query.order('created_at', { ascending: false });
+      }
 
-    if (fetchError) {
-      console.error('아이디어 조회 실패:', fetchError.message);
-      setError(fetchError.message);
+      const { data, error: fetchError } = await query;
+      clearTimeout(timeout);
+
+      if (fetchError) throw fetchError;
+      setIdeas((data as IdeaWithVotes[]) ?? []);
+    } catch (err) {
+      const msg = err instanceof DOMException && err.name === 'AbortError'
+        ? '데이터를 불러올 수 없습니다. 새로고침해주세요'
+        : err instanceof Error ? err.message : '데이터를 불러올 수 없습니다';
+      console.error('아이디어 조회 실패:', msg);
+      setError(msg);
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setIdeas((data as IdeaWithVotes[]) ?? []);
-    setLoading(false);
   }, []);
 
   const createIdea = useCallback(

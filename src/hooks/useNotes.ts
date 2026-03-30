@@ -21,33 +21,40 @@ export function useNotes() {
     setLoading(true);
     setError(null);
 
-    let query = supabase.from('anonymous_notes').select('*');
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
 
-    if (filters.category) {
-      query = query.eq('category', filters.category);
-    }
-    if (filters.status) {
-      query = query.eq('status', filters.status);
-    }
-    if (filters.team) {
-      query = query.eq('team', filters.team);
-    }
+      let query = supabase.from('anonymous_notes').select('*').abortSignal(controller.signal);
 
-    query = query.order('created_at', {
-      ascending: filters.sort === 'oldest',
-    });
+      if (filters.category) {
+        query = query.eq('category', filters.category);
+      }
+      if (filters.status) {
+        query = query.eq('status', filters.status);
+      }
+      if (filters.team) {
+        query = query.eq('team', filters.team);
+      }
 
-    const { data, error: fetchError } = await query;
+      query = query.order('created_at', {
+        ascending: filters.sort === 'oldest',
+      });
 
-    if (fetchError) {
-      console.error('쪽지 조회 실패:', fetchError.message);
-      setError(fetchError.message);
+      const { data, error: fetchError } = await query;
+      clearTimeout(timeout);
+
+      if (fetchError) throw fetchError;
+      setNotes(data ?? []);
+    } catch (err) {
+      const msg = err instanceof DOMException && err.name === 'AbortError'
+        ? '데이터를 불러올 수 없습니다. 새로고침해주세요'
+        : err instanceof Error ? err.message : '데이터를 불러올 수 없습니다';
+      console.error('쪽지 조회 실패:', msg);
+      setError(msg);
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setNotes(data ?? []);
-    setLoading(false);
   }, []);
 
   // 멤버용: 내가 보낸 실명 쪽지 목록
@@ -55,21 +62,29 @@ export function useNotes() {
     setLoading(true);
     setError(null);
 
-    const { data, error: fetchError } = await supabase
-      .from('anonymous_notes')
-      .select('*')
-      .eq('sender_id', userId)
-      .order('created_at', { ascending: false });
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
 
-    if (fetchError) {
-      console.error('내 쪽지 조회 실패:', fetchError.message);
-      setError(fetchError.message);
+      const { data, error: fetchError } = await supabase
+        .from('anonymous_notes')
+        .select('*')
+        .eq('sender_id', userId)
+        .order('created_at', { ascending: false })
+        .abortSignal(controller.signal);
+      clearTimeout(timeout);
+
+      if (fetchError) throw fetchError;
+      setNotes(data ?? []);
+    } catch (err) {
+      const msg = err instanceof DOMException && err.name === 'AbortError'
+        ? '데이터를 불러올 수 없습니다. 새로고침해주세요'
+        : err instanceof Error ? err.message : '데이터를 불러올 수 없습니다';
+      console.error('내 쪽지 조회 실패:', msg);
+      setError(msg);
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setNotes(data ?? []);
-    setLoading(false);
   }, []);
 
   const createNote = useCallback(
@@ -108,9 +123,9 @@ export function useNotes() {
 
       // 익명 쪽지 → localStorage에 session_token 저장
       if (input.anonymous && data && sessionToken) {
-        const tokens = JSON.parse(localStorage.getItem('note_tokens') || '{}');
+        const tokens = JSON.parse(sessionStorage.getItem('note_tokens') || '{}');
         tokens[data.id] = sessionToken;
-        localStorage.setItem('note_tokens', JSON.stringify(tokens));
+        sessionStorage.setItem('note_tokens', JSON.stringify(tokens));
       }
 
       // 수신 대상 리더에게 notification 생성
@@ -167,7 +182,7 @@ export function useNotes() {
   // 세션 토큰으로 익명 작성자 여부 확인
   const isAnonymousAuthor = useCallback((noteId: string, noteSessionToken: string | null) => {
     if (!noteSessionToken) return false;
-    const tokens = JSON.parse(localStorage.getItem('note_tokens') || '{}');
+    const tokens = JSON.parse(sessionStorage.getItem('note_tokens') || '{}');
     return tokens[noteId] === noteSessionToken;
   }, []);
 
@@ -234,7 +249,11 @@ export function useNoteRealtime(onNewNote: (note: AnonymousNote) => void) {
           onNewNote(payload.new as AnonymousNote);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR') {
+          console.error('쪽지 Realtime 구독 에러 — 자동 재연결 시도');
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);

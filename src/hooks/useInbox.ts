@@ -114,7 +114,11 @@ export function useInbox(userId: string | null) {
           setUnreadCount((prev) => prev + 1);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR') {
+          console.error('Inbox Realtime 구독 에러 — 자동 재연결 시도');
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);

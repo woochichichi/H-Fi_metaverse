@@ -19,33 +19,40 @@ export function useVocs() {
     setLoading(true);
     setError(null);
 
-    let query = supabase.from('vocs').select('*');
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
 
-    if (filters.category) {
-      query = query.eq('category', filters.category);
-    }
-    if (filters.status) {
-      query = query.eq('status', filters.status);
-    }
-    if (filters.team) {
-      query = query.eq('team', filters.team);
-    }
+      let query = supabase.from('vocs').select('*').eq('is_deleted', false).abortSignal(controller.signal);
 
-    query = query.order('created_at', {
-      ascending: filters.sort === 'oldest',
-    });
+      if (filters.category) {
+        query = query.eq('category', filters.category);
+      }
+      if (filters.status) {
+        query = query.eq('status', filters.status);
+      }
+      if (filters.team) {
+        query = query.eq('team', filters.team);
+      }
 
-    const { data, error: fetchError } = await query;
+      query = query.order('created_at', {
+        ascending: filters.sort === 'oldest',
+      });
 
-    if (fetchError) {
-      console.error('VOC 조회 실패:', fetchError.message);
-      setError(fetchError.message);
+      const { data, error: fetchError } = await query;
+      clearTimeout(timeout);
+
+      if (fetchError) throw fetchError;
+      setVocs(data ?? []);
+    } catch (err) {
+      const msg = err instanceof DOMException && err.name === 'AbortError'
+        ? '데이터를 불러올 수 없습니다. 새로고침해주세요'
+        : err instanceof Error ? err.message : '데이터를 불러올 수 없습니다';
+      console.error('VOC 조회 실패:', msg);
+      setError(msg);
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setVocs(data ?? []);
-    setLoading(false);
   }, []);
 
   const createVoc = useCallback(
@@ -84,9 +91,9 @@ export function useVocs() {
 
       // 익명 VOC → localStorage에 session_token 저장
       if (input.anonymous && data && sessionToken) {
-        const tokens = JSON.parse(localStorage.getItem('voc_tokens') || '{}');
+        const tokens = JSON.parse(sessionStorage.getItem('voc_tokens') || '{}');
         tokens[data.id] = sessionToken;
-        localStorage.setItem('voc_tokens', JSON.stringify(tokens));
+        sessionStorage.setItem('voc_tokens', JSON.stringify(tokens));
       }
 
       return { data, error: null };
@@ -138,10 +145,26 @@ export function useVocs() {
     []
   );
 
+  // VOC 소프트 삭제 (본인 또는 관리자)
+  const deleteVoc = useCallback(async (id: string) => {
+    const { error: deleteError } = await supabase
+      .from('vocs')
+      .update({ is_deleted: true })
+      .eq('id', id);
+
+    if (deleteError) {
+      console.error('VOC 삭제 실패:', deleteError.message);
+      return { error: deleteError.message };
+    }
+
+    setVocs((prev) => prev.filter((v) => v.id !== id));
+    return { error: null };
+  }, []);
+
   // 세션 토큰으로 익명 작성자 여부 확인
   const isAnonymousAuthor = useCallback((vocId: string, vocSessionToken: string | null) => {
     if (!vocSessionToken) return false;
-    const tokens = JSON.parse(localStorage.getItem('voc_tokens') || '{}');
+    const tokens = JSON.parse(sessionStorage.getItem('voc_tokens') || '{}');
     return tokens[vocId] === vocSessionToken;
   }, []);
 
@@ -162,6 +185,7 @@ export function useVocs() {
     fetchVocs,
     createVoc,
     updateVoc,
+    deleteVoc,
     isAnonymousAuthor,
     fetchAssignees,
   };
@@ -179,7 +203,11 @@ export function useVocRealtime(onNewVoc: (voc: Voc) => void) {
           onNewVoc(payload.new as Voc);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR') {
+          console.error('VOC Realtime 구독 에러 — 자동 재연결 시도');
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);
