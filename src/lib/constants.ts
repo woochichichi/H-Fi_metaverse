@@ -127,8 +127,7 @@ export const REACTION_EMOJIS = ['🤘', '👏', '❤️', '😆', '🎉', '🔥'
 export const MAP_WIDTH = 1800;
 export const MAP_HEIGHT = 1200;
 
-// 초대 코드 접두사
-export const INVITE_CODE_PREFIX = 'FITO';
+// 초대 코드 (숫자만, 관리자 자유 지정)
 
 // 모바일 브레이크포인트
 export const MOBILE_BREAKPOINT = 1024;

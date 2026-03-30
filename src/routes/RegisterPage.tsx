@@ -158,8 +158,9 @@ export default function RegisterPage() {
               <input
                 value={inviteCode}
                 onChange={(e) => setInviteCode(e.target.value)}
-                placeholder="FITO-XXXX-XXXX"
-                className="w-full rounded-lg bg-bg-primary px-3 py-2.5 font-mono text-sm text-text-primary placeholder-text-muted outline-none ring-1 ring-bg-tertiary uppercase tracking-wider transition-colors focus:ring-accent"
+                placeholder="초대 코드 입력"
+                inputMode="numeric"
+                className="w-full rounded-lg bg-bg-primary px-3 py-2.5 font-mono text-sm text-text-primary placeholder-text-muted outline-none ring-1 ring-bg-tertiary tracking-wider transition-colors focus:ring-accent"
                 autoFocus
               />
               <p className="mt-2 text-xs text-text-muted">관리자로부터 받은 초대 코드를 입력하세요</p>

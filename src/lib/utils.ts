@@ -37,10 +37,7 @@ export function isAllowedEmail(email: string): boolean {
   return ALLOWED_EMAIL_DOMAINS.some((d) => domain === d);
 }
 
-/** 초대 코드 생성 (FITO-XXXX-XXXX) */
+/** 초대 코드 생성 (8자리 숫자) */
 export function generateInviteCode(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  const part = () =>
-    Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-  return `FITO-${part()}-${part()}`;
+  return String(Math.floor(10000000 + Math.random() * 90000000));
 }

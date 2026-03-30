@@ -6,10 +6,7 @@ import { TEAMS } from '../../lib/constants';
 import type { InviteCode } from '../../types';
 
 function generateCode(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  const block = () =>
-    Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-  return `FITO-${block()}-${block()}`;
+  return String(Math.floor(10000000 + Math.random() * 90000000));
 }
 
 export default function InviteManager() {
@@ -19,6 +16,7 @@ export default function InviteManager() {
   const [showForm, setShowForm] = useState(false);
 
   // 폼 상태
+  const [formCode, setFormCode] = useState('');
   const [formTeam, setFormTeam] = useState<string>('');
   const [formRole, setFormRole] = useState<'member' | 'leader'>('member');
   const [formMaxUses, setFormMaxUses] = useState(10);
@@ -43,7 +41,7 @@ export default function InviteManager() {
   }, [fetchCodes]);
 
   const handleCreate = async () => {
-    const code = generateCode();
+    const code = formCode.trim() || generateCode();
     const { error } = await supabase.from('invite_codes').insert({
       code,
       team: formTeam || null,
@@ -59,6 +57,7 @@ export default function InviteManager() {
     }
     addToast('초대 코드가 생성되었습니다', 'success');
     setShowForm(false);
+    setFormCode('');
     setFormTeam('');
     setFormRole('member');
     setFormMaxUses(10);
@@ -113,6 +112,16 @@ export default function InviteManager() {
       {showForm && (
         <div className="rounded-xl border border-white/[.08] bg-white/[.03] p-4">
           <div className="grid grid-cols-2 gap-3">
+            <div className="col-span-2">
+              <label className="mb-1 block text-[11px] text-text-muted">코드 (비우면 자동 생성)</label>
+              <input
+                type="text"
+                value={formCode}
+                onChange={(e) => setFormCode(e.target.value)}
+                placeholder="자동 생성 (8자리 숫자)"
+                className="w-full rounded-lg border border-white/[.1] bg-bg-primary px-3 py-2 text-xs text-text-primary font-mono"
+              />
+            </div>
             <div>
               <label className="mb-1 block text-[11px] text-text-muted">대상 팀</label>
               <select
