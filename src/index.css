@@ -1,20 +1,19 @@
 /* ═══ v4 레트로 폰트 ═══ */
-@import url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff2');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
 
-/* DungGeunMo @font-face (CDN woff2 직접 로드) */
+/* NeoDunggeunmo (DungGeunMo 후속) */
 @font-face {
   font-family: 'DungGeunMo';
-  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff2') format('woff2');
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302@1.0/NeoDunggeunmoPro-Regular.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
 
-/* Galmuri11 (Google Fonts에 없으므로 CDN) */
+/* Galmuri11 */
 @font-face {
   font-family: 'Galmuri11';
-  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2406-two@1.0/Galmuri11.woff2') format('woff2');
+  src: url('https://cdn.jsdelivr.net/gh/fonts-archive/Galmuri11/Galmuri11-Regular.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -22,7 +21,7 @@
 
 @font-face {
   font-family: 'Galmuri11';
-  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2406-two@1.0/Galmuri11-Bold.woff2') format('woff2');
+  src: url('https://cdn.jsdelivr.net/gh/fonts-archive/Galmuri11/Galmuri11-Bold.woff2') format('woff2');
   font-weight: bold;
   font-style: normal;
   font-display: swap;

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Copy, ToggleLeft, ToggleRight, RefreshCw } from 'lucide-react';
+import { Plus, Copy, ToggleLeft, ToggleRight, RefreshCw, Trash2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
@@ -82,6 +82,20 @@ export default function InviteManager() {
       return;
     }
     setCodes((prev) => prev.map((c) => (c.id === id ? { ...c, active: !currentActive } : c)));
+  };
+
+  const deleteCode = async (id: string, code: string) => {
+    if (!confirm(`초대 코드 "${code}"를 삭제하시겠습니까?`)) return;
+    const { error } = await supabase
+      .from('invite_codes')
+      .delete()
+      .eq('id', id);
+    if (error) {
+      addToast('삭제 실패: ' + error.message, 'error');
+      return;
+    }
+    setCodes((prev) => prev.filter((c) => c.id !== id));
+    addToast('초대 코드가 삭제되었습니다', 'success');
   };
 
   const copyCode = (code: string) => {
@@ -259,6 +273,13 @@ export default function InviteManager() {
                           title={c.active ? '비활성화' : '활성화'}
                         >
                           {c.active ? <ToggleRight size={16} className="text-success" /> : <ToggleLeft size={16} />}
+                        </button>
+                        <button
+                          onClick={() => deleteCode(c.id, c.code)}
+                          className="rounded p-1 text-text-muted transition-colors hover:bg-danger/20 hover:text-danger"
+                          title="삭제"
+                        >
+                          <Trash2 size={13} />
                         </button>
                       </div>
                     </td>

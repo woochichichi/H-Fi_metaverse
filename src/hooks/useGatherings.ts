@@ -31,7 +31,6 @@ export function useGatherings() {
       }
 
       const { data, error: fetchError } = await query;
-      console.log('[모임방] 조회 결과:', { data, error: fetchError });
       if (fetchError) throw fetchError;
       setGatherings((data as Gathering[]) ?? []);
     } catch (err) {
