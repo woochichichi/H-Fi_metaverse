@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Search, Heart } from 'lucide-react';
 import { useUiStore } from '../../stores/uiStore';
 import { useAuthStore } from '../../stores/authStore';
@@ -70,6 +71,7 @@ export default function Sidebar() {
   const groups: StatusGroup[] = ['online', '재택', 'offline'];
 
   return (
+    <>
     <aside className="flex w-[260px] flex-shrink-0 flex-col border-l border-white/[.06]" style={{ background: 'rgba(42,31,40,.97)', backdropFilter: 'blur(16px)' }}>
       {/* 현재 룸 */}
       <div className="flex items-center justify-center px-4 pt-3 pb-1">
@@ -141,11 +143,13 @@ export default function Sidebar() {
         })}
       </div>
 
-      {/* 우클릭 컨텍스트 메뉴 */}
-      {ctxMenu && (
+    </aside>
+
+      {/* 우클릭 컨텍스트 메뉴 — backdrop-filter stacking context 회피를 위해 body에 portal */}
+      {ctxMenu && createPortal(
         <div
           ref={ctxRef}
-          className="fixed z-[200] min-w-[160px] rounded-lg border border-white/[.1] bg-bg-secondary py-1 shadow-xl"
+          className="fixed z-[9999] min-w-[160px] border border-white/[.1] bg-bg-secondary py-1 shadow-xl"
           style={{ top: ctxMenu.y, left: ctxMenu.x }}
         >
           <button
@@ -159,8 +163,9 @@ export default function Sidebar() {
             <Heart size={14} />
             💌 마음의 편지 보내기
           </button>
-        </div>
+        </div>,
+        document.body
       )}
-    </aside>
+    </>
   );
 }
