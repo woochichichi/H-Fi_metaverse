@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bell, Inbox, Users, LogOut, Settings } from 'lucide-react';
+import { Bell, Inbox, Users, LogOut, Settings, Pencil } from 'lucide-react';
 import InboxPanel from '../inbox/InboxPanel';
 import InboxBadge from '../inbox/InboxBadge';
 import AdminPanel from '../admin/AdminPanel';
 import MoodPicker from './MoodPicker';
+import NicknameEditor from './NicknameEditor';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
 import { useDeviceMode } from '../../hooks/useDeviceMode';
@@ -20,6 +21,7 @@ export default function TopBar() {
   const [showInbox, setShowInbox] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const [showMood, setShowMood] = useState(false);
+  const [showNicknameEditor, setShowNicknameEditor] = useState(false);
   const inboxRef = useRef<HTMLDivElement>(null);
   const moodRef = useRef<HTMLDivElement>(null);
 
@@ -164,7 +166,7 @@ export default function TopBar() {
             </button>
           )}
 
-          {/* 프로필 아바타 (기분 선택) + 로그아웃 */}
+          {/* 프로필 아바타 + 별명 + 로그아웃 */}
           {profile && (
             <div className="flex items-center gap-2 ml-1">
               <div ref={moodRef} className="relative">
@@ -181,6 +183,14 @@ export default function TopBar() {
                 )}
               </div>
               <button
+                onClick={() => setShowNicknameEditor(true)}
+                className="group flex items-center gap-1 rounded-lg px-1.5 py-1 text-xs text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary"
+                title="별명 변경"
+              >
+                <span className="max-w-[80px] truncate">{profile.nickname || profile.name}</span>
+                <Pencil size={10} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+              </button>
+              <button
                 onClick={logout}
                 className="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors duration-200 hover:bg-bg-tertiary hover:text-danger"
                 title="로그아웃"
@@ -191,6 +201,11 @@ export default function TopBar() {
           )}
         </div>
       </header>
+
+      {/* 별명 변경 모달 */}
+      {showNicknameEditor && (
+        <NicknameEditor onClose={() => setShowNicknameEditor(false)} />
+      )}
 
       {/* 관리자 패널 모달 — header 밖에 렌더링 (backdrop-filter가 fixed 포지션 깨뜨림) */}
       {showAdmin && (

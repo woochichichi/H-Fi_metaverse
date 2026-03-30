@@ -7,6 +7,7 @@ import { useUserActivities } from '../../hooks/useUserActivities';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
 import { TEAMS } from '../../lib/constants';
+import { getDisplayName } from '../../lib/utils';
 import { supabase } from '../../lib/supabase';
 import type { Profile } from '../../types';
 
@@ -162,7 +163,7 @@ export default function EvalDashboard() {
                 <option value="">선택</option>
                 {allUsers.map((u) => (
                   <option key={u.id} value={u.id}>
-                    {u.name} ({u.team})
+                    {getDisplayName(u, true)} ({u.team})
                   </option>
                 ))}
               </select>
