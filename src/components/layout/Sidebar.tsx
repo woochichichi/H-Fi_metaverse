@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Mail } from 'lucide-react';
+import { Search, Heart } from 'lucide-react';
 import { useUiStore } from '../../stores/uiStore';
 import { useAuthStore } from '../../stores/authStore';
 import { getDisplayName } from '../../lib/utils';
@@ -139,13 +139,14 @@ export default function Sidebar() {
         >
           <button
             onClick={() => {
+              const targetName = getDisplayName(ctxMenu.person, isAdmin);
               setCtxMenu(null);
-              openModal('note');
+              openModal('note', { targetName });
             }}
             className="flex w-full items-center gap-2 px-3 py-2 text-sm text-text-secondary transition-colors duration-150 hover:bg-accent/15 hover:text-accent-light"
           >
-            <Mail size={14} />
-            익명 쪽지 보내기
+            <Heart size={14} />
+            💌 마음의 편지 보내기
           </button>
         </div>
       )}

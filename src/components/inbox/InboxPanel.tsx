@@ -63,6 +63,13 @@ export default function InboxPanel({
         </div>
       </div>
 
+      {/* 보드 설명 */}
+      <div className="border-b border-white/[.06] bg-accent/[.04] px-3 py-1.5">
+        <p className="text-[10px] leading-relaxed text-text-muted">
+          <span className="font-semibold text-text-secondary">놓친 소식 모아보기</span> — 확인하지 못한 알림, 쪽지, VOC 답변을 시급성 순으로 정리해 보여줍니다.
+        </p>
+      </div>
+
       {/* 목록 */}
       <div className="flex-1 overflow-y-auto">
         {loading ? (

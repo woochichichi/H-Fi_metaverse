@@ -14,6 +14,7 @@ import NotePanel from '../note/NotePanel';
 import LoungePanel from './LoungePanel';
 import MoodPanel from './MoodPanel';
 import GatheringPanel from '../gathering/GatheringPanel';
+import OmokPanel from '../game/OmokPanel';
 import { useMetaverseStore } from '../../stores/metaverseStore';
 import { useUiStore } from '../../stores/uiStore';
 import { MAP_WIDTH, MAP_HEIGHT, TEAM_ZONES } from '../../lib/constants';
@@ -48,6 +49,7 @@ function getZonePanel(zoneId: string): React.FC<{ onClose: () => void }> | null 
   if (zoneId === 'lounge') return LoungePanel;
   if (zoneId === 'mood') return MoodPanelWrapper;
   if (zoneId === 'gathering') return GatheringPanel;
+  if (zoneId === 'omok') return OmokPanel;
   return null;
 }
 

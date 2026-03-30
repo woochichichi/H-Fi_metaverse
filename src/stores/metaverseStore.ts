@@ -8,15 +8,23 @@ interface EmojiFloat {
   y: number;
 }
 
+interface MoveTarget {
+  x: number;
+  y: number;
+  zoneId: ZoneId;
+}
+
 interface MetaverseState {
   activeZone: ZoneId | null;
   nearZone: ZoneId | null;
   playerPosition: { x: number; y: number };
+  moveTarget: MoveTarget | null;
   onlineUsers: string[];
   emojiFloats: EmojiFloat[];
   setActiveZone: (zone: ZoneId | null) => void;
   setNearZone: (zone: ZoneId | null) => void;
   setPlayerPosition: (pos: { x: number; y: number }) => void;
+  setMoveTarget: (target: MoveTarget | null) => void;
   setOnlineUsers: (users: string[]) => void;
   addEmojiFloat: (emoji: string) => void;
   removeEmojiFloat: (id: string) => void;
@@ -26,11 +34,13 @@ export const useMetaverseStore = create<MetaverseState>((set, get) => ({
   activeZone: null,
   nearZone: null,
   playerPosition: { x: 1200, y: 300 },
+  moveTarget: null,
   onlineUsers: [],
   emojiFloats: [],
   setActiveZone: (zone) => set({ activeZone: zone }),
   setNearZone: (zone) => set({ nearZone: zone }),
   setPlayerPosition: (pos) => set({ playerPosition: pos }),
+  setMoveTarget: (target) => set({ moveTarget: target }),
   setOnlineUsers: (users) => set({ onlineUsers: users }),
   addEmojiFloat: (emoji) => {
     const { playerPosition } = get();

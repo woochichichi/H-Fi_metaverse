@@ -92,6 +92,13 @@ export default function KpiPanel({ onClose }: KpiPanelProps) {
         </div>
       </div>
 
+      {/* 보드 설명 */}
+      <div className="border-b border-white/[.06] bg-accent/[.04] px-4 py-2">
+        <p className="text-[11px] leading-relaxed text-text-muted">
+          <span className="font-semibold text-text-secondary">우리 팀의 성과를 숫자로 확인</span> — 유닛별 핵심 지표와 월별 추이를 한눈에 파악하세요. 리더는 실적을 직접 입력하고, 목표 대비 달성률을 실시간으로 모니터링할 수 있습니다.
+        </p>
+      </div>
+
       {/* 유닛 필터 */}
       <div className="border-b border-white/[.06] px-4 py-2">
         <div className="flex gap-1">

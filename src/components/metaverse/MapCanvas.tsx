@@ -263,14 +263,33 @@ function Room({ x, y, w, h, floor, label, teamLabel, borderColor }: {
   const wallColor = borderColor || '#5d6d7d';
   return (
     <>
-      <div className="absolute z-[15] -translate-x-1/2 whitespace-nowrap rounded-[10px] px-3 py-[3px] text-[11px] font-semibold text-white pointer-events-none" style={{ left: x + w / 2, top: y - 22, background: 'rgba(0,0,0,.55)', backdropFilter: 'blur(4px)' }}>
+      <div
+        className="absolute z-[15] -translate-x-1/2 whitespace-nowrap rounded-xl px-5 py-[5px] text-sm font-bold text-white pointer-events-none"
+        style={{
+          left: x + w / 2, top: y - 28,
+          background: `linear-gradient(135deg, ${wallColor}dd, ${wallColor}aa)`,
+          backdropFilter: 'blur(6px)',
+          boxShadow: `0 3px 12px ${wallColor}44, 0 1px 0 rgba(255,255,255,.15) inset`,
+          letterSpacing: '0.5px',
+        }}
+      >
         {label}
       </div>
-      <div className="absolute z-[15] whitespace-nowrap rounded-lg px-[10px] py-[2px] text-[10px] font-medium text-white/60 pointer-events-none" style={{ left: x + 10, top: y + 8, background: 'rgba(0,0,0,.35)' }}>
+      <div
+        className="absolute z-[15] whitespace-nowrap rounded-lg px-3 py-[3px] text-[11px] font-semibold pointer-events-none"
+        style={{
+          left: x + 12, top: y + 12,
+          color: `${wallColor}`,
+          background: 'rgba(0,0,0,.5)',
+          border: `1px solid ${wallColor}44`,
+        }}
+      >
         {teamLabel}
       </div>
-      <div className="absolute overflow-hidden" style={{ left: x, top: y, width: w, height: h, boxShadow: '4px 4px 0px rgba(0,0,0,.3)', border: `2px solid ${wallColor}` }}>
+      <div className="absolute overflow-hidden rounded-sm" style={{ left: x, top: y, width: w, height: h, boxShadow: `6px 6px 0px rgba(0,0,0,.35), 0 0 30px ${wallColor}15`, border: `3px solid ${wallColor}` }}>
         <div className="absolute inset-0" style={{ background: floor }} />
+        {/* 코너 글로우 */}
+        <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse at 10% 10%, ${wallColor}18, transparent 50%)` }} />
         {/* 격자 패턴 오버레이 */}
         <div className="absolute inset-0 opacity-[0.06]" style={{
           backgroundImage: 'linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px)',
@@ -342,27 +361,39 @@ function PlazaFurniture() {
   const py = CENTRAL_PLAZA.y;
   return (
     <>
-      {/* VoC 센터 (좌측) */}
+      {/* VoC 센터 (좌측) — 핑크 콜센터 느낌 */}
       <Desk x={px + 60} y={py + 80} />
       <Monitor x={px + 80} y={py + 70} />
       <Chair x={px + 80} y={py + 132} />
       <Desk x={px + 190} y={py + 80} />
       <Monitor x={px + 210} y={py + 70} />
       <Chair x={px + 210} y={py + 132} />
+      <Desk x={px + 60} y={py + 170} />
+      <Monitor x={px + 80} y={py + 160} />
+      <Chair x={px + 80} y={py + 222} />
+      <Desk x={px + 190} y={py + 170} />
+      <Monitor x={px + 210} y={py + 160} />
+      <Chair x={px + 210} y={py + 222} />
       <Whiteboard x={px + 80} y={py + 40} />
       <PlantLarge x={px + 10} y={py + 30} />
       <PlantSmall x={px + 300} y={py + 30} />
+      <PixelDecoration x={px + 310} y={py + 200} type="phone" />
 
-      {/* 아이디어 보드 (우측) */}
-      <RoundTable x={px + 460} y={py + 70} size={56} />
-      <RoundTable x={px + 600} y={py + 70} size={56} />
-      <RoundTable x={px + 460} y={py + 170} size={56} />
-      <RoundTable x={px + 600} y={py + 170} size={56} />
-      <SofaH x={px + 440} y={py + 40} />
-      <SofaH x={px + 580} y={py + 40} />
-      <Whiteboard x={px + 470} y={py + 20} w={120} />
-      <PlantSmall x={px + 420} y={py + 30} />
+      {/* 아이디어 보드 (우측) — 창의적 브레인스토밍 공간 */}
+      <RoundTable x={px + 460} y={py + 80} size={56} />
+      <RoundTable x={px + 600} y={py + 80} size={56} />
+      <RoundTable x={px + 460} y={py + 180} size={56} />
+      <RoundTable x={px + 600} y={py + 180} size={56} />
+      <SofaH x={px + 440} y={py + 50} color="#FDCB6E" />
+      <SofaH x={px + 580} y={py + 50} color="#FDCB6E" />
+      <SofaH x={px + 440} y={py + 140} color="#FDCB6E" />
+      <SofaH x={px + 580} y={py + 140} color="#FDCB6E" />
+      <Whiteboard x={px + 470} y={py + 24} w={140} />
+      <Bookshelf x={px + 700} y={py + 60} />
+      <Bookshelf x={px + 700} y={py + 120} />
+      <PlantLarge x={px + 420} y={py + 30} />
       <PlantSmall x={px + 740} y={py + 30} />
+      <PixelDecoration x={px + 730} y={py + 200} type="bulb" />
 
       {/* 광장 장식 — 분수대(원) + 이정표 */}
       <div
@@ -376,16 +407,16 @@ function PlazaFurniture() {
         }}
       />
       {/* 이정표 */}
-      <div className="absolute z-[7]" style={{ left: px + 380, top: py + 260 }}>
-        <div style={{ width: 4, height: 40, background: '#8B6914', margin: '0 auto' }} />
-        <div className="absolute text-[8px] font-bold text-white whitespace-nowrap" style={{ top: 0, left: 10, background: 'rgba(0,0,0,.5)', padding: '1px 4px', borderRadius: 2 }}>
-          ↑ 증권
+      <div className="absolute z-[7]" style={{ left: px + 375, top: py + 250 }}>
+        <div style={{ width: 6, height: 50, background: 'linear-gradient(180deg,#a07030,#8B6914)', margin: '0 auto', borderRadius: 2 }} />
+        <div className="absolute text-[11px] font-bold whitespace-nowrap" style={{ top: -2, left: 14, background: '#00D68Fcc', color: '#fff', padding: '2px 8px', borderRadius: 4, boxShadow: '0 2px 6px rgba(0,0,0,.3)' }}>
+          ↑ 증권ITO
         </div>
-        <div className="absolute text-[8px] font-bold text-white whitespace-nowrap" style={{ top: 12, right: 10, background: 'rgba(0,0,0,.5)', padding: '1px 4px', borderRadius: 2 }}>
-          ↙ 생명
+        <div className="absolute text-[11px] font-bold whitespace-nowrap" style={{ top: 16, right: 14, background: '#6C5CE7cc', color: '#fff', padding: '2px 8px', borderRadius: 4, boxShadow: '0 2px 6px rgba(0,0,0,.3)' }}>
+          ↙ 생명ITO
         </div>
-        <div className="absolute text-[8px] font-bold text-white whitespace-nowrap" style={{ top: 24, left: 10, background: 'rgba(0,0,0,.5)', padding: '1px 4px', borderRadius: 2 }}>
-          ↘ 손보
+        <div className="absolute text-[11px] font-bold whitespace-nowrap" style={{ top: 34, left: 14, background: '#0984E3cc', color: '#fff', padding: '2px 8px', borderRadius: 4, boxShadow: '0 2px 6px rgba(0,0,0,.3)' }}>
+          ↘ 손보ITO
         </div>
       </div>
 
@@ -439,6 +470,9 @@ function Ground() {
 
       {/* 도로: 중앙광장↔모임방 (세로) */}
       <rect x={plaza.x + plaza.w / 2 - 30} y={plaza.y + plaza.h} width="60" height={1530 - plaza.y - plaza.h} fill="url(#path-tile)" />
+
+      {/* 도로: 모임방↔오목 게임방 (가로) */}
+      <rect x={940} y={1640} width={100} height="60" fill="url(#path-tile)" />
     </svg>
   );
 }
@@ -468,6 +502,11 @@ ROOMS.push(
   { x: 1010, y: 1530, w: 380, h: 280, floor: '#1a2a1a', label: '🎉 모임방', team: '공용', borderColor: '#FF9800' },
 );
 
+// 오목 게임방 (모임방 왼쪽)
+ROOMS.push(
+  { x: 540, y: 1530, w: 380, h: 280, floor: '#1a1a1a', label: '⚫ 오목 게임방', team: '공용', borderColor: '#8B6914' },
+);
+
 interface MapCanvasProps {
   children?: ReactNode;
 }
@@ -484,14 +523,22 @@ export default function MapCanvas({ children }: MapCanvasProps) {
       {Object.entries(TEAM_CONFIGS).map(([name, cfg]) => (
         <div
           key={name}
-          className="absolute z-[1] rounded-lg pointer-events-none"
+          className="absolute z-[1] rounded-xl pointer-events-none"
           style={{
             left: cfg.town.x, top: cfg.town.y, width: cfg.town.w, height: cfg.town.h,
-            border: `3px dashed ${cfg.color}44`,
-            background: `${cfg.color}08`,
+            border: `3px dashed ${cfg.color}55`,
+            background: `${cfg.color}0a`,
+            boxShadow: `inset 0 0 60px ${cfg.color}08`,
           }}
         >
-          <div className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg px-4 py-1 text-xs font-bold text-white" style={{ background: `${cfg.color}cc` }}>
+          <div
+            className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-xl px-6 py-[6px] text-base font-extrabold text-white tracking-wide"
+            style={{
+              background: `linear-gradient(135deg, ${cfg.color}ee, ${cfg.color}bb)`,
+              boxShadow: `0 4px 16px ${cfg.color}55`,
+              letterSpacing: '1px',
+            }}
+          >
             {name}
           </div>
         </div>
@@ -499,14 +546,22 @@ export default function MapCanvas({ children }: MapCanvasProps) {
 
       {/* 중앙 광장 외곽 */}
       <div
-        className="absolute z-[1] rounded-lg pointer-events-none"
+        className="absolute z-[1] rounded-xl pointer-events-none"
         style={{
           left: CENTRAL_PLAZA.x, top: CENTRAL_PLAZA.y, width: CENTRAL_PLAZA.w, height: CENTRAL_PLAZA.h,
-          border: '3px dashed rgba(248,181,0,.3)',
-          background: 'rgba(248,181,0,.05)',
+          border: '3px dashed rgba(248,181,0,.4)',
+          background: 'rgba(248,181,0,.06)',
+          boxShadow: 'inset 0 0 60px rgba(248,181,0,.06)',
         }}
       >
-        <div className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg px-4 py-1 text-xs font-bold text-white" style={{ background: 'rgba(248,181,0,.8)' }}>
+        <div
+          className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-xl px-6 py-[6px] text-base font-extrabold text-white tracking-wide"
+          style={{
+            background: 'linear-gradient(135deg, rgba(248,181,0,.9), rgba(248,150,0,.75))',
+            boxShadow: '0 4px 16px rgba(248,181,0,.4)',
+            letterSpacing: '1px',
+          }}
+        >
           중앙 광장
         </div>
       </div>
@@ -531,6 +586,40 @@ export default function MapCanvas({ children }: MapCanvasProps) {
       <PlantLarge x={1020} y={1540} />
       <PlantSmall x={1340} y={1540} />
       <PlantSmall x={1340} y={1740} />
+
+      {/* 오목 게임방 가구 */}
+      {/* 오목판 테이블 */}
+      <div
+        className="absolute z-[4] rounded"
+        style={{
+          left: 680, top: 1620, width: 100, height: 100,
+          background: 'linear-gradient(180deg,#DEB887,#C4A06E)',
+          border: '3px solid #8B6914',
+          boxShadow: '0 4px 0 rgba(0,0,0,.15), inset 0 1px 0 rgba(255,255,255,.2)',
+        }}
+      >
+        {/* 바둑판 격자 */}
+        <div className="absolute" style={{ top: 8, left: 8, right: 8, bottom: 8 }}>
+          {[0, 1, 2, 3, 4, 5, 6].map(i => (
+            <div key={`h${i}`} className="absolute" style={{ top: i * 12, left: 0, right: 0, height: 1, background: '#333' }} />
+          ))}
+          {[0, 1, 2, 3, 4, 5, 6].map(i => (
+            <div key={`v${i}`} className="absolute" style={{ left: i * 12, top: 0, bottom: 0, width: 1, background: '#333' }} />
+          ))}
+          {/* 돌 몇 개 */}
+          <div className="absolute rounded-full" style={{ left: 10, top: 10, width: 8, height: 8, background: '#111' }} />
+          <div className="absolute rounded-full" style={{ left: 34, top: 22, width: 8, height: 8, background: '#fff', border: '1px solid #ccc' }} />
+          <div className="absolute rounded-full" style={{ left: 22, top: 34, width: 8, height: 8, background: '#111' }} />
+          <div className="absolute rounded-full" style={{ left: 46, top: 46, width: 8, height: 8, background: '#fff', border: '1px solid #ccc' }} />
+        </div>
+      </div>
+      <Chair x={700} y={1590} />
+      <Chair x={760} y={1590} />
+      <Chair x={700} y={1726} />
+      <Chair x={760} y={1726} />
+      <PlantSmall x={560} y={1540} />
+      <PlantSmall x={880} y={1540} />
+      <PlantSmall x={560} y={1760} />
 
       {children}
     </div>

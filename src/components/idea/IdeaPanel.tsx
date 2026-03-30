@@ -116,6 +116,13 @@ export default function IdeaPanel({ onClose }: IdeaPanelProps) {
         </div>
       </div>
 
+      {/* 보드 설명 */}
+      <div className="border-b border-white/[.06] bg-accent/[.04] px-4 py-2">
+        <p className="text-[11px] leading-relaxed text-text-muted">
+          <span className="font-semibold text-text-secondary">좋은 생각을 함께 키우는 공간</span> — 업무 효율화, 문화 개선 등 아이디어를 자유롭게 제안하세요. 동료들의 좋아요 투표로 우선순위가 정해지고, 채택된 아이디어는 실제 실행으로 이어집니다.
+        </p>
+      </div>
+
       {/* 필터 바 */}
       {showFilters && (
         <div className="border-b border-white/[.06] px-4 py-2 space-y-2">

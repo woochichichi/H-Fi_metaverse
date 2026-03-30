@@ -11,7 +11,7 @@ const CHAR_W = 34;
 const CHAR_H = 46;
 
 export default function PlayerCharacter() {
-  const { playerPosition, setPlayerPosition, setNearZone, nearZone } = useMetaverseStore();
+  const { playerPosition, setPlayerPosition, setNearZone, nearZone, moveTarget, setMoveTarget } = useMetaverseStore();
   const { modalOpen, openModal } = useUiStore();
   const { profile } = useAuthStore();
   const keysRef = useRef<Set<string>>(new Set());
@@ -67,29 +67,64 @@ export default function PlayerCharacter() {
     setNearZone(found);
   }, [setNearZone]);
 
+  const moveTargetRef = useRef(moveTarget);
+  useEffect(() => { moveTargetRef.current = moveTarget; }, [moveTarget]);
+
+  // 키보드 입력 시 자동이동 취소
+  useEffect(() => {
+    const cancelAutoMove = () => {
+      if (moveTargetRef.current) setMoveTarget(null);
+    };
+    window.addEventListener('keydown', cancelAutoMove);
+    return () => window.removeEventListener('keydown', cancelAutoMove);
+  }, [setMoveTarget]);
+
   // 게임루프
   useEffect(() => {
+    const AUTO_SPEED = 5;
+    const ARRIVE_DIST = 6;
     const loop = () => {
       if (!modalOpen) {
-        const keys = keysRef.current;
-        let dx = 0, dy = 0;
-        if (keys.has('ArrowUp') || keys.has('w') || keys.has('W')) dy = -SPEED;
-        if (keys.has('ArrowDown') || keys.has('s') || keys.has('S')) dy = SPEED;
-        if (keys.has('ArrowLeft') || keys.has('a') || keys.has('A')) dx = -SPEED;
-        if (keys.has('ArrowRight') || keys.has('d') || keys.has('D')) dx = SPEED;
-        if (dx || dy) {
-          const nx = Math.max(20, Math.min(MAP_WIDTH - 40, posRef.current.x + dx));
-          const ny = Math.max(20, Math.min(MAP_HEIGHT - 40, posRef.current.y + dy));
-          posRef.current = { x: nx, y: ny };
-          setPlayerPosition(posRef.current);
-          checkZone(nx, ny);
+        const target = moveTargetRef.current;
+        if (target) {
+          // 자동 이동 모드
+          const diffX = target.x - posRef.current.x;
+          const diffY = target.y - posRef.current.y;
+          const dist = Math.sqrt(diffX * diffX + diffY * diffY);
+          if (dist < ARRIVE_DIST) {
+            // 도착 → Zone 입장
+            checkZone(posRef.current.x, posRef.current.y);
+            setMoveTarget(null);
+            openModal(target.zoneId);
+          } else {
+            const nx = Math.max(20, Math.min(MAP_WIDTH - 40, posRef.current.x + (diffX / dist) * AUTO_SPEED));
+            const ny = Math.max(20, Math.min(MAP_HEIGHT - 40, posRef.current.y + (diffY / dist) * AUTO_SPEED));
+            posRef.current = { x: nx, y: ny };
+            setPlayerPosition(posRef.current);
+            checkZone(nx, ny);
+          }
+        } else {
+          // 키보드 이동 모드
+          const keys = keysRef.current;
+          let dx = 0, dy = 0;
+          if (keys.has('ArrowUp') || keys.has('w') || keys.has('W')) dy = -SPEED;
+          if (keys.has('ArrowDown') || keys.has('s') || keys.has('S')) dy = SPEED;
+          if (keys.has('ArrowLeft') || keys.has('a') || keys.has('A')) dx = -SPEED;
+          if (keys.has('ArrowRight') || keys.has('d') || keys.has('D')) dx = SPEED;
+          if (dx || dy) {
+            const nx = Math.max(20, Math.min(MAP_WIDTH - 40, posRef.current.x + dx));
+            const ny = Math.max(20, Math.min(MAP_HEIGHT - 40, posRef.current.y + dy));
+            posRef.current = { x: nx, y: ny };
+            setPlayerPosition(posRef.current);
+            checkZone(nx, ny);
+          }
         }
       }
       rafRef.current = requestAnimationFrame(loop);
     };
     rafRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [modalOpen, setPlayerPosition, checkZone]);
+  }, [modalOpen, setPlayerPosition, checkZone, setMoveTarget, openModal]);
 
   // posRef sync
   useEffect(() => {

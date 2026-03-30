@@ -113,6 +113,13 @@ export default function EvalDashboard() {
 
   return (
     <div className="flex flex-col gap-5">
+      {/* 보드 설명 */}
+      <div className="rounded-lg border border-white/[.06] bg-accent/[.04] px-4 py-2.5">
+        <p className="text-[11px] leading-relaxed text-text-muted">
+          <span className="font-semibold text-text-secondary">활동 데이터 기반 조직 현황 파악</span> — VOC 처리, 아이디어 제안, 공지 확인 등 팀원 활동이 자동 축적됩니다. 팀별 히트맵과 개인별 요약으로 조직 활력을 한눈에 확인하고, CSV로 내보낼 수 있습니다.
+        </p>
+      </div>
+
       {/* 상단 필터 */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex gap-2">

@@ -161,6 +161,7 @@ export const SHARED_ZONES = [
   { id: 'voc', team: null, label: '📞 VOC 센터', emoji: '📞', x: 840, y: 700, width: 340, height: 240 },
   { id: 'idea', team: null, label: '💡 아이디어 보드', emoji: '💡', x: 1220, y: 700, width: 340, height: 240 },
   { id: 'gathering', team: null, label: '🎉 모임방', emoji: '🎉', x: 1030, y: 1550, width: 340, height: 240 },
+  { id: 'omok', team: null, label: '⚫ 오목 게임방', emoji: '⚫', x: 560, y: 1550, width: 340, height: 240 },
 ] as const;
 
 // 전체 Zone (하위 호환용)
@@ -186,8 +187,17 @@ export const CHAT_MESSAGES = [
   '간식 사왔어~', '장애 해결!', '배고파...', 'VOC 처리 중', '아이디어 있어요!',
 ] as const;
 
-// 이모지 반응 목록
-export const REACTION_EMOJIS = ['🤘', '👏', '❤️', '😆', '🎉', '🔥'] as const;
+// 이모지 반응 목록 (4x4 희노애락)
+export const REACTION_EMOJIS = [
+  // 희 (기쁨)
+  '😆', '🥳', '😍', '🤩',
+  // 노 (분노)
+  '😤', '🤬', '💢', '👊',
+  // 애 (슬픔)
+  '😢', '😭', '🥺', '💔',
+  // 락 (즐거움)
+  '🎉', '🔥', '👏', '❤️',
+] as const;
 
 // 맵 크기 (v4: 2400x2000)
 export const MAP_WIDTH = 2400;

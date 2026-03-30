@@ -1,20 +1,16 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { REACTION_EMOJIS } from '../../lib/constants';
-import { useMetaverseStore } from '../../stores/metaverseStore';
 import { useUiStore } from '../../stores/uiStore';
 
 export default function BottomBar() {
-  const { addEmojiFloat } = useMetaverseStore();
   const { openModal } = useUiStore();
   const [collapsed, setCollapsed] = useState(false);
 
   const actions = [
-    { id: 'mood', label: '마음의소리', emoji: '💭' },
     { id: 'kpi', label: 'KPI', emoji: '📊' },
     { id: 'voc', label: 'VOC', emoji: '📞' },
     { id: 'idea', label: '아이디어', emoji: '💡' },
-    { id: 'note', label: '쪽지', emoji: '✉️' },
+    { id: 'note', label: '마음의 편지', emoji: '💌' },
     { id: 'gathering', label: '모임방', emoji: '🎉' },
   ];
 
@@ -39,22 +35,6 @@ export default function BottomBar() {
                   {a.label}
                 </button>
               ))}
-            </div>
-
-            {/* 하단: 이모지 */}
-            <div className="flex flex-col gap-2">
-              <div className="h-px bg-white/[.06]" />
-              <div className="grid grid-cols-3 gap-1">
-                {REACTION_EMOJIS.map((emoji) => (
-                  <button
-                    key={emoji}
-                    onClick={() => addEmojiFloat(emoji)}
-                    className="flex h-8 w-full items-center justify-center rounded-md text-base transition-all duration-150 hover:bg-accent/20 active:scale-[.92]"
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
             </div>
           </div>
         )}

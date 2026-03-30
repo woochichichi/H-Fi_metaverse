@@ -18,10 +18,10 @@ interface NotePanelProps {
 
 export default function NotePanel({ onClose }: NotePanelProps) {
   const { profile, user } = useAuthStore();
-  const { addToast } = useUiStore();
+  const { addToast, modalContext } = useUiStore();
   const { notes, loading, fetchNotes, fetchMyNotes } = useNotes();
 
-  const [view, setView] = useState<ViewMode>('list');
+  const [view, setView] = useState<ViewMode>(modalContext?.targetName ? 'form' : 'list');
   const [selectedNote, setSelectedNote] = useState<AnonymousNote | null>(null);
 
   // 필터
@@ -54,7 +54,7 @@ export default function NotePanel({ onClose }: NotePanelProps) {
     useCallback(
       (newNote: AnonymousNote) => {
         if (isLeader) {
-          addToast(`✉️ 새 쪽지 도착 — ${newNote.title}`, 'info');
+          addToast(`💌 새 편지 도착 — ${newNote.title}`, 'info');
         }
         loadNotes();
       },
@@ -84,7 +84,7 @@ export default function NotePanel({ onClose }: NotePanelProps) {
 
   // 폼 뷰
   if (view === 'form') {
-    return <NoteForm onClose={handleBack} onCreated={handleCreated} />;
+    return <NoteForm onClose={handleBack} onCreated={handleCreated} targetName={modalContext?.targetName} />;
   }
 
   // 상세 뷰
@@ -104,7 +104,7 @@ export default function NotePanel({ onClose }: NotePanelProps) {
       {/* 헤더 */}
       <div className="flex items-center justify-between border-b border-white/[.06] px-4 py-3">
         <h2 className="font-heading text-base font-bold text-text-primary">
-          ✉️ {isLeader ? '수신 쪽지함' : '익명 쪽지함'}
+          💌 {isLeader ? '받은 편지함' : '마음의 편지'}
         </h2>
         <div className="flex items-center gap-1">
           {isLeader && (
@@ -127,6 +127,17 @@ export default function NotePanel({ onClose }: NotePanelProps) {
             </button>
           )}
         </div>
+      </div>
+
+      {/* 보드 설명 */}
+      <div className="border-b border-white/[.06] bg-accent/[.04] px-4 py-2">
+        <p className="text-[11px] leading-relaxed text-text-muted">
+          {isLeader ? (
+            <><span className="font-semibold text-text-secondary">팀원들의 솔직한 목소리를 받는 곳</span> — 익명으로 전달된 건의·질문·피드백을 확인하고, 답장을 통해 양방향 대화를 이어갈 수 있습니다.</>
+          ) : (
+            <><span className="font-semibold text-text-secondary">수평적 소통을 위한 비밀 우체통</span> — 리더에게 건의·질문·피드백을 익명으로 전달하세요. 누가 보냈는지 알 수 없지만, 리더의 답장을 받을 수 있습니다.</>
+          )}
+        </p>
       </div>
 
       {/* 필터 바 (리더만) */}
@@ -188,7 +199,7 @@ export default function NotePanel({ onClose }: NotePanelProps) {
         onClick={() => setView('form')}
         className="absolute bottom-6 right-6 flex h-12 w-12 items-center justify-center rounded-full bg-accent text-white shadow-lg transition-colors duration-200 hover:bg-accent/80"
         style={{ boxShadow: '0 4px 20px rgba(108,92,231,.4)' }}
-        title="새 쪽지 보내기"
+        title="마음의 편지 쓰기"
       >
         <Plus size={22} />
       </button>
