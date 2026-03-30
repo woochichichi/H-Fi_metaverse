@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ITO 메타버스 오피스 v3</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Galmuri11:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Space+Grotesk:wght@400;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans KR',sans-serif;overflow:hidden;background:#2a2a3e;user-select:none;}
+#app{width:100vw;height:100vh;display:flex;flex-direction:column;position:relative;}
+
+/* ═══ TOPBAR ═══ */
+.topbar{height:48px;background:rgba(30,30,48,.95);backdrop-filter:blur(12px);display:flex;align-items:center;padding:0 18px;gap:14px;z-index:100;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;}
+.topbar-logo{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px;letter-spacing:-.3px;}
+.topbar-logo .logo-icon{width:28px;height:28px;background:linear-gradient(135deg,#6C5CE7,#a29bfe);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.topbar-center{flex:1;display:flex;justify-content:center;gap:6px;}
+.topbar-pill{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:#94a3b8;padding:6px 14px;border-radius:20px;font-size:12px;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;gap:5px;}
+.topbar-pill:hover{background:rgba(108,92,231,.15);color:#a29bfe;border-color:rgba(108,92,231,.3);}
+.topbar-pill.active{background:rgba(108,92,231,.2);color:#a29bfe;border-color:rgba(108,92,231,.4);}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.online-badge{background:rgba(93,200,120,.12);color:#5DC878;font-size:11px;padding:5px 12px;border-radius:20px;font-weight:600;display:flex;align-items:center;gap:5px;}
+.online-dot{width:6px;height:6px;background:#5DC878;border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(.7);}}
+.inbox-btn{position:relative;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:#94a3b8;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;font-size:15px;}
+.inbox-btn:hover{background:rgba(108,92,231,.15);color:#a29bfe;}
+.inbox-btn .badge{position:absolute;top:-3px;right:-3px;background:#E91E63;color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;line-height:1.3;}
+.avatar-btn{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#6C5CE7,#a29bfe);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;border:2px solid rgba(255,255,255,.1);transition:all .2s;}
+.avatar-btn:hover{border-color:#a29bfe;transform:scale(1.08);}
+
+/* ═══ MAIN ═══ */
+.main-area{flex:1;display:flex;overflow:hidden;position:relative;}
+.map-container{flex:1;position:relative;overflow:hidden;background:#6b8f71;}
+.map-viewport{position:absolute;width:1800px;height:1200px;image-rendering:pixelated;}
+
+/* ═══ GROUND ═══ */
+.ground{position:absolute;top:0;left:0;width:100%;height:100%;}
+
+/* ═══ ROOMS ═══ */
+.room{position:absolute;border-radius:2px;overflow:hidden;box-shadow:0 2px 0 rgba(0,0,0,.15);}
+.room-floor{width:100%;height:100%;position:absolute;top:0;left:0;}
+.room-label{position:absolute;top:-22px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.55);color:#fff;padding:3px 12px;border-radius:10px;font-size:11px;font-weight:600;white-space:nowrap;z-index:15;pointer-events:none;backdrop-filter:blur(4px);}
+.team-label{position:absolute;top:-22px;left:10px;background:rgba(0,0,0,.5);color:#fff;padding:2px 10px;border-radius:8px;font-size:10px;font-weight:600;white-space:nowrap;z-index:15;pointer-events:none;}
+
+/* ═══ WALLS ═══ */
+.wall-h{position:absolute;height:8px;background:linear-gradient(180deg,#8899aa,#6b7b8d);border-radius:1px;z-index:3;box-shadow:0 2px 0 rgba(0,0,0,.1);}
+.wall-v{position:absolute;width:8px;background:linear-gradient(90deg,#8899aa,#6b7b8d);border-radius:1px;z-index:3;box-shadow:2px 0 0 rgba(0,0,0,.1);}
+.wall-top{background:linear-gradient(180deg,#7a8a9a,#5d6d7d);}
+
+/* ═══ FURNITURE (Gather-style) ═══ */
+.desk{position:absolute;z-index:4;}
+.desk-wood{width:84px;height:46px;background:linear-gradient(180deg,#dbb88a,#c4a06e);border:2px solid #b8904e;border-radius:4px;box-shadow:0 3px 0 #a07844,inset 0 1px 0 rgba(255,255,255,.2);}
+.desk-top{position:absolute;top:3px;left:3px;right:3px;bottom:6px;background:linear-gradient(180deg,#e8cca0,#d4b888);border-radius:2px;}
+.monitor{position:absolute;z-index:5;}
+.monitor-body{width:28px;height:22px;background:linear-gradient(180deg,#2a2a3e,#1e1e30);border:2px solid #444;border-radius:3px;box-shadow:0 2px 0 #222;}
+.monitor-screen{position:absolute;top:2px;left:2px;right:2px;bottom:4px;border-radius:1px;animation:screenGlow 3s infinite alternate;}
+@keyframes screenGlow{0%{background:#4fc3f7;}50%{background:#81d4fa;}100%{background:#29b6f6;}}
+.monitor-stand{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:8px;height:4px;background:#555;border-radius:0 0 2px 2px;}
+.chair{position:absolute;z-index:4;}
+.chair-seat{width:24px;height:24px;background:radial-gradient(circle,#666,#555);border-radius:50%;border:2px solid #444;box-shadow:0 2px 0 #333;}
+.chair-back{position:absolute;top:-6px;left:4px;width:16px;height:8px;background:#555;border-radius:4px 4px 0 0;border:1px solid #444;}
+.round-table{position:absolute;z-index:4;background:radial-gradient(circle,#f0f0f0,#ddd);border:3px solid #bbb;border-radius:50%;box-shadow:0 4px 0 rgba(0,0,0,.1),inset 0 1px 0 rgba(255,255,255,.5);}
+.sofa{position:absolute;z-index:4;border-radius:8px;box-shadow:0 3px 0 rgba(0,0,0,.15);}
+.sofa-h{width:76px;height:34px;background:linear-gradient(180deg,#8b7bc4,#7c6bc4);border:2px solid #6C5CE7;}
+.sofa-v{width:34px;height:76px;background:linear-gradient(90deg,#8b7bc4,#7c6bc4);border:2px solid #6C5CE7;}
+.sofa-cushion{position:absolute;top:4px;left:4px;right:4px;bottom:4px;background:rgba(255,255,255,.08);border-radius:4px;}
+.whiteboard{position:absolute;z-index:5;background:linear-gradient(180deg,#f5f5f5,#e8e8e8);border:3px solid #bbb;border-radius:3px;box-shadow:0 2px 0 rgba(0,0,0,.1);}
+.whiteboard-content{position:absolute;top:3px;left:3px;right:3px;bottom:3px;border:1px dashed #ccc;border-radius:1px;}
+.tv-screen{position:absolute;z-index:5;background:#111;border:3px solid #333;border-radius:3px;box-shadow:0 2px 0 #000;overflow:hidden;}
+.tv-glow{position:absolute;top:2px;left:2px;right:2px;bottom:2px;background:linear-gradient(135deg,#1a3a5c,#0a1a2c);border-radius:1px;}
+.bookshelf{position:absolute;z-index:5;}
+.bookshelf-frame{width:54px;height:40px;background:linear-gradient(180deg,#a07030,#8B6914);border:2px solid #6d5310;border-radius:2px;box-shadow:0 2px 0 rgba(0,0,0,.15);}
+.books{position:absolute;top:3px;left:3px;display:flex;gap:1px;}
+.book{height:14px;border-radius:1px;}
+.vending{position:absolute;z-index:5;width:30px;height:44px;background:linear-gradient(180deg,#e74c3c,#c0392b);border:2px solid #a93226;border-radius:4px;box-shadow:0 3px 0 rgba(0,0,0,.15);}
+.vending-slot{position:absolute;top:6px;left:4px;right:4px;height:20px;background:#1a1a2e;border-radius:2px;}
+
+/* ═══ PLANTS (detailed) ═══ */
+.plant{position:absolute;z-index:6;}
+.plant-lg{position:absolute;z-index:6;}
+
+/* ═══ ZONE ═══ */
+.zone{position:absolute;z-index:2;border-radius:6px;cursor:pointer;transition:all .2s;}
+.zone:hover{outline:3px solid rgba(108,92,231,.5);outline-offset:2px;background:rgba(108,92,231,.04);}
+.zone-indicator{position:absolute;top:-28px;left:50%;transform:translateX(-50%);background:rgba(108,92,231,.92);color:#fff;padding:4px 12px;border-radius:10px;font-size:11px;font-weight:600;white-space:nowrap;opacity:0;transition:opacity .2s;pointer-events:none;backdrop-filter:blur(4px);box-shadow:0 4px 12px rgba(108,92,231,.3);}
+.zone:hover .zone-indicator{opacity:1;}
+
+/* ═══ CHARACTERS ═══ */
+.player{position:absolute;z-index:50;pointer-events:none;filter:drop-shadow(0 3px 2px rgba(0,0,0,.25));}
+.player-name{position:absolute;top:-22px;left:50%;transform:translateX(-50%);background:rgba(108,92,231,.9);color:#fff;padding:2px 10px;border-radius:10px;font-size:10px;font-weight:600;white-space:nowrap;display:flex;align-items:center;gap:4px;box-shadow:0 2px 8px rgba(108,92,231,.3);}
+.player-name .green-dot{width:6px;height:6px;background:#5DC878;border-radius:50;display:inline-block;}
+.npc{position:absolute;z-index:20;transition:left 2.5s ease-in-out, top 2.5s ease-in-out;filter:drop-shadow(0 3px 2px rgba(0,0,0,.2));}
+.npc-name{position:absolute;top:-18px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.55);color:#e2e8f0;padding:2px 8px;border-radius:8px;font-size:9px;font-weight:500;white-space:nowrap;backdrop-filter:blur(2px);display:flex;align-items:center;gap:3px;}
+.npc-status{position:absolute;top:-32px;left:50%;transform:translateX(-50%);font-size:14px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3));}
+.chat-bubble{position:absolute;bottom:48px;left:50%;transform:translateX(-50%);background:#fff;color:#333;padding:5px 10px;border-radius:12px;font-size:10px;font-weight:500;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.15);animation:bubbleAnim 4s ease forwards;pointer-events:none;z-index:60;}
+.chat-bubble::after{content:'';position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid #fff;}
+@keyframes bubbleAnim{0%{opacity:0;transform:translateX(-50%) translateY(4px);}8%{opacity:1;transform:translateX(-50%) translateY(0);}75%{opacity:1;}100%{opacity:0;}}
+
+/* ═══ SIDEBAR ═══ */
+.sidebar{width:260px;background:rgba(30,30,48,.97);backdrop-filter:blur(16px);border-left:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;flex-shrink:0;z-index:50;}
+.sidebar-header{padding:16px 18px 12px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;}
+.sidebar-header h3{font-family:'Space Grotesk',sans-serif;font-size:14px;color:#e2e8f0;display:flex;align-items:center;gap:8px;}
+.sidebar-close{background:rgba(255,255,255,.06);border:none;color:#94a3b8;width:26px;height:26px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s;}
+.sidebar-close:hover{background:rgba(108,92,231,.2);color:#a29bfe;}
+.people-search{margin:10px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06);color:#e2e8f0;padding:9px 14px;border-radius:10px;font-size:12px;font-family:inherit;outline:none;width:calc(100% - 28px);transition:border-color .2s;}
+.people-search::placeholder{color:#64748b;}
+.people-search:focus{border-color:rgba(108,92,231,.4);}
+.people-list{flex:1;overflow-y:auto;padding:4px 14px;}
+.people-section{margin-bottom:14px;}
+.people-section-title{font-size:11px;color:#64748b;font-weight:600;padding:8px 0 4px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.5px;}
+.people-section-title .count{background:rgba(255,255,255,.08);padding:2px 7px;border-radius:8px;font-size:10px;}
+.person-row{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:10px;cursor:pointer;transition:background .15s;}
+.person-row:hover{background:rgba(255,255,255,.04);}
+.person-avatar{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;position:relative;}
+.person-avatar .online-indicator{position:absolute;bottom:-1px;right:-1px;width:10px;height:10px;background:#5DC878;border:2px solid #1e1e30;border-radius:50%;}
+.person-info{flex:1;min-width:0;}
+.person-name{font-size:12px;color:#e2e8f0;font-weight:500;}
+.person-role{font-size:10px;color:#64748b;}
+.person-status-tag{font-size:9px;padding:3px 8px;border-radius:8px;font-weight:600;flex-shrink:0;}
+
+/* ═══ BOTTOMBAR ═══ */
+.bottombar{height:52px;background:rgba(30,30,48,.95);backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:center;padding:0 18px;gap:14px;z-index:100;flex-shrink:0;}
+.emoji-bar{display:flex;gap:4px;}
+.emoji-btn{width:36px;height:36px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06);border-radius:10px;font-size:18px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;}
+.emoji-btn:hover{background:rgba(108,92,231,.2);border-color:rgba(108,92,231,.3);transform:scale(1.12);}
+.emoji-btn:active{transform:scale(.92);}
+.bottom-actions{display:flex;gap:6px;margin-left:auto;}
+.action-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06);color:#94a3b8;padding:7px 16px;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;transition:all .15s;}
+.action-btn:hover{background:rgba(108,92,231,.2);color:#a29bfe;border-color:rgba(108,92,231,.3);}
+.move-hint{color:#475569;font-size:10px;display:flex;align-items:center;gap:5px;}
+.key-icon{background:rgba(255,255,255,.08);color:#94a3b8;padding:3px 7px;border-radius:5px;font-size:9px;font-weight:700;font-family:'Space Grotesk',monospace;}
+
+/* ═══ MODAL ═══ */
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+@keyframes slideUp{from{transform:translateY(20px) scale(.97);opacity:0;}to{transform:translateY(0) scale(1);opacity:1;}}
+.modal{background:rgba(34,34,54,.98);border:1px solid rgba(255,255,255,.08);border-radius:20px;width:90%;max-width:500px;max-height:80vh;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.5);animation:slideUp .25s ease;display:flex;flex-direction:column;backdrop-filter:blur(20px);}
+.modal-header{padding:20px 22px 14px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.06);}
+.modal-icon{width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.modal-header h2{font-family:'Space Grotesk',sans-serif;font-size:17px;color:#e2e8f0;flex:1;font-weight:600;}
+.modal-close{background:rgba(255,255,255,.06);border:none;width:32px;height:32px;border-radius:10px;color:#94a3b8;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.modal-close:hover{background:rgba(108,92,231,.2);color:#a29bfe;transform:rotate(90deg);}
+.modal-body{padding:18px 22px 22px;overflow-y:auto;flex:1;}
+
+/* modal content styles */
+.mood-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+.mood-btn{aspect-ratio:1;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.06);border-radius:14px;font-size:28px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
+.mood-btn span{font-size:9px;color:#64748b;}
+.mood-btn:hover{border-color:rgba(108,92,231,.5);background:rgba(108,92,231,.1);transform:scale(1.04);}
+.mood-btn.selected{border-color:#6C5CE7;background:rgba(108,92,231,.15);}
+.mood-history{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:14px;}
+.mood-history h4{font-size:12px;color:#64748b;margin-bottom:8px;}
+.mood-entry{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px;color:#cbd5e1;border-bottom:1px solid rgba(255,255,255,.04);}
+.mood-entry:last-child{border:none;}
+.kpi-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:16px;margin-bottom:10px;}
+.kpi-card h4{font-size:13px;color:#e2e8f0;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.kpi-bar-bg{height:16px;background:rgba(255,255,255,.06);border-radius:8px;overflow:hidden;}
+.kpi-bar-fill{height:100%;border-radius:8px;transition:width 1s ease;position:relative;}
+.kpi-bar-fill::after{content:attr(data-pct);position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.3);}
+.kpi-meta{display:flex;justify-content:space-between;margin-top:8px;font-size:10px;color:#64748b;}
+.voc-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;transition:background .15s;}
+.voc-card:hover{background:rgba(255,255,255,.05);}
+.voc-badge{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
+.voc-content h4{font-size:12px;color:#e2e8f0;margin-bottom:4px;}
+.voc-content p{font-size:11px;color:#64748b;}
+.voc-tag{display:inline-block;font-size:9px;padding:3px 8px;border-radius:8px;margin-top:6px;font-weight:600;}
+.idea-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:16px;margin-bottom:8px;transition:all .15s;}
+.idea-card:hover{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1);}
+.idea-card h4{font-size:13px;color:#e2e8f0;margin-bottom:4px;}
+.idea-card p{font-size:11px;color:#64748b;line-height:1.5;}
+.idea-footer{display:flex;align-items:center;gap:10px;margin-top:10px;}
+.idea-like{background:none;border:1.5px solid rgba(255,255,255,.1);border-radius:20px;padding:4px 14px;font-size:11px;color:#94a3b8;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:4px;}
+.idea-like:hover{border-color:#FF6B9D;color:#FF6B9D;}
+.idea-like.liked{border-color:#FF6B9D;color:#FF6B9D;background:rgba(255,107,157,.08);}
+.idea-author{font-size:10px;color:#475569;}
+.input-row{display:flex;gap:8px;margin-top:14px;}
+.input-row input{flex:1;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 14px;color:#e2e8f0;font-family:inherit;font-size:12px;outline:none;transition:border-color .2s;}
+.input-row input:focus{border-color:rgba(108,92,231,.5);}
+.input-row input::placeholder{color:#475569;}
+.submit-btn{background:linear-gradient(135deg,#6C5CE7,#7c6df7);color:#fff;border:none;border-radius:12px;padding:10px 18px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;box-shadow:0 4px 12px rgba(108,92,231,.3);}
+.submit-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(108,92,231,.4);}
+
+.toast{position:fixed;top:58px;left:50%;transform:translateX(-50%) translateY(-30px);background:rgba(108,92,231,.95);color:#fff;padding:10px 22px;border-radius:14px;font-size:12px;font-weight:600;z-index:300;opacity:0;transition:all .3s;pointer-events:none;box-shadow:0 8px 24px rgba(108,92,231,.3);backdrop-filter:blur(8px);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.emoji-float{position:absolute;z-index:100;font-size:26px;pointer-events:none;animation:emojiRise 1.5s ease forwards;}
+@keyframes emojiRise{0%{opacity:1;transform:translateY(0) scale(1);}100%{opacity:0;transform:translateY(-60px) scale(1.4);}}
+.prox-hint{position:fixed;bottom:64px;left:50%;transform:translateX(-50%);background:rgba(108,92,231,.92);color:#fff;padding:8px 18px;border-radius:14px;font-size:12px;font-weight:600;z-index:90;animation:fadeIn .2s;display:flex;align-items:center;gap:8px;box-shadow:0 6px 20px rgba(108,92,231,.3);backdrop-filter:blur(8px);}
+.prox-hint .key-icon{background:rgba(255,255,255,.2);color:#fff;}
+.corridor{position:absolute;z-index:1;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const TEAM=[
+  {name:'우형',color:'#6C5CE7',skin:'#FFE0BD',hair:'#5a3e28',role:'증권ITO',emoji:'😎',status:'재택',team:'증권ITO'},
+  {name:'재철',color:'#FF6B9D',skin:'#FFE0BD',hair:'#333',role:'손보1팀',emoji:'🤓',status:'출근',team:'손보ITO'},
+  {name:'혜림',color:'#FFD93D',skin:'#FFDBB4',hair:'#5a3218',role:'손보2팀',emoji:'😊',status:'출근',team:'손보ITO'},
+  {name:'은지',color:'#95E86B',skin:'#FFE0BD',hair:'#222',role:'생명2팀',emoji:'💪',status:'출근',team:'생명ITO'},
+  {name:'한나',color:'#C49AFF',skin:'#FFDBB4',hair:'#4a2810',role:'생명1팀',emoji:'🌟',status:'재택',team:'생명ITO'},
+  {name:'민수',color:'#FF9A6B',skin:'#FFE0BD',hair:'#333',role:'대리',emoji:'🔥',status:'출근',team:'증권ITO'},
+  {name:'예린',color:'#FF6BCA',skin:'#FFDBB4',hair:'#3a2010',role:'주임',emoji:'🌸',status:'출근',team:'증권ITO'},
+  {name:'동현',color:'#6BFFD4',skin:'#FFE0BD',hair:'#222',role:'대리',emoji:'🎮',status:'출근',team:'한금서'},
+];
+const MOODS=[{emoji:'😆',label:'최고!'},{emoji:'😊',label:'좋아요'},{emoji:'😐',label:'보통'},{emoji:'😰',label:'힘들어'},{emoji:'🤯',label:'바빠!'},{emoji:'😴',label:'졸려..'},{emoji:'🔥',label:'열정!'},{emoji:'☕',label:'커피중'}];
+const BUBBLES=['오늘도 화이팅!','커피 한 잔 ☕','점심 뭐 먹지?','ㅋㅋㅋ','코드 짜는 중...','회의 끝!','칼퇴!','배포 완료 🚀','간식 사왔어~','장애 해결!','배고파...','VoC 처리 중','아이디어 있어요!'];
+const EMOJIS=['🤘','👏','❤️','😆','🎉','🔥'];
+const ZONES=[
+  {id:'mood',x:80,y:80,w:340,h:280,label:'💭 마음의소리'},
+  {id:'kpi',x:480,y:80,w:340,h:280,label:'📊 KPI 관리실'},
+  {id:'voc',x:80,y:500,w:340,h:280,label:'📞 VOC 센터'},
+  {id:'idea',x:480,y:500,w:340,h:280,label:'💡 아이디어 보드'},
+  {id:'lounge',x:900,y:80,w:300,h:360,label:'☕ 라운지'},
+  {id:'note',x:900,y:500,w:300,h:280,label:'✉️ 익명 쪽지함'},
+];
+
+let S={px:440,py:400,modal:null,sidebar:true,selectedMood:null,
+  moods:[{name:'우형',emoji:'🔥',time:'09:00'},{name:'혜림',emoji:'😊',time:'09:15'},{name:'은지',emoji:'😰',time:'09:30'},{name:'동현',emoji:'☕',time:'10:00'}],
+  kpis:[{title:'VOC 처리율',current:87,target:95,unit:'%',icon:'📋'},{title:'이벤트 참여율',current:72,target:80,unit:'%',icon:'🎉'},{title:'인적교류 달성',current:1,target:4,unit:'회',icon:'🤝'},{title:'신입 소프트랜딩',current:3,target:5,unit:'명',icon:'🌱'}],
+  vocs:[{type:'불편',content:'A팀 창가 쪽 에어컨 온도 30도 넘어요',dept:'증권ITO',status:'처리중'},{type:'요청',content:'워크샵 때 팀 간 교류 시간 늘려주세요',dept:'생명ITO',status:'검토중'},{type:'칭찬',content:'3월 생일 이벤트 너무 좋았습니다!',dept:'손보ITO',status:'완료'}],
+  ideas:[{title:'달리기 이벤트',desc:'증권+손보 팀 합동 러닝 (4월)',author:'재철',likes:7,liked:false},{title:'랜덤 커피챗',desc:'선후배 1:1 매칭 월 1회',author:'은지',likes:9,liked:false},{title:'ITO 인사이트 공유',desc:'자발적 지식공유 세션 분기 1회',author:'우형',likes:5,liked:false}],
+  keys:{},nearZone:null};
+
+let npcs=TEAM.map((t,i)=>({...t,id:i,
+  x:200+(i%4)*200+Math.random()*60,
+  y:180+Math.floor(i/4)*300+Math.random()*60,
+  moodEmoji:S.moods.find(m=>m.name===t.name)?.emoji||null}));
+
+function charSVG(c,sk,hr,sz=32){
+  return `<svg width="${sz}" height="${Math.round(sz*1.35)}" viewBox="0 0 32 43">
+    <ellipse cx="16" cy="40" rx="10" ry="3" fill="rgba(0,0,0,.15)"/>
+    <rect x="7" y="22" width="18" height="15" rx="5" fill="${c}"/>
+    <rect x="11" y="35" width="4" height="6" rx="2" fill="#555"/>
+    <rect x="17" y="35" width="4" height="6" rx="2" fill="#555"/>
+    <rect x="10" y="39" width="5" height="3" rx="1.5" fill="${c}"/>
+    <rect x="17" y="39" width="5" height="3" rx="1.5" fill="${c}"/>
+    <circle cx="16" cy="14" r="10" fill="${sk}"/>
+    <ellipse cx="16" cy="7" rx="10" ry="6" fill="${hr}"/>
+    <ellipse cx="6.5" cy="10" rx="3" ry="5" fill="${hr}"/>
+    <ellipse cx="25.5" cy="10" rx="3" ry="5" fill="${hr}"/>
+    <circle cx="12" cy="14" r="2" fill="#333"/>
+    <circle cx="20" cy="14" r="2" fill="#333"/>
+    <circle cx="12.7" cy="13.4" r=".8" fill="#fff"/>
+    <circle cx="20.7" cy="13.4" r=".8" fill="#fff"/>
+    <path d="M13,18 Q16,20.5 19,18" stroke="#333" stroke-width="1.2" fill="none"/>
+    <ellipse cx="8" cy="16" rx="2.5" ry="1.5" fill="#FFB3B3" opacity=".35"/>
+    <ellipse cx="24" cy="16" rx="2.5" ry="1.5" fill="#FFB3B3" opacity=".35"/>
+  </svg>`;
+}
+
+function plantSVG(x,y,type='sm'){
+  if(type==='lg'){
+    return `<div class="plant-lg" style="left:${x}px;top:${y}px;"><svg width="40" height="56" viewBox="0 0 40 56">
+      <rect x="14" y="40" width="12" height="16" rx="3" fill="#b8904e"/>
+      <rect x="16" y="42" width="8" height="12" rx="2" fill="#c49a5a"/>
+      <ellipse cx="20" cy="30" rx="16" ry="20" fill="#43A047"/>
+      <ellipse cx="12" cy="24" rx="8" ry="14" fill="#66BB6A"/>
+      <ellipse cx="28" cy="26" rx="7" ry="12" fill="#388E3C"/>
+      <ellipse cx="20" cy="18" rx="6" ry="10" fill="#4CAF50"/>
+    </svg></div>`;
+  }
+  return `<div class="plant" style="left:${x}px;top:${y}px;"><svg width="22" height="30" viewBox="0 0 22 30">
+    <rect x="7" y="22" width="8" height="8" rx="2" fill="#c49a5a"/>
+    <ellipse cx="11" cy="18" rx="8" ry="10" fill="#4CAF50"/>
+    <ellipse cx="7" cy="14" rx="5" ry="8" fill="#66BB6A"/>
+    <ellipse cx="15" cy="15" rx="4" ry="7" fill="#388E3C"/>
+  </svg></div>`;
+}
+
+function render(){
+  const a=document.getElementById('app');
+  const onCnt=npcs.filter(n=>n.status==='출근').length+1;
+  const online=npcs.filter(n=>n.status==='출근');
+  const remote=npcs.filter(n=>n.status==='재택');
+
+  a.innerHTML=`
+  <div class="topbar">
+    <div class="topbar-logo"><div class="logo-icon">🏢</div> ITO 메타버스</div>
+    <div class="topbar-center">
+      <button class="topbar-pill ${S.sidebar?'active':''}" onclick="S.sidebar=!S.sidebar;render()">👥 피플</button>
+      <button class="topbar-pill" onclick="openModal('note')">✉️ 쪽지함</button>
+    </div>
+    <div class="topbar-right">
+      <div class="online-badge"><div class="online-dot"></div>${onCnt}명 접속중</div>
+      <div class="inbox-btn" onclick="showToast('📬 수집함: 새 알림 3건')">📬<span class="badge">3</span></div>
+      <div class="inbox-btn" onclick="showToast('🔔 알림 확인')">🔔<span class="badge">2</span></div>
+      <div class="avatar-btn">😎</div>
+    </div>
+  </div>
+  <div class="main-area">
+    <div class="map-container" id="mc">
+      <div class="map-viewport" id="mv">
+        ${renderGround()}
+        ${renderRooms()}
+        ${renderFurniture()}
+        ${ZONES.map(z=>`<div class="zone" style="left:${z.x}px;top:${z.y}px;width:${z.w}px;height:${z.h}px;" onclick="openModal('${z.id}')"><div class="zone-indicator">${z.label} — Space로 입장</div></div>`).join('')}
+        ${npcs.map((n,i)=>`<div class="npc" id="npc-${i}" style="left:${n.x}px;top:${n.y}px;">
+          ${n.moodEmoji?`<div class="npc-status">${n.moodEmoji}</div>`:''}
+          <div class="npc-name"><span style="color:${n.color};">●</span> ${n.name}, ${n.role}</div>
+          <div>${charSVG(n.color,n.skin,n.hair,28)}</div>
+        </div>`).join('')}
+        <div class="player" id="player" style="left:${S.px}px;top:${S.py}px;">
+          <div class="player-name"><span class="green-dot" style="width:6px;height:6px;background:#5DC878;border-radius:50%;display:inline-block;"></span> You</div>
+          ${charSVG('#6C5CE7','#FFE0BD','#5a3e28',34)}
+        </div>
+      </div>
+    </div>
+    ${S.sidebar?renderSidebar(online,remote):''}
+  </div>
+  <div class="bottombar">
+    <div class="move-hint">
+      <span class="key-icon">↑↓←→</span>이동
+      <span class="key-icon" style="margin-left:4px;">Space</span>입장
+    </div>
+    <div class="emoji-bar">${EMOJIS.map(e=>`<button class="emoji-btn" onclick="floatEmoji('${e}')">${e}</button>`).join('')}</div>
+    <div class="bottom-actions">
+      <button class="action-btn" onclick="openModal('mood')">💭 마음의소리</button>
+      <button class="action-btn" onclick="openModal('kpi')">📊 KPI</button>
+      <button class="action-btn" onclick="openModal('voc')">📞 VOC</button>
+      <button class="action-btn" onclick="openModal('idea')">💡 아이디어</button>
+      <button class="action-btn" onclick="openModal('note')">✉️ 쪽지</button>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+  ${S.modal?renderModalHTML():''}`;
+  centerCamera();
+}
+
+function renderGround(){
+  // Gather-style grass base with path patterns
+  return `<svg width="1800" height="1200" style="position:absolute;top:0;left:0;">
+    <defs>
+      <pattern id="grass" width="16" height="16" patternUnits="userSpaceOnUse">
+        <rect width="16" height="16" fill="#7da87d"/>
+        <circle cx="4" cy="4" r="1" fill="#6b9a6b" opacity=".5"/>
+        <circle cx="12" cy="12" r="1" fill="#8ab88a" opacity=".4"/>
+        <circle cx="8" cy="2" r=".8" fill="#6b9a6b" opacity=".3"/>
+      </pattern>
+      <pattern id="path" width="32" height="32" patternUnits="userSpaceOnUse">
+        <rect width="32" height="32" fill="#c8c0b0"/>
+        <rect x="0" y="0" width="16" height="16" fill="#ccc4b4" opacity=".5"/>
+        <rect x="16" y="16" width="16" height="16" fill="#ccc4b4" opacity=".5"/>
+      </pattern>
+    </defs>
+    <rect width="1800" height="1200" fill="url(#grass)"/>
+    <!-- paths/corridors -->
+    <rect x="420" y="0" width="60" height="1200" fill="url(#path)" rx="2"/>
+    <rect x="840" y="0" width="60" height="1200" fill="url(#path)" rx="2"/>
+    <rect x="0" y="370" width="1800" height="60" fill="url(#path)" rx="2"/>
+    <rect x="0" y="790" width="1800" height="60" fill="url(#path)" rx="2"/>
+  </svg>`;
+}
+
+function renderRooms(){
+  const rooms=[
+    {x:60,y:60,w:360,h:300,f:'#f0ebe4',l:'💭 마음의소리',t:'조직유닛'},
+    {x:480,y:60,w:360,h:300,f:'#e4eef0',l:'📊 KPI 관리실',t:'조직유닛'},
+    {x:60,y:440,w:360,h:340,f:'#eee4f0',l:'📞 VOC 센터',t:'전체'},
+    {x:480,y:440,w:360,h:340,f:'#f0eee4',l:'💡 아이디어 보드',t:'전체'},
+    {x:900,y:60,w:320,h:380,f:'#e8e4f0',l:'☕ 라운지',t:'자유 공간'},
+    {x:900,y:480,w:320,h:300,f:'#e4f0ec',l:'✉️ 쪽지함',t:'익명'},
+    {x:900,y:840,w:320,h:180,f:'#e4e8f0',l:'🏢 회의실',t:'조직유닛'},
+  ];
+  let h='';
+  rooms.forEach(r=>{
+    h+=`<div class="room" style="left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px;">
+      <div class="room-floor" style="background:${r.f};"></div>
+      <div class="room-label">${r.l}</div>
+      <div class="team-label">${r.t}</div>
+    </div>`;
+    // walls
+    h+=`<div class="wall-h wall-top" style="left:${r.x}px;top:${r.y}px;width:${r.w}px;"></div>`;
+    h+=`<div class="wall-h" style="left:${r.x}px;top:${r.y+r.h}px;width:${r.w}px;"></div>`;
+    h+=`<div class="wall-v wall-top" style="left:${r.x}px;top:${r.y}px;height:${r.h}px;"></div>`;
+    h+=`<div class="wall-v" style="left:${r.x+r.w}px;top:${r.y}px;height:${r.h}px;"></div>`;
+  });
+  return h;
+}
+
+function renderFurniture(){
+  let h='';
+  const desk=(x,y)=>`<div class="desk" style="left:${x}px;top:${y}px;"><div class="desk-wood"><div class="desk-top"></div></div></div>`;
+  const mon=(x,y)=>`<div class="monitor" style="left:${x}px;top:${y}px;"><div class="monitor-body"><div class="monitor-screen"></div></div><div class="monitor-stand"></div></div>`;
+  const chr=(x,y)=>`<div class="chair" style="left:${x}px;top:${y}px;"><div class="chair-seat"></div></div>`;
+  const rt=(x,y,s=60)=>`<div class="round-table" style="left:${x}px;top:${y}px;width:${s}px;height:${s}px;"></div>`;
+  const sfh=(x,y)=>`<div class="sofa sofa-h" style="left:${x}px;top:${y}px;"><div class="sofa-cushion"></div></div>`;
+  const sfv=(x,y)=>`<div class="sofa sofa-v" style="left:${x}px;top:${y}px;"><div class="sofa-cushion"></div></div>`;
+  const wb=(x,y,w=90)=>`<div class="whiteboard" style="left:${x}px;top:${y}px;width:${w}px;height:10px;"><div class="whiteboard-content"></div></div>`;
+  const tv=(x,y)=>`<div class="tv-screen" style="left:${x}px;top:${y}px;width:64px;height:8px;"><div class="tv-glow"></div></div>`;
+  const bs=(x,y)=>`<div class="bookshelf" style="left:${x}px;top:${y}px;"><div class="bookshelf-frame"><div class="books"><div class="book" style="width:4px;background:#e74c3c;"></div><div class="book" style="width:3px;background:#3498db;"></div><div class="book" style="width:5px;background:#f39c12;"></div><div class="book" style="width:3px;background:#2ecc71;"></div><div class="book" style="width:4px;background:#9b59b6;"></div><div class="book" style="width:3px;background:#e67e22;"></div></div></div></div>`;
+  const vd=(x,y)=>`<div class="vending" style="left:${x}px;top:${y}px;"><div class="vending-slot"></div></div>`;
+  const p=plantSVG;
+
+  // ── 마음의소리 room ──
+  h+=desk(120,120)+mon(140,110)+chr(140,172);
+  h+=desk(250,120)+mon(270,110)+chr(270,172);
+  h+=rt(170,240,54);
+  h+=sfh(110,300)+sfh(240,300);
+  h+=p(70,72)+p(70,320,'lg')+p(388,72)+p(388,310);
+
+  // ── KPI room ──
+  for(let i=0;i<3;i++){h+=desk(530+i*105,120)+mon(550+i*105,110)+chr(550+i*105,172);}
+  for(let i=0;i<3;i++){h+=desk(530+i*105,230)+mon(550+i*105,220)+chr(550+i*105,282);}
+  h+=wb(570,78)+p(478,72)+p(478,310)+p(808,72)+p(808,310);
+
+  // ── VOC room ──
+  h+=desk(120,510)+mon(140,500)+chr(140,562);
+  h+=desk(250,510)+mon(270,500)+chr(270,562);
+  h+=desk(120,620)+mon(140,610)+chr(140,672);
+  h+=desk(250,620)+mon(270,610)+chr(270,672);
+  h+=wb(180,460)+p(70,440,'lg')+p(388,440)+p(70,730)+p(388,730);
+
+  // ── Idea Board ──
+  h+=rt(550,540,56)+rt(700,540,56);
+  h+=rt(550,670,56)+rt(700,670,56);
+  h+=sfh(510,490)+sfh(660,490);
+  h+=wb(560,460,120)+p(478,440)+p(808,440)+p(478,730)+p(808,730);
+
+  // ── Lounge ──
+  h+=sfv(920,100)+sfv(920,220);
+  h+=rt(970,140,50)+rt(970,290,50);
+  h+=vd(1140,80)+vd(1180,80);
+  h+=bs(1080,78)+bs(1140,78);
+  h+=p(910,380,'lg')+p(1180,380,'lg')+p(1180,100);
+
+  // ── 쪽지함 room ──
+  h+=desk(960,550)+mon(980,540)+chr(980,600);
+  h+=desk(1080,550)+mon(1100,540)+chr(1100,600);
+  h+=sfh(980,700);
+  h+=p(910,490)+p(1190,490)+p(910,740)+p(1190,740);
+
+  // ── 회의실 ──
+  h+=`<div class="desk" style="left:980px;top:890px;"><div class="desk-wood" style="width:140px;height:54px;"><div class="desk-top"></div></div></div>`;
+  for(let i=0;i<4;i++)h+=chr(990+i*35,870);
+  for(let i=0;i<4;i++)h+=chr(990+i*35,950);
+  h+=tv(1010,858)+p(910,840)+p(1190,840)+p(1190,990);
+
+  return h;
+}
+
+function renderSidebar(online,remote){
+  return `<div class="sidebar">
+    <div class="sidebar-header"><h3>👥 피플 목록</h3><button class="sidebar-close" onclick="S.sidebar=false;render()">✕</button></div>
+    <input class="people-search" placeholder="이름으로 검색..."/>
+    <div class="people-list">
+      <div class="person-row" style="border-bottom:1px solid rgba(255,255,255,.04);padding-bottom:10px;margin-bottom:8px;">
+        <div class="person-avatar" style="background:rgba(108,92,231,.2);border-radius:10px;">😎<div class="online-indicator"></div></div>
+        <div class="person-info"><div class="person-name">나 (우형)</div><div class="person-role">증권ITO · 조직유닛장</div></div>
+        <span class="person-status-tag" style="background:rgba(108,92,231,.15);color:#a29bfe;">접속중</span>
+      </div>
+      <div class="people-section">
+        <div class="people-section-title">🟢 출근 <span class="count">${online.length}</span></div>
+        ${online.map(n=>`<div class="person-row">
+          <div class="person-avatar" style="background:${n.color}15;border-radius:10px;">${n.emoji}<div class="online-indicator"></div></div>
+          <div class="person-info"><div class="person-name">${n.name}</div><div class="person-role">${n.team} · ${n.role}</div></div>
+          <span class="person-status-tag" style="background:rgba(107,197,255,.1);color:#6BC5FF;">출근</span>
+        </div>`).join('')}
+      </div>
+      <div class="people-section">
+        <div class="people-section-title">🏠 재택 <span class="count">${remote.length}</span></div>
+        ${remote.map(n=>`<div class="person-row">
+          <div class="person-avatar" style="background:${n.color}15;border-radius:10px;">${n.emoji}</div>
+          <div class="person-info"><div class="person-name">${n.name}</div><div class="person-role">${n.team} · ${n.role}</div></div>
+          <span class="person-status-tag" style="background:rgba(93,200,120,.1);color:#5DC878;">재택</span>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderModalHTML(){
+  const fns={mood:moodM,kpi:kpiM,voc:vocM,idea:ideaM,lounge:loungeM,note:noteM};
+  return `<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal">${(fns[S.modal]||loungeM)()}</div></div>`;
+}
+function mH(ic,bg,t){return `<div class="modal-header"><div class="modal-icon" style="background:${bg};">${ic}</div><h2>${t}</h2><button class="modal-close" onclick="closeModal()">✕</button></div>`;}
+
+function moodM(){
+  return `${mH('💭','rgba(108,92,231,.2)','마음의소리')}<div class="modal-body">
+    <p style="font-size:12px;color:#64748b;margin-bottom:12px;">오늘 나의 기분은? 클릭해서 팀에 공유해요 😊</p>
+    <div class="mood-grid">${MOODS.map((m,i)=>`<button class="mood-btn ${S.selectedMood===i?'selected':''}" onclick="selectMood(${i})">${m.emoji}<span>${m.label}</span></button>`).join('')}</div>
+    <div class="mood-history"><h4>📋 오늘의 팀 기분</h4>${S.moods.map(m=>`<div class="mood-entry"><span>${m.emoji}</span><strong style="color:#e2e8f0;">${m.name}</strong><span style="margin-left:auto;color:#475569;">${m.time}</span></div>`).join('')}</div>
+  </div>`;
+}
+
+function kpiM(){
+  return `${mH('📊','rgba(41,182,246,.15)','KPI 관리실')}<div class="modal-body">
+    <p style="font-size:12px;color:#64748b;margin-bottom:12px;">조직유닛 핵심 지표 현황</p>
+    ${S.kpis.map(k=>{
+      let pct=Math.min(100,(k.current/k.target)*100);
+      const c=pct>=90?'linear-gradient(90deg,#4CAF50,#66BB6A)':pct>=70?'linear-gradient(90deg,#FF9800,#FFB74D)':'linear-gradient(90deg,#E91E63,#F06292)';
+      return `<div class="kpi-card"><h4>${k.icon} ${k.title}</h4><div class="kpi-bar-bg"><div class="kpi-bar-fill" style="width:${pct}%;background:${c};" data-pct="${Math.round(pct)}%"></div></div><div class="kpi-meta"><span>현재: ${k.current}${k.unit}</span><span>목표: ${k.target}${k.unit}</span></div></div>`;
+    }).join('')}
+  </div>`;
+}
+
+function vocM(){
+  const cl={'불편':'#E91E63','요청':'#2196F3','칭찬':'#4CAF50','검토중':'#FF9800'};
+  return `${mH('📞','rgba(76,175,80,.15)','VOC 센터')}<div class="modal-body">
+    ${S.vocs.map(v=>`<div class="voc-card"><div class="voc-badge" style="background:${cl[v.type]||'#999'};">${v.type[0]}</div><div class="voc-content"><h4>${v.content}</h4><p>${v.dept} · ${v.status}</p><span class="voc-tag" style="background:${cl[v.type]}15;color:${cl[v.type]};">${v.type}</span></div></div>`).join('')}
+    <div class="input-row"><input id="voc-input" placeholder="새 VOC 입력..."/><button class="submit-btn" onclick="addVOC()">등록</button></div>
+  </div>`;
+}
+
+function ideaM(){
+  return `${mH('💡','rgba(255,152,0,.15)','아이디어 보드')}<div class="modal-body">
+    ${S.ideas.map((d,i)=>`<div class="idea-card"><h4>💡 ${d.title}</h4><p>${d.desc}</p><div class="idea-footer"><button class="idea-like ${d.liked?'liked':''}" onclick="toggleLike(${i})">${d.liked?'❤️':'🤍'} ${d.likes}</button><span class="idea-author">by ${d.author}</span></div></div>`).join('')}
+    <div class="input-row" style="flex-direction:column;gap:8px;"><input id="idea-title" placeholder="아이디어 제목"/><div class="input-row"><input id="idea-desc" placeholder="설명"/><button class="submit-btn" onclick="addIdea()">공유 ✨</button></div></div>
+  </div>`;
+}
+
+function noteM(){
+  return `${mH('✉️','rgba(93,200,120,.15)','익명 쪽지함')}<div class="modal-body">
+    <p style="font-size:12px;color:#64748b;margin-bottom:12px;">팀에 전하고 싶은 건의, 감사, 질문을 익명으로 보내세요.</p>
+    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:16px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <span style="font-size:11px;color:#94a3b8;">익명 모드</span>
+        <div style="width:40px;height:22px;background:#6C5CE7;border-radius:11px;position:relative;cursor:pointer;">
+          <div style="width:16px;height:16px;background:#fff;border-radius:50%;position:absolute;top:3px;right:3px;"></div>
+        </div>
+        <span style="font-size:10px;color:#5DC878;">ON</span>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
+        <span class="voc-tag" style="background:rgba(108,92,231,.15);color:#a29bfe;cursor:pointer;padding:5px 12px;border-radius:10px;">건의</span>
+        <span class="voc-tag" style="background:rgba(255,255,255,.06);color:#94a3b8;cursor:pointer;padding:5px 12px;border-radius:10px;">질문</span>
+        <span class="voc-tag" style="background:rgba(255,255,255,.06);color:#94a3b8;cursor:pointer;padding:5px 12px;border-radius:10px;">감사</span>
+        <span class="voc-tag" style="background:rgba(255,255,255,.06);color:#94a3b8;cursor:pointer;padding:5px 12px;border-radius:10px;">불편</span>
+      </div>
+      <input style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:9px 12px;color:#e2e8f0;font-family:inherit;font-size:12px;outline:none;margin-bottom:8px;" placeholder="제목"/>
+      <textarea style="width:100%;height:80px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:9px 12px;color:#e2e8f0;font-family:inherit;font-size:12px;outline:none;resize:none;" placeholder="내용을 입력하세요..."></textarea>
+      <div style="display:flex;justify-content:flex-end;margin-top:10px;">
+        <button class="submit-btn" onclick="showToast('✉️ 쪽지가 전달되었습니다');closeModal()">보내기</button>
+      </div>
+    </div>
+    <div style="font-size:11px;color:#475569;display:flex;align-items:center;gap:6px;">🔒 작성자 정보는 관리자도 확인할 수 없습니다</div>
+  </div>`;
+}
+
+function loungeM(){
+  return `${mH('☕','rgba(108,92,231,.15)','라운지')}<div class="modal-body"><div style="text-align:center;padding:30px 0;">
+    <div style="font-size:60px;margin-bottom:14px;">☕</div>
+    <h3 style="color:#e2e8f0;margin-bottom:8px;font-family:'Space Grotesk',sans-serif;">잠시 쉬어가세요</h3>
+    <p style="color:#64748b;font-size:13px;">자판기에서 커피 한 잔, 소파에서 휴식!</p>
+    <div style="margin-top:22px;display:flex;justify-content:center;gap:10px;">
+      <button class="submit-btn" onclick="showToast('☕ 아메리카노 한 잔!');closeModal()">☕ 커피</button>
+      <button class="submit-btn" style="background:linear-gradient(135deg,#FF6B9D,#ff8db5);" onclick="showToast('🍫 간식 획득!');closeModal()">🍫 간식</button>
+    </div>
+  </div></div>`;
+}
+
+// ACTIONS
+function openModal(id){S.modal=id;render();}
+function closeModal(){S.modal=null;S.selectedMood=null;render();}
+function selectMood(idx){
+  S.selectedMood=idx;const mood=MOODS[idx];
+  const now=new Date();const time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  S.moods=S.moods.filter(m=>m.name!=='나');
+  S.moods.unshift({name:'나',emoji:mood.emoji,time});
+  showToast(`${mood.emoji} "${mood.label}" 등록!`);
+  S.modal='mood';render();
+}
+function addVOC(){const el=document.getElementById('voc-input');if(!el||!el.value.trim())return;S.vocs.unshift({type:'요청',content:el.value.trim(),dept:'증권ITO',status:'접수'});showToast('📞 VOC 등록!');S.modal='voc';render();}
+function addIdea(){const t=document.getElementById('idea-title'),d=document.getElementById('idea-desc');if(!t||!t.value.trim())return;S.ideas.unshift({title:t.value.trim(),desc:d?d.value.trim():'',author:'나',likes:0,liked:false});showToast('💡 아이디어 공유!');S.modal='idea';render();}
+function toggleLike(i){S.ideas[i].liked=!S.ideas[i].liked;S.ideas[i].likes+=S.ideas[i].liked?1:-1;S.modal='idea';render();}
+function showToast(msg){setTimeout(()=>{const el=document.getElementById('toast');if(el){el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500);}},50);}
+function floatEmoji(e){const mv=document.getElementById('mv');if(!mv)return;const el=document.createElement('div');el.className='emoji-float';el.textContent=e;el.style.left=(S.px+8)+'px';el.style.top=(S.py-10)+'px';mv.appendChild(el);setTimeout(()=>el.remove(),1500);}
+
+// MOVEMENT
+const SP=4;
+document.addEventListener('keydown',e=>{if(S.modal)return;S.keys[e.key]=true;if(e.key===' '||e.key==='Enter'){e.preventDefault();if(S.nearZone)openModal(S.nearZone);}});
+document.addEventListener('keyup',e=>{S.keys[e.key]=false;});
+
+function gameLoop(){
+  if(!S.modal){
+    let dx=0,dy=0;
+    if(S.keys['ArrowUp']||S.keys['w']||S.keys['W'])dy=-SP;
+    if(S.keys['ArrowDown']||S.keys['s']||S.keys['S'])dy=SP;
+    if(S.keys['ArrowLeft']||S.keys['a']||S.keys['A'])dx=-SP;
+    if(S.keys['ArrowRight']||S.keys['d']||S.keys['D'])dx=SP;
+    if(dx||dy){
+      S.px=Math.max(20,Math.min(1760,S.px+dx));
+      S.py=Math.max(20,Math.min(1160,S.py+dy));
+      const pl=document.getElementById('player');
+      if(pl){pl.style.left=S.px+'px';pl.style.top=S.py+'px';}
+      centerCamera();
+      checkZone();
+    }
+  }
+  requestAnimationFrame(gameLoop);
+}
+
+function centerCamera(){
+  const c=document.getElementById('mc'),v=document.getElementById('mv');
+  if(!c||!v)return;
+  const cw=c.clientWidth,ch=c.clientHeight;
+  let ox=cw/2-S.px-17,oy=ch/2-S.py-22;
+  ox=Math.min(0,Math.max(ox,cw-1800));
+  oy=Math.min(0,Math.max(oy,ch-1200));
+  v.style.transform=`translate(${ox}px,${oy}px)`;
+}
+
+function checkZone(){
+  let near=null;const cx=S.px+17,cy=S.py+22;
+  for(const z of ZONES){if(cx>z.x&&cx<z.x+z.w&&cy>z.y&&cy<z.y+z.h){near=z.id;break;}}
+  if(near!==S.nearZone){
+    S.nearZone=near;
+    document.querySelectorAll('.prox-hint').forEach(e=>e.remove());
+    if(near){
+      const z=ZONES.find(z=>z.id===near);
+      const el=document.createElement('div');el.className='prox-hint';
+      el.innerHTML=`<span class="key-icon">Space</span> ${z.label} 입장`;
+      document.getElementById('app').appendChild(el);
+    }
+  }
+}
+
+// NPC AI
+function moveNPCs(){
+  npcs.forEach((n,i)=>{
+    if(Math.random()<.25){
+      const z=ZONES[i%ZONES.length];
+      n.x=z.x+40+Math.random()*(z.w-100);
+      n.y=z.y+50+Math.random()*(z.h-120);
+      const el=document.getElementById(`npc-${i}`);
+      if(el){el.style.left=n.x+'px';el.style.top=n.y+'px';}
+    }
+  });
+}
+function spawnBubble(){
+  const i=Math.floor(Math.random()*npcs.length);
+  const msg=BUBBLES[Math.floor(Math.random()*BUBBLES.length)];
+  const el=document.getElementById(`npc-${i}`);
+  if(el){const old=el.querySelector('.chat-bubble');if(old)old.remove();
+  const b=document.createElement('div');b.className='chat-bubble';b.textContent=msg;
+  el.appendChild(b);setTimeout(()=>{if(b.parentNode)b.remove();},4000);}
+}
+
+render();gameLoop();
+setInterval(moveNPCs,3500);
+setInterval(spawnBubble,4000);
+window.addEventListener('resize',centerCamera);
+</script>
+</body>
+</html>
