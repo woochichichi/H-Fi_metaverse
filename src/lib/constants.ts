@@ -89,16 +89,66 @@ export type ProfileStatus = (typeof PROFILE_STATUSES)[number];
 // 기분 이모지
 export const MOOD_EMOJIS = ['😆', '😊', '😐', '😰', '🤯', '😴', '🔥', '☕'] as const;
 
-// 메타버스 Zone 정의 (mockup-v3 좌표 기준)
-export const ZONES = [
-  { id: 'mood', label: '마음의소리', emoji: '💭', x: 80, y: 80, width: 340, height: 280 },
-  { id: 'kpi', label: 'KPI 관리실', emoji: '📊', x: 480, y: 80, width: 340, height: 280 },
-  { id: 'voc', label: 'VOC 센터', emoji: '📞', x: 80, y: 500, width: 340, height: 280 },
-  { id: 'idea', label: '아이디어 보드', emoji: '💡', x: 480, y: 500, width: 340, height: 280 },
-  { id: 'lounge', label: '라운지', emoji: '☕', x: 900, y: 80, width: 300, height: 360 },
-  { id: 'note', label: '익명 쪽지함', emoji: '✉️', x: 900, y: 500, width: 300, height: 280 },
-  { id: 'notice', label: '공지게시판', emoji: '📢', x: 80, y: 860, width: 340, height: 200 },
+// ═══ 팀별 설정 (v4) ═══
+export const TEAM_CONFIGS = {
+  증권ITO: {
+    theme: 'stock',
+    color: '#00D68F',
+    subColor: '#FF4757',
+    floor: '#0d2818',
+    // 타운 위치 (삼각형 상단 중앙)
+    town: { x: 800, y: 50, w: 800, h: 600 },
+    spawn: { x: 1200, y: 300 },
+  },
+  생명ITO: {
+    theme: 'life',
+    color: '#6C5CE7',
+    subColor: '#FFC312',
+    floor: '#1a0d2e',
+    // 타운 위치 (좌하)
+    town: { x: 50, y: 900, w: 800, h: 600 },
+    spawn: { x: 450, y: 1200 },
+  },
+  손보ITO: {
+    theme: 'shield',
+    color: '#0984E3',
+    subColor: '#FD7272',
+    floor: '#0d1a2e',
+    // 타운 위치 (우하)
+    town: { x: 1550, y: 900, w: 800, h: 600 },
+    spawn: { x: 1950, y: 1200 },
+  },
+} as const;
+export type TeamConfigKey = keyof typeof TEAM_CONFIGS;
+
+// 중앙 광장
+export const CENTRAL_PLAZA = { x: 800, y: 650, w: 800, h: 500 } as const;
+
+// ═══ v4 Zone 정의 — 팀별 + 공용 ═══
+export const TEAM_ZONES = [
+  // 증권ITO 타운
+  { id: 'stock-lobby', team: '증권ITO' as const, label: '🏠 증권 로비', emoji: '💭', x: 840, y: 90, width: 340, height: 240 },
+  { id: 'stock-kpi', team: '증권ITO' as const, label: '📊 증권 KPI', emoji: '📊', x: 1220, y: 90, width: 340, height: 240 },
+  { id: 'stock-notice', team: '증권ITO' as const, label: '📢 증권 공지', emoji: '📢', x: 1030, y: 370, width: 340, height: 240 },
+
+  // 생명ITO 타운
+  { id: 'life-lobby', team: '생명ITO' as const, label: '🏠 생명 로비', emoji: '💭', x: 90, y: 940, width: 340, height: 240 },
+  { id: 'life-kpi', team: '생명ITO' as const, label: '📊 생명 KPI', emoji: '📊', x: 470, y: 940, width: 340, height: 240 },
+  { id: 'life-notice', team: '생명ITO' as const, label: '📢 생명 공지', emoji: '📢', x: 280, y: 1220, width: 340, height: 240 },
+
+  // 손보ITO 타운
+  { id: 'shield-lobby', team: '손보ITO' as const, label: '🏠 손보 로비', emoji: '💭', x: 1590, y: 940, width: 340, height: 240 },
+  { id: 'shield-kpi', team: '손보ITO' as const, label: '📊 손보 KPI', emoji: '📊', x: 1970, y: 940, width: 340, height: 240 },
+  { id: 'shield-notice', team: '손보ITO' as const, label: '📢 손보 공지', emoji: '📢', x: 1780, y: 1220, width: 340, height: 240 },
 ] as const;
+
+export const SHARED_ZONES = [
+  { id: 'voc', team: null, label: '📞 VOC 센터', emoji: '📞', x: 840, y: 700, width: 340, height: 240 },
+  { id: 'idea', team: null, label: '💡 아이디어 보드', emoji: '💡', x: 1220, y: 700, width: 340, height: 240 },
+] as const;
+
+// 전체 Zone (하위 호환용)
+export const ZONES = [...TEAM_ZONES, ...SHARED_ZONES] as const;
 export type ZoneId = (typeof ZONES)[number]['id'];
 
 // NPC 팀원 데이터
@@ -123,9 +173,9 @@ export const CHAT_MESSAGES = [
 // 이모지 반응 목록
 export const REACTION_EMOJIS = ['🤘', '👏', '❤️', '😆', '🎉', '🔥'] as const;
 
-// 맵 크기
-export const MAP_WIDTH = 1800;
-export const MAP_HEIGHT = 1200;
+// 맵 크기 (v4: 2400x2000)
+export const MAP_WIDTH = 2400;
+export const MAP_HEIGHT = 2000;
 
 // 초대 코드 (숫자만, 관리자 자유 지정)
 

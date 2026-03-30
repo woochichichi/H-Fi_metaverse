@@ -20,7 +20,7 @@ const URGENCY_STYLE: Record<UrgencyLevel, string> = {
 };
 
 export default function NoticeForm({ onClose, onCreated }: NoticeFormProps) {
-  const { user } = useAuthStore();
+  const { user, profile } = useAuthStore();
   const { createNotice } = useNotices();
   const { addToast } = useUiStore();
   const { upload, uploading } = useFileUpload({
@@ -32,7 +32,7 @@ export default function NoticeForm({ onClose, onCreated }: NoticeFormProps) {
   const [category, setCategory] = useState<NoticeCategory>('일반');
   const [pinned, setPinned] = useState(false);
   const [targetUnit, setTargetUnit] = useState<string>('');
-  const [targetTeam, setTargetTeam] = useState<string>('');
+  const [targetTeam, setTargetTeam] = useState<string>(profile?.team ?? '');
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [files, setFiles] = useState<File[]>([]);

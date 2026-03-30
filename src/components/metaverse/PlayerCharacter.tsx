@@ -2,8 +2,8 @@ import { useEffect, useRef, useCallback } from 'react';
 import CharacterSVG from './CharacterSVG';
 import { useMetaverseStore } from '../../stores/metaverseStore';
 import { useUiStore } from '../../stores/uiStore';
-import { ZONES, MAP_WIDTH, MAP_HEIGHT } from '../../lib/constants';
-import type { ZoneId } from '../../lib/constants';
+import { ZONES, MAP_WIDTH, MAP_HEIGHT, TEAM_CONFIGS } from '../../lib/constants';
+import type { ZoneId, TeamConfigKey } from '../../lib/constants';
 import { useAuthStore } from '../../stores/authStore';
 
 const SPEED = 4;
@@ -17,6 +17,20 @@ export default function PlayerCharacter() {
   const keysRef = useRef<Set<string>>(new Set());
   const rafRef = useRef<number>(0);
   const posRef = useRef(playerPosition);
+  const spawnedRef = useRef(false);
+
+  // 팀 기반 스폰
+  useEffect(() => {
+    if (spawnedRef.current) return;
+    const team = profile?.team as TeamConfigKey | undefined;
+    const cfg = team ? TEAM_CONFIGS[team] : null;
+    if (cfg) {
+      const spawn = cfg.spawn;
+      posRef.current = spawn;
+      setPlayerPosition(spawn);
+    }
+    spawnedRef.current = true;
+  }, [profile?.team, setPlayerPosition]);
 
   // 키 이벤트
   useEffect(() => {

@@ -8,7 +8,7 @@ import { useVocs, useVocRealtime } from '../../hooks/useVocs';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
 import { supabase } from '../../lib/supabase';
-import { VOC_CATEGORIES, VOC_STATUSES, TEAMS } from '../../lib/constants';
+import { VOC_CATEGORIES, VOC_STATUSES, TEAM_CONFIGS } from '../../lib/constants';
 import type { Voc } from '../../types';
 import type { VocCategory, VocStatus } from '../../lib/constants';
 
@@ -194,7 +194,7 @@ export default function VocPanel({ onClose }: VocPanelProps) {
               className="flex-1 rounded-lg bg-white/[.06] px-2 py-1 text-[11px] text-text-secondary outline-none"
             >
               <option value="">팀: 전체</option>
-              {TEAMS.map((t) => (
+              {Object.keys(TEAM_CONFIGS).map((t) => (
                 <option key={t} value={t}>{t}</option>
               ))}
             </select>

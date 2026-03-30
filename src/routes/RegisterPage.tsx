@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, Eye, EyeOff, Ticket, Mail, Lock, UserCircle } from 'lucide-react';
-import { TEAMS } from '../lib/constants';
+import { TEAMS, TEAM_CONFIGS } from '../lib/constants';
 import { isAllowedEmail } from '../lib/utils';
 import { validateInviteCode, signUp, checkNicknameAvailable } from '../hooks/useAuth';
 import { useAuthStore } from '../stores/authStore';
@@ -306,7 +306,8 @@ export default function RegisterPage() {
                   className="w-full rounded-lg bg-bg-primary px-3 py-2.5 text-sm text-text-primary outline-none ring-1 ring-bg-tertiary transition-colors focus:ring-accent disabled:opacity-50"
                 >
                   <option value="">팀을 선택하세요</option>
-                  {TEAMS.map((t) => (
+                  {/* Phase 1: TEAM_CONFIGS에 있는 3개 팀만 표시 (한금서 Phase 2) */}
+                  {TEAMS.filter((t) => t in TEAM_CONFIGS).map((t) => (
                     <option key={t} value={t}>{t}</option>
                   ))}
                 </select>

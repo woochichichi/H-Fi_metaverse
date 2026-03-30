@@ -1,6 +1,7 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, type JSX } from 'react';
+import { TEAM_CONFIGS, CENTRAL_PLAZA } from '../../lib/constants';
 
-// ═══ SVG Plants ═══
+// ═══ SVG Plants (픽셀 스타일 — Sprint B에서 더 개선) ═══
 function PlantSmall({ x, y }: { x: number; y: number }) {
   return (
     <div className="absolute z-[6]" style={{ left: x, top: y }}>
@@ -41,15 +42,7 @@ function Desk({ x, y, w = 84, h = 46 }: { x: number; y: number; w?: number; h?: 
           border: '2px solid #b8904e',
           boxShadow: '0 3px 0 #a07844, inset 0 1px 0 rgba(255,255,255,.2)',
         }}
-      >
-        <div
-          className="absolute rounded-sm"
-          style={{
-            top: 3, left: 3, right: 3, bottom: 6,
-            background: 'linear-gradient(180deg,#e8cca0,#d4b888)',
-          }}
-        />
-      </div>
+      />
     </div>
   );
 }
@@ -71,13 +64,6 @@ function Monitor({ x, y }: { x: number; y: number }) {
           style={{ top: 2, left: 2, right: 2, bottom: 4 }}
         />
       </div>
-      <div
-        className="absolute"
-        style={{
-          bottom: -4, left: '50%', transform: 'translateX(-50%)',
-          width: 8, height: 4, background: '#555', borderRadius: '0 0 2px 2px',
-        }}
-      />
     </div>
   );
 }
@@ -112,30 +98,14 @@ function RoundTable({ x, y, size = 60 }: { x: number; y: number; size?: number }
   );
 }
 
-function SofaH({ x, y }: { x: number; y: number }) {
+function SofaH({ x, y, color = '#8b7bc4' }: { x: number; y: number; color?: string }) {
   return (
     <div
       className="absolute z-[4] rounded-lg"
       style={{
         left: x, top: y, width: 76, height: 34,
-        background: 'linear-gradient(180deg,#8b7bc4,#7c6bc4)',
-        border: '2px solid #6C5CE7',
-        boxShadow: '0 3px 0 rgba(0,0,0,.15)',
-      }}
-    >
-      <div className="absolute rounded" style={{ top: 4, left: 4, right: 4, bottom: 4, background: 'rgba(255,255,255,.08)' }} />
-    </div>
-  );
-}
-
-function SofaV({ x, y }: { x: number; y: number }) {
-  return (
-    <div
-      className="absolute z-[4] rounded-lg"
-      style={{
-        left: x, top: y, width: 34, height: 76,
-        background: 'linear-gradient(90deg,#8b7bc4,#7c6bc4)',
-        border: '2px solid #6C5CE7',
+        background: `linear-gradient(180deg,${color},${color}dd)`,
+        border: `2px solid ${color}`,
         boxShadow: '0 3px 0 rgba(0,0,0,.15)',
       }}
     >
@@ -154,23 +124,7 @@ function Whiteboard({ x, y, w = 90 }: { x: number; y: number; w?: number }) {
         border: '3px solid #bbb',
         boxShadow: '0 2px 0 rgba(0,0,0,.1)',
       }}
-    >
-      <div className="absolute rounded-sm" style={{ top: 3, left: 3, right: 3, bottom: 3, border: '1px dashed #ccc' }} />
-    </div>
-  );
-}
-
-function TVScreen({ x, y }: { x: number; y: number }) {
-  return (
-    <div
-      className="absolute z-[5] overflow-hidden rounded-sm"
-      style={{
-        left: x, top: y, width: 64, height: 8,
-        background: '#111', border: '3px solid #333', boxShadow: '0 2px 0 #000',
-      }}
-    >
-      <div className="absolute rounded-sm" style={{ top: 2, left: 2, right: 2, bottom: 2, background: 'linear-gradient(135deg,#1a3a5c,#0a1a2c)' }} />
-    </div>
+    />
   );
 }
 
@@ -214,42 +168,253 @@ function VendingMachine({ x, y }: { x: number; y: number }) {
   );
 }
 
+// ═══ 팀별 픽셀 장식 ═══
+function PixelDecoration({ x, y, type }: { x: number; y: number; type: 'chart' | 'heart' | 'car' | 'bulb' | 'phone' }) {
+  const decos: Record<string, JSX.Element> = {
+    // 증권: 캔들스틱 차트
+    chart: (
+      <svg width="40" height="32" viewBox="0 0 10 8" style={{ imageRendering: 'pixelated' }}>
+        <rect x="1" y="4" width="2" height="4" fill="#00D68F" />
+        <rect x="1.5" y="2" width="1" height="2" fill="#00D68F" />
+        <rect x="4" y="1" width="2" height="5" fill="#FF4757" />
+        <rect x="4.5" y="0" width="1" height="1" fill="#FF4757" />
+        <rect x="4.5" y="6" width="1" height="2" fill="#FF4757" />
+        <rect x="7" y="3" width="2" height="5" fill="#00D68F" />
+        <rect x="7.5" y="1" width="1" height="2" fill="#00D68F" />
+      </svg>
+    ),
+    // 생명: 하트
+    heart: (
+      <svg width="36" height="36" viewBox="0 0 9 9" style={{ imageRendering: 'pixelated' }}>
+        <rect x="1" y="0" width="2" height="1" fill="#FFC312" />
+        <rect x="6" y="0" width="2" height="1" fill="#FFC312" />
+        <rect x="0" y="1" width="4" height="1" fill="#6C5CE7" />
+        <rect x="5" y="1" width="4" height="1" fill="#6C5CE7" />
+        <rect x="0" y="2" width="9" height="1" fill="#6C5CE7" />
+        <rect x="0" y="3" width="9" height="1" fill="#7d6df7" />
+        <rect x="1" y="4" width="7" height="1" fill="#7d6df7" />
+        <rect x="2" y="5" width="5" height="1" fill="#6C5CE7" />
+        <rect x="3" y="6" width="3" height="1" fill="#6C5CE7" />
+        <rect x="4" y="7" width="1" height="1" fill="#6C5CE7" />
+      </svg>
+    ),
+    // 손보: 자동차
+    car: (
+      <svg width="40" height="32" viewBox="0 0 10 8" style={{ imageRendering: 'pixelated' }}>
+        {/* 차체 상단 (캐빈) */}
+        <rect x="3" y="0" width="4" height="1" fill="#3498db" />
+        <rect x="2" y="1" width="6" height="1" fill="#3498db" />
+        {/* 유리 */}
+        <rect x="3" y="1" width="2" height="1" fill="#85C1E9" />
+        <rect x="6" y="1" width="1" height="1" fill="#85C1E9" />
+        {/* 차체 하단 */}
+        <rect x="1" y="2" width="8" height="1" fill="#0984E3" />
+        <rect x="0" y="3" width="10" height="1" fill="#0984E3" />
+        <rect x="0" y="4" width="10" height="1" fill="#0984E3" />
+        {/* 헤드라이트 */}
+        <rect x="0" y="3" width="1" height="1" fill="#FFC312" />
+        <rect x="9" y="3" width="1" height="1" fill="#FD7272" />
+        {/* 바퀴 */}
+        <rect x="1" y="5" width="2" height="2" fill="#333" />
+        <rect x="7" y="5" width="2" height="2" fill="#333" />
+        {/* 휠캡 */}
+        <rect x="1.5" y="5.5" width="1" height="1" fill="#888" />
+        <rect x="7.5" y="5.5" width="1" height="1" fill="#888" />
+      </svg>
+    ),
+    // 아이디어: 전구
+    bulb: (
+      <svg width="28" height="36" viewBox="0 0 7 9" style={{ imageRendering: 'pixelated' }}>
+        <rect x="2" y="0" width="3" height="1" fill="#FDCB6E" />
+        <rect x="1" y="1" width="5" height="1" fill="#FDCB6E" />
+        <rect x="1" y="2" width="5" height="1" fill="#FFC312" />
+        <rect x="1" y="3" width="5" height="1" fill="#FDCB6E" />
+        <rect x="2" y="4" width="3" height="1" fill="#FDCB6E" />
+        <rect x="2" y="5" width="3" height="1" fill="#aaa" />
+        <rect x="2" y="6" width="3" height="1" fill="#888" />
+        <rect x="3" y="7" width="1" height="1" fill="#666" />
+      </svg>
+    ),
+    // VOC: 전화기
+    phone: (
+      <svg width="28" height="28" viewBox="0 0 7 7" style={{ imageRendering: 'pixelated' }}>
+        <rect x="1" y="0" width="5" height="1" fill="#E84393" />
+        <rect x="0" y="1" width="7" height="1" fill="#E84393" />
+        <rect x="0" y="2" width="1" height="3" fill="#E84393" />
+        <rect x="6" y="2" width="1" height="3" fill="#E84393" />
+        <rect x="2" y="2" width="3" height="2" fill="#333" />
+        <rect x="1" y="5" width="5" height="1" fill="#E84393" />
+        <rect x="2" y="6" width="3" height="1" fill="#c0392b" />
+      </svg>
+    ),
+  };
+
+  return (
+    <div className="absolute z-[6] pointer-events-none" style={{ left: x, top: y }}>
+      {decos[type]}
+    </div>
+  );
+}
+
 // ═══ Room with walls ═══
-function Room({ x, y, w, h, floor, label, teamLabel }: {
-  x: number; y: number; w: number; h: number; floor: string; label: string; teamLabel: string;
+function Room({ x, y, w, h, floor, label, teamLabel, borderColor }: {
+  x: number; y: number; w: number; h: number; floor: string; label: string; teamLabel: string; borderColor?: string;
 }) {
+  const wallColor = borderColor || '#5d6d7d';
   return (
     <>
-      {/* 방 라벨 — overflow-hidden 밖에 배치 */}
       <div className="absolute z-[15] -translate-x-1/2 whitespace-nowrap rounded-[10px] px-3 py-[3px] text-[11px] font-semibold text-white pointer-events-none" style={{ left: x + w / 2, top: y - 22, background: 'rgba(0,0,0,.55)', backdropFilter: 'blur(4px)' }}>
         {label}
       </div>
       <div className="absolute z-[15] whitespace-nowrap rounded-lg px-[10px] py-[2px] text-[10px] font-medium text-white/60 pointer-events-none" style={{ left: x + 10, top: y + 8, background: 'rgba(0,0,0,.35)' }}>
         {teamLabel}
       </div>
-      {/* 방 바닥 */}
-      <div className="absolute overflow-hidden rounded-sm" style={{ left: x, top: y, width: w, height: h, boxShadow: '0 2px 0 rgba(0,0,0,.15)' }}>
+      <div className="absolute overflow-hidden" style={{ left: x, top: y, width: w, height: h, boxShadow: '4px 4px 0px rgba(0,0,0,.3)', border: `2px solid ${wallColor}` }}>
         <div className="absolute inset-0" style={{ background: floor }} />
+        {/* 격자 패턴 오버레이 */}
+        <div className="absolute inset-0 opacity-[0.06]" style={{
+          backgroundImage: 'linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px)',
+          backgroundSize: '32px 32px',
+        }} />
       </div>
-      {/* 벽 — 상/하/좌/우 */}
-      <div className="absolute z-[3] rounded-sm" style={{ left: x, top: y, width: w, height: 8, background: 'linear-gradient(180deg,#7a8a9a,#5d6d7d)', boxShadow: '0 2px 0 rgba(0,0,0,.1)' }} />
-      <div className="absolute z-[3] rounded-sm" style={{ left: x, top: y + h, width: w, height: 8, background: 'linear-gradient(180deg,#8899aa,#6b7b8d)', boxShadow: '0 2px 0 rgba(0,0,0,.1)' }} />
-      <div className="absolute z-[3] rounded-sm" style={{ left: x, top: y, width: 8, height: h, background: 'linear-gradient(90deg,#7a8a9a,#5d6d7d)', boxShadow: '2px 0 0 rgba(0,0,0,.1)' }} />
-      <div className="absolute z-[3] rounded-sm" style={{ left: x + w, top: y, width: 8, height: h, background: 'linear-gradient(90deg,#8899aa,#6b7b8d)', boxShadow: '2px 0 0 rgba(0,0,0,.1)' }} />
+      {/* 벽 */}
+      <div className="absolute z-[3] rounded-sm" style={{ left: x, top: y, width: w, height: 8, background: `linear-gradient(180deg,${wallColor},${wallColor}aa)`, boxShadow: '0 2px 0 rgba(0,0,0,.1)' }} />
+      <div className="absolute z-[3] rounded-sm" style={{ left: x, top: y + h, width: w, height: 8, background: `linear-gradient(180deg,${wallColor}ee,${wallColor}88)`, boxShadow: '0 2px 0 rgba(0,0,0,.1)' }} />
+      <div className="absolute z-[3] rounded-sm" style={{ left: x, top: y, width: 8, height: h, background: `linear-gradient(90deg,${wallColor},${wallColor}aa)`, boxShadow: '2px 0 0 rgba(0,0,0,.1)' }} />
+      <div className="absolute z-[3] rounded-sm" style={{ left: x + w, top: y, width: 8, height: h, background: `linear-gradient(90deg,${wallColor}ee,${wallColor}88)`, boxShadow: '2px 0 0 rgba(0,0,0,.1)' }} />
     </>
   );
 }
 
-// ═══ Ground SVG ═══
-function Ground() {
+// ═══ 팀 타운 가구 배치 (3개 Zone씩) ═══
+function TeamTownFurniture({ ox, oy, teamColor, theme }: { ox: number; oy: number; teamColor: string; theme: string }) {
+  const decoType = theme === 'stock' ? 'chart' : theme === 'life' ? 'heart' : 'car';
   return (
-    <svg width="1800" height="1200" className="absolute left-0 top-0">
+    <>
+      {/* 로비 (좌측 Zone) — 소파 + 테이블 */}
+      <SofaH x={ox + 60} y={oy + 80} color={teamColor} />
+      <SofaH x={ox + 200} y={oy + 80} color={teamColor} />
+      <RoundTable x={ox + 130} y={oy + 130} size={50} />
+      <RoundTable x={ox + 260} y={oy + 130} size={50} />
+      <PlantLarge x={ox + 10} y={oy + 10} />
+      <PlantSmall x={ox + 310} y={oy + 10} />
+
+      {/* KPI실 (우측 Zone) — 책상 + 모니터 */}
+      {[0, 1, 2].map((i) => (
+        <span key={`kpi-${i}`}>
+          <Desk x={ox + 410 + i * 105} y={oy + 60} />
+          <Monitor x={ox + 430 + i * 105} y={oy + 50} />
+          <Chair x={ox + 430 + i * 105} y={oy + 112} />
+        </span>
+      ))}
+      {[0, 1, 2].map((i) => (
+        <span key={`kpi2-${i}`}>
+          <Desk x={ox + 410 + i * 105} y={oy + 160} />
+          <Monitor x={ox + 430 + i * 105} y={oy + 150} />
+          <Chair x={ox + 430 + i * 105} y={oy + 212} />
+        </span>
+      ))}
+      <Whiteboard x={ox + 450} y={oy + 20} />
+
+      {/* 공지게시판 (하단 Zone) — 화이트보드 + 의자 */}
+      <Whiteboard x={ox + 200} y={oy + 310} w={120} />
+      <Whiteboard x={ox + 360} y={oy + 310} w={100} />
+      <Bookshelf x={ox + 170} y={oy + 340} />
+      <Bookshelf x={ox + 170} y={oy + 390} />
+      <Chair x={ox + 280} y={oy + 380} />
+      <Chair x={ox + 340} y={oy + 380} />
+      <Chair x={ox + 400} y={oy + 380} />
+      <Desk x={ox + 260} y={oy + 420} w={120} />
+      <PlantSmall x={ox + 170} y={oy + 450} />
+      <PlantSmall x={ox + 500} y={oy + 310} />
+
+      {/* 팀별 장식 */}
+      <PixelDecoration x={ox + 340} y={oy + 30} type={decoType} />
+      <PixelDecoration x={ox + 730} y={oy + 30} type={decoType} />
+      <PixelDecoration x={ox + 540} y={oy + 500} type={decoType} />
+    </>
+  );
+}
+
+// ═══ 중앙 광장 가구 ═══
+function PlazaFurniture() {
+  const px = CENTRAL_PLAZA.x;
+  const py = CENTRAL_PLAZA.y;
+  return (
+    <>
+      {/* VoC 센터 (좌측) */}
+      <Desk x={px + 60} y={py + 80} />
+      <Monitor x={px + 80} y={py + 70} />
+      <Chair x={px + 80} y={py + 132} />
+      <Desk x={px + 190} y={py + 80} />
+      <Monitor x={px + 210} y={py + 70} />
+      <Chair x={px + 210} y={py + 132} />
+      <Whiteboard x={px + 80} y={py + 40} />
+      <PlantLarge x={px + 10} y={py + 30} />
+      <PlantSmall x={px + 300} y={py + 30} />
+
+      {/* 아이디어 보드 (우측) */}
+      <RoundTable x={px + 460} y={py + 70} size={56} />
+      <RoundTable x={px + 600} y={py + 70} size={56} />
+      <RoundTable x={px + 460} y={py + 170} size={56} />
+      <RoundTable x={px + 600} y={py + 170} size={56} />
+      <SofaH x={px + 440} y={py + 40} />
+      <SofaH x={px + 580} y={py + 40} />
+      <Whiteboard x={px + 470} y={py + 20} w={120} />
+      <PlantSmall x={px + 420} y={py + 30} />
+      <PlantSmall x={px + 740} y={py + 30} />
+
+      {/* 광장 장식 — 분수대(원) + 이정표 */}
+      <div
+        className="absolute z-[6] rounded-full"
+        style={{
+          left: px + 350, top: py + 320,
+          width: 80, height: 80,
+          background: 'radial-gradient(circle, #6bc5ff44, #6bc5ff22, transparent)',
+          border: '3px solid #6bc5ff66',
+          boxShadow: '0 0 20px rgba(107,197,255,.2)',
+        }}
+      />
+      {/* 이정표 */}
+      <div className="absolute z-[7]" style={{ left: px + 380, top: py + 260 }}>
+        <div style={{ width: 4, height: 40, background: '#8B6914', margin: '0 auto' }} />
+        <div className="absolute text-[8px] font-bold text-white whitespace-nowrap" style={{ top: 0, left: 10, background: 'rgba(0,0,0,.5)', padding: '1px 4px', borderRadius: 2 }}>
+          ↑ 증권
+        </div>
+        <div className="absolute text-[8px] font-bold text-white whitespace-nowrap" style={{ top: 12, right: 10, background: 'rgba(0,0,0,.5)', padding: '1px 4px', borderRadius: 2 }}>
+          ↙ 생명
+        </div>
+        <div className="absolute text-[8px] font-bold text-white whitespace-nowrap" style={{ top: 24, left: 10, background: 'rgba(0,0,0,.5)', padding: '1px 4px', borderRadius: 2 }}>
+          ↘ 손보
+        </div>
+      </div>
+
+      <VendingMachine x={px + 730} y={py + 380} />
+      <VendingMachine x={px + 760} y={py + 380} />
+
+      {/* 광장 장식 아이콘 */}
+      <PixelDecoration x={px + 20} y={py + 240} type="phone" />
+      <PixelDecoration x={px + 340} y={py + 20} type="phone" />
+      <PixelDecoration x={px + 420} y={py + 240} type="bulb" />
+      <PixelDecoration x={px + 740} y={py + 20} type="bulb" />
+    </>
+  );
+}
+
+// ═══ Ground SVG (2400x2000) ═══
+function Ground() {
+  const stock = TEAM_CONFIGS.증권ITO.town;
+  const life = TEAM_CONFIGS.생명ITO.town;
+  const shield = TEAM_CONFIGS.손보ITO.town;
+  const plaza = CENTRAL_PLAZA;
+
+  return (
+    <svg width="2400" height="2000" className="absolute left-0 top-0">
       <defs>
         <pattern id="grass" width="16" height="16" patternUnits="userSpaceOnUse">
-          <rect width="16" height="16" fill="#7da87d" />
-          <circle cx="4" cy="4" r="1" fill="#6b9a6b" opacity="0.5" />
-          <circle cx="12" cy="12" r="1" fill="#8ab88a" opacity="0.4" />
-          <circle cx="8" cy="2" r="0.8" fill="#6b9a6b" opacity="0.3" />
+          <rect width="16" height="16" fill="#5a7a5a" />
+          <circle cx="4" cy="4" r="1" fill="#4d6d4d" opacity="0.5" />
+          <circle cx="12" cy="12" r="1" fill="#6b8a6b" opacity="0.4" />
         </pattern>
         <pattern id="path-tile" width="32" height="32" patternUnits="userSpaceOnUse">
           <rect width="32" height="32" fill="#c8c0b0" />
@@ -257,152 +422,43 @@ function Ground() {
           <rect x="16" y="16" width="16" height="16" fill="#ccc4b4" opacity="0.5" />
         </pattern>
       </defs>
-      <rect width="1800" height="1200" fill="url(#grass)" />
-      {/* 복도 (돌길) */}
-      <rect x="420" y="0" width="60" height="1200" fill="url(#path-tile)" rx="2" />
-      <rect x="840" y="0" width="60" height="1200" fill="url(#path-tile)" rx="2" />
-      <rect x="0" y="370" width="1800" height="60" fill="url(#path-tile)" rx="2" />
-      <rect x="0" y="790" width="1800" height="60" fill="url(#path-tile)" rx="2" />
+
+      {/* 전체 잔디 */}
+      <rect width="2400" height="2000" fill="url(#grass)" />
+
+      {/* 도로: 증권↔중앙광장 (세로) */}
+      <rect x={stock.x + stock.w / 2 - 30} y={stock.y + stock.h} width="60" height={plaza.y - stock.y - stock.h} fill="url(#path-tile)" />
+
+      {/* 도로: 생명↔중앙광장 (대각선 근사 — 꺾인 도로) */}
+      <rect x={life.x + life.w} y={plaza.y + plaza.h / 2 - 30} width={plaza.x - life.x - life.w} height="60" fill="url(#path-tile)" />
+      <rect x={life.x + life.w / 2 - 30} y={life.y - 60} width="60" height={plaza.y + plaza.h / 2 - life.y + 90} fill="url(#path-tile)" />
+
+      {/* 도로: 손보↔중앙광장 */}
+      <rect x={plaza.x + plaza.w} y={plaza.y + plaza.h / 2 - 30} width={shield.x - plaza.x - plaza.w} height="60" fill="url(#path-tile)" />
+      <rect x={shield.x + shield.w / 2 - 30} y={shield.y - 60} width="60" height={plaza.y + plaza.h / 2 - shield.y + 90} fill="url(#path-tile)" />
     </svg>
   );
 }
 
-// ═══ All Furniture ═══
-function Furniture() {
-  return (
-    <>
-      {/* ── 마음의소리 room ── */}
-      <Desk x={120} y={120} />
-      <Monitor x={140} y={110} />
-      <Chair x={140} y={172} />
-      <Desk x={250} y={120} />
-      <Monitor x={270} y={110} />
-      <Chair x={270} y={172} />
-      <RoundTable x={170} y={240} size={54} />
-      <SofaH x={110} y={300} />
-      <SofaH x={240} y={300} />
-      <PlantSmall x={70} y={72} />
-      <PlantLarge x={70} y={320} />
-      <PlantSmall x={388} y={72} />
-      <PlantSmall x={388} y={310} />
+// ═══ ROOMS 정의 (v4 삼각형 배치) ═══
+const ROOMS: Array<{ x: number; y: number; w: number; h: number; floor: string; label: string; team: string; borderColor?: string }> = [];
 
-      {/* ── KPI room ── */}
-      {[0, 1, 2].map((i) => (
-        <span key={`kpi-row1-${i}`}>
-          <Desk x={530 + i * 105} y={120} />
-          <Monitor x={550 + i * 105} y={110} />
-          <Chair x={550 + i * 105} y={172} />
-        </span>
-      ))}
-      {[0, 1, 2].map((i) => (
-        <span key={`kpi-row2-${i}`}>
-          <Desk x={530 + i * 105} y={230} />
-          <Monitor x={550 + i * 105} y={220} />
-          <Chair x={550 + i * 105} y={282} />
-        </span>
-      ))}
-      <Whiteboard x={570} y={78} />
-      <PlantSmall x={478} y={72} />
-      <PlantSmall x={478} y={310} />
-      <PlantSmall x={808} y={72} />
-      <PlantSmall x={808} y={310} />
-
-      {/* ── VOC room ── */}
-      <Desk x={120} y={510} />
-      <Monitor x={140} y={500} />
-      <Chair x={140} y={562} />
-      <Desk x={250} y={510} />
-      <Monitor x={270} y={500} />
-      <Chair x={270} y={562} />
-      <Desk x={120} y={620} />
-      <Monitor x={140} y={610} />
-      <Chair x={140} y={672} />
-      <Desk x={250} y={620} />
-      <Monitor x={270} y={610} />
-      <Chair x={270} y={672} />
-      <Whiteboard x={180} y={460} />
-      <PlantLarge x={70} y={440} />
-      <PlantSmall x={388} y={440} />
-      <PlantSmall x={70} y={730} />
-      <PlantSmall x={388} y={730} />
-
-      {/* ── Idea Board ── */}
-      <RoundTable x={550} y={540} size={56} />
-      <RoundTable x={700} y={540} size={56} />
-      <RoundTable x={550} y={670} size={56} />
-      <RoundTable x={700} y={670} size={56} />
-      <SofaH x={510} y={490} />
-      <SofaH x={660} y={490} />
-      <Whiteboard x={560} y={460} w={120} />
-      <PlantSmall x={478} y={440} />
-      <PlantSmall x={808} y={440} />
-      <PlantSmall x={478} y={730} />
-      <PlantSmall x={808} y={730} />
-
-      {/* ── Lounge ── */}
-      <SofaV x={920} y={100} />
-      <SofaV x={920} y={220} />
-      <RoundTable x={970} y={140} size={50} />
-      <RoundTable x={970} y={290} size={50} />
-      <VendingMachine x={1140} y={80} />
-      <VendingMachine x={1180} y={80} />
-      <Bookshelf x={1080} y={78} />
-      <Bookshelf x={1140} y={78} />
-      <PlantLarge x={910} y={380} />
-      <PlantLarge x={1180} y={380} />
-      <PlantSmall x={1180} y={100} />
-
-      {/* ── 쪽지함 room ── */}
-      <Desk x={960} y={550} />
-      <Monitor x={980} y={540} />
-      <Chair x={980} y={600} />
-      <Desk x={1080} y={550} />
-      <Monitor x={1100} y={540} />
-      <Chair x={1100} y={600} />
-      <SofaH x={980} y={700} />
-      <PlantSmall x={910} y={490} />
-      <PlantSmall x={1190} y={490} />
-      <PlantSmall x={910} y={740} />
-      <PlantSmall x={1190} y={740} />
-
-      {/* ── 공지게시판 room ── */}
-      <Whiteboard x={120} y={848} w={120} />
-      <Whiteboard x={280} y={848} w={100} />
-      <Bookshelf x={70} y={880} />
-      <Bookshelf x={70} y={930} />
-      <Chair x={180} y={920} />
-      <Chair x={240} y={920} />
-      <Chair x={300} y={920} />
-      <Desk x={160} y={960} w={120} />
-      <Chair x={180} y={1010} />
-      <Chair x={240} y={1010} />
-      <PlantSmall x={70} y={1020} />
-      <PlantSmall x={388} y={840} />
-      <PlantSmall x={388} y={1020} />
-
-      {/* ── 회의실 ── */}
-      <Desk x={980} y={890} w={140} h={54} />
-      {[0, 1, 2, 3].map((i) => <Chair key={`conf-top-${i}`} x={990 + i * 35} y={870} />)}
-      {[0, 1, 2, 3].map((i) => <Chair key={`conf-bot-${i}`} x={990 + i * 35} y={950} />)}
-      <TVScreen x={1010} y={858} />
-      <PlantSmall x={910} y={840} />
-      <PlantSmall x={1190} y={840} />
-      <PlantSmall x={1190} y={990} />
-    </>
-  );
+// 팀 타운 방 생성
+for (const [teamName, cfg] of Object.entries(TEAM_CONFIGS)) {
+  const t = cfg.town;
+  // 로비
+  ROOMS.push({ x: t.x + 20, y: t.y + 20, w: 360, h: 260, floor: cfg.floor, label: `🏠 ${teamName} 로비`, team: teamName, borderColor: cfg.color });
+  // KPI실
+  ROOMS.push({ x: t.x + 400, y: t.y + 20, w: 360, h: 260, floor: cfg.floor, label: `📊 ${teamName} KPI`, team: teamName, borderColor: cfg.color });
+  // 공지게시판
+  ROOMS.push({ x: t.x + 210, y: t.y + 300, w: 360, h: 260, floor: cfg.floor, label: `📢 ${teamName} 공지`, team: teamName, borderColor: cfg.color });
 }
 
-// ═══ Rooms ═══
-const ROOMS = [
-  { x: 60, y: 60, w: 360, h: 300, floor: '#f0ebe4', label: '💭 마음의소리', team: '조직유닛' },
-  { x: 480, y: 60, w: 360, h: 300, floor: '#e4eef0', label: '📊 KPI 관리실', team: '조직유닛' },
-  { x: 60, y: 440, w: 360, h: 340, floor: '#eee4f0', label: '📞 VOC 센터', team: '전체' },
-  { x: 480, y: 440, w: 360, h: 340, floor: '#f0eee4', label: '💡 아이디어 보드', team: '전체' },
-  { x: 900, y: 60, w: 320, h: 380, floor: '#e8e4f0', label: '☕ 라운지', team: '자유 공간' },
-  { x: 900, y: 480, w: 320, h: 300, floor: '#e4f0ec', label: '✉️ 쪽지함', team: '익명' },
-  { x: 900, y: 840, w: 320, h: 180, floor: '#e4e8f0', label: '🏢 회의실', team: '조직유닛' },
-  { x: 60, y: 840, w: 360, h: 220, floor: '#f0e8e4', label: '📢 공지게시판', team: '전체' },
-];
+// 중앙 광장 방
+ROOMS.push(
+  { x: CENTRAL_PLAZA.x + 20, y: CENTRAL_PLAZA.y + 20, w: 360, h: 260, floor: '#2a1a1a', label: '📞 VOC 센터', team: '공용', borderColor: '#E84393' },
+  { x: CENTRAL_PLAZA.x + 400, y: CENTRAL_PLAZA.y + 20, w: 360, h: 260, floor: '#2a2a1a', label: '💡 아이디어 보드', team: '공용', borderColor: '#FDCB6E' },
+);
 
 interface MapCanvasProps {
   children?: ReactNode;
@@ -410,12 +466,51 @@ interface MapCanvasProps {
 
 export default function MapCanvas({ children }: MapCanvasProps) {
   return (
-    <div className="absolute w-[1800px] h-[1200px]" style={{ imageRendering: 'pixelated' }}>
+    <div className="absolute w-[2400px] h-[2000px]" style={{ imageRendering: 'pixelated' }}>
       <Ground />
       {ROOMS.map((r, i) => (
-        <Room key={i} x={r.x} y={r.y} w={r.w} h={r.h} floor={r.floor} label={r.label} teamLabel={r.team} />
+        <Room key={i} x={r.x} y={r.y} w={r.w} h={r.h} floor={r.floor} label={r.label} teamLabel={r.team} borderColor={r.borderColor} />
       ))}
-      <Furniture />
+
+      {/* 타운 배경 외곽 (팀 컬러 테두리) */}
+      {Object.entries(TEAM_CONFIGS).map(([name, cfg]) => (
+        <div
+          key={name}
+          className="absolute z-[1] rounded-lg pointer-events-none"
+          style={{
+            left: cfg.town.x, top: cfg.town.y, width: cfg.town.w, height: cfg.town.h,
+            border: `3px dashed ${cfg.color}44`,
+            background: `${cfg.color}08`,
+          }}
+        >
+          <div className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg px-4 py-1 text-xs font-bold text-white" style={{ background: `${cfg.color}cc` }}>
+            {name}
+          </div>
+        </div>
+      ))}
+
+      {/* 중앙 광장 외곽 */}
+      <div
+        className="absolute z-[1] rounded-lg pointer-events-none"
+        style={{
+          left: CENTRAL_PLAZA.x, top: CENTRAL_PLAZA.y, width: CENTRAL_PLAZA.w, height: CENTRAL_PLAZA.h,
+          border: '3px dashed rgba(248,181,0,.3)',
+          background: 'rgba(248,181,0,.05)',
+        }}
+      >
+        <div className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg px-4 py-1 text-xs font-bold text-white" style={{ background: 'rgba(248,181,0,.8)' }}>
+          중앙 광장
+        </div>
+      </div>
+
+      {/* 팀 타운 가구 */}
+      {Object.values(TEAM_CONFIGS).map((cfg, i) => (
+        <TeamTownFurniture key={i} ox={cfg.town.x} oy={cfg.town.y} teamColor={cfg.color} theme={cfg.theme} />
+      ))}
+
+      {/* 중앙 광장 가구 */}
+      <PlazaFurniture />
+
       {children}
     </div>
   );

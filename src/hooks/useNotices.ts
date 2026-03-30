@@ -96,13 +96,17 @@ export function useNotices() {
         return { data: null, error: insertError.message };
       }
 
-      // 대상 유저 전체에게 notification 생성
+      // 대상 유저에게 notification 생성 (팀 공지면 같은 팀만)
       if (data) {
         try {
-          const { data: allProfiles } = await supabase
+          let profileQuery = supabase
             .from('profiles')
             .select('id')
             .neq('id', input.author_id);
+          if (input.team) {
+            profileQuery = profileQuery.eq('team', input.team);
+          }
+          const { data: allProfiles } = await profileQuery;
 
           if (allProfiles && allProfiles.length > 0) {
             const notifications = allProfiles.map((p) => ({

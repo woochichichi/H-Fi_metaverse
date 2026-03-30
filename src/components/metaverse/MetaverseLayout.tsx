@@ -15,7 +15,8 @@ import LoungePanel from './LoungePanel';
 import MoodPanel from './MoodPanel';
 import { useMetaverseStore } from '../../stores/metaverseStore';
 import { useUiStore } from '../../stores/uiStore';
-import { MAP_WIDTH, MAP_HEIGHT } from '../../lib/constants';
+import { MAP_WIDTH, MAP_HEIGHT, TEAM_ZONES } from '../../lib/constants';
+import { useAuthStore } from '../../stores/authStore';
 import { X } from 'lucide-react';
 
 // mood 전용 래퍼 (마음의소리 Zone에서 바로 패널 열 때)
@@ -35,22 +36,43 @@ function MoodPanelWrapper({ onClose }: { onClose: () => void }) {
   );
 }
 
-// Zone ID → 패널 매핑
-const ZONE_PANELS: Record<string, React.FC<{ onClose: () => void }>> = {
-  voc: VocPanel,
-  idea: IdeaPanel,
-  notice: ({ onClose }) => <NoticePanel onClose={onClose} />,
-  kpi: KpiPanel,
-  note: NotePanel,
-  lounge: LoungePanel,
-  mood: MoodPanelWrapper,
-};
+// Zone ID → 패널 매핑 (v4: 팀별 zone ID를 기능별 패널로 매핑)
+function getZonePanel(zoneId: string): React.FC<{ onClose: () => void }> | null {
+  if (zoneId === 'voc') return VocPanel;
+  if (zoneId === 'idea') return IdeaPanel;
+  if (zoneId.endsWith('-notice')) return ({ onClose }) => <NoticePanel onClose={onClose} />;
+  if (zoneId.endsWith('-kpi')) return KpiPanel;
+  if (zoneId.endsWith('-lobby')) return MoodPanelWrapper;
+  if (zoneId === 'note') return NotePanel;
+  if (zoneId === 'lounge') return LoungePanel;
+  if (zoneId === 'mood') return MoodPanelWrapper;
+  return null;
+}
+
+// Zone 접근 권한 체크 (v4: 타 팀 KPI/공지 잠금)
+function checkZoneAccess(zoneId: string, userTeam: string | undefined): { allowed: boolean; message?: string } {
+  const zone = TEAM_ZONES.find((z) => z.id === zoneId);
+  if (!zone) return { allowed: true }; // 공용 zone (voc, idea) 또는 old zone
+  if (!userTeam) return { allowed: false, message: '팀 정보가 없습니다' };
+
+  // 같은 팀이면 허용
+  if (zone.team === userTeam) return { allowed: true };
+
+  // 타 팀 KPI/공지 → 잠금
+  if (zoneId.endsWith('-kpi') || zoneId.endsWith('-notice')) {
+    return { allowed: false, message: `🔒 이 공간은 [${zone.team}] 팀 전용입니다` };
+  }
+
+  // 타 팀 로비 → 읽기 전용으로 허용
+  return { allowed: true };
+}
 
 export default function MetaverseLayout() {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const { playerPosition } = useMetaverseStore();
-  const { modalOpen, closeModal } = useUiStore();
+  const { modalOpen, closeModal, addToast } = useUiStore();
+  const { profile } = useAuthStore();
 
   const centerCamera = useCallback(() => {
     const container = containerRef.current;
@@ -88,8 +110,18 @@ export default function MetaverseLayout() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [modalOpen, closeModal]);
 
+  // v4: 타 팀 Zone 접근 시 잠금
+  useEffect(() => {
+    if (!modalOpen) return;
+    const access = checkZoneAccess(modalOpen, profile?.team);
+    if (!access.allowed) {
+      closeModal();
+      if (access.message) addToast(access.message, 'error');
+    }
+  }, [modalOpen, profile?.team, closeModal, addToast]);
+
   // 현재 열린 패널 컴포넌트 결정
-  const PanelComponent = modalOpen ? ZONE_PANELS[modalOpen] : null;
+  const PanelComponent = modalOpen ? getZonePanel(modalOpen) : null;
 
   return (
     <div className="flex flex-1 overflow-hidden">

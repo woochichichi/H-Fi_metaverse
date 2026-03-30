@@ -25,7 +25,7 @@ interface MetaverseState {
 export const useMetaverseStore = create<MetaverseState>((set, get) => ({
   activeZone: null,
   nearZone: null,
-  playerPosition: { x: 430, y: 380 },
+  playerPosition: { x: 1200, y: 300 },
   onlineUsers: [],
   emojiFloats: [],
   setActiveZone: (zone) => set({ activeZone: zone }),

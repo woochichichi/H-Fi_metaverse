@@ -1,15 +1,42 @@
-/* Google Fonts — @import must precede all other rules */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+/* ═══ v4 레트로 폰트 ═══ */
+@import url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff2');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+/* DungGeunMo @font-face (CDN woff2 직접 로드) */
+@font-face {
+  font-family: 'DungGeunMo';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Galmuri11 (Google Fonts에 없으므로 CDN) */
+@font-face {
+  font-family: 'Galmuri11';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2406-two@1.0/Galmuri11.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Galmuri11';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2406-two@1.0/Galmuri11-Bold.woff2') format('woff2');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
 
 @import "tailwindcss";
 
-/* ===== Custom Theme (Tailwind v4 CSS-based config) ===== */
+/* ===== Custom Theme (v4 레트로 — Tailwind v4 CSS config) ===== */
 @theme {
-  /* 배경 */
-  --color-bg-primary: #1a1a2e;
-  --color-bg-secondary: #2d2d44;
-  --color-bg-tertiary: #3d3d5c;
-  --color-bg-hover: #4d4d6c;
+  /* 배경 — 더 깊은 다크 (게임보이 느낌) */
+  --color-bg-primary: #0f0f23;
+  --color-bg-secondary: #1a1a3e;
+  --color-bg-tertiary: #2a2a4e;
+  --color-bg-hover: #3a3a5e;
 
   /* 액센트 */
   --color-accent: #6C5CE7;
@@ -21,24 +48,24 @@
   --color-text-secondary: #CBD5E1;
   --color-text-muted: #94A3B8;
 
-  /* 시맨틱 */
-  --color-success: #5DC878;
-  --color-warning: #FF9800;
-  --color-danger: #E91E63;
-  --color-info: #6BC5FF;
+  /* 시맨틱 (v4 업데이트) */
+  --color-success: #00D68F;
+  --color-warning: #FFC312;
+  --color-danger: #FF4757;
+  --color-info: #0984E3;
 
   /* 시급성 */
-  --color-urgency-critical: #E91E63;
-  --color-urgency-todo: #FF9800;
-  --color-urgency-info: #6BC5FF;
+  --color-urgency-critical: #FF4757;
+  --color-urgency-todo: #FFC312;
+  --color-urgency-info: #0984E3;
 
-  /* 폰트 */
-  --font-heading: 'Space Grotesk', sans-serif;
-  --font-body: 'Noto Sans KR', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  /* 폰트 (v4 레트로) */
+  --font-heading: 'DungGeunMo', 'Galmuri11', sans-serif;
+  --font-body: 'Galmuri11', 'Noto Sans KR', sans-serif;
+  --font-mono: 'Galmuri11', monospace;
 }
 
-/* ===== Base Styles ===== */
+/* ===== Base Styles (v4 레트로) ===== */
 html {
   color-scheme: dark;
 }
@@ -49,8 +76,10 @@ body {
   color: var(--color-text-primary);
   margin: 0;
   min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* 픽셀 폰트는 안티앨리어싱 끄는 게 선명 */
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
+  image-rendering: pixelated;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -65,7 +94,43 @@ code, pre, .font-mono {
   min-height: 100vh;
 }
 
-/* 스크롤바 (다크 테마) */
+/* ═══ v4 레트로 전역 스타일 ═══ */
+
+/* 모든 border-radius를 각지게 */
+*, *::before, *::after {
+  border-radius: 0 !important;
+}
+
+/* 예외: 캐릭터 SVG 내부는 그대로 유지 */
+svg *, svg {
+  border-radius: unset !important;
+}
+
+/* 픽셀 그림자 유틸 클래스 */
+.pixel-shadow {
+  box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
+}
+
+/* 픽셀 테두리 유틸 클래스 */
+.pixel-border {
+  border: 2px solid;
+}
+
+/* 스캔라인 오버레이 */
+.scanline::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent, transparent 2px,
+    rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px
+  );
+  z-index: 999;
+}
+
+/* 스크롤바 (레트로) */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -77,11 +142,34 @@ code, pre, .font-mono {
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-bg-tertiary);
-  border-radius: 4px;
+  border: 1px solid var(--color-bg-hover);
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-bg-hover);
+}
+
+/* ═══ 버튼/인풋 레트로 스타일 ═══ */
+button {
+  border: 2px solid transparent;
+  box-shadow: 2px 2px 0px rgba(0,0,0,0.3);
+  transition: all 0.1s;
+}
+
+button:hover {
+  box-shadow: 1px 1px 0px rgba(0,0,0,0.3);
+  transform: translate(1px, 1px);
+}
+
+button:active {
+  box-shadow: 0 0 0 rgba(0,0,0,0.3);
+  transform: translate(2px, 2px);
+}
+
+input, select, textarea {
+  border: 2px solid var(--color-bg-tertiary);
+  background: var(--color-bg-secondary);
+  font-family: var(--font-body);
 }
 
 /* ═══ 메타버스 애니메이션 ═══ */
@@ -135,11 +223,10 @@ code, pre, .font-mono {
   100% { transform: scale(1); }
 }
 
-/* ═══ 글로벌 포커스 ═══ */
+/* ═══ 글로벌 포커스 (레트로) ═══ */
 *:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
-  border-radius: 4px;
 }
 
 button:focus-visible,
