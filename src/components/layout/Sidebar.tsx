@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Search } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Search, Mail } from 'lucide-react';
 import { useUiStore } from '../../stores/uiStore';
 import { useAuthStore } from '../../stores/authStore';
 import { getDisplayName } from '../../lib/utils';
@@ -31,10 +31,29 @@ const STATUS_COLORS: Record<StatusGroup, string> = {
 };
 
 export default function Sidebar() {
-  const { sidebarOpen } = useUiStore();
+  const { sidebarOpen, openModal } = useUiStore();
   const { profile: myProfile } = useAuthStore();
-  const isAdmin = myProfile?.role === 'admin';
+  const isAdmin = myProfile?.role === 'admin' || myProfile?.role === 'director';
   const [search, setSearch] = useState('');
+  const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; person: typeof MOCK_PEOPLE[0] } | null>(null);
+  const ctxRef = useRef<HTMLDivElement>(null);
+
+  // 컨텍스트 메뉴 외부 클릭/ESC 닫기
+  useEffect(() => {
+    if (!ctxMenu) return;
+    const handleClick = (e: MouseEvent) => {
+      if (ctxRef.current && !ctxRef.current.contains(e.target as Node)) setCtxMenu(null);
+    };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setCtxMenu(null);
+    };
+    document.addEventListener('mousedown', handleClick);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handleClick);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [ctxMenu]);
 
   if (!sidebarOpen) return null;
 
@@ -85,7 +104,11 @@ export default function Sidebar() {
               {people.map((p) => (
                 <div
                   key={p.id}
-                  className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors duration-200 hover:bg-bg-tertiary"
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    setCtxMenu({ x: e.clientX, y: e.clientY, person: p });
+                  }}
+                  className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors duration-200 hover:bg-bg-tertiary cursor-default"
                 >
                   <div
                     className="flex h-7 w-7 items-center justify-center rounded-full text-xs"
@@ -106,6 +129,26 @@ export default function Sidebar() {
           );
         })}
       </div>
+
+      {/* 우클릭 컨텍스트 메뉴 */}
+      {ctxMenu && (
+        <div
+          ref={ctxRef}
+          className="fixed z-[200] min-w-[160px] rounded-lg border border-white/[.1] bg-bg-secondary py-1 shadow-xl"
+          style={{ top: ctxMenu.y, left: ctxMenu.x }}
+        >
+          <button
+            onClick={() => {
+              setCtxMenu(null);
+              openModal('note');
+            }}
+            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-text-secondary transition-colors duration-150 hover:bg-accent/15 hover:text-accent-light"
+          >
+            <Mail size={14} />
+            익명 쪽지 보내기
+          </button>
+        </div>
+      )}
     </aside>
   );
 }

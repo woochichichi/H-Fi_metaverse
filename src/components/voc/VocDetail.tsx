@@ -29,8 +29,8 @@ export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDeta
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  const isLeader = profile?.role === 'admin' || profile?.role === 'leader';
-  const isAdmin = profile?.role === 'admin';
+  const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
+  const isAdmin = profile?.role === 'admin' || profile?.role === 'director';
 
   useEffect(() => {
     if (isLeader) {

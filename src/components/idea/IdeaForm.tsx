@@ -24,25 +24,34 @@ export default function IdeaForm({ onClose, onCreated }: IdeaFormProps) {
   const isValid = category && title.trim() && description.trim();
 
   const handleSubmit = async () => {
+    console.log('[IdeaForm] submit 시작', { isValid, submitting, user: !!user });
     if (!isValid || submitting || !user) return;
     setSubmitting(true);
 
-    const { error } = await createIdea({
-      title: title.trim(),
-      description: description.trim(),
-      category: category!,
-      author_id: user.id,
-    });
+    try {
+      const { error } = await createIdea({
+        title: title.trim(),
+        description: description.trim(),
+        category: category!,
+        author_id: user.id,
+      });
 
-    setSubmitting(false);
+      console.log('[IdeaForm] createIdea 결과:', { error });
 
-    if (error) {
-      addToast(`등록 실패: ${error}`, 'error');
-      return;
+      if (error) {
+        addToast(`등록 실패: ${error}`, 'error');
+        return;
+      }
+
+      addToast('💡 아이디어가 공유되었습니다!', 'success');
+      onCreated();
+    } catch (err) {
+      console.error('[IdeaForm] 예외:', err);
+      const msg = err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다';
+      addToast(`등록 실패: ${msg}`, 'error');
+    } finally {
+      setSubmitting(false);
     }
-
-    addToast('💡 아이디어가 공유되었습니다!', 'success');
-    onCreated();
   };
 
   return (

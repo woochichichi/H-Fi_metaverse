@@ -291,7 +291,7 @@ function TeamTownFurniture({ ox, oy, teamColor, theme }: { ox: number; oy: numbe
   const decoType = theme === 'stock' ? 'chart' : theme === 'life' ? 'heart' : 'car';
   return (
     <>
-      {/* 로비 (좌측 Zone) — 소파 + 테이블 */}
+      {/* 라운지 (좌측 Zone) — 소파 + 테이블 */}
       <SofaH x={ox + 60} y={oy + 80} color={teamColor} />
       <SofaH x={ox + 200} y={oy + 80} color={teamColor} />
       <RoundTable x={ox + 130} y={oy + 130} size={50} />
@@ -436,6 +436,9 @@ function Ground() {
       {/* 도로: 손보↔중앙광장 */}
       <rect x={plaza.x + plaza.w} y={plaza.y + plaza.h / 2 - 30} width={shield.x - plaza.x - plaza.w} height="60" fill="url(#path-tile)" />
       <rect x={shield.x + shield.w / 2 - 30} y={shield.y - 60} width="60" height={plaza.y + plaza.h / 2 - shield.y + 90} fill="url(#path-tile)" />
+
+      {/* 도로: 중앙광장↔모임방 (세로) */}
+      <rect x={plaza.x + plaza.w / 2 - 30} y={plaza.y + plaza.h} width="60" height={1530 - plaza.y - plaza.h} fill="url(#path-tile)" />
     </svg>
   );
 }
@@ -446,8 +449,8 @@ const ROOMS: Array<{ x: number; y: number; w: number; h: number; floor: string; 
 // 팀 타운 방 생성
 for (const [teamName, cfg] of Object.entries(TEAM_CONFIGS)) {
   const t = cfg.town;
-  // 로비
-  ROOMS.push({ x: t.x + 20, y: t.y + 20, w: 360, h: 260, floor: cfg.floor, label: `🏠 ${teamName} 로비`, team: teamName, borderColor: cfg.color });
+  // 라운지
+  ROOMS.push({ x: t.x + 20, y: t.y + 20, w: 360, h: 260, floor: cfg.floor, label: `🏠 ${teamName} 라운지`, team: teamName, borderColor: cfg.color });
   // KPI실
   ROOMS.push({ x: t.x + 400, y: t.y + 20, w: 360, h: 260, floor: cfg.floor, label: `📊 ${teamName} KPI`, team: teamName, borderColor: cfg.color });
   // 공지게시판
@@ -458,6 +461,11 @@ for (const [teamName, cfg] of Object.entries(TEAM_CONFIGS)) {
 ROOMS.push(
   { x: CENTRAL_PLAZA.x + 20, y: CENTRAL_PLAZA.y + 20, w: 360, h: 260, floor: '#2a1a1a', label: '📞 VOC 센터', team: '공용', borderColor: '#E84393' },
   { x: CENTRAL_PLAZA.x + 400, y: CENTRAL_PLAZA.y + 20, w: 360, h: 260, floor: '#2a2a1a', label: '💡 아이디어 보드', team: '공용', borderColor: '#FDCB6E' },
+);
+
+// 모임방 (하단 중앙)
+ROOMS.push(
+  { x: 1010, y: 1530, w: 380, h: 280, floor: '#1a2a1a', label: '🎉 모임방', team: '공용', borderColor: '#FF9800' },
 );
 
 interface MapCanvasProps {
@@ -510,6 +518,19 @@ export default function MapCanvas({ children }: MapCanvasProps) {
 
       {/* 중앙 광장 가구 */}
       <PlazaFurniture />
+
+      {/* 모임방 가구 */}
+      <RoundTable x={1060} y={1590} size={56} />
+      <RoundTable x={1200} y={1590} size={56} />
+      <RoundTable x={1060} y={1690} size={56} />
+      <RoundTable x={1200} y={1690} size={56} />
+      <SofaH x={1040} y={1560} color="#FF9800" />
+      <SofaH x={1180} y={1560} color="#FF9800" />
+      <SofaH x={1040} y={1740} color="#FF9800" />
+      <SofaH x={1180} y={1740} color="#FF9800" />
+      <PlantLarge x={1020} y={1540} />
+      <PlantSmall x={1340} y={1540} />
+      <PlantSmall x={1340} y={1740} />
 
       {children}
     </div>

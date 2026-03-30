@@ -15,4 +15,7 @@ export type {
   AnonymousNote,
   MessageThread,
   UserActivity,
+  CustomEvalItem,
+  Gathering,
+  GatheringMember,
 } from './database';

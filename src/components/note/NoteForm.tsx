@@ -36,26 +36,31 @@ export default function NoteForm({ onClose, onCreated }: NoteFormProps) {
     if (!isValid || submitting || !profile) return;
     setSubmitting(true);
 
-    const { error } = await createNote({
-      anonymous,
-      recipient_role: recipientRole,
-      recipient_team: recipientRole === 'team_leaders' ? recipientTeam : null,
-      category: category!,
-      title: title.trim(),
-      content: content.trim(),
-      team: profile.team,
-      sender_id: anonymous ? null : user?.id,
-    });
+    try {
+      const { error } = await createNote({
+        anonymous,
+        recipient_role: recipientRole,
+        recipient_team: recipientRole === 'team_leaders' ? recipientTeam : null,
+        category: category!,
+        title: title.trim(),
+        content: content.trim(),
+        team: profile.team,
+        sender_id: anonymous ? null : user?.id,
+      });
 
-    setSubmitting(false);
+      if (error) {
+        addToast(`쪽지 발송 실패: ${error}`, 'error');
+        return;
+      }
 
-    if (error) {
-      addToast(`쪽지 발송 실패: ${error}`, 'error');
-      return;
+      addToast('✉️ 쪽지가 전달되었습니다', 'success');
+      onCreated();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다';
+      addToast(`발송 실패: ${msg}`, 'error');
+    } finally {
+      setSubmitting(false);
     }
-
-    addToast('✉️ 쪽지가 전달되었습니다', 'success');
-    onCreated();
   };
 
   return (

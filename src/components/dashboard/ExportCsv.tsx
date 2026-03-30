@@ -1,29 +1,42 @@
 import { Download } from 'lucide-react';
 import type { UserStat } from '../../hooks/useUserActivities';
+import type { CustomEvalItem } from '../../types';
 
 interface ExportCsvProps {
   stats: UserStat[];
+  customItems: CustomEvalItem[];
   period: string;
 }
 
-export default function ExportCsv({ stats, period }: ExportCsvProps) {
+export default function ExportCsv({ stats, customItems, period }: ExportCsvProps) {
   const handleExport = () => {
     if (stats.length === 0) return;
 
-    const headers = ['이름', '팀', 'VOC건수', '아이디어건수', '투표건수', '공지읽음', '이벤트참여', '쪽지', '인적교류', '총포인트'];
+    // 각 유저의 팀에 해당하는 커스텀 항목 수집
+    const allTeams = [...new Set(stats.map((s) => s.team))];
+    const relevantCustomItems = customItems.filter((ci) => allTeams.includes(ci.team));
 
-    const rows = stats.map((s) => [
-      s.name,
-      s.team,
-      s.voc_submit,
-      s.idea_submit,
-      s.idea_vote,
-      s.notice_read,
-      s.event_join,
-      s.note_send,
-      s.exchange_join,
-      s.totalPoints.toFixed(1),
-    ]);
+    const baseHeaders = ['이름', '팀', 'VOC건수', '아이디어건수', '투표건수', '공지읽음', '이벤트참여', '쪽지', '인적교류'];
+    const customHeaders = relevantCustomItems.map((ci) => `${ci.name}(${ci.team})`);
+    const headers = [...baseHeaders, ...customHeaders, '총포인트'];
+
+    const rows = stats.map((s) => {
+      const baseRow = [
+        s.name,
+        s.team,
+        s.voc_submit,
+        s.idea_submit,
+        s.idea_vote,
+        s.notice_read,
+        s.event_join,
+        s.note_send,
+        s.exchange_join,
+      ];
+      const customRow = relevantCustomItems.map((ci) =>
+        ci.team === s.team ? (s.customCounts[ci.id] || 0) : ''
+      );
+      return [...baseRow, ...customRow, s.totalPoints.toFixed(1)];
+    });
 
     const periodLabel = period === 'month' ? '월별' : period === 'quarter' ? '분기별' : '반기별';
     const now = new Date();

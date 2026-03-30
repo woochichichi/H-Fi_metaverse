@@ -18,29 +18,33 @@ export function useInbox(userId: string | null) {
     if (!userId) return;
     setLoading(true);
 
-    const { data, error } = await supabase
-      .from('notifications')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('수집함 조회 실패:', error.message);
+      if (error) {
+        console.error('수집함 조회 실패:', error.message);
+        return;
+      }
+
+      // 시급성 순 + 시간 역순 정렬
+      const sorted = (data ?? []).sort((a, b) => {
+        const urgA = URGENCY_ORDER[a.urgency] ?? 9;
+        const urgB = URGENCY_ORDER[b.urgency] ?? 9;
+        if (urgA !== urgB) return urgA - urgB;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+
+      setItems(sorted);
+      setUnreadCount(sorted.filter((n) => !n.read).length);
+    } catch (err) {
+      console.error('수집함 로딩 실패:', err);
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // 시급성 순 + 시간 역순 정렬
-    const sorted = (data ?? []).sort((a, b) => {
-      const urgA = URGENCY_ORDER[a.urgency] ?? 9;
-      const urgB = URGENCY_ORDER[b.urgency] ?? 9;
-      if (urgA !== urgB) return urgA - urgB;
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-    });
-
-    setItems(sorted);
-    setUnreadCount(sorted.filter((n) => !n.read).length);
-    setLoading(false);
   }, [userId]);
 
   const markAsRead = useCallback(

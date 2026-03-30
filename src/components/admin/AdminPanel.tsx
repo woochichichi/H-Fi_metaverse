@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { X, KeyRound, Users, BarChart3 } from 'lucide-react';
+import { X, KeyRound, Users, BarChart3, ListChecks } from 'lucide-react';
 import InviteManager from './InviteManager';
 import UserManager from './UserManager';
+import EvalItemManager from './EvalItemManager';
 import EvalDashboard from '../dashboard/EvalDashboard';
 
 interface AdminPanelProps {
@@ -11,6 +12,7 @@ interface AdminPanelProps {
 const TABS = [
   { id: 'invite', label: '초대 코드', icon: KeyRound },
   { id: 'users', label: '사용자 관리', icon: Users },
+  { id: 'eval-items', label: '평가 항목', icon: ListChecks },
   { id: 'eval', label: '평가 대시보드', icon: BarChart3 },
 ] as const;
 
@@ -59,6 +61,7 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
       <div className="flex-1 overflow-y-auto p-4">
         {activeTab === 'invite' && <InviteManager />}
         {activeTab === 'users' && <UserManager />}
+        {activeTab === 'eval-items' && <EvalItemManager />}
         {activeTab === 'eval' && <EvalDashboard />}
       </div>
     </div>

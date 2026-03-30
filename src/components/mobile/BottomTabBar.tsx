@@ -1,6 +1,6 @@
 import { Phone, Lightbulb, ClipboardList, Mail, Coffee } from 'lucide-react';
 
-export type MobileTab = 'voc' | 'idea' | 'notice' | 'note' | 'more' | 'more_kpi' | 'more_lounge' | 'more_admin';
+export type MobileTab = 'voc' | 'idea' | 'notice' | 'note' | 'more' | 'more_kpi' | 'more_gathering' | 'more_lounge' | 'more_admin';
 
 interface BottomTabBarProps {
   activeTab: MobileTab;

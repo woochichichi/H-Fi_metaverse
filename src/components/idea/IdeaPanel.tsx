@@ -193,7 +193,7 @@ export default function IdeaPanel({ onClose }: IdeaPanelProps) {
                 key={idea.id}
                 idea={idea}
                 onVote={handleVote}
-                onStatusChange={profile?.role === 'admin' || profile?.role === 'leader' ? handleStatusChange : undefined}
+                onStatusChange={profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader' ? handleStatusChange : undefined}
               />
             ))}
           </div>

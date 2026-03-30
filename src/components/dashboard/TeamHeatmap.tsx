@@ -1,10 +1,12 @@
 import type { TeamStat } from '../../hooks/useUserActivities';
+import type { CustomEvalItem } from '../../types';
 
 interface TeamHeatmapProps {
   stats: TeamStat[];
+  customItems: CustomEvalItem[];
 }
 
-const ACTIVITY_COLS = [
+const BASE_COLS = [
   { key: 'voc_submit', label: 'VOC' },
   { key: 'idea_submit', label: '아이디어' },
   { key: 'notice_read', label: '공지읽음' },
@@ -12,7 +14,6 @@ const ACTIVITY_COLS = [
 ] as const;
 
 function getHeatColor(rate: number): string {
-  // rate: 인당 활동 건수
   if (rate === 0) return 'rgba(255,255,255,.04)';
   if (rate < 0.5) return 'rgba(108,92,231,.15)';
   if (rate < 1) return 'rgba(108,92,231,.3)';
@@ -21,7 +22,7 @@ function getHeatColor(rate: number): string {
   return 'rgba(108,92,231,.9)';
 }
 
-export default function TeamHeatmap({ stats }: TeamHeatmapProps) {
+export default function TeamHeatmap({ stats, customItems }: TeamHeatmapProps) {
   if (stats.length === 0) {
     return (
       <div className="py-6 text-center text-xs text-text-muted">
@@ -29,6 +30,12 @@ export default function TeamHeatmap({ stats }: TeamHeatmapProps) {
       </div>
     );
   }
+
+  // 단일 팀 필터 시에만 해당 팀의 커스텀 열 표시
+  const singleTeam = stats.length === 1 ? stats[0].team : null;
+  const teamCustomCols = singleTeam
+    ? customItems.filter((ci) => ci.team === singleTeam)
+    : [];
 
   return (
     <div className="rounded-xl border border-white/[.06] overflow-hidden">
@@ -41,9 +48,14 @@ export default function TeamHeatmap({ stats }: TeamHeatmapProps) {
         <thead>
           <tr className="border-b border-white/[.06]">
             <th className="px-3 py-2 text-left font-semibold text-text-muted w-28">팀</th>
-            {ACTIVITY_COLS.map((col) => (
+            {BASE_COLS.map((col) => (
               <th key={col.key} className="px-3 py-2 text-center font-semibold text-text-muted">
                 {col.label}
+              </th>
+            ))}
+            {teamCustomCols.map((ci) => (
+              <th key={ci.id} className="px-3 py-2 text-center font-semibold text-accent/80 text-[10px]">
+                {ci.name}
               </th>
             ))}
             <th className="px-3 py-2 text-center font-semibold text-text-muted">총합</th>
@@ -51,13 +63,17 @@ export default function TeamHeatmap({ stats }: TeamHeatmapProps) {
         </thead>
         <tbody>
           {stats.map((s) => {
-            const total =
-              s.voc_submit + s.idea_submit + s.notice_read + s.event_join;
+            const baseTotal = s.voc_submit + s.idea_submit + s.notice_read + s.event_join;
+            const customTotal = teamCustomCols.reduce(
+              (sum, ci) => sum + (s.customCounts[ci.id] || 0),
+              0
+            );
+            const total = baseTotal + customTotal;
 
             return (
               <tr key={s.team} className="border-b border-white/[.04]">
                 <td className="px-3 py-2 font-medium text-text-primary">{s.team}</td>
-                {ACTIVITY_COLS.map((col) => {
+                {BASE_COLS.map((col) => {
                   const count = s[col.key as keyof TeamStat] as number;
                   const rate = count / s.memberCount;
                   return (
@@ -66,6 +82,21 @@ export default function TeamHeatmap({ stats }: TeamHeatmapProps) {
                         className="mx-auto flex h-10 w-14 items-center justify-center rounded-lg text-xs font-mono font-bold transition-colors"
                         style={{ backgroundColor: getHeatColor(rate) }}
                         title={`${count}건 (인당 ${rate.toFixed(1)})`}
+                      >
+                        <span className="text-text-primary">{count}</span>
+                      </div>
+                    </td>
+                  );
+                })}
+                {teamCustomCols.map((ci) => {
+                  const count = s.customCounts[ci.id] || 0;
+                  const rate = count / s.memberCount;
+                  return (
+                    <td key={ci.id} className="px-3 py-2 text-center">
+                      <div
+                        className="mx-auto flex h-10 w-14 items-center justify-center rounded-lg text-xs font-mono font-bold transition-colors"
+                        style={{ backgroundColor: getHeatColor(rate) }}
+                        title={`${ci.name}: ${count}건 (인당 ${rate.toFixed(1)})`}
                       >
                         <span className="text-text-primary">{count}</span>
                       </div>

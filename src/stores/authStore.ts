@@ -57,12 +57,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   initialize: async () => {
     set({ isLoading: true });
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      set({ user: session.user });
-      await get().fetchProfile(session.user.id);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        set({ user: session.user });
+        await get().fetchProfile(session.user.id);
+      }
+    } catch (err) {
+      console.error('세션 초기화 실패:', err);
+    } finally {
+      set({ isLoading: false });
     }
-    set({ isLoading: false });
 
     // 세션 변경 리스너
     supabase.auth.onAuthStateChange(async (event, session) => {

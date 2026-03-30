@@ -15,6 +15,7 @@ export default function BottomBar() {
     { id: 'voc', label: 'VOC', emoji: '📞' },
     { id: 'idea', label: '아이디어', emoji: '💡' },
     { id: 'note', label: '쪽지', emoji: '✉️' },
+    { id: 'gathering', label: '모임방', emoji: '🎉' },
   ];
 
   return (
@@ -40,23 +41,19 @@ export default function BottomBar() {
               ))}
             </div>
 
-            {/* 하단: 이모지 + 힌트 */}
+            {/* 하단: 이모지 */}
             <div className="flex flex-col gap-2">
               <div className="h-px bg-white/[.06]" />
-              <div className="flex flex-wrap gap-1">
+              <div className="grid grid-cols-3 gap-1">
                 {REACTION_EMOJIS.map((emoji) => (
                   <button
                     key={emoji}
                     onClick={() => addEmojiFloat(emoji)}
-                    className="flex h-7 w-7 items-center justify-center rounded-md text-sm transition-all duration-150 hover:bg-accent/20 active:scale-[.92]"
+                    className="flex h-8 w-full items-center justify-center rounded-md text-base transition-all duration-150 hover:bg-accent/20 active:scale-[.92]"
                   >
                     {emoji}
                   </button>
                 ))}
-              </div>
-              <div className="flex items-center gap-2 text-[9px] text-text-muted">
-                <span><kbd className="rounded bg-white/[.08] px-1 py-0.5 font-mono text-[8px] text-text-secondary">↑↓←→</kbd> 이동</span>
-                <span><kbd className="rounded bg-white/[.08] px-1 py-0.5 font-mono text-[8px] text-text-secondary">Space</kbd> 입장</span>
               </div>
             </div>
           </div>

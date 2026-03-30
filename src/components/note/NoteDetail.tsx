@@ -24,7 +24,7 @@ export default function NoteDetail({ note, onBack, onUpdated }: NoteDetailProps)
   const { updateNoteStatus, isAnonymousAuthor } = useNotes();
   const { addToast } = useUiStore();
 
-  const isLeader = profile?.role === 'admin' || profile?.role === 'leader';
+  const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
   const canReplyAsAuthor = note.anonymous
     ? isAnonymousAuthor(note.id, note.session_token)
     : note.sender_id === profile?.id;

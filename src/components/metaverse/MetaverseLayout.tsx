@@ -13,6 +13,7 @@ import KpiPanel from '../kpi/KpiPanel';
 import NotePanel from '../note/NotePanel';
 import LoungePanel from './LoungePanel';
 import MoodPanel from './MoodPanel';
+import GatheringPanel from '../gathering/GatheringPanel';
 import { useMetaverseStore } from '../../stores/metaverseStore';
 import { useUiStore } from '../../stores/uiStore';
 import { MAP_WIDTH, MAP_HEIGHT, TEAM_ZONES } from '../../lib/constants';
@@ -46,6 +47,7 @@ function getZonePanel(zoneId: string): React.FC<{ onClose: () => void }> | null 
   if (zoneId === 'note') return NotePanel;
   if (zoneId === 'lounge') return LoungePanel;
   if (zoneId === 'mood') return MoodPanelWrapper;
+  if (zoneId === 'gathering') return GatheringPanel;
   return null;
 }
 
@@ -63,7 +65,7 @@ function checkZoneAccess(zoneId: string, userTeam: string | undefined): { allowe
     return { allowed: false, message: `🔒 이 공간은 [${zone.team}] 팀 전용입니다` };
   }
 
-  // 타 팀 로비 → 읽기 전용으로 허용
+  // 타 팀 라운지 → 읽기 전용으로 허용
   return { allowed: true };
 }
 

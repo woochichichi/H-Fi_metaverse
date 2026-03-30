@@ -1,8 +1,10 @@
 import { ChevronRight } from 'lucide-react';
 import type { UserStat, UserDetailActivity } from '../../hooks/useUserActivities';
+import type { CustomEvalItem } from '../../types';
 
 interface UserActivityCardProps {
   stat: UserStat;
+  customItems: CustomEvalItem[];
   onViewDetail: (userId: string) => void;
 }
 
@@ -16,10 +18,13 @@ const TYPE_LABELS: Record<string, string> = {
   exchange_join: '인적교류',
 };
 
-export default function UserActivityCard({ stat, onViewDetail }: UserActivityCardProps) {
+export default function UserActivityCard({ stat, customItems, onViewDetail }: UserActivityCardProps) {
+  const teamCustom = customItems.filter((ci) => ci.team === stat.team);
+
   const totalActivities =
     stat.voc_submit + stat.idea_submit + stat.idea_vote +
-    stat.notice_read + stat.event_join + stat.note_send + stat.exchange_join;
+    stat.notice_read + stat.event_join + stat.note_send + stat.exchange_join +
+    teamCustom.reduce((sum, ci) => sum + (stat.customCounts[ci.id] || 0), 0);
 
   return (
     <div className="rounded-xl border border-white/[.06] bg-white/[.03] p-3 transition-colors hover:bg-white/[.04]">
@@ -43,6 +48,16 @@ export default function UserActivityCard({ stat, onViewDetail }: UserActivityCar
         {stat.event_join > 0 && <span>🎉 이벤트 {stat.event_join}건</span>}
         {stat.note_send > 0 && <span>✉️ 쪽지 {stat.note_send}건</span>}
         {stat.exchange_join > 0 && <span>🤝 인적교류 {stat.exchange_join}건</span>}
+        {/* 커스텀 항목 */}
+        {teamCustom.map((ci) => {
+          const count = stat.customCounts[ci.id] || 0;
+          if (count === 0) return null;
+          return (
+            <span key={ci.id} className="text-accent/80">
+              🏷️ {ci.name} {count}건
+            </span>
+          );
+        })}
         {totalActivities === 0 && <span className="text-text-muted">활동 없음</span>}
       </div>
 
@@ -99,7 +114,9 @@ export function UserDetailModal({ userName, details, onClose }: UserDetailModalP
                 >
                   <div>
                     <span className="text-xs text-text-primary">
-                      {TYPE_LABELS[d.activity_type] || d.activity_type}
+                      {d.activity_type === 'custom' && d.customItemName
+                        ? d.customItemName
+                        : TYPE_LABELS[d.activity_type] || d.activity_type}
                     </span>
                     <span className="ml-2 text-[10px] text-text-muted">+{d.points}pt</span>
                   </div>

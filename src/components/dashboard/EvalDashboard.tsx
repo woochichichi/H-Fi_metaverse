@@ -21,18 +21,21 @@ export default function EvalDashboard() {
   const { profile } = useAuthStore();
   const { addToast } = useUiStore();
   const {
-    teamStats, userStats, userDetail, loading,
+    teamStats, userStats, userDetail, customEvalItems, loading,
     fetchTeamStats, fetchUserStats, fetchUserDetail, manualLogActivity,
   } = useUserActivities();
 
   const [period, setPeriod] = useState('month');
-  const [filterTeam, setFilterTeam] = useState('');
+  // leader는 자기 팀만, admin/director는 전체
+  const canSeeAll = profile?.role === 'admin' || profile?.role === 'director';
+  const [filterTeam, setFilterTeam] = useState(canSeeAll ? '' : profile?.team ?? '');
   const [detailUser, setDetailUser] = useState<{ id: string; name: string } | null>(null);
   const [showManualForm, setShowManualForm] = useState(false);
 
   // 수동 기록 폼
   const [manualUserId, setManualUserId] = useState('');
-  const [manualType, setManualType] = useState<'event_join' | 'exchange_join'>('event_join');
+  const [manualType, setManualType] = useState<string>('event_join');
+  const [manualCustomItemId, setManualCustomItemId] = useState('');
   const [manualMemo, setManualMemo] = useState('');
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
 
@@ -52,6 +55,12 @@ export default function EvalDashboard() {
     }
   }, [showManualForm, allUsers.length]);
 
+  // 선택된 유저의 팀에 맞는 커스텀 항목
+  const selectedUser = allUsers.find((u) => u.id === manualUserId);
+  const userCustomItems = customEvalItems.filter(
+    (ci) => selectedUser && ci.team === selectedUser.team
+  );
+
   const handleViewDetail = async (userId: string) => {
     const user = userStats.find((u) => u.userId === userId);
     if (!user) return;
@@ -67,11 +76,17 @@ export default function EvalDashboard() {
     const user = allUsers.find((u) => u.id === manualUserId);
     if (!user) return;
 
+    if (manualType === 'custom' && !manualCustomItemId) {
+      addToast('커스텀 항목을 선택하세요', 'error');
+      return;
+    }
+
     const { error } = await manualLogActivity(
       manualUserId,
       user.team,
-      manualType,
-      manualMemo || undefined
+      manualType as any,
+      manualMemo || undefined,
+      manualType === 'custom' ? manualCustomItemId : undefined
     );
     if (error) {
       addToast('기록 실패: ' + error, 'error');
@@ -79,17 +94,19 @@ export default function EvalDashboard() {
       addToast('활동이 기록되었습니다', 'success');
       setShowManualForm(false);
       setManualUserId('');
+      setManualType('event_join');
+      setManualCustomItemId('');
       setManualMemo('');
       fetchTeamStats(period, filterTeam || undefined);
       fetchUserStats(period, filterTeam || undefined);
     }
   };
 
-  const canAccess = profile?.role === 'admin' || profile?.role === 'leader';
+  const canAccess = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
   if (!canAccess) {
     return (
       <div className="py-8 text-center text-sm text-text-muted">
-        접근 권한이 없습니다 (관리자 또는 리더만 접근 가능)
+        접근 권한이 없습니다 (관리자, 금융담당 또는 리더만 접근 가능)
       </div>
     );
   }
@@ -116,17 +133,23 @@ export default function EvalDashboard() {
             ))}
           </div>
 
-          {/* 팀 필터 */}
-          <select
-            value={filterTeam}
-            onChange={(e) => setFilterTeam(e.target.value)}
-            className="rounded-lg border border-white/[.1] bg-bg-primary px-3 py-1.5 text-xs text-text-primary"
-          >
-            <option value="">전체 팀</option>
-            {TEAMS.map((t) => (
-              <option key={t} value={t}>{t}</option>
-            ))}
-          </select>
+          {/* 팀 필터 — admin/director만 전체 팀 선택 가능 */}
+          {canSeeAll ? (
+            <select
+              value={filterTeam}
+              onChange={(e) => setFilterTeam(e.target.value)}
+              className="rounded-lg border border-white/[.1] bg-bg-primary px-3 py-1.5 text-xs text-text-primary"
+            >
+              <option value="">전체 팀</option>
+              {TEAMS.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          ) : (
+            <span className="rounded-lg border border-white/[.1] bg-bg-primary px-3 py-1.5 text-xs text-text-primary">
+              {profile?.team}
+            </span>
+          )}
         </div>
 
         <div className="flex gap-2">
@@ -139,7 +162,7 @@ export default function EvalDashboard() {
           </button>
 
           {/* CSV 내보내기 */}
-          <ExportCsv stats={userStats} period={period} />
+          <ExportCsv stats={userStats} customItems={customEvalItems} period={period} />
         </div>
       </div>
 
@@ -152,12 +175,15 @@ export default function EvalDashboard() {
               <X size={14} />
             </button>
           </div>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div>
               <label className="mb-1 block text-[11px] text-text-muted">대상 유저</label>
               <select
                 value={manualUserId}
-                onChange={(e) => setManualUserId(e.target.value)}
+                onChange={(e) => {
+                  setManualUserId(e.target.value);
+                  setManualCustomItemId('');
+                }}
                 className="w-full rounded-lg border border-white/[.1] bg-bg-primary px-3 py-2 text-xs text-text-primary"
               >
                 <option value="">선택</option>
@@ -172,13 +198,36 @@ export default function EvalDashboard() {
               <label className="mb-1 block text-[11px] text-text-muted">활동 타입</label>
               <select
                 value={manualType}
-                onChange={(e) => setManualType(e.target.value as 'event_join' | 'exchange_join')}
+                onChange={(e) => {
+                  setManualType(e.target.value);
+                  if (e.target.value !== 'custom') setManualCustomItemId('');
+                }}
                 className="w-full rounded-lg border border-white/[.1] bg-bg-primary px-3 py-2 text-xs text-text-primary"
               >
                 <option value="event_join">이벤트 참여</option>
                 <option value="exchange_join">인적교류 참여</option>
+                {userCustomItems.length > 0 && (
+                  <option value="custom">커스텀 항목</option>
+                )}
               </select>
             </div>
+            {manualType === 'custom' && (
+              <div>
+                <label className="mb-1 block text-[11px] text-text-muted">커스텀 항목</label>
+                <select
+                  value={manualCustomItemId}
+                  onChange={(e) => setManualCustomItemId(e.target.value)}
+                  className="w-full rounded-lg border border-white/[.1] bg-bg-primary px-3 py-2 text-xs text-text-primary"
+                >
+                  <option value="">선택</option>
+                  {userCustomItems.map((ci) => (
+                    <option key={ci.id} value={ci.id}>
+                      {ci.name} ({ci.points}pt)
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div>
               <label className="mb-1 block text-[11px] text-text-muted">메모 (선택)</label>
               <input
@@ -205,7 +254,7 @@ export default function EvalDashboard() {
       ) : (
         <>
           {/* 팀별 히트맵 */}
-          <TeamHeatmap stats={teamStats} />
+          <TeamHeatmap stats={teamStats} customItems={customEvalItems} />
 
           {/* 개인별 활동 */}
           <div>
@@ -221,6 +270,7 @@ export default function EvalDashboard() {
                   <UserActivityCard
                     key={s.userId}
                     stat={s}
+                    customItems={customEvalItems}
                     onViewDetail={handleViewDetail}
                   />
                 ))}

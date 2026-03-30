@@ -10,21 +10,25 @@ export function useThreads(refType: 'voc' | 'note', refId: string | null) {
     if (!refId) return;
     setLoading(true);
 
-    const { data, error } = await supabase
-      .from('message_threads')
-      .select('*')
-      .eq('ref_type', refType)
-      .eq('ref_id', refId)
-      .order('created_at', { ascending: true });
+    try {
+      const { data, error } = await supabase
+        .from('message_threads')
+        .select('*')
+        .eq('ref_type', refType)
+        .eq('ref_id', refId)
+        .order('created_at', { ascending: true });
 
-    if (error) {
-      console.error('대화 조회 실패:', error.message);
+      if (error) {
+        console.error('대화 조회 실패:', error.message);
+        return;
+      }
+
+      setMessages(data ?? []);
+    } catch (err) {
+      console.error('대화 로딩 실패:', err);
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setMessages(data ?? []);
-    setLoading(false);
   }, [refType, refId]);
 
   const sendMessage = useCallback(

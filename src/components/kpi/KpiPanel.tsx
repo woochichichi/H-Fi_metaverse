@@ -21,7 +21,7 @@ export default function KpiPanel({ onClose }: KpiPanelProps) {
   const [filterUnit, setFilterUnit] = useState<string>('');
   const [skeletonTimeout, setSkeletonTimeout] = useState(false);
 
-  const isLeader = profile?.role === 'admin' || profile?.role === 'leader';
+  const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
 
   const loadData = useCallback(async () => {
     await fetchKpiItems(filterUnit || null);

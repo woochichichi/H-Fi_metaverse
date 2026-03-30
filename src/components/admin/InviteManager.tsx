@@ -20,23 +20,28 @@ export default function InviteManager() {
   // 폼 상태
   const [formCode, setFormCode] = useState('');
   const [formTeam, setFormTeam] = useState<string>('');
-  const [formRole, setFormRole] = useState<'member' | 'leader'>('member');
+  const [formRole, setFormRole] = useState<'member' | 'leader' | 'director'>('member');
   const [formMaxUses, setFormMaxUses] = useState(10);
   const [formExpires, setFormExpires] = useState('');
 
   const fetchCodes = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('invite_codes')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (error) {
-      console.error('초대 코드 조회 실패:', error.message);
-    } else {
-      setCodes(data ?? []);
+    try {
+      const { data, error } = await supabase
+        .from('invite_codes')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) {
+        addToast('초대 코드 조회 실패: ' + error.message, 'error');
+      } else {
+        setCodes(data ?? []);
+      }
+    } catch (err) {
+      addToast('서버 연결 실패 — 잠시 후 다시 시도해 주세요', 'error');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  }, []);
+  }, [addToast]);
 
   useEffect(() => {
     fetchCodes();
@@ -141,11 +146,12 @@ export default function InviteManager() {
               <label className="mb-1 block text-[11px] text-text-muted">역할</label>
               <select
                 value={formRole}
-                onChange={(e) => setFormRole(e.target.value as 'member' | 'leader')}
+                onChange={(e) => setFormRole(e.target.value as 'member' | 'leader' | 'director')}
                 className="w-full rounded-lg border border-white/[.1] bg-bg-primary px-3 py-2 text-xs text-text-primary"
               >
                 <option value="member">member</option>
                 <option value="leader">leader</option>
+                <option value="director">director (금융담당)</option>
               </select>
             </div>
             <div>

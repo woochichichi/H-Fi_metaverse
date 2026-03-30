@@ -21,17 +21,22 @@ export default function UserManager() {
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (error) {
-      console.error('사용자 조회 실패:', error.message);
-    } else {
-      setUsers(data ?? []);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) {
+        addToast('사용자 조회 실패: ' + error.message, 'error');
+      } else {
+        setUsers(data ?? []);
+      }
+    } catch (err) {
+      addToast('서버 연결 실패 — 잠시 후 다시 시도해 주세요', 'error');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  }, []);
+  }, [addToast]);
 
   useEffect(() => {
     fetchUsers();
@@ -75,6 +80,7 @@ export default function UserManager() {
 
   const roleLabel = (role: string) => {
     if (role === 'admin') return '관리자';
+    if (role === 'director') return '금융담당';
     if (role === 'leader') return '리더';
     return '멤버';
   };
@@ -148,6 +154,7 @@ export default function UserManager() {
                       >
                         <option value="member">멤버</option>
                         <option value="leader">리더</option>
+                        <option value="director">금융담당</option>
                         <option value="admin">관리자</option>
                       </select>
                       <ChevronDown size={10} className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-text-muted" />

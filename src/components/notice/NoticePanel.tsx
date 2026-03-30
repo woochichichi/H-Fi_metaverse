@@ -25,7 +25,7 @@ export default function NoticePanel({ onClose }: NoticePanelProps) {
   const [filterCategory, setFilterCategory] = useState<NoticeCategory | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
-  const isLeader = profile?.role === 'admin' || profile?.role === 'leader';
+  const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
 
   const loadNotices = useCallback(() => {
     fetchNotices({

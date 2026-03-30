@@ -87,6 +87,24 @@ export interface Database {
         Update: Record<string, never>;
         Relationships: [];
       };
+      custom_eval_items: {
+        Row: CustomEvalItem;
+        Insert: Omit<CustomEvalItem, 'id' | 'created_at'>;
+        Update: Partial<Omit<CustomEvalItem, 'id'>>;
+        Relationships: [];
+      };
+      gatherings: {
+        Row: Gathering;
+        Insert: Omit<Gathering, 'id' | 'created_at' | 'updated_at' | 'status' | 'member_count'>;
+        Update: Partial<Omit<Gathering, 'id'>>;
+        Relationships: [];
+      };
+      gathering_members: {
+        Row: GatheringMember;
+        Insert: GatheringMember;
+        Update: Record<string, never>;
+        Relationships: [];
+      };
     };
     Views: {
       idea_with_votes: {
@@ -108,7 +126,7 @@ export interface Profile {
   name: string;
   nickname: string | null;
   team: '증권ITO' | '생명ITO' | '손보ITO' | '한금서';
-  role: 'admin' | 'leader' | 'member';
+  role: 'admin' | 'director' | 'leader' | 'member';
   unit: '조직' | '품질' | '전략' | 'AX' | null;
   avatar_color: string;
   avatar_emoji: string;
@@ -274,8 +292,40 @@ export interface UserActivity {
     | 'notice_read'
     | 'event_join'
     | 'note_send'
-    | 'exchange_join';
+    | 'exchange_join'
+    | 'custom';
   points: number;
   ref_id: string | null;
   created_at: string;
+}
+
+export interface CustomEvalItem {
+  id: string;
+  team: string;
+  name: string;
+  points: number;
+  active: boolean;
+  created_by: string | null;
+  created_at: string;
+}
+
+export interface Gathering {
+  id: string;
+  author_id: string | null;
+  title: string;
+  description: string;
+  category: '운동' | '맛집' | '스터디' | '취미' | '기타';
+  status: 'recruiting' | 'closed' | 'completed';
+  max_members: number | null;
+  contact_info: string | null;
+  deadline: string | null;
+  member_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GatheringMember {
+  gathering_id: string;
+  user_id: string;
+  joined_at: string;
 }

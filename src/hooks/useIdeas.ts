@@ -60,23 +60,41 @@ export function useIdeas() {
       category: IdeaCategory;
       author_id: string;
     }) => {
-      const { data, error: insertError } = await supabase
-        .from('ideas')
-        .insert({
-          author_id: input.author_id,
-          title: input.title,
-          description: input.description,
-          category: input.category,
-        })
-        .select()
-        .single();
+      console.log('[createIdea] 시작:', input);
 
-      if (insertError) {
-        console.error('아이디어 등록 실패:', insertError.message);
-        return { data: null, error: insertError.message };
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+
+      try {
+        const { data, error: insertError } = await supabase
+          .from('ideas')
+          .insert({
+            author_id: input.author_id,
+            title: input.title,
+            description: input.description,
+            category: input.category,
+          })
+          .select()
+          .single()
+          .abortSignal(controller.signal);
+
+        clearTimeout(timeout);
+        console.log('[createIdea] 응답:', { data, error: insertError });
+
+        if (insertError) {
+          console.error('아이디어 등록 실패:', insertError.message);
+          return { data: null, error: insertError.message };
+        }
+
+        return { data, error: null };
+      } catch (err) {
+        clearTimeout(timeout);
+        const msg = err instanceof DOMException && err.name === 'AbortError'
+          ? '요청 시간이 초과되었습니다 (10초)'
+          : err instanceof Error ? err.message : '알 수 없는 오류';
+        console.error('[createIdea] 예외:', msg);
+        return { data: null, error: msg };
       }
-
-      return { data, error: null };
     },
     []
   );

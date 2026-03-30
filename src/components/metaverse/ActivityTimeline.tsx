@@ -30,7 +30,7 @@ interface ActivityWithName extends UserActivity {
 
 export default function ActivityTimeline() {
   const { profile: myProfile } = useAuthStore();
-  const isAdmin = myProfile?.role === 'admin';
+  const isAdmin = myProfile?.role === 'admin' || myProfile?.role === 'director';
   const [activities, setActivities] = useState<ActivityWithName[]>([]);
   const [loading, setLoading] = useState(false);
 

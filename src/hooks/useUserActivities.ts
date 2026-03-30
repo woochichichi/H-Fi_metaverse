@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 import { getDisplayName } from '../lib/utils';
 import { TEAMS, ACTIVITY_POINTS } from '../lib/constants';
 import type { ActivityType } from '../lib/constants';
-import type { UserActivity, Profile } from '../types';
+import type { UserActivity, Profile, CustomEvalItem } from '../types';
 
 export interface TeamStat {
   team: string;
@@ -14,6 +14,8 @@ export interface TeamStat {
   event_join: number;
   note_send: number;
   exchange_join: number;
+  // 커스텀 항목: customCounts[itemId] = count
+  customCounts: Record<string, number>;
   memberCount: number;
 }
 
@@ -28,17 +30,21 @@ export interface UserStat {
   event_join: number;
   note_send: number;
   exchange_join: number;
+  // 커스텀 항목: customCounts[itemId] = count
+  customCounts: Record<string, number>;
   totalPoints: number;
 }
 
 export interface UserDetailActivity extends UserActivity {
   // 상세 활동 목록용
+  customItemName?: string;
 }
 
 export function useUserActivities() {
   const [teamStats, setTeamStats] = useState<TeamStat[]>([]);
   const [userStats, setUserStats] = useState<UserStat[]>([]);
   const [userDetail, setUserDetail] = useState<UserDetailActivity[]>([]);
+  const [customEvalItems, setCustomEvalItems] = useState<CustomEvalItem[]>([]);
   const [loading, setLoading] = useState(false);
 
   // 기간 필터 생성
@@ -68,118 +74,147 @@ export function useUserActivities() {
   // 팀별 활동 통계
   const fetchTeamStats = useCallback(async (period: string, team?: string) => {
     setLoading(true);
-    const { from, to } = getPeriodRange(period);
+    try {
+      const { from, to } = getPeriodRange(period);
 
-    let query = supabase
-      .from('user_activities')
-      .select('*')
-      .gte('created_at', from)
-      .lte('created_at', to);
+      let query = supabase
+        .from('user_activities')
+        .select('*')
+        .gte('created_at', from)
+        .lte('created_at', to);
 
-    if (team) {
-      query = query.eq('team', team);
-    }
+      if (team) {
+        query = query.eq('team', team);
+      }
 
-    const { data: activities, error } = await query;
-    if (error) {
-      console.error('활동 통계 조회 실패:', error.message);
+      const { data: activities, error } = await query;
+      if (error) {
+        console.error('활동 통계 조회 실패:', error.message);
+        return;
+      }
+
+      // 프로필에서 팀별 인원수
+      const { data: profiles } = await supabase.from('profiles').select('id, team');
+
+      // 커스텀 평가 항목 조회
+      let customQuery = supabase.from('custom_eval_items').select('*').eq('active', true);
+      if (team) customQuery = customQuery.eq('team', team);
+      const { data: customItems } = await customQuery;
+      setCustomEvalItems(customItems ?? []);
+
+      const stats: TeamStat[] = TEAMS.map((t) => {
+        const teamActivities = (activities ?? []).filter((a) => a.team === t);
+        const memberCount = (profiles ?? []).filter((p) => p.team === t).length;
+        const countByType = (type: string) =>
+          teamActivities.filter((a) => a.activity_type === type).length;
+
+        // 커스텀 항목 카운트
+        const teamCustomItems = (customItems ?? []).filter((ci) => ci.team === t);
+        const customCounts: Record<string, number> = {};
+        teamCustomItems.forEach((ci) => {
+          customCounts[ci.id] = teamActivities.filter(
+            (a) => a.activity_type === 'custom' && a.ref_id === ci.id
+          ).length;
+        });
+
+        return {
+          team: t,
+          voc_submit: countByType('voc_submit'),
+          idea_submit: countByType('idea_submit'),
+          idea_vote: countByType('idea_vote'),
+          notice_read: countByType('notice_read'),
+          event_join: countByType('event_join'),
+          note_send: countByType('note_send'),
+          exchange_join: countByType('exchange_join'),
+          customCounts,
+          memberCount: memberCount || 1,
+        };
+      });
+
+      if (team) {
+        setTeamStats(stats.filter((s) => s.team === team));
+      } else {
+        setTeamStats(stats);
+      }
+    } catch (err) {
+      console.error('팀 통계 로딩 실패:', err);
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // 프로필에서 팀별 인원수
-    const { data: profiles } = await supabase.from('profiles').select('id, team');
-
-    const stats: TeamStat[] = TEAMS.map((t) => {
-      const teamActivities = (activities ?? []).filter((a) => a.team === t);
-      const memberCount = (profiles ?? []).filter((p) => p.team === t).length;
-      const countByType = (type: string) =>
-        teamActivities.filter((a) => a.activity_type === type).length;
-
-      return {
-        team: t,
-        voc_submit: countByType('voc_submit'),
-        idea_submit: countByType('idea_submit'),
-        idea_vote: countByType('idea_vote'),
-        notice_read: countByType('notice_read'),
-        event_join: countByType('event_join'),
-        note_send: countByType('note_send'),
-        exchange_join: countByType('exchange_join'),
-        memberCount: memberCount || 1,
-      };
-    });
-
-    if (team) {
-      setTeamStats(stats.filter((s) => s.team === team));
-    } else {
-      setTeamStats(stats);
-    }
-    setLoading(false);
   }, []);
 
   // 개인별 활동 통계
   const fetchUserStats = useCallback(async (period: string, team?: string) => {
     setLoading(true);
-    const { from, to } = getPeriodRange(period);
+    try {
+      const { from, to } = getPeriodRange(period);
 
-    let activityQuery = supabase
-      .from('user_activities')
-      .select('*')
-      .gte('created_at', from)
-      .lte('created_at', to)
-      .not('user_id', 'is', null);
+      let activityQuery = supabase
+        .from('user_activities')
+        .select('*')
+        .gte('created_at', from)
+        .lte('created_at', to)
+        .not('user_id', 'is', null);
 
-    if (team) {
-      activityQuery = activityQuery.eq('team', team);
-    }
-
-    const { data: activities, error } = await activityQuery;
-    if (error) {
-      console.error('개인 통계 조회 실패:', error.message);
-      setLoading(false);
-      return;
-    }
-
-    let profileQuery = supabase.from('profiles').select('*');
-    if (team) {
-      profileQuery = profileQuery.eq('team', team);
-    }
-    const { data: profiles } = await profileQuery;
-
-    const userMap = new Map<string, UserStat>();
-
-    // 프로필 기반 초기화 — 평가 대시보드는 리더/관리자 전용이므로 별명(실명) 표시
-    (profiles ?? []).forEach((p: Profile) => {
-      userMap.set(p.id, {
-        userId: p.id,
-        name: getDisplayName(p, true),
-        team: p.team,
-        voc_submit: 0,
-        idea_submit: 0,
-        idea_vote: 0,
-        notice_read: 0,
-        event_join: 0,
-        note_send: 0,
-        exchange_join: 0,
-        totalPoints: 0,
-      });
-    });
-
-    // 활동 집계
-    (activities ?? []).forEach((a) => {
-      if (!a.user_id) return;
-      const stat = userMap.get(a.user_id);
-      if (stat) {
-        const type = a.activity_type as keyof Omit<UserStat, 'userId' | 'name' | 'team' | 'totalPoints'>;
-        if (type in stat && type !== ('totalPoints' as string)) {
-          (stat[type] as number) += 1;
-        }
-        stat.totalPoints += a.points;
+      if (team) {
+        activityQuery = activityQuery.eq('team', team);
       }
-    });
 
-    setUserStats(Array.from(userMap.values()).sort((a, b) => b.totalPoints - a.totalPoints));
-    setLoading(false);
+      const { data: activities, error } = await activityQuery;
+      if (error) {
+        console.error('개인 통계 조회 실패:', error.message);
+        return;
+      }
+
+      let profileQuery = supabase.from('profiles').select('*');
+      if (team) {
+        profileQuery = profileQuery.eq('team', team);
+      }
+      const { data: profiles } = await profileQuery;
+
+      const userMap = new Map<string, UserStat>();
+
+      // 프로필 기반 초기화 — 평가 대시보드는 리더/관리자 전용이므로 별명(실명) 표시
+      (profiles ?? []).forEach((p: Profile) => {
+        userMap.set(p.id, {
+          userId: p.id,
+          name: getDisplayName(p, true),
+          team: p.team,
+          voc_submit: 0,
+          idea_submit: 0,
+          idea_vote: 0,
+          notice_read: 0,
+          event_join: 0,
+          note_send: 0,
+          exchange_join: 0,
+          customCounts: {},
+          totalPoints: 0,
+        });
+      });
+
+      // 활동 집계
+      (activities ?? []).forEach((a) => {
+        if (!a.user_id) return;
+        const stat = userMap.get(a.user_id);
+        if (stat) {
+          if (a.activity_type === 'custom' && a.ref_id) {
+            stat.customCounts[a.ref_id] = (stat.customCounts[a.ref_id] || 0) + 1;
+          } else {
+            const type = a.activity_type as keyof Omit<UserStat, 'userId' | 'name' | 'team' | 'totalPoints' | 'customCounts'>;
+            if (type in stat && type !== ('totalPoints' as string)) {
+              (stat[type] as number) += 1;
+            }
+          }
+          stat.totalPoints += a.points;
+        }
+      });
+
+      setUserStats(Array.from(userMap.values()).sort((a, b) => b.totalPoints - a.totalPoints));
+    } catch (err) {
+      console.error('개인 통계 로딩 실패:', err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   // 개인 활동 상세
@@ -197,18 +232,42 @@ export function useUserActivities() {
       console.error('상세 활동 조회 실패:', error.message);
       return;
     }
-    setUserDetail(data ?? []);
+
+    // 커스텀 항목 이름 매핑
+    const customRefIds = (data ?? [])
+      .filter((a) => a.activity_type === 'custom' && a.ref_id)
+      .map((a) => a.ref_id!);
+    let customNameMap: Record<string, string> = {};
+    if (customRefIds.length > 0) {
+      const { data: ciData } = await supabase
+        .from('custom_eval_items')
+        .select('id, name')
+        .in('id', customRefIds);
+      (ciData ?? []).forEach((ci) => { customNameMap[ci.id] = ci.name; });
+    }
+
+    const details: UserDetailActivity[] = (data ?? []).map((a) => ({
+      ...a,
+      customItemName: a.activity_type === 'custom' && a.ref_id
+        ? customNameMap[a.ref_id] || '커스텀'
+        : undefined,
+    }));
+    setUserDetail(details);
   }, []);
 
   // 리더 수동 활동 기록
   const manualLogActivity = useCallback(
-    async (userId: string, team: string, type: ActivityType, memo?: string) => {
+    async (userId: string, team: string, type: ActivityType | 'custom', memo?: string, customItemId?: string) => {
+      const points = type === 'custom' && customItemId
+        ? (customEvalItems.find((ci) => ci.id === customItemId)?.points ?? 1)
+        : ACTIVITY_POINTS[type as ActivityType];
+
       const { error } = await supabase.from('user_activities').insert({
         user_id: userId,
         team,
         activity_type: type,
-        points: ACTIVITY_POINTS[type],
-        ref_id: memo || null,
+        points,
+        ref_id: type === 'custom' ? customItemId || null : memo || null,
       });
       if (error) {
         console.error('수동 기록 실패:', error.message);
@@ -216,13 +275,14 @@ export function useUserActivities() {
       }
       return { error: null };
     },
-    []
+    [customEvalItems]
   );
 
   return {
     teamStats,
     userStats,
     userDetail,
+    customEvalItems,
     loading,
     fetchTeamStats,
     fetchUserStats,

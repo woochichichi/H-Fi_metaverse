@@ -34,7 +34,7 @@ export default function VocPanel({ onClose }: VocPanelProps) {
   const [showFilters, setShowFilters] = useState(false);
   const [assigneeNames, setAssigneeNames] = useState<Record<string, string>>({});
 
-  const isLeader = profile?.role === 'admin' || profile?.role === 'leader';
+  const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
 
   // 담당자 이름 맵 로드
   useEffect(() => {

@@ -30,7 +30,7 @@ export default function NotePanel({ onClose }: NotePanelProps) {
   const [filterTeam, setFilterTeam] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
-  const isLeader = profile?.role === 'admin' || profile?.role === 'leader';
+  const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
 
   const loadNotes = useCallback(() => {
     if (isLeader) {

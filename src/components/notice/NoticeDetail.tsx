@@ -15,7 +15,7 @@ export default function NoticeDetail({ notice, onBack }: NoticeDetailProps) {
   const { profile, user } = useAuthStore();
   const { markAsRead, fetchReadStatus } = useNotices();
 
-  const isLeader = profile?.role === 'admin' || profile?.role === 'leader';
+  const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
   const [readers, setReaders] = useState<Profile[]>([]);
   const [readTotal, setReadTotal] = useState(0);
   const [showReaders, setShowReaders] = useState(false);

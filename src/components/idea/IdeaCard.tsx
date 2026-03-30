@@ -34,7 +34,7 @@ export default function IdeaCard({ idea, onVote, onStatusChange }: IdeaCardProps
   const { addToast } = useUiStore();
   const [animating, setAnimating] = useState(false);
 
-  const isLeader = profile?.role === 'admin' || profile?.role === 'leader';
+  const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
   const catConfig = CATEGORY_CONFIG[idea.category ?? '기타'];
   const statusConfig = STATUS_CONFIG[idea.status];
 
