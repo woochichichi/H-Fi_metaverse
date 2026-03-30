@@ -151,7 +151,7 @@ export default function RegisterPage() {
         {/* 헤더 */}
         <div className="mb-6 text-center">
           <h1 className="font-heading text-2xl font-bold text-text-primary">회원가입</h1>
-          <p className="mt-1 text-sm text-text-muted">ITO 메타버스에 오신 것을 환영합니다</p>
+          <p className="mt-1 text-sm text-text-muted">한울타리에 오신 것을 환영합니다</p>
         </div>
 
         {/* 스텝 인디케이터 */}

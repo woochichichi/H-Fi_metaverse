@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../stores/authStore';
+import { saveOmokResult } from './useOmokRanking';
 
 type Stone = 0 | 1 | 2; // 0=빈칸, 1=흑, 2=백
 export type GameStatus = 'waiting' | 'playing' | 'finished';
@@ -33,6 +34,8 @@ function checkWin(board: Stone[][], row: number, col: number, stone: Stone): boo
 export interface OmokPlayer {
   id: string;
   name: string;
+  realName: string;
+  team: string;
 }
 
 export function useOmokGame() {
@@ -46,6 +49,7 @@ export function useOmokGame() {
   const [lastMove, setLastMove] = useState<{ row: number; col: number } | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const gameStartedRef = useRef(false);
+  const resultSavedRef = useRef(false);
 
   useEffect(() => {
     if (!profile) return;
@@ -58,7 +62,12 @@ export function useOmokGame() {
       const state = channel.presenceState();
       const users: OmokPlayer[] = Object.values(state)
         .flat()
-        .map((u: any) => ({ id: u.user_id as string, name: u.name as string }));
+        .map((u: any) => ({
+          id: u.user_id as string,
+          name: u.name as string,
+          realName: u.real_name as string,
+          team: u.team as string,
+        }));
       setPlayers(users);
 
       // 2명 모이면 게임 시작 (아직 시작 안 했을 때만)
@@ -105,6 +114,8 @@ export function useOmokGame() {
         await channel.track({
           user_id: profile.id,
           name: profile.nickname || profile.name,
+          real_name: profile.name,
+          team: profile.team,
         });
       }
     });
@@ -132,6 +143,12 @@ export function useOmokGame() {
       if (isWin) {
         setWinner(myColor);
         setStatus('finished');
+        // 승자가 전적 저장 (중복 방지)
+        if (!resultSavedRef.current && profile) {
+          resultSavedRef.current = true;
+          const loserId = players.find((p) => p.id !== profile.id)?.id;
+          if (loserId) saveOmokResult(profile.id, loserId);
+        }
       }
 
       channelRef.current?.send({
@@ -149,6 +166,7 @@ export function useOmokGame() {
     setWinner(null);
     setLastMove(null);
     setStatus('playing');
+    resultSavedRef.current = false;
     channelRef.current?.send({ type: 'broadcast', event: 'reset', payload: {} });
   }, []);
 

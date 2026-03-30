@@ -29,34 +29,34 @@
 
 @import "tailwindcss";
 
-/* ===== Custom Theme (v4 레트로 — Tailwind v4 CSS config) ===== */
+/* ===== Custom Theme (v4 레트로 — 한울타리 노을 테마) ===== */
 @theme {
-  /* 배경 — 더 깊은 다크 (게임보이 느낌) */
-  --color-bg-primary: #0f0f23;
-  --color-bg-secondary: #1a1a3e;
-  --color-bg-tertiary: #2a2a4e;
-  --color-bg-hover: #3a3a5e;
+  /* 배경 — 따뜻한 다크 (노을 지는 하늘) */
+  --color-bg-primary: #1a1118;
+  --color-bg-secondary: #2a1f28;
+  --color-bg-tertiary: #3d2f38;
+  --color-bg-hover: #4e3d48;
 
-  /* 액센트 */
-  --color-accent: #6C5CE7;
-  --color-accent-light: #a29bfe;
-  --color-accent-hover: #7d6df7;
+  /* 액센트 — 노을 코랄/주황 */
+  --color-accent: #E8725C;
+  --color-accent-light: #F4A58A;
+  --color-accent-hover: #F08570;
 
   /* 텍스트 */
-  --color-text-primary: #E2E8F0;
-  --color-text-secondary: #CBD5E1;
-  --color-text-muted: #94A3B8;
+  --color-text-primary: #F0E6E0;
+  --color-text-secondary: #D4C4BC;
+  --color-text-muted: #A8948A;
 
-  /* 시맨틱 (v4 업데이트) */
-  --color-success: #00D68F;
-  --color-warning: #FFC312;
-  --color-danger: #FF4757;
-  --color-info: #0984E3;
+  /* 시맨틱 */
+  --color-success: #5DC878;
+  --color-warning: #F0A830;
+  --color-danger: #E84360;
+  --color-info: #5CAED6;
 
   /* 시급성 */
-  --color-urgency-critical: #FF4757;
-  --color-urgency-todo: #FFC312;
-  --color-urgency-info: #0984E3;
+  --color-urgency-critical: #E84360;
+  --color-urgency-todo: #F0A830;
+  --color-urgency-info: #5CAED6;
 
   /* 폰트 (v4 레트로) */
   --font-heading: 'DungGeunMo', 'Galmuri11', sans-serif;

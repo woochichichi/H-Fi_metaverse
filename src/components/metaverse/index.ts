@@ -7,6 +7,6 @@ export { default as ChatBubble } from './ChatBubble';
 export { default as EmojiFloat } from './EmojiFloat';
 export { default as BottomBar } from './BottomBar';
 export { default as MetaverseLayout } from './MetaverseLayout';
-export { default as LoungePanel } from './LoungePanel';
+export { default as LobbyPanel } from './LobbyPanel';
 export { default as MoodPanel } from './MoodPanel';
 export { default as ActivityTimeline } from './ActivityTimeline';

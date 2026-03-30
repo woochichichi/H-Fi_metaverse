@@ -24,6 +24,7 @@ export default function TopBar() {
   const [showNicknameEditor, setShowNicknameEditor] = useState(false);
   const inboxRef = useRef<HTMLDivElement>(null);
   const moodRef = useRef<HTMLDivElement>(null);
+  const moodBtnRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (user) {
@@ -80,7 +81,11 @@ export default function TopBar() {
   // 바깥 클릭으로 기분 선택 닫기
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (moodRef.current && !moodRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (
+        moodRef.current && !moodRef.current.contains(target) &&
+        moodBtnRef.current && !moodBtnRef.current.contains(target)
+      ) {
         setShowMood(false);
       }
     };
@@ -96,10 +101,10 @@ export default function TopBar() {
         {/* 왼쪽: 로고 */}
         <div className="flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg text-sm" style={{ background: 'linear-gradient(135deg,#6C5CE7,#a29bfe)' }}>
-            🏢
+            🏡
           </div>
           <h1 className="font-heading text-base font-bold tracking-tight text-white">
-            ITO 메타버스
+            한울타리
           </h1>
         </div>
 
@@ -169,18 +174,14 @@ export default function TopBar() {
           {/* 프로필 아바타 + 별명 + 로그아웃 */}
           {profile && (
             <div className="flex items-center gap-2 ml-1">
-              <div ref={moodRef} className="relative">
+              <div ref={moodBtnRef}>
                 <button
                   onClick={() => setShowMood((v) => !v)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full text-sm transition-all duration-200 hover:ring-2 hover:ring-accent/50"
+                  className={`flex h-8 w-8 items-center justify-center rounded-full text-sm transition-all duration-200 hover:ring-2 hover:ring-accent/50 ${showMood ? 'ring-2 ring-accent' : ''}`}
                   style={{ backgroundColor: profile.avatar_color }}
-                  title="기분 변경"
                 >
                   {profile.mood_emoji || profile.avatar_emoji}
                 </button>
-                {showMood && (
-                  <MoodPicker onClose={() => setShowMood(false)} />
-                )}
               </div>
               <button
                 onClick={() => setShowNicknameEditor(true)}
@@ -201,6 +202,13 @@ export default function TopBar() {
           )}
         </div>
       </header>
+
+      {/* 기분/감정 표현 드롭다운 — header 밖에 렌더링 (backdrop-filter가 z-index 깨뜨림) */}
+      {showMood && (
+        <div ref={moodRef} className="fixed z-[200]" style={{ top: 48, right: 80 }}>
+          <MoodPicker onClose={() => setShowMood(false)} />
+        </div>
+      )}
 
       {/* 별명 변경 모달 */}
       {showNicknameEditor && (

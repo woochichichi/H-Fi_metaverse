@@ -1,7 +1,7 @@
-# CLAUDE.md — ITO 메타버스
+# CLAUDE.md — 한울타리
 
 ## 프로젝트
-금융ITO 4개 팀(증권ITO/생명ITO/손보ITO/한금서)의 조직문화 활동·KPI·공지·VOC·아이디어를 **게더타운 스타일 메타버스 UI**로 통합 관리하는 웹앱.
+금융ITO 4개 팀(증권ITO/생명ITO/손보ITO/한금서)이 하나로 모이는 조직문화 플랫폼 **한울타리**. 게더타운 스타일 메타버스 UI로 VOC·아이디어·공지·KPI·활동을 통합 관리하는 웹앱.
 비공식 프로젝트 (비용 0원 목표). 대상: 관리자 1명 + 유닛 리더 4명 + 팀원 ~60명 + 팀장 1명.
 
 ## 기술 스택
@@ -107,12 +107,12 @@ notifications, anonymous_notes, message_threads, user_activities
 - `transition-colors duration-200` 기본 적용
 
 ## 디자인 시스템
-- **스타일**: 다크 모드 + 플레이풀 (게더타운 감성)
-- **배경**: `#1a1a2e` (primary), `#2d2d44` (secondary), `#3d3d5c` (tertiary)
-- **액센트**: `#6C5CE7` (보라), `#a29bfe` (라이트)
-- **텍스트**: `#E2E8F0` (primary), `#CBD5E1` (secondary), `#94A3B8` (muted)
-- **시맨틱**: success `#5DC878`, warning `#FF9800`, danger `#E91E63`, info `#6BC5FF`
-- **폰트**: Space Grotesk(헤딩) + Noto Sans KR(본문) + JetBrains Mono(숫자/코드)
+- **스타일**: 다크 모드 + 노을 감성 (따뜻한 게더타운)
+- **배경**: `#1a1118` (primary), `#2a1f28` (secondary), `#3d2f38` (tertiary)
+- **액센트**: `#E8725C` (코랄), `#F4A58A` (라이트)
+- **텍스트**: `#F0E6E0` (primary), `#D4C4BC` (secondary), `#A8948A` (muted)
+- **시맨틱**: success `#5DC878`, warning `#F0A830`, danger `#E84360`, info `#5CAED6`
+- **폰트**: DungGeunMo(헤딩) + Galmuri11(본문) + Galmuri11(숫자/코드)
 - **호버**: 색상/그림자 변경 (scale 사용 금지), 포커스: `focus-visible:ring-2 ring-accent`
 
 ## 환경 변수

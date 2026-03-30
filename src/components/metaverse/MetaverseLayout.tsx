@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useMemo } from 'react';
 import MapCanvas from './MapCanvas';
 import PlayerCharacter from './PlayerCharacter';
 import NPCCharacter from './NPCCharacter';
@@ -11,43 +11,28 @@ import IdeaPanel from '../idea/IdeaPanel';
 import NoticePanel from '../notice/NoticePanel';
 import KpiPanel from '../kpi/KpiPanel';
 import NotePanel from '../note/NotePanel';
-import LoungePanel from './LoungePanel';
-import MoodPanel from './MoodPanel';
+import LobbyPanel from './LobbyPanel';
 import GatheringPanel from '../gathering/GatheringPanel';
 import OmokPanel from '../game/OmokPanel';
 import { useMetaverseStore } from '../../stores/metaverseStore';
 import { useUiStore } from '../../stores/uiStore';
 import { MAP_WIDTH, MAP_HEIGHT, TEAM_ZONES } from '../../lib/constants';
+import { getMapTimeTheme } from '../../lib/utils';
 import { useAuthStore } from '../../stores/authStore';
-import { X } from 'lucide-react';
-
-// mood 전용 래퍼 (마음의소리 Zone에서 바로 패널 열 때)
-function MoodPanelWrapper({ onClose }: { onClose: () => void }) {
-  return (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between border-b border-white/[.06] px-4 py-3">
-        <h2 className="font-heading text-base font-bold text-text-primary">💭 마음의소리</h2>
-        <button onClick={onClose} className="flex h-7 w-7 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-white/[.08] hover:text-text-primary">
-          <X size={16} />
-        </button>
-      </div>
-      <div className="flex-1 overflow-y-auto p-4">
-        <MoodPanel />
-      </div>
-    </div>
-  );
-}
 
 // Zone ID → 패널 매핑 (v4: 팀별 zone ID를 기능별 패널로 매핑)
-function getZonePanel(zoneId: string): React.FC<{ onClose: () => void }> | null {
+function getZonePanel(zoneId: string, userTeam: string | undefined): React.FC<{ onClose: () => void }> | null {
   if (zoneId === 'voc') return VocPanel;
   if (zoneId === 'idea') return IdeaPanel;
   if (zoneId.endsWith('-notice')) return ({ onClose }) => <NoticePanel onClose={onClose} />;
   if (zoneId.endsWith('-kpi')) return KpiPanel;
-  if (zoneId.endsWith('-lobby')) return MoodPanelWrapper;
+  if (zoneId.endsWith('-lobby')) {
+    const zone = TEAM_ZONES.find((z) => z.id === zoneId);
+    const lobbyTeam = zone?.team ?? userTeam ?? '';
+    const readOnly = !!userTeam && lobbyTeam !== userTeam;
+    return ({ onClose }) => <LobbyPanel onClose={onClose} team={lobbyTeam} readOnly={readOnly} />;
+  }
   if (zoneId === 'note') return NotePanel;
-  if (zoneId === 'lounge') return LoungePanel;
-  if (zoneId === 'mood') return MoodPanelWrapper;
   if (zoneId === 'gathering') return GatheringPanel;
   if (zoneId === 'omok') return OmokPanel;
   return null;
@@ -77,6 +62,7 @@ export default function MetaverseLayout() {
   const { playerPosition } = useMetaverseStore();
   const { modalOpen, closeModal, addToast } = useUiStore();
   const { profile } = useAuthStore();
+  const mapTheme = useMemo(() => getMapTimeTheme(), []);
 
   const centerCamera = useCallback(() => {
     const container = containerRef.current;
@@ -125,7 +111,7 @@ export default function MetaverseLayout() {
   }, [modalOpen, profile?.team, closeModal, addToast]);
 
   // 현재 열린 패널 컴포넌트 결정
-  const PanelComponent = modalOpen ? getZonePanel(modalOpen) : null;
+  const PanelComponent = modalOpen ? getZonePanel(modalOpen, profile?.team) : null;
 
   return (
     <div className="flex flex-1 overflow-hidden">
@@ -134,7 +120,7 @@ export default function MetaverseLayout() {
 
       {/* 맵 컨테이너 */}
       <div className="relative flex-1 flex flex-col overflow-hidden">
-        <div ref={containerRef} className="relative flex-1 overflow-hidden" style={{ background: '#6b8f71' }}>
+        <div ref={containerRef} className="relative flex-1 overflow-hidden" style={{ background: mapTheme.outerBg }}>
           <div ref={viewportRef} className="absolute" style={{ width: MAP_WIDTH, height: MAP_HEIGHT }}>
             <MapCanvas>
               <Zone />

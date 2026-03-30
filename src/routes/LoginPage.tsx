@@ -43,13 +43,13 @@ export default function LoginPage() {
         {/* 로고 */}
         <div className="mb-8 text-center">
           <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent/20">
-            <span className="text-3xl">🏢</span>
+            <span className="text-3xl">🏡</span>
           </div>
           <h1 className="font-heading text-2xl font-bold text-text-primary">
-            ITO 메타버스
+            한울타리
           </h1>
           <p className="mt-1 text-sm text-text-muted">
-            금융ITO 조직문화 플랫폼
+            금융ITO가 하나 되는 공간
           </p>
         </div>
 

@@ -53,3 +53,84 @@ export function getDisplayName(
 export function generateInviteCode(): string {
   return String(Math.floor(10000000 + Math.random() * 90000000));
 }
+
+/** 시간대별 맵 테마 — 아침/낮/저녁/밤 */
+export type TimeOfDay = 'morning' | 'day' | 'evening' | 'night';
+
+export interface MapTimeTheme {
+  timeOfDay: TimeOfDay;
+  /** 맵 외곽 배경색 (MetaverseLayout) */
+  outerBg: string;
+  /** 잔디 주 색상 */
+  grass: string;
+  /** 잔디 어두운 점 */
+  grassDark: string;
+  /** 잔디 밝은 점 */
+  grassLight: string;
+  /** 하늘 그라디언트 오버레이 (SVG) */
+  skyGradient: [string, string, string];
+  /** 오버레이 투명도 */
+  skyOpacity: number;
+  /** 도로 색상 */
+  pathTile: string;
+  pathTileAlt: string;
+}
+
+export function getMapTimeTheme(): MapTimeTheme {
+  const hour = new Date().getHours();
+
+  // 06~10 아침: 화사한 골드빛
+  if (hour >= 6 && hour < 10) {
+    return {
+      timeOfDay: 'morning',
+      outerBg: '#7a9a6a',
+      grass: '#6a8f5a',
+      grassDark: '#5a7f4a',
+      grassLight: '#7da06d',
+      skyGradient: ['#FFD89B', '#FFECD2', '#fff8e8'],
+      skyOpacity: 0.18,
+      pathTile: '#d4c8a8',
+      pathTileAlt: '#ddd0b0',
+    };
+  }
+  // 10~16 낮: 밝고 맑은 하늘
+  if (hour >= 10 && hour < 16) {
+    return {
+      timeOfDay: 'day',
+      outerBg: '#6b8f71',
+      grass: '#5a7a5a',
+      grassDark: '#4d6d4d',
+      grassLight: '#6b8a6b',
+      skyGradient: ['#87CEEB', '#B0E2FF', '#e8f4fd'],
+      skyOpacity: 0.12,
+      pathTile: '#c8c0b0',
+      pathTileAlt: '#ccc4b4',
+    };
+  }
+  // 16~20 저녁: 노을
+  if (hour >= 16 && hour < 20) {
+    return {
+      timeOfDay: 'evening',
+      outerBg: '#6a6050',
+      grass: '#5a6a4a',
+      grassDark: '#4d5d3d',
+      grassLight: '#6a7a5a',
+      skyGradient: ['#E8725C', '#F4A58A', '#FFD4A0'],
+      skyOpacity: 0.22,
+      pathTile: '#c4b8a0',
+      pathTileAlt: '#ccbca6',
+    };
+  }
+  // 20~06 밤: 깊은 어둠 + 별빛
+  return {
+    timeOfDay: 'night',
+    outerBg: '#2a3a2e',
+    grass: '#3a4a3a',
+    grassDark: '#2d3d2d',
+    grassLight: '#445544',
+    skyGradient: ['#1a1a3e', '#2a2a4e', '#1e2d4a'],
+    skyOpacity: 0.25,
+    pathTile: '#8a8478',
+    pathTileAlt: '#8e887c',
+  };
+}

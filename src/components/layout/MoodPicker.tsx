@@ -48,7 +48,7 @@ export default function MoodPicker({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="absolute right-0 top-full mt-2 z-[200] w-56 rounded-xl border border-white/[.08] bg-bg-secondary p-3 shadow-2xl">
+    <div className="w-56 rounded-xl border border-white/[.08] bg-bg-secondary p-3 shadow-2xl">
       {/* 기분 선택 */}
       <p className="mb-2 text-xs font-bold text-text-primary">오늘 나의 기분은?</p>
       <div className="grid grid-cols-4 gap-1.5">

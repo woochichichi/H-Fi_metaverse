@@ -18,4 +18,7 @@ export type {
   CustomEvalItem,
   Gathering,
   GatheringMember,
+  UnitActivity,
+  ActivityReaction,
+  ActivityComment,
 } from './database';

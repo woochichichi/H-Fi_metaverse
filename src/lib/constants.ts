@@ -142,17 +142,17 @@ export const CENTRAL_PLAZA = { x: 800, y: 650, w: 800, h: 500 } as const;
 // ═══ v4 Zone 정의 — 팀별 + 공용 ═══
 export const TEAM_ZONES = [
   // 증권ITO 타운
-  { id: 'stock-lobby', team: '증권ITO' as const, label: '🏠 증권 라운지', emoji: '💭', x: 840, y: 90, width: 340, height: 240 },
+  { id: 'stock-lobby', team: '증권ITO' as const, label: '🏠 증권 로비', emoji: '💭', x: 840, y: 90, width: 340, height: 240 },
   { id: 'stock-kpi', team: '증권ITO' as const, label: '📊 증권 KPI', emoji: '📊', x: 1220, y: 90, width: 340, height: 240 },
   { id: 'stock-notice', team: '증권ITO' as const, label: '📢 증권 공지', emoji: '📢', x: 1030, y: 370, width: 340, height: 240 },
 
   // 생명ITO 타운
-  { id: 'life-lobby', team: '생명ITO' as const, label: '🏠 생명 라운지', emoji: '💭', x: 90, y: 940, width: 340, height: 240 },
+  { id: 'life-lobby', team: '생명ITO' as const, label: '🏠 생명 로비', emoji: '💭', x: 90, y: 940, width: 340, height: 240 },
   { id: 'life-kpi', team: '생명ITO' as const, label: '📊 생명 KPI', emoji: '📊', x: 470, y: 940, width: 340, height: 240 },
   { id: 'life-notice', team: '생명ITO' as const, label: '📢 생명 공지', emoji: '📢', x: 280, y: 1220, width: 340, height: 240 },
 
   // 손보ITO 타운
-  { id: 'shield-lobby', team: '손보ITO' as const, label: '🏠 손보 라운지', emoji: '💭', x: 1590, y: 940, width: 340, height: 240 },
+  { id: 'shield-lobby', team: '손보ITO' as const, label: '🏠 손보 로비', emoji: '💭', x: 1590, y: 940, width: 340, height: 240 },
   { id: 'shield-kpi', team: '손보ITO' as const, label: '📊 손보 KPI', emoji: '📊', x: 1970, y: 940, width: 340, height: 240 },
   { id: 'shield-notice', team: '손보ITO' as const, label: '📢 손보 공지', emoji: '📢', x: 1780, y: 1220, width: 340, height: 240 },
 ] as const;

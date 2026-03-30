@@ -40,22 +40,20 @@ export default function Zone() {
           onMouseEnter={() => setHoveredZone(z.id)}
           onMouseLeave={() => setHoveredZone(null)}
         >
-          {/* 호버 힌트 */}
-          <div
-            className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-xl px-4 py-[6px] text-[13px] font-bold text-white pointer-events-none transition-all duration-200"
-            style={{
-              top: -38,
-              zIndex: 100,
-              background: 'linear-gradient(135deg, rgba(108,92,231,.95), rgba(88,72,211,.9))',
-              opacity: hoveredZone === z.id ? 1 : 0,
-              transform: `translateX(-50%) translateY(${hoveredZone === z.id ? 0 : 4}px)`,
-              backdropFilter: 'blur(6px)',
-              boxShadow: '0 6px 20px rgba(108,92,231,.4)',
-              letterSpacing: '0.3px',
-            }}
-          >
-            {z.emoji} {z.label} — 클릭 or Space
-          </div>
+          {/* 호버 힌트: 간결하게 '클릭 or Space' 만 표시 (zone 라벨과 중복 방지) */}
+          {hoveredZone === z.id && (
+            <div
+              className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-0.5 text-[10px] font-medium text-white/80 pointer-events-none animate-[fadeIn_.15s]"
+              style={{
+                bottom: -24,
+                zIndex: 100,
+                background: 'rgba(30,30,48,.85)',
+                backdropFilter: 'blur(4px)',
+              }}
+            >
+              클릭하여 입장
+            </div>
+          )}
         </div>
       ))}
 
@@ -65,17 +63,17 @@ export default function Zone() {
         if (!zone) return null;
         return (
           <div
-            className="absolute z-[90] flex items-center gap-2 whitespace-nowrap rounded-2xl px-4 py-2 text-[13px] font-bold text-white pointer-events-none animate-[fadeIn_.2s]"
+            className="absolute z-[90] flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-[5px] text-[12px] font-semibold text-white pointer-events-none animate-[fadeIn_.2s]"
             style={{
               left: playerPosition.x + 17,
-              top: playerPosition.y + 60,
+              top: playerPosition.y + 58,
               transform: 'translateX(-50%)',
-              background: 'linear-gradient(135deg, rgba(108,92,231,.95), rgba(88,72,211,.9))',
-              boxShadow: '0 6px 20px rgba(108,92,231,.4)',
-              backdropFilter: 'blur(8px)',
+              background: 'rgba(108,92,231,.9)',
+              boxShadow: '0 3px 12px rgba(108,92,231,.35)',
+              backdropFilter: 'blur(6px)',
             }}
           >
-            <span className="rounded-md bg-white/25 px-2 py-[2px] font-mono text-[10px] font-bold text-white">
+            <span className="rounded bg-white/20 px-[6px] py-[1px] font-mono text-[9px] font-semibold text-white/90">
               Space
             </span>
             {zone.emoji} {zone.label} 입장

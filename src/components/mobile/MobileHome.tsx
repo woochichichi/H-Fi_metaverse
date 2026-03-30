@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { BarChart3, Coffee, PartyPopper, Settings } from 'lucide-react';
+import { BarChart3, ScrollText, PartyPopper, Settings } from 'lucide-react';
 import VocPanel from '../voc/VocPanel';
 import IdeaPanel from '../idea/IdeaPanel';
 import NoticePanel from '../notice/NoticePanel';
 import KpiPanel from '../kpi/KpiPanel';
 import NotePanel from '../note/NotePanel';
-import LoungePanel from '../metaverse/LoungePanel';
+import LobbyPanel from '../metaverse/LobbyPanel';
 import GatheringPanel from '../gathering/GatheringPanel';
 import AdminPanel from '../admin/AdminPanel';
 import { useNotices } from '../../hooks/useNotices';
@@ -204,9 +204,10 @@ export default function MobileHome({ activeTab }: MobileHomeProps) {
   }
 
   if (currentTab === 'more_lounge') {
+    const myTeam = useAuthStore.getState().profile?.team ?? '';
     return (
       <div className="relative flex flex-1 flex-col">
-        <LoungePanel onClose={() => setOverrideTab('more')} />
+        <LobbyPanel onClose={() => setOverrideTab('more')} team={myTeam} readOnly={false} />
       </div>
     );
   }
@@ -236,7 +237,7 @@ function MoreMenu({ onNavigate }: { onNavigate: (tab: MobileTab) => void }) {
   const items = [
     { id: 'more_kpi' as MobileTab, label: 'KPI 관리', icon: BarChart3, emoji: '📊' },
     { id: 'more_gathering' as MobileTab, label: '모임방', icon: PartyPopper, emoji: '🎉' },
-    { id: 'more_lounge' as MobileTab, label: '라운지', icon: Coffee, emoji: '☕' },
+    { id: 'more_lounge' as MobileTab, label: '활동 타임라인', icon: ScrollText, emoji: '📋' },
   ];
 
   return (

@@ -105,10 +105,20 @@ export interface Database {
         Update: Record<string, never>;
         Relationships: [];
       };
+      omok_records: {
+        Row: OmokRecord;
+        Insert: Omit<OmokRecord, 'id' | 'created_at'>;
+        Update: Record<string, never>;
+        Relationships: [];
+      };
     };
     Views: {
       idea_with_votes: {
         Row: IdeaWithVotes;
+        Relationships: [];
+      };
+      omok_ranking: {
+        Row: OmokRanking;
         Relationships: [];
       };
     };
@@ -328,4 +338,49 @@ export interface GatheringMember {
   gathering_id: string;
   user_id: string;
   joined_at: string;
+}
+
+export interface OmokRecord {
+  id: string;
+  winner_id: string;
+  loser_id: string;
+  created_at: string;
+}
+
+export interface OmokRanking {
+  id: string;
+  name: string;
+  nickname: string | null;
+  team: string;
+  wins: number;
+  losses: number;
+  total: number;
+  win_rate: number;
+}
+
+export interface UnitActivity {
+  id: string;
+  author_id: string | null;
+  team: string;
+  unit: string | null;
+  title: string;
+  description: string | null;
+  category: '이벤트' | '인적교류' | 'VoC' | '소프트랜딩' | '기타' | null;
+  status: '계획' | '진행중' | '완료' | '보류';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ActivityReaction {
+  activity_id: string;
+  user_id: string;
+  created_at: string;
+}
+
+export interface ActivityComment {
+  id: string;
+  activity_id: string;
+  author_id: string | null;
+  content: string;
+  created_at: string;
 }
