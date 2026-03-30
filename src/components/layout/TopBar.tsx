@@ -11,6 +11,7 @@ import { useUiStore } from '../../stores/uiStore';
 import { useDeviceMode } from '../../hooks/useDeviceMode';
 import { useNotices } from '../../hooks/useNotices';
 import { useInbox } from '../../hooks/useInbox';
+import { TEAM_TO_ROOM } from '../../lib/constants';
 
 export default function TopBar() {
   const { profile, user, logout } = useAuthStore();
@@ -56,7 +57,9 @@ export default function TopBar() {
     setShowInbox(false);
     setShowAdmin(false);
     if (sidebarOpen) toggleSidebar();
-    openModal('notice');
+    // 팀별 공지 zone으로 열기 (예: stock-notice)
+    const roomId = profile?.team ? TEAM_TO_ROOM[profile.team as keyof typeof TEAM_TO_ROOM] : null;
+    openModal(roomId ? `${roomId}-notice` : 'notice');
   };
 
   const handleOpenAdmin = () => {

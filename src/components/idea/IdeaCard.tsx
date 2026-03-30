@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Heart, User, Clock } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
-import { useUiStore } from '../../stores/uiStore';
 import { IDEA_STATUSES } from '../../lib/constants';
 import { formatRelativeTime } from '../../lib/utils';
 import type { IdeaWithVotes } from '../../types';
@@ -31,7 +30,6 @@ interface IdeaCardProps {
 
 export default function IdeaCard({ idea, onVote, onStatusChange }: IdeaCardProps) {
   const { profile } = useAuthStore();
-  const { addToast } = useUiStore();
   const [animating, setAnimating] = useState(false);
 
   const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
@@ -49,7 +47,6 @@ export default function IdeaCard({ idea, onVote, onStatusChange }: IdeaCardProps
     e.stopPropagation();
     const newStatus = e.target.value as IdeaStatus;
     onStatusChange?.(idea.id, newStatus);
-    addToast(`상태가 "${newStatus}"(으)로 변경되었습니다`, 'success');
   };
 
   return (

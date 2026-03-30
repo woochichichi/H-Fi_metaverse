@@ -65,7 +65,11 @@ export default function IdeaPanel({ onClose }: IdeaPanelProps) {
 
   const handleStatusChange = async (ideaId: string, status: IdeaStatus) => {
     const { error } = await updateIdeaStatus(ideaId, status);
-    if (error) addToast(`상태 변경 실패: ${error}`, 'error');
+    if (error) {
+      addToast(`상태 변경 실패: ${error}`, 'error');
+    } else {
+      addToast(`상태가 "${status}"(으)로 변경되었습니다`, 'success');
+    }
   };
 
   const handleCreated = () => {

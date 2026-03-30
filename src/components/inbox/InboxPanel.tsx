@@ -1,6 +1,8 @@
 import { CheckCheck, X } from 'lucide-react';
 import InboxCard from './InboxCard';
 import { useUiStore } from '../../stores/uiStore';
+import { useAuthStore } from '../../stores/authStore';
+import { TEAM_TO_ROOM } from '../../lib/constants';
 import type { Notification } from '../../types';
 
 interface InboxPanelProps {
@@ -19,6 +21,7 @@ export default function InboxPanel({
   onClose,
 }: InboxPanelProps) {
   const { openModal } = useUiStore();
+  const { profile } = useAuthStore();
 
   const unreadItems = items.filter((n) => !n.read);
   const readItems = items.filter((n) => n.read);
@@ -32,7 +35,13 @@ export default function InboxPanel({
     if (notification.link) {
       const match = notification.link.match(/^\/(voc|note|notice|idea)\//);
       if (match) {
-        openModal(match[1]);
+        let modalId = match[1];
+        // notice → 팀별 zone ID로 변환 (예: stock-notice)
+        if (modalId === 'notice' && profile?.team) {
+          const roomId = TEAM_TO_ROOM[profile.team as keyof typeof TEAM_TO_ROOM];
+          if (roomId) modalId = `${roomId}-notice`;
+        }
+        openModal(modalId);
         onClose();
       }
     }
