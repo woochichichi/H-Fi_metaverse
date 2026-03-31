@@ -7,6 +7,7 @@ import type { GatheringCategory, GatheringStatus } from '../lib/constants';
 export interface GatheringFilters {
   category?: GatheringCategory | null;
   status?: GatheringStatus | null;
+  sort?: 'newest' | 'oldest';
 }
 
 export function useGatherings() {
@@ -20,7 +21,8 @@ export function useGatherings() {
 
     try {
       const buildQuery = () => {
-        let q = supabase.from('gatherings').select('*').order('created_at', { ascending: false });
+        const asc = filters.sort === 'oldest';
+        let q = supabase.from('gatherings').select('*').order('created_at', { ascending: asc });
         if (filters.category) q = q.eq('category', filters.category);
         if (filters.status) q = q.eq('status', filters.status);
         return q;

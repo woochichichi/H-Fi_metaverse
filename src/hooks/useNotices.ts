@@ -8,6 +8,7 @@ import type { UrgencyLevel, NoticeCategory } from '../lib/constants';
 export interface NoticeFilters {
   urgency?: UrgencyLevel | null;
   category?: NoticeCategory | null;
+  sort?: 'newest' | 'oldest';
 }
 
 export function useNotices() {
@@ -25,7 +26,8 @@ export function useNotices() {
         let q = supabase.from('notices').select('*');
         if (filters.urgency) q = q.eq('urgency', filters.urgency);
         if (filters.category) q = q.eq('category', filters.category);
-        return q.order('pinned', { ascending: false }).order('created_at', { ascending: false });
+        const asc = filters.sort === 'oldest';
+        return q.order('pinned', { ascending: false }).order('created_at', { ascending: asc });
       };
 
       const { data, error: fetchError } = await withTimeout(buildQuery, 8000, 'notices');

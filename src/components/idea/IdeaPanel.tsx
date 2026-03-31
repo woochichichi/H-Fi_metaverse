@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Plus, X, Filter, TrendingUp, Clock, RefreshCw } from 'lucide-react';
 import IdeaCard from './IdeaCard';
 import IdeaForm from './IdeaForm';
+import LoadMore from '../common/LoadMore';
 import { useIdeas } from '../../hooks/useIdeas';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
@@ -25,6 +26,7 @@ export default function IdeaPanel({ onClose }: IdeaPanelProps) {
   const [filterCategory, setFilterCategory] = useState<IdeaCategory | null>(null);
   const [filterStatus, setFilterStatus] = useState<IdeaStatus | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [displayCount, setDisplayCount] = useState(20);
 
   const loadIdeas = useCallback(() => {
     fetchIdeas({
@@ -199,7 +201,7 @@ export default function IdeaPanel({ onClose }: IdeaPanelProps) {
           </div>
         ) : (
           <div className="flex flex-col gap-2">
-            {ideas.map((idea) => (
+            {ideas.slice(0, displayCount).map((idea) => (
               <IdeaCard
                 key={idea.id}
                 idea={idea}
@@ -207,6 +209,7 @@ export default function IdeaPanel({ onClose }: IdeaPanelProps) {
                 onStatusChange={profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader' ? handleStatusChange : undefined}
               />
             ))}
+            <LoadMore current={Math.min(displayCount, ideas.length)} total={ideas.length} onLoadMore={() => setDisplayCount((c) => c + 20)} />
           </div>
         )}
       </div>

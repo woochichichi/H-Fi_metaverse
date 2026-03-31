@@ -18,7 +18,7 @@ export default function ThreadPanel({
   canReplyAsManager,
   onMessageSent,
 }: ThreadPanelProps) {
-  const { messages, loading, sendMessage } = useThreads(refType, refId);
+  const { messages, loading, error: threadError, sendMessage } = useThreads(refType, refId);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -58,7 +58,11 @@ export default function ThreadPanel({
 
       {/* 메시지 목록 */}
       <div ref={scrollRef} className="flex flex-col gap-2 p-3 max-h-60 overflow-y-auto">
-        {loading ? (
+        {threadError ? (
+          <p className="text-xs text-danger text-center py-4">
+            대화를 불러오지 못했습니다
+          </p>
+        ) : loading ? (
           <div className="space-y-2 py-2">
             {[1, 2].map((i) => (
               <div key={i} className={`flex ${i % 2 === 0 ? 'justify-end' : ''}`}>

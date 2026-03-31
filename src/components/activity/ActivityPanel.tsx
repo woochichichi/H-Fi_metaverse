@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Eye } from 'lucide-react';
+import { Plus, Eye, RefreshCw } from 'lucide-react';
 import { useUnitActivities } from '../../hooks/useUnitActivities';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
 import ActivityCard from './ActivityCard';
 import ActivityForm from './ActivityForm';
+import LoadMore from '../common/LoadMore';
 
 interface ActivityPanelProps {
   team: string;
@@ -18,6 +19,7 @@ export default function ActivityPanel({ team, readOnly }: ActivityPanelProps) {
     activities,
     comments,
     loading,
+    error,
     fetchActivities,
     createActivity,
     updateActivityStatus,
@@ -28,6 +30,7 @@ export default function ActivityPanel({ team, readOnly }: ActivityPanelProps) {
 
   const [showForm, setShowForm] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [displayCount, setDisplayCount] = useState(20);
 
   const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
 
@@ -126,7 +129,15 @@ export default function ActivityPanel({ team, readOnly }: ActivityPanelProps) {
       {showForm && <ActivityForm onSubmit={handleCreate} onCancel={() => setShowForm(false)} />}
 
       {/* 카드 리스트 */}
-      {loading ? (
+      {error ? (
+        <div className="flex flex-col items-center justify-center py-8">
+          <span className="text-2xl mb-2">⚠️</span>
+          <p className="text-xs text-text-muted mb-2">{error}</p>
+          <button onClick={reload} className="flex items-center gap-1 rounded-lg bg-accent/20 px-2.5 py-1 text-[11px] font-medium text-accent hover:bg-accent/30">
+            <RefreshCw size={12} /> 새로고침
+          </button>
+        </div>
+      ) : loading ? (
         <div className="py-6 text-center text-xs text-text-muted">로딩 중...</div>
       ) : activities.length === 0 ? (
         <div className="py-8 text-center">
@@ -137,7 +148,7 @@ export default function ActivityPanel({ team, readOnly }: ActivityPanelProps) {
         </div>
       ) : (
         <div className="flex flex-col gap-2">
-          {activities.map((a) => (
+          {activities.slice(0, displayCount).map((a) => (
             <ActivityCard
               key={a.id}
               activity={a}
@@ -152,6 +163,7 @@ export default function ActivityPanel({ team, readOnly }: ActivityPanelProps) {
               expanded={expandedId === a.id}
             />
           ))}
+          <LoadMore current={Math.min(displayCount, activities.length)} total={activities.length} onLoadMore={() => setDisplayCount((c) => c + 20)} />
         </div>
       )}
     </div>

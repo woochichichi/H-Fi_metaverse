@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, RefreshCw } from 'lucide-react';
 import TeamHeatmap from './TeamHeatmap';
 import UserActivityCard, { UserDetailModal } from './UserActivityCard';
 import ExportCsv from './ExportCsv';
@@ -257,7 +257,25 @@ export default function EvalDashboard() {
       )}
 
       {loading ? (
-        <div className="py-8 text-center text-sm text-text-muted">데이터 로딩 중...</div>
+        <div className="flex flex-col gap-3 py-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="rounded-xl border border-white/[.06] bg-white/[.03] p-4 animate-pulse">
+              <div className="h-4 w-1/3 rounded bg-white/10 mb-3" />
+              <div className="h-20 w-full rounded bg-white/[.06]" />
+            </div>
+          ))}
+        </div>
+      ) : teamStats.length === 0 && userStats.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12">
+          <span className="text-3xl mb-2">📊</span>
+          <p className="text-sm text-text-muted mb-3">데이터가 없습니다</p>
+          <button
+            onClick={() => { fetchTeamStats(period, filterTeam || undefined); fetchUserStats(period, filterTeam || undefined); }}
+            className="flex items-center gap-1.5 rounded-lg bg-accent/20 px-3 py-1.5 text-xs font-medium text-accent hover:bg-accent/30"
+          >
+            <RefreshCw size={13} /> 새로고침
+          </button>
+        </div>
       ) : (
         <>
           {/* 팀별 히트맵 */}

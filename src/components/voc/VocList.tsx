@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
 import VocCard from './VocCard';
+import LoadMore from '../common/LoadMore';
 import type { Voc } from '../../types';
 
 interface VocListProps {
@@ -25,8 +26,11 @@ function Skeleton() {
   );
 }
 
+const PAGE_SIZE = 20;
+
 export default function VocList({ vocs, loading, error, onSelect, onRetry, assigneeNames = {} }: VocListProps) {
   const [skeletonTimeout, setSkeletonTimeout] = useState(false);
+  const [displayCount, setDisplayCount] = useState(PAGE_SIZE);
 
   useEffect(() => {
     if (!loading) {
@@ -84,11 +88,14 @@ export default function VocList({ vocs, loading, error, onSelect, onRetry, assig
     );
   }
 
+  const visible = vocs.slice(0, displayCount);
+
   return (
     <div className="flex flex-col gap-2">
-      {vocs.map((voc) => (
+      {visible.map((voc) => (
         <VocCard key={voc.id} voc={voc} onClick={() => onSelect(voc)} assigneeName={voc.assignee_id ? assigneeNames[voc.assignee_id] : null} />
       ))}
+      <LoadMore current={visible.length} total={vocs.length} onLoadMore={() => setDisplayCount((c) => c + PAGE_SIZE)} />
     </div>
   );
 }

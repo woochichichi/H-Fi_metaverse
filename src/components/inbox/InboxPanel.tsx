@@ -1,5 +1,7 @@
-import { CheckCheck, X, Inbox } from 'lucide-react';
+import { useState } from 'react';
+import { CheckCheck, X, Inbox, RefreshCw } from 'lucide-react';
 import InboxCard from './InboxCard';
+import LoadMore from '../common/LoadMore';
 import { useUiStore } from '../../stores/uiStore';
 import { useAuthStore } from '../../stores/authStore';
 import { useInbox } from '../../hooks/useInbox';
@@ -13,7 +15,9 @@ interface InboxPanelProps {
 export default function InboxPanel({ onClose }: InboxPanelProps) {
   const { openModal } = useUiStore();
   const { profile, user } = useAuthStore();
-  const { items, loading, markAsRead, markAllAsRead } = useInbox(user?.id ?? null);
+  const { items, loading, error, markAsRead, markAllAsRead, fetchInbox } = useInbox(user?.id ?? null);
+
+  const [readDisplayCount, setReadDisplayCount] = useState(20);
 
   const unreadItems = items.filter((n) => !n.read);
   const readItems = items.filter((n) => n.read);
@@ -75,7 +79,15 @@ export default function InboxPanel({ onClose }: InboxPanelProps) {
 
       {/* 목록 */}
       <div className="flex-1 overflow-y-auto">
-        {loading ? (
+        {error ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <span className="text-3xl mb-2">⚠️</span>
+            <p className="text-sm text-text-muted mb-3">{error}</p>
+            <button onClick={fetchInbox} className="flex items-center gap-1.5 rounded-lg bg-accent/20 px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent/30">
+              <RefreshCw size={13} /> 새로고침
+            </button>
+          </div>
+        ) : loading ? (
           <div className="space-y-2 p-3">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="flex gap-2 rounded-lg bg-white/[.03] p-2.5 animate-pulse">
@@ -116,13 +128,14 @@ export default function InboxPanel({ onClose }: InboxPanelProps) {
                 <p className="px-3 py-1.5 text-[10px] font-medium text-text-muted uppercase mt-2">
                   이전 ({readItems.length})
                 </p>
-                {readItems.slice(0, 30).map((item) => (
+                {readItems.slice(0, readDisplayCount).map((item) => (
                   <InboxCard
                     key={item.id}
                     notification={item}
                     onClick={() => handleItemClick(item)}
                   />
                 ))}
+                <LoadMore current={Math.min(readDisplayCount, readItems.length)} total={readItems.length} onLoadMore={() => setReadDisplayCount((c) => c + 20)} />
               </>
             )}
           </div>

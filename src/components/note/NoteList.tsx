@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
 import NoteCard from './NoteCard';
+import LoadMore from '../common/LoadMore';
 import type { AnonymousNote } from '../../types';
 
 interface NoteListProps {
@@ -24,8 +25,11 @@ function Skeleton() {
   );
 }
 
+const PAGE_SIZE = 20;
+
 export default function NoteList({ notes, loading, error, onSelect, onRetry }: NoteListProps) {
   const [skeletonTimeout, setSkeletonTimeout] = useState(false);
+  const [displayCount, setDisplayCount] = useState(PAGE_SIZE);
 
   useEffect(() => {
     if (!loading) {
@@ -83,11 +87,14 @@ export default function NoteList({ notes, loading, error, onSelect, onRetry }: N
     );
   }
 
+  const visible = notes.slice(0, displayCount);
+
   return (
     <div className="flex flex-col gap-2">
-      {notes.map((note) => (
+      {visible.map((note) => (
         <NoteCard key={note.id} note={note} onClick={() => onSelect(note)} />
       ))}
+      <LoadMore current={visible.length} total={notes.length} onLoadMore={() => setDisplayCount((c) => c + PAGE_SIZE)} />
     </div>
   );
 }

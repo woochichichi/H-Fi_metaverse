@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { RefreshCw } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
@@ -28,18 +29,20 @@ export default function MoodPanel() {
   const { addToast } = useUiStore();
   const [moods, setMoods] = useState<MoodEntry[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchMoods = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error: fetchError } = await supabase
       .from('profiles')
       .select('id, name, team, mood_emoji, updated_at')
       .not('mood_emoji', 'is', null)
       .order('updated_at', { ascending: false });
 
-    if (error) {
-      console.error('기분 목록 조회 실패:', error.message);
+    if (fetchError) {
+      setError('기분 목록 조회 실패');
     } else {
+      setError(null);
       setMoods(data ?? []);
     }
     setLoading(false);
@@ -105,7 +108,15 @@ export default function MoodPanel() {
       {/* 팀 기분 목록 */}
       <div className="mt-2">
         <h4 className="mb-2 text-xs font-semibold text-text-secondary">팀원들의 기분</h4>
-        {loading ? (
+        {error ? (
+          <div className="flex flex-col items-center justify-center py-6">
+            <span className="text-2xl mb-2">⚠️</span>
+            <p className="text-xs text-text-muted mb-2">{error}</p>
+            <button onClick={fetchMoods} className="flex items-center gap-1 rounded-lg bg-accent/20 px-2.5 py-1 text-[11px] font-medium text-accent hover:bg-accent/30">
+              <RefreshCw size={12} /> 새로고침
+            </button>
+          </div>
+        ) : loading ? (
           <div className="py-4 text-center text-xs text-text-muted">로딩 중...</div>
         ) : moods.length === 0 ? (
           <div className="py-4 text-center text-xs text-text-muted">

@@ -13,20 +13,22 @@ const URGENCY_ORDER: Record<string, number> = {
 export function useInbox(userId: string | null) {
   const [items, setItems] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
 
   const fetchInbox = useCallback(async () => {
     if (!userId) return;
     setLoading(true);
+    setError(null);
 
     try {
-      const { data, error } = await withTimeout(
+      const { data, error: fetchErr } = await withTimeout(
         () => supabase.from('notifications').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
         8000, 'inbox',
       );
 
-      if (error) {
-        console.error('수집함 조회 실패:', error.message);
+      if (fetchErr) {
+        setError('알림을 불러오지 못했습니다');
         return;
       }
 
@@ -40,8 +42,8 @@ export function useInbox(userId: string | null) {
 
       setItems(sorted);
       setUnreadCount(sorted.filter((n) => !n.read).length);
-    } catch (err) {
-      console.error('수집함 로딩 실패:', err);
+    } catch {
+      setError('알림을 불러오지 못했습니다');
     } finally {
       setLoading(false);
     }
@@ -129,5 +131,5 @@ export function useInbox(userId: string | null) {
     };
   }, [userId]);
 
-  return { items, loading, unreadCount, fetchInbox, markAsRead, markAllAsRead };
+  return { items, loading, error, unreadCount, fetchInbox, markAsRead, markAllAsRead };
 }

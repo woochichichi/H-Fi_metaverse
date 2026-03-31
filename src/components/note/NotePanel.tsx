@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { X, Filter, MousePointerClick } from 'lucide-react';
+import { X, Filter, MousePointerClick, Clock, TrendingUp } from 'lucide-react';
 import NoteList from './NoteList';
 import NoteForm from './NoteForm';
 import NoteDetail from './NoteDetail';
@@ -27,6 +27,7 @@ export default function NotePanel({ onClose }: NotePanelProps) {
   // 필터
   const [filterCategory, setFilterCategory] = useState<NoteCategory | null>(null);
   const [filterStatus, setFilterStatus] = useState<NoteStatus | null>(null);
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [showFilters, setShowFilters] = useState(false);
 
   // RLS가 본인 수신/발신만 필터링 — 역할 구분 불필요
@@ -34,9 +35,9 @@ export default function NotePanel({ onClose }: NotePanelProps) {
     fetchNotes({
       category: filterCategory,
       status: filterStatus,
-      sort: 'newest',
+      sort: sortOrder,
     });
-  }, [fetchNotes, filterCategory, filterStatus]);
+  }, [fetchNotes, filterCategory, filterStatus, sortOrder]);
 
   useEffect(() => {
     loadNotes();
@@ -104,6 +105,18 @@ export default function NotePanel({ onClose }: NotePanelProps) {
           💌 마음의 편지
         </h2>
         <div className="flex items-center gap-1">
+          <button
+            onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
+            className={`flex h-7 items-center gap-1 rounded-lg px-2 text-[11px] font-medium transition-colors ${
+              sortOrder === 'oldest'
+                ? 'bg-info/15 text-info'
+                : 'text-text-muted hover:bg-white/10 hover:text-text-primary'
+            }`}
+            title={sortOrder === 'newest' ? '오래된순으로 전환' : '최신순으로 전환'}
+          >
+            {sortOrder === 'oldest' ? <TrendingUp size={13} /> : <Clock size={13} />}
+            {sortOrder === 'oldest' ? '오래된순' : '최신순'}
+          </button>
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, Copy, ToggleLeft, ToggleRight, RefreshCw, Trash2 } from 'lucide-react';
+import ConfirmDialog from '../common/ConfirmDialog';
 import { supabase } from '../../lib/supabase';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
@@ -16,6 +17,7 @@ export default function InviteManager() {
   const [codes, setCodes] = useState<InviteCode[]>([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; code: string } | null>(null);
 
   // 폼 상태
   const [formCode, setFormCode] = useState('');
@@ -84,18 +86,19 @@ export default function InviteManager() {
     setCodes((prev) => prev.map((c) => (c.id === id ? { ...c, active: !currentActive } : c)));
   };
 
-  const deleteCode = async (id: string, code: string) => {
-    if (!confirm(`초대 코드 "${code}"를 삭제하시겠습니까?`)) return;
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
     const { error } = await supabase
       .from('invite_codes')
       .delete()
-      .eq('id', id);
+      .eq('id', deleteTarget.id);
     if (error) {
       addToast('삭제 실패: ' + error.message, 'error');
-      return;
+    } else {
+      setCodes((prev) => prev.filter((c) => c.id !== deleteTarget.id));
+      addToast('초대 코드가 삭제되었습니다', 'success');
     }
-    setCodes((prev) => prev.filter((c) => c.id !== id));
-    addToast('초대 코드가 삭제되었습니다', 'success');
+    setDeleteTarget(null);
   };
 
   const copyCode = (code: string) => {
@@ -275,7 +278,7 @@ export default function InviteManager() {
                           {c.active ? <ToggleRight size={16} className="text-success" /> : <ToggleLeft size={16} />}
                         </button>
                         <button
-                          onClick={() => deleteCode(c.id, c.code)}
+                          onClick={() => setDeleteTarget({ id: c.id, code: c.code })}
                           className="rounded p-1 text-text-muted transition-colors hover:bg-danger/20 hover:text-danger"
                           title="삭제"
                         >
@@ -290,6 +293,16 @@ export default function InviteManager() {
           </table>
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="초대 코드 삭제"
+        message={`초대 코드 "${deleteTarget?.code}"를 삭제하시겠습니까?`}
+        confirmLabel="삭제"
+        danger
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }

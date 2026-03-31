@@ -6,25 +6,27 @@ import type { MessageThread } from '../types';
 export function useThreads(refType: 'voc' | 'note', refId: string | null) {
   const [messages, setMessages] = useState<MessageThread[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchMessages = useCallback(async () => {
     if (!refId) return;
     setLoading(true);
+    setError(null);
 
     try {
-      const { data, error } = await withTimeout(
+      const { data, error: fetchErr } = await withTimeout(
         () => supabase.from('message_threads').select('*').eq('ref_type', refType).eq('ref_id', refId).order('created_at', { ascending: true }),
         8000, 'threads',
       );
 
-      if (error) {
-        console.error('대화 조회 실패:', error.message);
+      if (fetchErr) {
+        setError('대화를 불러오지 못했습니다');
         return;
       }
 
       setMessages(data ?? []);
-    } catch (err) {
-      console.error('대화 로딩 실패:', err);
+    } catch {
+      setError('대화를 불러오지 못했습니다');
     } finally {
       setLoading(false);
     }
@@ -94,5 +96,5 @@ export function useThreads(refType: 'voc' | 'note', refId: string | null) {
     };
   }, [refType, refId]);
 
-  return { messages, loading, sendMessage, refetchMessages: fetchMessages };
+  return { messages, loading, error, sendMessage, refetchMessages: fetchMessages };
 }

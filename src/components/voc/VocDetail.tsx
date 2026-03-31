@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, EyeOff, User, Paperclip, Trash2, ShieldOff, Shield } from 'lucide-react';
 import StatusBadge from '../common/StatusBadge';
+import ConfirmDialog from '../common/ConfirmDialog';
 import ThreadPanel from '../thread/ThreadPanel';
 import { useVocs } from '../../hooks/useVocs';
 import { useAuthStore } from '../../stores/authStore';
@@ -33,6 +34,7 @@ export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDeta
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [hiding, setHiding] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
   const isAdmin = profile?.role === 'admin' || profile?.role === 'director';
@@ -51,11 +53,11 @@ export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDeta
 
   const handleDelete = async () => {
     if (deleting) return;
-    if (!confirm('이 VOC를 삭제하시겠습니까?')) return;
     setDeleting(true);
 
     const { error } = await deleteVoc(voc.id);
     setDeleting(false);
+    setShowDeleteConfirm(false);
 
     if (error) {
       addToast(`삭제 실패: ${error}`, 'error');
@@ -141,7 +143,7 @@ export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDeta
         )}
         {canDelete && (
           <button
-            onClick={handleDelete}
+            onClick={() => setShowDeleteConfirm(true)}
             disabled={deleting}
             className="flex h-7 w-7 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-danger/20 hover:text-danger disabled:opacity-40"
             title="삭제"
@@ -318,6 +320,16 @@ export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDeta
           canReplyAsManager={isLeader}
         />
       </div>
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        title="VOC 삭제"
+        message="이 VOC를 삭제하시겠습니까? 삭제 후 복구할 수 없습니다."
+        confirmLabel="삭제"
+        danger
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </div>
   );
 }

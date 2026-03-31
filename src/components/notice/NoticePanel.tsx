@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, X, Filter } from 'lucide-react';
+import { Plus, X, Filter, Clock, TrendingUp } from 'lucide-react';
 import NoticeList from './NoticeList';
 import NoticeForm from './NoticeForm';
 import NoticeDetail from './NoticeDetail';
@@ -23,6 +23,7 @@ export default function NoticePanel({ onClose }: NoticePanelProps) {
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
   const [filterUrgency, setFilterUrgency] = useState<UrgencyLevel | null>(null);
   const [filterCategory, setFilterCategory] = useState<NoticeCategory | null>(null);
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [showFilters, setShowFilters] = useState(false);
 
   const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
@@ -31,8 +32,9 @@ export default function NoticePanel({ onClose }: NoticePanelProps) {
     fetchNotices({
       urgency: filterUrgency,
       category: filterCategory,
+      sort: sortOrder,
     });
-  }, [fetchNotices, filterUrgency, filterCategory]);
+  }, [fetchNotices, filterUrgency, filterCategory, sortOrder]);
 
   useEffect(() => {
     loadNotices();
@@ -83,6 +85,18 @@ export default function NoticePanel({ onClose }: NoticePanelProps) {
       <div className="flex items-center justify-between border-b border-white/[.06] px-4 py-3">
         <h2 className="font-heading text-base font-bold text-text-primary">📋 공지사항</h2>
         <div className="flex items-center gap-1">
+          <button
+            onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
+            className={`flex h-7 items-center gap-1 rounded-lg px-2 text-[11px] font-medium transition-colors ${
+              sortOrder === 'oldest'
+                ? 'bg-info/15 text-info'
+                : 'text-text-muted hover:bg-white/10 hover:text-text-primary'
+            }`}
+            title={sortOrder === 'newest' ? '오래된순으로 전환' : '최신순으로 전환'}
+          >
+            {sortOrder === 'oldest' ? <TrendingUp size={13} /> : <Clock size={13} />}
+            {sortOrder === 'oldest' ? '오래된순' : '최신순'}
+          </button>
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${

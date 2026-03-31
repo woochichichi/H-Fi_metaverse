@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, X, Filter, RefreshCw } from 'lucide-react';
+import { Plus, X, Filter, RefreshCw, Clock, TrendingUp } from 'lucide-react';
 import GatheringCard from './GatheringCard';
 import GatheringForm from './GatheringForm';
 import GatheringDetail from './GatheringDetail';
+import LoadMore from '../common/LoadMore';
 import { useGatherings } from '../../hooks/useGatherings';
 import { useAuthStore } from '../../stores/authStore';
 import { GATHERING_CATEGORIES, GATHERING_STATUSES, GATHERING_STATUS_LABELS } from '../../lib/constants';
@@ -24,15 +25,18 @@ export default function GatheringPanel({ onClose }: GatheringPanelProps) {
   const [joinedIds, setJoinedIds] = useState<Set<string>>(new Set());
   const [filterCategory, setFilterCategory] = useState<GatheringCategory | null>(null);
   const [filterStatus, setFilterStatus] = useState<GatheringStatus | null>(null);
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [showFilters, setShowFilters] = useState(false);
   const [skeletonTimeout, setSkeletonTimeout] = useState(false);
+  const [displayCount, setDisplayCount] = useState(20);
 
   const loadGatherings = useCallback(() => {
     fetchGatherings({
       category: filterCategory,
       status: filterStatus,
+      sort: sortOrder,
     });
-  }, [fetchGatherings, filterCategory, filterStatus]);
+  }, [fetchGatherings, filterCategory, filterStatus, sortOrder]);
 
   useEffect(() => {
     loadGatherings();
@@ -104,6 +108,18 @@ export default function GatheringPanel({ onClose }: GatheringPanelProps) {
       <div className="flex items-center justify-between border-b border-white/[.06] px-4 py-3">
         <h2 className="font-heading text-base font-bold text-text-primary">🎉 모임방</h2>
         <div className="flex items-center gap-1">
+          <button
+            onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
+            className={`flex h-7 items-center gap-1 rounded-lg px-2 text-[11px] font-medium transition-colors ${
+              sortOrder === 'oldest'
+                ? 'bg-info/15 text-info'
+                : 'text-text-muted hover:bg-white/10 hover:text-text-primary'
+            }`}
+            title={sortOrder === 'newest' ? '오래된순으로 전환' : '최신순으로 전환'}
+          >
+            {sortOrder === 'oldest' ? <TrendingUp size={13} /> : <Clock size={13} />}
+            {sortOrder === 'oldest' ? '오래된순' : '최신순'}
+          </button>
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
@@ -195,7 +211,7 @@ export default function GatheringPanel({ onClose }: GatheringPanelProps) {
           </div>
         ) : (
           <div className="flex flex-col gap-2">
-            {gatherings.map((g) => (
+            {gatherings.slice(0, displayCount).map((g) => (
               <GatheringCard
                 key={g.id}
                 gathering={g}
@@ -203,6 +219,7 @@ export default function GatheringPanel({ onClose }: GatheringPanelProps) {
                 onClick={() => handleCardClick(g)}
               />
             ))}
+            <LoadMore current={Math.min(displayCount, gatherings.length)} total={gatherings.length} onLoadMore={() => setDisplayCount((c) => c + 20)} />
           </div>
         )}
       </div>

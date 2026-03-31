@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Pin, Paperclip, RefreshCw } from 'lucide-react';
 import UrgencyBadge from '../common/UrgencyBadge';
+import LoadMore from '../common/LoadMore';
 import { formatRelativeTime } from '../../lib/utils';
 import type { Notice } from '../../types';
 
@@ -32,8 +33,11 @@ function Skeleton() {
   );
 }
 
+const PAGE_SIZE = 20;
+
 export default function NoticeList({ notices, loading, error, readIds, onSelect, onRetry }: NoticeListProps) {
   const [skeletonTimeout, setSkeletonTimeout] = useState(false);
+  const [displayCount, setDisplayCount] = useState(PAGE_SIZE);
 
   useEffect(() => {
     if (!loading) {
@@ -91,9 +95,11 @@ export default function NoticeList({ notices, loading, error, readIds, onSelect,
     );
   }
 
+  const visible = notices.slice(0, displayCount);
+
   return (
     <div className="flex flex-col gap-2">
-      {notices.map((notice) => {
+      {visible.map((notice) => {
         const isRead = readIds.has(notice.id);
         const catConfig = CATEGORY_CONFIG[notice.category] ?? CATEGORY_CONFIG['일반'];
 
@@ -148,6 +154,7 @@ export default function NoticeList({ notices, loading, error, readIds, onSelect,
           </button>
         );
       })}
+      <LoadMore current={visible.length} total={notices.length} onLoadMore={() => setDisplayCount((c) => c + PAGE_SIZE)} />
     </div>
   );
 }
