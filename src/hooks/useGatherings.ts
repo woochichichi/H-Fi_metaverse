@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { withTimeout } from '../lib/utils';
-import type { Gathering, GatheringMember, Profile } from '../types';
+import type { Gathering, GatheringMember, GatheringComment, Profile } from '../types';
 import type { GatheringCategory, GatheringStatus } from '../lib/constants';
 
 export interface GatheringFilters {
@@ -209,6 +209,69 @@ export function useGatherings() {
     return { members, profiles: (profiles ?? []) as Pick<Profile, 'id' | 'name' | 'nickname' | 'team' | 'avatar_emoji' | 'avatar_color'>[] };
   }, []);
 
+  // ===== 댓글 =====
+
+  const fetchComments = useCallback(async (gatheringId: string) => {
+    const { data, error: fetchError } = await withTimeout(
+      () =>
+        supabase
+          .from('gathering_comments')
+          .select('id, gathering_id, author_id, content, created_at')
+          .eq('gathering_id', gatheringId)
+          .order('created_at', { ascending: true }),
+      8000,
+      'gatheringComments',
+    );
+
+    if (fetchError) {
+      console.error('댓글 조회 실패:', fetchError.message);
+      return { comments: [] as GatheringComment[], error: fetchError.message };
+    }
+
+    // 작성자 프로필 조회
+    const comments = (data ?? []) as GatheringComment[];
+    const authorIds = [...new Set(comments.map((c) => c.author_id).filter(Boolean))] as string[];
+    let profiles: Pick<Profile, 'id' | 'name' | 'nickname' | 'avatar_emoji' | 'avatar_color'>[] = [];
+
+    if (authorIds.length > 0) {
+      const { data: pData } = await withTimeout(
+        () => supabase.from('profiles').select('id, name, nickname, avatar_emoji, avatar_color').in('id', authorIds),
+        8000,
+        'commentProfiles',
+      );
+      profiles = (pData ?? []) as typeof profiles;
+    }
+
+    return { comments, profiles, error: null };
+  }, []);
+
+  const addComment = useCallback(async (gatheringId: string, authorId: string, content: string) => {
+    const { data, error: insertError } = await supabase
+      .from('gathering_comments')
+      .insert({ gathering_id: gatheringId, author_id: authorId, content })
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error('댓글 등록 실패:', insertError.message);
+      return { data: null, error: insertError.message };
+    }
+    return { data: data as GatheringComment, error: null };
+  }, []);
+
+  const deleteComment = useCallback(async (commentId: string) => {
+    const { error: deleteError } = await supabase
+      .from('gathering_comments')
+      .delete()
+      .eq('id', commentId);
+
+    if (deleteError) {
+      console.error('댓글 삭제 실패:', deleteError.message);
+      return { error: deleteError.message };
+    }
+    return { error: null };
+  }, []);
+
   return {
     gatherings,
     loading,
@@ -220,5 +283,8 @@ export function useGatherings() {
     leaveGathering,
     fetchMyJoins,
     fetchMembers,
+    fetchComments,
+    addComment,
+    deleteComment,
   };
 }

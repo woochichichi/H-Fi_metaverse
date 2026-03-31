@@ -105,6 +105,12 @@ export interface Database {
         Update: Record<string, never>;
         Relationships: [];
       };
+      gathering_comments: {
+        Row: GatheringComment;
+        Insert: Omit<GatheringComment, 'id' | 'created_at'>;
+        Update: Record<string, never>;
+        Relationships: [];
+      };
       omok_records: {
         Row: OmokRecord;
         Insert: Omit<OmokRecord, 'id' | 'created_at'>;
@@ -352,6 +358,14 @@ export interface GatheringMember {
   gathering_id: string;
   user_id: string;
   joined_at: string;
+}
+
+export interface GatheringComment {
+  id: string;
+  gathering_id: string;
+  author_id: string | null;
+  content: string;
+  created_at: string;
 }
 
 export interface OmokRecord {

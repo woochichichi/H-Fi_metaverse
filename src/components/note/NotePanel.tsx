@@ -6,7 +6,7 @@ import NoteDetail from './NoteDetail';
 import { useNotes, useNoteRealtime } from '../../hooks/useNotes';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
-import { NOTE_CATEGORIES, NOTE_STATUSES, TEAMS } from '../../lib/constants';
+import { NOTE_CATEGORIES, NOTE_STATUSES } from '../../lib/constants';
 import type { AnonymousNote } from '../../types';
 import type { NoteCategory, NoteStatus } from '../../lib/constants';
 
@@ -17,9 +17,9 @@ interface NotePanelProps {
 }
 
 export default function NotePanel({ onClose }: NotePanelProps) {
-  const { profile, user } = useAuthStore();
+  const { user } = useAuthStore();
   const { addToast, modalContext } = useUiStore();
-  const { notes, loading, error, fetchNotes, fetchMyNotes } = useNotes();
+  const { notes, loading, error, fetchNotes } = useNotes();
 
   const [view, setView] = useState<ViewMode>(modalContext?.targetName ? 'form' : 'list');
   const [selectedNote, setSelectedNote] = useState<AnonymousNote | null>(null);
@@ -27,23 +27,16 @@ export default function NotePanel({ onClose }: NotePanelProps) {
   // 필터
   const [filterCategory, setFilterCategory] = useState<NoteCategory | null>(null);
   const [filterStatus, setFilterStatus] = useState<NoteStatus | null>(null);
-  const [filterTeam, setFilterTeam] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
-  const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
-
+  // RLS가 본인 수신/발신만 필터링 — 역할 구분 불필요
   const loadNotes = useCallback(() => {
-    if (isLeader) {
-      fetchNotes({
-        category: filterCategory,
-        status: filterStatus,
-        team: filterTeam,
-        sort: 'newest',
-      });
-    } else if (user) {
-      fetchMyNotes(user.id);
-    }
-  }, [isLeader, user, fetchNotes, fetchMyNotes, filterCategory, filterStatus, filterTeam]);
+    fetchNotes({
+      category: filterCategory,
+      status: filterStatus,
+      sort: 'newest',
+    });
+  }, [fetchNotes, filterCategory, filterStatus]);
 
   useEffect(() => {
     loadNotes();
@@ -53,12 +46,12 @@ export default function NotePanel({ onClose }: NotePanelProps) {
   useNoteRealtime(
     useCallback(
       (newNote: AnonymousNote) => {
-        if (isLeader) {
+        if (newNote.recipient_id === user?.id) {
           addToast(`💌 새 편지 도착 — ${newNote.title}`, 'info');
         }
         loadNotes();
       },
-      [isLeader, addToast, loadNotes]
+      [user, addToast, loadNotes]
     )
   );
 
@@ -98,26 +91,28 @@ export default function NotePanel({ onClose }: NotePanelProps) {
     );
   }
 
+  // 수신/발신 분리
+  const received = notes.filter((n) => n.recipient_id === user?.id);
+  const sent = notes.filter((n) => n.sender_id === user?.id);
+
   // 목록 뷰
   return (
     <div className="flex flex-col h-full">
       {/* 헤더 */}
       <div className="flex items-center justify-between border-b border-white/[.06] px-4 py-3">
         <h2 className="font-heading text-base font-bold text-text-primary">
-          💌 {isLeader ? '받은 편지함' : '마음의 편지'}
+          💌 마음의 편지
         </h2>
         <div className="flex items-center gap-1">
-          {isLeader && (
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
-                showFilters ? 'bg-accent/20 text-accent' : 'text-text-muted hover:bg-white/10 hover:text-text-primary'
-              }`}
-              title="필터"
-            >
-              <Filter size={15} />
-            </button>
-          )}
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
+              showFilters ? 'bg-accent/20 text-accent' : 'text-text-muted hover:bg-white/10 hover:text-text-primary'
+            }`}
+            title="필터"
+          >
+            <Filter size={15} />
+          </button>
           {onClose && (
             <button
               onClick={onClose}
@@ -132,16 +127,12 @@ export default function NotePanel({ onClose }: NotePanelProps) {
       {/* 보드 설명 */}
       <div className="border-b border-white/[.06] bg-accent/[.04] px-4 py-2">
         <p className="text-[11px] leading-relaxed text-text-muted">
-          {isLeader ? (
-            <><span className="font-semibold text-text-secondary">팀원들의 솔직한 목소리를 받는 곳</span> — 익명으로 전달된 건의·질문·피드백을 확인하고, 답장을 통해 양방향 대화를 이어갈 수 있습니다.</>
-          ) : (
-            <><span className="font-semibold text-text-secondary">수평적 소통을 위한 비밀 우체통</span> — 리더에게 건의·질문·피드백을 익명으로 전달하세요. 누가 보냈는지 알 수 없지만, 리더의 답장을 받을 수 있습니다.</>
-          )}
+          <span className="font-semibold text-text-secondary">마음을 전하는 비밀 우체통</span> — 익명 또는 실명으로 편지를 보내고, 답장을 통해 대화를 이어갈 수 있습니다.
         </p>
       </div>
 
-      {/* 필터 바 (리더만) */}
-      {isLeader && showFilters && (
+      {/* 필터 바 */}
+      {showFilters && (
         <div className="border-b border-white/[.06] px-4 py-2 space-y-2">
           <div className="flex flex-wrap gap-1">
             <button
@@ -164,34 +155,50 @@ export default function NotePanel({ onClose }: NotePanelProps) {
               </button>
             ))}
           </div>
-          <div className="flex gap-2">
-            <select
-              value={filterStatus ?? ''}
-              onChange={(e) => setFilterStatus((e.target.value || null) as NoteStatus | null)}
-              className="flex-1 rounded-lg bg-white/[.06] px-2 py-1 text-[11px] text-text-secondary outline-none"
-            >
-              <option value="">상태: 전체</option>
-              {NOTE_STATUSES.map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-            <select
-              value={filterTeam ?? ''}
-              onChange={(e) => setFilterTeam(e.target.value || null)}
-              className="flex-1 rounded-lg bg-white/[.06] px-2 py-1 text-[11px] text-text-secondary outline-none"
-            >
-              <option value="">팀: 전체</option>
-              {TEAMS.map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
-          </div>
+          <select
+            value={filterStatus ?? ''}
+            onChange={(e) => setFilterStatus((e.target.value || null) as NoteStatus | null)}
+            className="w-full rounded-lg bg-white/[.06] px-2 py-1 text-[11px] text-text-secondary outline-none"
+          >
+            <option value="">상태: 전체</option>
+            {NOTE_STATUSES.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
         </div>
       )}
 
       {/* 쪽지 목록 */}
-      <div className="flex-1 overflow-y-auto p-4">
-        <NoteList notes={notes} loading={loading} error={error} onSelect={handleSelectNote} onRetry={loadNotes} />
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* 받은 편지 */}
+        {received.length > 0 && (
+          <div>
+            <p className="text-[10px] font-medium text-text-muted uppercase mb-2">받은 편지 ({received.length})</p>
+            <NoteList notes={received} loading={false} error={null} onSelect={handleSelectNote} onRetry={loadNotes} />
+          </div>
+        )}
+
+        {/* 보낸 편지 */}
+        {sent.length > 0 && (
+          <div>
+            <p className="text-[10px] font-medium text-text-muted uppercase mb-2">보낸 편지 ({sent.length})</p>
+            <NoteList notes={sent} loading={false} error={null} onSelect={handleSelectNote} onRetry={loadNotes} />
+          </div>
+        )}
+
+        {/* 로딩/에러/빈 상태 */}
+        {loading && received.length === 0 && sent.length === 0 && (
+          <NoteList notes={[]} loading={true} error={null} onSelect={handleSelectNote} onRetry={loadNotes} />
+        )}
+        {error && (
+          <NoteList notes={[]} loading={false} error={error} onSelect={handleSelectNote} onRetry={loadNotes} />
+        )}
+        {!loading && !error && received.length === 0 && sent.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-12">
+            <span className="text-3xl mb-2">💌</span>
+            <p className="text-sm text-text-muted">아직 편지가 없습니다</p>
+          </div>
+        )}
       </div>
 
       {/* 온보딩: 편지 보내기 안내 */}

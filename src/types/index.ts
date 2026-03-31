@@ -18,6 +18,7 @@ export type {
   CustomEvalItem,
   Gathering,
   GatheringMember,
+  GatheringComment,
   UnitActivity,
   ActivityReaction,
   ActivityComment,

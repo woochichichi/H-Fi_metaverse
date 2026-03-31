@@ -24,7 +24,7 @@ export default function NoteDetail({ note, onBack, onUpdated }: NoteDetailProps)
   const { updateNoteStatus, isAnonymousAuthor } = useNotes();
   const { addToast } = useUiStore();
 
-  const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
+  const isRecipient = note.recipient_id === profile?.id;
   const canReplyAsAuthor = note.anonymous
     ? isAnonymousAuthor(note.id, note.session_token)
     : note.sender_id === profile?.id;
@@ -130,7 +130,7 @@ export default function NoteDetail({ note, onBack, onUpdated }: NoteDetailProps)
         </div>
 
         {/* 리더 전용: 읽음 처리 버튼 */}
-        {isLeader && note.status === '미읽음' && (
+        {isRecipient && note.status === '미읽음' && (
           <button
             onClick={handleMarkAsRead}
             className="w-full rounded-lg border border-info/20 bg-info/[.08] py-2 text-sm font-medium text-info transition-colors hover:bg-info/[.15]"
@@ -144,8 +144,8 @@ export default function NoteDetail({ note, onBack, onUpdated }: NoteDetailProps)
           refType="note"
           refId={note.id}
           canReplyAsAuthor={canReplyAsAuthor}
-          canReplyAsManager={isLeader}
-          onMessageSent={isLeader ? handleThreadReply : undefined}
+          canReplyAsManager={isRecipient}
+          onMessageSent={isRecipient ? handleThreadReply : undefined}
         />
       </div>
     </div>

@@ -4,6 +4,7 @@ import { useGatherings } from '../../hooks/useGatherings';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
 import { GATHERING_STATUS_LABELS } from '../../lib/constants';
+import GatheringComments from './GatheringComments';
 import type { Gathering, Profile } from '../../types';
 
 interface GatheringDetailProps {
@@ -196,6 +197,9 @@ export default function GatheringDetail({ gathering, joined, isAuthor, onClose, 
             <span>마감된 모임입니다. 참여자 정보는 참여자에게만 공개됩니다.</span>
           </div>
         )}
+
+        {/* 댓글 */}
+        <GatheringComments gatheringId={gathering.id} />
       </div>
 
       {/* 하단 액션 */}
