@@ -3,7 +3,7 @@ import CharacterSVG, { type Direction, type IdleAnim } from './CharacterSVG';
 import CharacterPet from './CharacterPet';
 import TypingBubble from './TypingBubble';
 import { useMetaverseStore, type OtherPlayer } from '../../stores/metaverseStore';
-import { TEAM_COLORS, type HairStyle, type Accessory } from '../../lib/constants';
+import { TEAM_COLORS, type HairStyle, type Accessory, type PetType } from '../../lib/constants';
 
 const LERP_SPEED = 0.15;
 const CHAR_W = 30;
@@ -59,7 +59,7 @@ function OtherPlayerSprite({ player }: { player: OtherPlayer }) {
     return () => clearInterval(timer);
   }, [isMoving]);
 
-  const petType = (player.pet || 'none') as 'cat' | 'dog' | 'bird' | 'rabbit' | 'none';
+  const petType = (player.pet || 'none') as PetType;
   const resolvedDir = player.direction || dirRef.current;
 
   return (

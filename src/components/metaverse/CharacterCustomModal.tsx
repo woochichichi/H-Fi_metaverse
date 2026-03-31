@@ -4,17 +4,18 @@ import { X, Check } from 'lucide-react';
 import CharacterSVG from './CharacterSVG';
 import { useAuthStore } from '../../stores/authStore';
 import { supabase } from '../../lib/supabase';
+import CharacterPet from './CharacterPet';
 import {
   SKIN_COLORS, HAIR_COLORS, BODY_COLORS,
-  HAIR_STYLES, ACCESSORIES,
-  type HairStyle, type Accessory,
+  HAIR_STYLES, ACCESSORIES, PETS,
+  type HairStyle, type Accessory, type PetType,
 } from '../../lib/constants';
 
 interface Props {
   onClose: () => void;
 }
 
-type Tab = 'body' | 'skin' | 'hair' | 'hairStyle' | 'accessory';
+type Tab = 'body' | 'skin' | 'hair' | 'hairStyle' | 'accessory' | 'pet';
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'body',      label: '옷' },
@@ -22,6 +23,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'hair',      label: '머리색' },
   { id: 'hairStyle', label: '헤어' },
   { id: 'accessory', label: '악세' },
+  { id: 'pet',       label: '펫' },
 ];
 
 export default function CharacterCustomModal({ onClose }: Props) {
@@ -32,6 +34,7 @@ export default function CharacterCustomModal({ onClose }: Props) {
   const [hairColor, setHairColor] = useState(profile?.hair_color ?? '#5a3e28');
   const [hairStyle, setHairStyle] = useState<HairStyle>((profile?.hair_style as HairStyle) ?? 'default');
   const [accessory, setAccessory] = useState<Accessory>((profile?.accessory as Accessory) ?? 'none');
+  const [pet, setPet] = useState<PetType>((profile?.pet as PetType) ?? 'none');
   const [activeTab, setActiveTab] = useState<Tab>('body');
   const [saving, setSaving] = useState(false);
 
@@ -46,6 +49,7 @@ export default function CharacterCustomModal({ onClose }: Props) {
         hair_color: hairColor,
         hair_style: hairStyle,
         accessory,
+        pet,
       })
       .eq('id', user.id);
     if (error) {
@@ -76,7 +80,7 @@ export default function CharacterCustomModal({ onClose }: Props) {
         {/* 미리보기 */}
         <div className="flex flex-col items-center py-5 gap-2">
           <div
-            className="flex items-center justify-center rounded-2xl"
+            className="relative flex items-center justify-center rounded-2xl"
             style={{ width: 100, height: 100, background: 'rgba(255,255,255,.05)' }}
           >
             <CharacterSVG
@@ -87,6 +91,7 @@ export default function CharacterCustomModal({ onClose }: Props) {
               accessory={accessory}
               size={64}
             />
+            {pet !== 'none' && <CharacterPet type={pet} ownerDirection="right" />}
           </div>
           <span className="text-xs text-text-secondary">
             {profile?.nickname || profile?.name}
@@ -110,8 +115,8 @@ export default function CharacterCustomModal({ onClose }: Props) {
           ))}
         </div>
 
-        {/* 옵션 패널 */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 min-h-[140px]">
+        {/* 옵션 패널 — 탭 전환 시 높이 고정 */}
+        <div className="overflow-y-auto px-4 py-4 h-[200px]">
           {activeTab === 'body' && (
             <ColorGrid
               items={BODY_COLORS}
@@ -183,6 +188,24 @@ export default function CharacterCustomModal({ onClose }: Props) {
                     />
                   </div>
                   <span className="text-[10px] text-text-secondary">{a.emoji} {a.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+          {activeTab === 'pet' && (
+            <div className="grid grid-cols-3 gap-2">
+              {PETS.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => setPet(p.id)}
+                  className={`flex flex-col items-center gap-1 rounded-xl p-2 transition-all ${
+                    pet === p.id
+                      ? 'bg-accent/20 ring-2 ring-accent'
+                      : 'bg-white/5 hover:bg-white/10'
+                  }`}
+                >
+                  <span className="text-2xl">{p.emoji}</span>
+                  <span className="text-[10px] text-text-secondary">{p.label}</span>
                 </button>
               ))}
             </div>

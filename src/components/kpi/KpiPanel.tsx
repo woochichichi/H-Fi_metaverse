@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { X, RefreshCw, ChevronDown, PenLine } from 'lucide-react';
 import KpiMemberRow from './KpiMemberRow';
+import KpiUnitScoreRow from './KpiUnitScoreRow';
 import KpiForm from './KpiForm';
 import { useKpi } from '../../hooks/useKpi';
 import { useAuthStore } from '../../stores/authStore';
@@ -20,7 +21,7 @@ function getQuarterOptions(): { value: string; label: string }[] {
 
 export default function KpiPanel({ onClose }: KpiPanelProps) {
   const { profile } = useAuthStore();
-  const { kpiItems, members, loading, error, fetchKpiItems, fetchMemberActivities, fetchMemberDetail } = useKpi();
+  const { kpiItems, members, memberUnitScores, loading, error, fetchKpiItems, fetchMemberActivities, fetchMemberUnitScores, fetchMemberDetail } = useKpi();
 
   const quarters = getQuarterOptions();
   const [selectedQuarter, setSelectedQuarter] = useState(quarters[0]?.value ?? '');
@@ -31,21 +32,31 @@ export default function KpiPanel({ onClose }: KpiPanelProps) {
   const isAdmin = profile?.role === 'admin' || profile?.role === 'director';
   const isLeader = isAdmin || profile?.role === 'leader';
   const userTeam = profile?.team ?? '';
+  const isAllUnits = !filterUnit;
 
   const loadData = useCallback(async () => {
-    // fetchKpiItems가 loading 상태를 관리, 유닛 필터는 항목에만 적용
-    await fetchKpiItems(userTeam, filterUnit || null);
-    await fetchMemberActivities(userTeam, selectedQuarter);
-  }, [fetchKpiItems, fetchMemberActivities, userTeam, filterUnit, selectedQuarter]);
+    if (!filterUnit) {
+      // 전체 탭: 유닛별 점수 집계
+      await fetchKpiItems(userTeam, null);
+      await fetchMemberUnitScores(userTeam, selectedQuarter);
+    } else {
+      // 개별 유닛 탭: 기존 활동 집계
+      await fetchKpiItems(userTeam, filterUnit);
+      await fetchMemberActivities(userTeam, selectedQuarter);
+    }
+  }, [fetchKpiItems, fetchMemberActivities, fetchMemberUnitScores, userTeam, filterUnit, selectedQuarter]);
 
   useEffect(() => {
     if (userTeam) loadData();
   }, [loadData, userTeam]);
 
-  // 권한별 멤버 필터 (유닛은 KPI 항목에만 적용 — profiles.unit 미설정)
+  // 권한별 멤버 필터
   const visibleMembers = isLeader
     ? members
     : members.filter((m) => m.userId === profile?.id);
+  const visibleUnitScores = isLeader
+    ? memberUnitScores
+    : memberUnitScores.filter((m) => m.userId === profile?.id);
 
   // KPI 항목별 설명 토글
   const toggleItem = (id: string) =>
@@ -195,33 +206,55 @@ export default function KpiPanel({ onClose }: KpiPanelProps) {
             {/* 팀원 활동 현황 */}
             <div className="px-4 py-3">
               <h3 className="text-[11px] font-semibold text-text-muted mb-2 uppercase tracking-wider">
-                팀원 활동 현황 ({visibleMembers.length}명)
+                {isAllUnits ? '유닛별 점수 현황' : '팀원 활동 현황'} ({isAllUnits ? visibleUnitScores.length : visibleMembers.length}명)
               </h3>
 
-              {visibleMembers.length === 0 ? (
-                <div className="flex flex-col items-center py-8">
-                  <span className="text-2xl mb-2">👥</span>
-                  <p className="text-xs text-text-muted">표시할 팀원이 없습니다</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {/* 헤더 */}
-                  <div className="grid grid-cols-[1fr_repeat(4,40px)_20px] gap-1 px-2 text-[9px] font-medium text-text-muted text-center">
-                    <span className="text-left">이름</span>
-                    <span title="VoC 제출">VoC</span>
-                    <span title="아이디어 제안">💡</span>
-                    <span title="이벤트 참석">🎪</span>
-                    <span title="교류+커피챗">☕</span>
-                    <span />
+              {isAllUnits ? (
+                /* 전체 탭: 유닛별 점수 */
+                visibleUnitScores.length === 0 ? (
+                  <div className="flex flex-col items-center py-8">
+                    <span className="text-2xl mb-2">👥</span>
+                    <p className="text-xs text-text-muted">표시할 팀원이 없습니다</p>
                   </div>
-                  {visibleMembers.map((m) => (
-                    <KpiMemberRow
-                      key={`${m.userId}-${selectedQuarter}`}
-                      member={m}
-                      onExpand={(uid) => fetchMemberDetail(uid, selectedQuarter)}
-                    />
-                  ))}
-                </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-[1fr_repeat(4,40px)] gap-1 px-2 text-[9px] font-medium text-text-muted text-center">
+                      <span className="text-left">이름</span>
+                      {UNITS.map((u) => (
+                        <span key={u}>{u}</span>
+                      ))}
+                    </div>
+                    {visibleUnitScores.map((m) => (
+                      <KpiUnitScoreRow key={`${m.userId}-${selectedQuarter}`} member={m} />
+                    ))}
+                  </div>
+                )
+              ) : (
+                /* 개별 유닛 탭: 활동 건수 */
+                visibleMembers.length === 0 ? (
+                  <div className="flex flex-col items-center py-8">
+                    <span className="text-2xl mb-2">👥</span>
+                    <p className="text-xs text-text-muted">표시할 팀원이 없습니다</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-[1fr_repeat(4,40px)_20px] gap-1 px-2 text-[9px] font-medium text-text-muted text-center">
+                      <span className="text-left">이름</span>
+                      <span title="VoC 제출">VoC</span>
+                      <span title="아이디어 제안">💡</span>
+                      <span title="이벤트 참석">🎪</span>
+                      <span title="교류+커피챗">☕</span>
+                      <span />
+                    </div>
+                    {visibleMembers.map((m) => (
+                      <KpiMemberRow
+                        key={`${m.userId}-${selectedQuarter}`}
+                        member={m}
+                        onExpand={(uid) => fetchMemberDetail(uid, selectedQuarter)}
+                      />
+                    ))}
+                  </div>
+                )
               )}
             </div>
           </>

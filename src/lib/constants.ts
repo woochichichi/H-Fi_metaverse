@@ -189,6 +189,15 @@ export const ACCESSORIES: { id: Accessory; label: string; emoji: string }[] = [
   { id: 'crown',      label: '왕관',     emoji: '👑' },
 ];
 
+export type PetType = 'none' | 'cat' | 'dog' | 'bird' | 'rabbit';
+export const PETS: { id: PetType; label: string; emoji: string }[] = [
+  { id: 'none',   label: '없음',   emoji: '❌' },
+  { id: 'cat',    label: '고양이', emoji: '🐱' },
+  { id: 'dog',    label: '강아지', emoji: '🐶' },
+  { id: 'bird',   label: '새',     emoji: '🐦' },
+  { id: 'rabbit', label: '토끼',   emoji: '🐰' },
+];
+
 // 프로필 상태
 export const PROFILE_STATUSES = ['online', 'offline', '재택', '퇴사'] as const;
 export type ProfileStatus = (typeof PROFILE_STATUSES)[number];

@@ -1,10 +1,11 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import CharacterSVG, { type IdleAnim } from './CharacterSVG';
+import CharacterPet from './CharacterPet';
 import SpawnEffect from './SpawnEffect';
 import TypingBubble from './TypingBubble';
 import { useMetaverseStore } from '../../stores/metaverseStore';
 import { useUiStore } from '../../stores/uiStore';
-import { ROOMS_DATA, TEAM_TO_ROOM, type HairStyle, type Accessory } from '../../lib/constants';
+import { ROOMS_DATA, TEAM_TO_ROOM, type HairStyle, type Accessory, type PetType } from '../../lib/constants';
 import { useAuthStore } from '../../stores/authStore';
 
 const SPEED = 4;
@@ -263,7 +264,9 @@ export default function PlayerCharacter() {
         idleAnim={isMoving ? 'none' : idleAnim}
       />
 
-      {/* 펫: DB pet 필드 활성화 시 연동 */}
+      {((profile?.pet as PetType) ?? 'none') !== 'none' && (
+        <CharacterPet type={(profile?.pet as PetType)} ownerDirection={playerDirection} />
+      )}
     </div>
   );
 }

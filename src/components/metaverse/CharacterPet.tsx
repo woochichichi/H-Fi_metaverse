@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-
-export type PetType = 'cat' | 'dog' | 'bird' | 'rabbit' | 'none';
+import type { PetType } from '../../lib/constants';
 
 interface Props {
   type: PetType;

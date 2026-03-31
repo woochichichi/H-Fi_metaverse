@@ -14,6 +14,13 @@ export interface MemberActivity {
   exchangeJoinCount: number;
 }
 
+/** 팀원별 유닛 점수 (전체 탭용) */
+export interface MemberUnitScores {
+  userId: string;
+  name: string;
+  unitScores: Record<string, number>; // unit -> 평균 점수
+}
+
 /** 활동 상세 1건 */
 export interface ActivityDetail {
   id: string;
@@ -27,6 +34,7 @@ export function useKpi() {
   const [kpiItems, setKpiItems] = useState<KpiItem[]>([]);
   const [kpiRecords, setKpiRecords] = useState<KpiRecord[]>([]);
   const [members, setMembers] = useState<MemberActivity[]>([]);
+  const [memberUnitScores, setMemberUnitScores] = useState<MemberUnitScores[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -205,6 +213,66 @@ export function useKpi() {
     []
   );
 
+  /** 전체 탭: 유닛별 KPI 점수 집계 */
+  const fetchMemberUnitScores = useCallback(async (team: string, quarter: string) => {
+    try {
+      // 1) 프로필
+      const { data: profiles, error: pErr } = await withTimeout(
+        () => supabase.from('profiles').select('id, name').eq('team', team).order('name'),
+        8000, 'unitScoreProfiles',
+      );
+      if (pErr) throw pErr;
+      if (!profiles || profiles.length === 0) { setMemberUnitScores([]); return; }
+
+      // 2) 해당 팀 + 분기의 KPI 항목
+      const { data: items, error: iErr } = await withTimeout(
+        () => supabase.from('kpi_items').select('id, unit').eq('team', team).eq('quarter', quarter),
+        8000, 'unitScoreItems',
+      );
+      if (iErr) throw iErr;
+      if (!items || items.length === 0) { setMemberUnitScores(profiles.map(p => ({ userId: p.id, name: p.name, unitScores: {} }))); return; }
+
+      const itemIds = items.map(i => i.id);
+      const itemUnitMap = new Map(items.map(i => [i.id, i.unit]));
+
+      // 3) 해당 항목들의 실적 조회
+      const { data: records, error: rErr } = await withTimeout(
+        () => supabase.from('kpi_records').select('kpi_item_id, user_id, score').in('kpi_item_id', itemIds),
+        8000, 'unitScoreRecords',
+      );
+      if (rErr) throw rErr;
+
+      // 4) user_id + unit별 점수 합산
+      const scoreMap = new Map<string, Record<string, { sum: number; count: number }>>();
+      (records ?? []).forEach((r: { kpi_item_id: string; user_id: string; score: number | null }) => {
+        if (r.score == null) return;
+        const unit = itemUnitMap.get(r.kpi_item_id);
+        if (!unit) return;
+        if (!scoreMap.has(r.user_id)) scoreMap.set(r.user_id, {});
+        const userScores = scoreMap.get(r.user_id)!;
+        if (!userScores[unit]) userScores[unit] = { sum: 0, count: 0 };
+        userScores[unit].sum += r.score;
+        userScores[unit].count += 1;
+      });
+
+      // 5) 유닛별 항목 수 (max_score 기준이 아닌 항목 개수 기준 평균)
+      const result: MemberUnitScores[] = profiles.map(p => {
+        const userScores = scoreMap.get(p.id) ?? {};
+        const unitScores: Record<string, number> = {};
+        for (const [unit, { sum, count }] of Object.entries(userScores)) {
+          unitScores[unit] = Math.round((sum / count) * 10) / 10;
+        }
+        return { userId: p.id, name: p.name, unitScores };
+      });
+
+      setMemberUnitScores(result);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '유닛별 점수 조회 실패';
+      console.error('유닛별 점수 조회 실패:', msg);
+      setError(msg);
+    }
+  }, []);
+
   /** 특정 팀원의 활동 상세 조회 (제목 포함) */
   const fetchMemberDetail = useCallback(async (
     userId: string,
@@ -269,10 +337,12 @@ export function useKpi() {
     kpiItems,
     kpiRecords,
     members,
+    memberUnitScores,
     loading,
     error,
     fetchKpiItems,
     fetchMemberActivities,
+    fetchMemberUnitScores,
     fetchMemberDetail,
     fetchKpiRecords,
     fetchAllRecords,

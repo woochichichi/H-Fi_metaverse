@@ -171,6 +171,7 @@ export interface Profile {
   hair_color: string;
   hair_style: string;
   accessory: string;
+  pet: string;
   status: 'online' | 'offline' | '재택' | '퇴사';
   mood_emoji: string | null;
   position_x: number;
