@@ -108,10 +108,7 @@ export function useTeamPosts() {
         () => supabase.from('team_posts').insert({ author_id: authorId, team, content, category }),
         8000, 'createPost',
       );
-      if (error) {
-        console.error('게시글 등록 실패:', error.code, error.message, error.details, { authorId, team, category });
-        throw error;
-      }
+      if (error) throw error;
     },
     [],
   );
@@ -177,9 +174,10 @@ export function useTeamPosts() {
 
   const addComment = useCallback(
     async (postId: string, authorId: string, content: string) => {
-      const { error } = await supabase
-        .from('team_post_comments')
-        .insert({ post_id: postId, author_id: authorId, content });
+      const { error } = await withTimeout(
+        () => supabase.from('team_post_comments').insert({ post_id: postId, author_id: authorId, content }),
+        8000, 'addComment',
+      );
       if (error) throw error;
 
       setPosts((prev) =>

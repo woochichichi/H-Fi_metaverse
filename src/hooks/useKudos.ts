@@ -97,9 +97,10 @@ export function useKudos() {
 
   const createKudos = useCallback(
     async (authorId: string, targetId: string, team: string, message: string) => {
-      const { error } = await supabase
-        .from('kudos')
-        .insert({ author_id: authorId, target_id: targetId, team, message });
+      const { error } = await withTimeout(
+        () => supabase.from('kudos').insert({ author_id: authorId, target_id: targetId, team, message }),
+        8000, 'createKudos',
+      );
       if (error) throw error;
     },
     [],

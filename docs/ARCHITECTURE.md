@@ -239,6 +239,18 @@ const useDeviceMode = () => {
 4. 삭제는 기존 RLS(`019`)가 `author_id` 기준으로 이미 안전 → 추가 변경 불필요
 **교훈:** 프론트 권한 변경 시 반드시 RLS 정책 + full_setup.sql 동기화 확인. 보안은 RLS, 프론트는 UX 목적(CLAUDE.md 원칙 #4)
 
+### Supabase Management API 경유 마이그레이션 시 한글/이모지 인코딩 깨짐 (2026-03-31)
+**증상:** 게시글 작성 시 `POST /rest/v1/team_posts 400 Bad Request` — Supabase 로그에 `PostgREST; error=23514` (check_violation)
+**원인:** `curl`로 Management API를 통해 마이그레이션 SQL 실행 시 JSON 직렬화 과정에서 한글·이모지가 U+FFFD(대체 문자, `efbfbd`)로 저장됨. CHECK 제약조건·컬럼 DEFAULT 값이 깨져서 프론트에서 정상 한글을 INSERT하면 제약조건 불일치로 실패.
+**영향 범위 (수정 완료):**
+- `team_posts.team_posts_category_check` — `'자유','질문','정보','잡담'` 깨짐 → 재생성
+- `team_posts.category` DEFAULT — `'자유'` 깨짐 → 재설정
+- `profiles.profiles_status_check` — `'재택','퇴사'` 깨짐 → 재생성
+- `kudos_likes.kudos_likes_reaction_check` — 이모지 6개 깨짐 → 재생성
+- `kudos_likes.reaction` DEFAULT — `'❤️'` 깨짐 → 재설정
+**RLS 정책·트리거·실제 데이터:** 이상 없음 (hex 검사로 확인)
+**교훈:** Management API(`/v1/projects/{ref}/database/query`)로 한글·이모지 포함 SQL 실행 시, JSON body를 파일(`--data-binary @file.json`)로 넘겨야 인코딩 안전. 마이그레이션 후 CHECK 제약조건의 hex 값을 반드시 검증할 것 (`encode(pg_get_constraintdef(c.oid)::bytea,'hex') LIKE '%efbfbd%'`).
+
 ### backdrop-filter + fixed 스택킹 이슈
 **증상:** 오버레이 UI가 부모 기준으로 잡혀 backdrop-filter 깨짐
 **해결:** 오버레이 UI는 `createPortal(document.body)` 필수

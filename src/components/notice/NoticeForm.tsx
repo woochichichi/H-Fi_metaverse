@@ -5,7 +5,7 @@ import { useNotices } from '../../hooks/useNotices';
 import { useFileUpload } from '../../hooks/useFileUpload';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
-import { URGENCY_LEVELS, NOTICE_CATEGORIES, UNITS, TEAMS, FILE_LIMITS } from '../../lib/constants';
+import { URGENCY_LEVELS, NOTICE_CATEGORIES, TEAMS, FILE_LIMITS } from '../../lib/constants';
 import type { UrgencyLevel, NoticeCategory } from '../../lib/constants';
 
 interface NoticeFormProps {
@@ -28,12 +28,11 @@ export default function NoticeForm({ onClose, onCreated }: NoticeFormProps) {
     ...FILE_LIMITS.notice,
   });
 
-  const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
+  const isLeader = profile?.role === 'admin' || profile?.role === 'director';
 
   const [urgency, setUrgency] = useState<UrgencyLevel>('참고');
   const [category, setCategory] = useState<NoticeCategory>('일반');
   const [pinned, setPinned] = useState(false);
-  const [targetUnit, setTargetUnit] = useState<string>('');
   const [targetTeam, setTargetTeam] = useState<string>(profile?.team ?? '');
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -67,7 +66,7 @@ export default function NoticeForm({ onClose, onCreated }: NoticeFormProps) {
         urgency,
         category,
         pinned,
-        unit: targetUnit || null,
+        unit: null,
         team: targetTeam || null,
         attachment_urls: attachmentUrls.length > 0 ? attachmentUrls : undefined,
         author_id: user.id,
@@ -148,39 +147,19 @@ export default function NoticeForm({ onClose, onCreated }: NoticeFormProps) {
         </div>
 
         {/* 대상 */}
-        <div className="flex gap-2">
-          <div className="flex-1">
-            <label className="text-xs font-medium text-text-muted mb-1.5 block">대상 유닛</label>
-            <select
-              value={targetUnit}
-              onChange={(e) => setTargetUnit(e.target.value)}
-              className="w-full rounded-lg bg-white/[.06] px-3 py-1.5 text-xs text-text-secondary outline-none"
-            >
-              <option value="">전체</option>
-              {UNITS.map((u) => (
-                <option key={u} value={u}>{u}</option>
-              ))}
-            </select>
-          </div>
-          <div className="flex-1">
-            <label className="text-xs font-medium text-text-muted mb-1.5 block">대상 팀</label>
-            {isLeader ? (
-              <select
-                value={targetTeam}
-                onChange={(e) => setTargetTeam(e.target.value)}
-                className="w-full rounded-lg bg-white/[.06] px-3 py-1.5 text-xs text-text-secondary outline-none"
-              >
-                <option value="">전체</option>
-                {TEAMS.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
-            ) : (
-              <span className="block w-full rounded-lg bg-white/[.06] px-3 py-1.5 text-xs text-text-secondary">
-                {profile?.team ?? '미지정'}
-              </span>
-            )}
-          </div>
+        <div>
+          <label className="text-xs font-medium text-text-muted mb-1.5 block">대상 팀</label>
+          <select
+            value={targetTeam}
+            onChange={(e) => setTargetTeam(e.target.value)}
+            disabled={!isLeader}
+            className="w-full rounded-lg bg-white/[.06] px-3 py-1.5 text-xs text-text-secondary outline-none disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {isLeader && <option value="">전체</option>}
+            {TEAMS.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
         </div>
 
         {/* 상단 고정 — 리더 이상만 */}
