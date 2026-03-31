@@ -8,6 +8,7 @@ const BUBBLE_COLORS: Record<string, { bg: string; text: string; border: string }
   '생명ITO': { bg: '#f0edff', text: '#3d2f8c', border: 'rgba(108,92,231,.25)' },
   '손보ITO': { bg: '#e8f4ff', text: '#1a4b7a', border: 'rgba(9,132,227,.25)' },
   '한금서':  { bg: '#fff8e1', text: '#6b5a10', border: 'rgba(248,181,0,.25)' },
+  '금융ITO': { bg: '#ffe6d9', text: '#7a3d1a', border: 'rgba(255,99,72,.25)' },
 };
 
 const DEFAULT_BUBBLE = { bg: '#fff', text: '#555', border: 'rgba(0,0,0,.08)' };

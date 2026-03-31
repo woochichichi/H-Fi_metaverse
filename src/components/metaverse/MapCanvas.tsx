@@ -116,7 +116,7 @@ function PixelSofa90s({ x, y, color = '#8B6914' }: { x: number; y: number; color
 }
 
 // 화이트보드 (마커 자국 + 지우개)
-function PixelWhiteboard({ x, y, w = 120 }: { x: number; y: number; w?: number }) {
+function PixelWhiteboard({ x, y, w = 120, text = '' }: { x: number; y: number; w?: number; text?: string }) {
   const vw = w / 4; // viewBox 비율
   return (
     <div className="absolute z-[5]" style={{ left: x, top: y }}>
@@ -125,11 +125,28 @@ function PixelWhiteboard({ x, y, w = 120 }: { x: number; y: number; w?: number }
         <rect x="0" y="0" width={vw} height="18" rx="1" fill="#E8E8E8" stroke="#AAAAAA" strokeWidth="0.5" />
         {/* 보드 */}
         <rect x="1" y="1" width={vw - 2} height="14" fill="#F5F5F0" />
-        {/* 마커 자국 */}
-        <rect x="3" y="3" width={vw * 0.5} height="1" fill="#E74C3C" opacity="0.6" />
-        <rect x="3" y="5" width={vw * 0.4} height="1" fill="#3498DB" opacity="0.5" />
-        <rect x="3" y="7" width={vw * 0.6} height="1" fill="#2ECC71" opacity="0.4" />
-        <rect x="3" y="9" width={vw * 0.3} height="1" fill="#E74C3C" opacity="0.3" />
+        {text ? (
+          <text
+            x={vw / 2}
+            y="9"
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontFamily="'DungGeunMo', monospace"
+            fontSize="5"
+            fill="#444"
+            style={{ imageRendering: 'auto' }}
+          >
+            {text}
+          </text>
+        ) : (
+          <>
+            {/* 마커 자국 */}
+            <rect x="3" y="3" width={vw * 0.5} height="1" fill="#E74C3C" opacity="0.6" />
+            <rect x="3" y="5" width={vw * 0.4} height="1" fill="#3498DB" opacity="0.5" />
+            <rect x="3" y="7" width={vw * 0.6} height="1" fill="#2ECC71" opacity="0.4" />
+            <rect x="3" y="9" width={vw * 0.3} height="1" fill="#E74C3C" opacity="0.3" />
+          </>
+        )}
         {/* 트레이 */}
         <rect x="2" y="16" width={vw - 4} height="2" fill="#CCCCCC" />
         {/* 마커 */}
@@ -281,12 +298,12 @@ function PixelCopier({ x, y }: { x: number; y: number }) {
 }
 
 // 코르크 게시판 (포스트잇 붙어있음)
-function PixelCorkboard({ x, y }: { x: number; y: number }) {
+function PixelCorkboard({ x, y, frameColor = '#8B6914' }: { x: number; y: number; frameColor?: string }) {
   return (
     <div className="absolute z-[5]" style={{ left: x, top: y }}>
       <svg width="96" height="72" viewBox="0 0 24 18" style={{ imageRendering: 'pixelated' }}>
         {/* 프레임 */}
-        <rect x="0" y="0" width="24" height="18" fill="#8B6914" />
+        <rect x="0" y="0" width="24" height="18" fill={frameColor} />
         {/* 코르크 */}
         <rect x="1" y="1" width="22" height="16" fill="#D4A06E" />
         <rect x="2" y="2" width="20" height="14" fill="#C4966A" />
@@ -382,6 +399,72 @@ function PixelArcade({ x, y, accent = '#FF6B6B' }: { x: number; y: number; accen
         <rect x="7" y="19.2" width="2" height="0.6" fill="#888" />
         {/* 네온 글로우 */}
         <rect x="2" y="2" width="12" height="0.5" fill={accent} opacity="0.4" />
+      </svg>
+    </div>
+  );
+}
+
+// 픽셀아트 우체통 (VOC센터용, 48×72 — viewBox 12×18, 4배 스케일)
+function PixelMailbox({ x, y }: { x: number; y: number }) {
+  return (
+    <div className="absolute z-[5]" style={{ left: x, top: y }}>
+      <svg width="48" height="72" viewBox="0 0 12 18" style={{ imageRendering: 'pixelated' }}>
+        <ellipse cx="6" cy="17.5" rx="3.5" ry="0.8" fill="rgba(0,0,0,0.12)" />
+        {/* 기둥/받침대 */}
+        <rect x="5" y="10" width="2" height="7" fill="#888" />
+        <rect x="4" y="16" width="4" height="1.5" fill="#777" />
+        {/* 본체 */}
+        <rect x="2" y="3" width="8" height="7" rx="0.5" fill="#E74C3C" />
+        <rect x="3" y="4" width="6" height="5" fill="#C0392B" />
+        {/* 상단 반원 뚜껑 */}
+        <ellipse cx="6" cy="3" rx="4" ry="2" fill="#E74C3C" />
+        <ellipse cx="6" cy="3" rx="3.5" ry="1.5" fill="#D63031" />
+        {/* 우편 슬롯 */}
+        <rect x="3.5" y="6" width="5" height="1" fill="#1a1a2e" />
+        <rect x="4" y="6.2" width="4" height="0.6" fill="#333" />
+        {/* 전면 장식 라인 */}
+        <rect x="3" y="8" width="6" height="0.5" fill="#D63031" />
+        {/* 측면 깃발 (오른쪽) */}
+        <rect x="10" y="4.5" width="0.8" height="3" fill="#888" />
+        <rect x="10" y="4" width="1.5" height="1.5" fill="#E74C3C" />
+        <rect x="10.2" y="4.2" width="1" height="1" fill="#FF6B6B" />
+        {/* 하이라이트 */}
+        <rect x="3" y="4" width="1" height="2" fill="rgba(255,255,255,0.1)" />
+      </svg>
+    </div>
+  );
+}
+
+// 픽셀아트 전구 오브젝트 (아이디어보드용, 40×72 — viewBox 10×18, 4배 스케일)
+function PixelLightbulb({ x, y }: { x: number; y: number }) {
+  return (
+    <div className="absolute z-[5]" style={{ left: x, top: y }}>
+      <svg width="40" height="72" viewBox="0 0 10 18" style={{ imageRendering: 'pixelated' }}>
+        <ellipse cx="5" cy="17.5" rx="2.5" ry="0.8" fill="rgba(0,0,0,0.1)" />
+        {/* 받침대/기둥 */}
+        <rect x="4.2" y="12.5" width="1.6" height="4.5" fill="#888" />
+        <rect x="3.2" y="16.5" width="3.6" height="1" fill="#777" />
+        {/* 소켓 */}
+        <rect x="3.5" y="11" width="3" height="2" rx="0.3" fill="#A0A0A0" />
+        <rect x="3.5" y="11.5" width="3" height="0.5" fill="#888" />
+        <rect x="3.5" y="12.5" width="3" height="0.5" fill="#888" />
+        {/* 전구 (원형) */}
+        <ellipse cx="5" cy="7" rx="3.5" ry="4" fill="#F8B500" />
+        <ellipse cx="5" cy="7" rx="3" ry="3.5" fill="#FFD93D" />
+        {/* 전구 내부 밝은 영역 */}
+        <ellipse cx="5" cy="6.5" rx="2" ry="2.5" fill="#FFEB8A" />
+        {/* 필라멘트 */}
+        <rect x="4.2" y="5.5" width="0.5" height="2.5" fill="#E6A800" />
+        <rect x="5.3" y="5.5" width="0.5" height="2.5" fill="#E6A800" />
+        <rect x="4.2" y="6.5" width="1.6" height="0.5" fill="#E6A800" />
+        {/* 빛 이펙트 — 주변 작은 선/점 */}
+        <rect x="0.5" y="6.5" width="1" height="0.5" fill="#FFD93D" opacity="0.5" />
+        <rect x="8.5" y="6.5" width="1" height="0.5" fill="#FFD93D" opacity="0.5" />
+        <rect x="4.5" y="1.5" width="1" height="0.8" fill="#FFD93D" opacity="0.5" />
+        <rect x="1.5" y="3.5" width="0.8" height="0.5" fill="#FFD93D" opacity="0.4" />
+        <rect x="7.7" y="3.5" width="0.8" height="0.5" fill="#FFD93D" opacity="0.4" />
+        {/* 하이라이트 */}
+        <ellipse cx="4" cy="5.5" rx="0.8" ry="1" fill="rgba(255,255,255,0.15)" />
       </svg>
     </div>
   );
@@ -679,12 +762,12 @@ function PixelJumpRope({ x, y }: { x: number; y: number }) {
 // ═══ Zone 바닥 색상 매핑 ═══
 const ZONE_FLOOR_COLORS: Record<string, string> = {
   // 팀 룸 Zone
-  'lobby': '#3a3020',   // 밝은 나무 바닥
+  'lobby': '#4a3d28',   // 따뜻한 나무 바닥
   'kpi': '#1a2a3a',     // 푸른 바닥
-  'notice': '#2a1a1a',  // 붉은 바닥
+  'notice': '#3a2020',  // 다크레드 바닥
   // 광장 Zone
-  'voc': '#2a1a2a',     // 분홍 톤
-  'idea': '#2a2a1a',    // 노란 톤
+  'voc': '#382038',     // 보라/핑크 톤
+  'idea': '#38381e',    // 옐로/올리브 톤
   'gathering': '#1e2a18', // 잔디/야외 톤
   'reaction': '#1a0a20', // 진한 보라/네온 톤
   'omok': '#1a2a1a',    // 녹색 톤
@@ -898,7 +981,7 @@ const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme }: 
 
       {/* ═══ 로비 Zone (60,60 ~ 560,400) — 활기찬 라운지 ═══ */}
       {/* 네온 환영 사인 */}
-      <PixelNeonSign x={200} y={68} text="WELCOME!" color={teamColor} />
+      <PixelNeonSign x={200} y={68} text="환영합니다!" color={teamColor} />
       {/* 편안한 소파 + 라운드 테이블 */}
       <PixelSofa90s x={100} y={130} color={teamColor} />
       <PixelSofa90s x={300} y={130} color={teamColor} />
@@ -945,9 +1028,9 @@ const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme }: 
       {/* 네온 뉴스 사인 */}
       <PixelNeonSign x={530} y={468} text="NEWS!" color="#FFD93D" />
       {/* 컬러풀 게시판 갤러리 */}
-      <PixelCorkboard x={380} y={490} />
-      <PixelCorkboard x={560} y={490} />
-      <PixelCorkboard x={740} y={490} />
+      <PixelCorkboard x={380} y={490} frameColor="#E91E63" />
+      <PixelCorkboard x={560} y={490} frameColor="#FF9800" />
+      <PixelCorkboard x={740} y={490} frameColor="#6BC5FF" />
       {/* 카페 스타일 라운지 */}
       <PixelSofa90s x={400} y={620} color={teamColor} />
       <PixelSofa90s x={600} y={620} color={teamColor} />
@@ -985,10 +1068,12 @@ const PlazaFurniture = memo(function PlazaFurniture() {
       <PixelRoundTable x={240} y={370} size={60} />
       <PixelBeerSet x={250} y={350} />
       {/* 오른쪽 편의시설 */}
-      <PixelWhiteboard x={100} y={80} w={140} />
+      <PixelWhiteboard x={100} y={80} w={140} text="VOC" />
       <PixelCorkboard x={500} y={100} />
       <PixelVending90s x={600} y={140} />
-      <PixelArcade x={600} y={290} accent="#FF6B9D" />
+      {/* 이전: <PixelArcade x={600} y={290} accent="#FF6B9D" /> */}
+      <PixelMailbox x={600} y={290} />
+      <PixelPlant90s x={650} y={310} size="small" />
       <PixelWaterCooler x={500} y={300} />
       {/* 분위기 */}
       <PixelPlant90s x={80} y={80} />
@@ -1011,12 +1096,14 @@ const PlazaFurniture = memo(function PlazaFurniture() {
       <PixelChair90s x={1000} y={380} />
       <PixelChair90s x={1100} y={360} />
       {/* 아이디어 벽 — 게시판 + 화이트보드 */}
-      <PixelWhiteboard x={880} y={80} w={140} />
+      <PixelWhiteboard x={880} y={80} w={140} text="IDEAS" />
       <PixelCorkboard x={1350} y={120} />
       <PixelCorkboard x={1350} y={250} />
       {/* 영감 코너 */}
       <PixelGuitar x={1400} y={360} />
-      <PixelArcade x={860} y={300} accent="#FFD93D" />
+      {/* 이전: <PixelArcade x={860} y={300} accent="#FFD93D" /> */}
+      <PixelLightbulb x={860} y={300} />
+      <PixelPlant90s x={905} y={320} size="small" />
       <PixelBeerSet x={1030} y={290} />
       {/* 편의 + 분위기 */}
       <PixelSofa90s x={1200} y={340} color="#F8B500" />

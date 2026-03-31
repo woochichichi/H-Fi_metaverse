@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { withTimeout } from '../lib/utils';
-import type { KpiItem, KpiRecord, Profile } from '../types';
+import type { KpiItem, KpiRecord } from '../types';
 
 /** 팀원별 활동 집계 */
 export interface MemberActivity {
@@ -70,7 +70,7 @@ export function useKpi() {
       const { start, end } = getQuarterRange(quarter ?? getCurrentQuarter());
 
       // 3) 해당 팀원들의 활동 조회
-      const userIds = profiles.map((p: Profile) => p.id);
+      const userIds = profiles.map((p) => p.id);
       const actQuery = () =>
         supabase
           .from('user_activities')
@@ -90,7 +90,7 @@ export function useKpi() {
         m[a.activity_type] = (m[a.activity_type] ?? 0) + 1;
       });
 
-      const result: MemberActivity[] = profiles.map((p: Profile) => {
+      const result: MemberActivity[] = profiles.map((p) => {
         const acts = actMap.get(p.id) ?? {};
         return {
           userId: p.id,

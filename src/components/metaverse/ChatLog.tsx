@@ -6,6 +6,7 @@ const TEAM_NAME_COLORS: Record<string, string> = {
   '생명ITO': '#a78bfa',
   '손보ITO': '#60a5fa',
   '한금서':  '#F8B500',
+  '금융ITO': '#FF6348',
 };
 
 export default function ChatLog() {
