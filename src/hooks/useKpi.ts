@@ -70,7 +70,7 @@ export function useKpi() {
       const { start, end } = getQuarterRange(quarter ?? getCurrentQuarter());
 
       // 3) 해당 팀원들의 활동 조회
-      const userIds = profiles.map((p) => p.id);
+      const userIds = profiles.map((p: { id: string }) => p.id);
       const actQuery = () =>
         supabase
           .from('user_activities')
@@ -90,7 +90,7 @@ export function useKpi() {
         m[a.activity_type] = (m[a.activity_type] ?? 0) + 1;
       });
 
-      const result: MemberActivity[] = profiles.map((p) => {
+      const result: MemberActivity[] = profiles.map((p: { id: string; name: string; unit: string | null }) => {
         const acts = actMap.get(p.id) ?? {};
         return {
           userId: p.id,
