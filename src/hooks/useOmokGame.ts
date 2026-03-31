@@ -1,34 +1,17 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../stores/authStore';
 import { saveOmokResult } from './useOmokRanking';
+import { checkWinRenju, isForbidden, computeForbiddenCells } from '../lib/renju';
 
 type Stone = 0 | 1 | 2; // 0=빈칸, 1=흑, 2=백
 export type GameStatus = 'waiting' | 'playing' | 'finished';
 
 export const BOARD_SIZE = 15;
+const TURN_TIME = 60; // 1분
 
 function createEmptyBoard(): Stone[][] {
   return Array.from({ length: BOARD_SIZE }, () => Array<Stone>(BOARD_SIZE).fill(0));
-}
-
-function checkWin(board: Stone[][], row: number, col: number, stone: Stone): boolean {
-  const dirs = [[0, 1], [1, 0], [1, 1], [1, -1]];
-  for (const [dr, dc] of dirs) {
-    let count = 1;
-    for (let i = 1; i < 5; i++) {
-      const r = row + dr * i, c = col + dc * i;
-      if (r < 0 || r >= BOARD_SIZE || c < 0 || c >= BOARD_SIZE || board[r][c] !== stone) break;
-      count++;
-    }
-    for (let i = 1; i < 5; i++) {
-      const r = row - dr * i, c = col - dc * i;
-      if (r < 0 || r >= BOARD_SIZE || c < 0 || c >= BOARD_SIZE || board[r][c] !== stone) break;
-      count++;
-    }
-    if (count >= 5) return true;
-  }
-  return false;
 }
 
 export interface OmokPlayer {
@@ -47,9 +30,57 @@ export function useOmokGame() {
   const [players, setPlayers] = useState<OmokPlayer[]>([]);
   const [winner, setWinner] = useState<1 | 2 | null>(null);
   const [lastMove, setLastMove] = useState<{ row: number; col: number } | null>(null);
+  const [timeLeft, setTimeLeft] = useState(TURN_TIME);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const gameStartedRef = useRef(false);
   const resultSavedRef = useRef(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // 금수 위치 계산 (흑 차례일 때만)
+  const forbiddenCells = useMemo(() => {
+    if (status !== 'playing' || currentTurn !== 1) return null;
+    return computeForbiddenCells(board);
+  }, [board, status, currentTurn]);
+
+  // 타이머
+  useEffect(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (status !== 'playing' || winner) return;
+
+    setTimeLeft(TURN_TIME);
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          // 시간 초과 → 현재 턴 플레이어 패배
+          clearInterval(timerRef.current!);
+          const loser = currentTurn;
+          const winnerColor: 1 | 2 = loser === 1 ? 2 : 1;
+          setWinner(winnerColor);
+          setStatus('finished');
+
+          // 시간 초과 broadcast
+          channelRef.current?.send({
+            type: 'broadcast',
+            event: 'timeout',
+            payload: { loser },
+          });
+
+          // 전적 저장
+          if (!resultSavedRef.current && profile && myColor === winnerColor) {
+            resultSavedRef.current = true;
+            const loserId = players.find((p) => p.id !== profile.id)?.id;
+            if (loserId) saveOmokResult(profile.id, loserId);
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [currentTurn, status, winner]);
 
   useEffect(() => {
     if (!profile) return;
@@ -71,7 +102,7 @@ export function useOmokGame() {
         }));
       setPlayers(users);
 
-      // 2명 모이면 게임 시작 (아직 시작 안 했을 때만)
+      // 2명 모이면 게임 시작
       if (users.length >= 2 && !gameStartedRef.current) {
         gameStartedRef.current = true;
         const sorted = [...users].sort((a, b) => a.id.localeCompare(b.id));
@@ -84,14 +115,11 @@ export function useOmokGame() {
         setLastMove(null);
       }
 
-      // 상대방 퇴장 감지: 게임 중에 1명만 남으면 승리 처리
+      // 상대방 퇴장 → 승리
       if (users.length < 2 && gameStartedRef.current && !winner) {
         setStatus('finished');
-        // 남은 사람이 나면 → 상대 퇴장으로 승리
         const me = users.find((u) => u.id === profile.id);
-        if (me && myColor) {
-          setWinner(myColor);
-        }
+        if (me && myColor) setWinner(myColor);
       }
     });
 
@@ -101,7 +129,6 @@ export function useOmokGame() {
       };
       setBoard((prev) => {
         const next = prev.map((r) => [...r]);
-        // 이미 돌이 놓여있으면 무시 (동시 착수 방지)
         if (next[row][col] !== 0) return prev;
         next[row][col] = stone;
         return next;
@@ -114,12 +141,20 @@ export function useOmokGame() {
       }
     });
 
+    channel.on('broadcast', { event: 'timeout' }, ({ payload }) => {
+      const { loser } = payload as { loser: 1 | 2 };
+      const winnerColor: 1 | 2 = loser === 1 ? 2 : 1;
+      setWinner(winnerColor);
+      setStatus('finished');
+    });
+
     channel.on('broadcast', { event: 'reset' }, () => {
       setBoard(createEmptyBoard());
       setCurrentTurn(1);
       setWinner(null);
       setLastMove(null);
       setStatus('playing');
+      setTimeLeft(TURN_TIME);
       resultSavedRef.current = false;
     });
 
@@ -136,7 +171,6 @@ export function useOmokGame() {
 
     channelRef.current = channel;
 
-    // beforeunload: 브라우저 닫기 시 forfeit broadcast
     const handleUnload = () => {
       channel.send({ type: 'broadcast', event: 'forfeit', payload: { userId: profile.id } });
     };
@@ -145,6 +179,7 @@ export function useOmokGame() {
     return () => {
       window.removeEventListener('beforeunload', handleUnload);
       gameStartedRef.current = false;
+      if (timerRef.current) clearInterval(timerRef.current);
       supabase.removeChannel(channel);
       channelRef.current = null;
     };
@@ -154,9 +189,12 @@ export function useOmokGame() {
     (row: number, col: number) => {
       if (status !== 'playing' || myColor !== currentTurn || board[row][col] !== 0) return;
 
+      // 렌주룰: 흑 금수 체크
+      if (myColor === 1 && isForbidden(board, row, col)) return;
+
       const newBoard = board.map((r) => [...r]);
       newBoard[row][col] = myColor;
-      const isWin = checkWin(newBoard, row, col, myColor);
+      const isWin = checkWinRenju(newBoard, row, col, myColor);
       const nextTurn: 1 | 2 = myColor === 1 ? 2 : 1;
 
       setBoard(newBoard);
@@ -165,7 +203,6 @@ export function useOmokGame() {
       if (isWin) {
         setWinner(myColor);
         setStatus('finished');
-        // 승자가 전적 저장 (중복 방지)
         if (!resultSavedRef.current && profile) {
           resultSavedRef.current = true;
           const loserId = players.find((p) => p.id !== profile.id)?.id;
@@ -188,9 +225,13 @@ export function useOmokGame() {
     setWinner(null);
     setLastMove(null);
     setStatus('playing');
+    setTimeLeft(TURN_TIME);
     resultSavedRef.current = false;
     channelRef.current?.send({ type: 'broadcast', event: 'reset', payload: {} });
   }, []);
 
-  return { board, status, currentTurn, myColor, players, winner, lastMove, makeMove, resetGame };
+  return {
+    board, status, currentTurn, myColor, players, winner, lastMove,
+    timeLeft, forbiddenCells, makeMove, resetGame, TURN_TIME,
+  };
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, RotateCcw, User, Trophy } from 'lucide-react';
+import { X, RotateCcw, User, Trophy, Clock } from 'lucide-react';
 import { useOmokGame, BOARD_SIZE, type OmokPlayer } from '../../hooks/useOmokGame';
 import { useOmokRanking } from '../../hooks/useOmokRanking';
 import { useAuthStore } from '../../stores/authStore';
@@ -31,6 +31,30 @@ function StoneDot({ stone, isLast }: { stone: 1 | 2; isLast: boolean }) {
   );
 }
 
+function Timer({ timeLeft, isMyTurn, turnTime }: { timeLeft: number; isMyTurn: boolean; turnTime: number }) {
+  const urgent = timeLeft <= 10;
+  const pct = (timeLeft / turnTime) * 100;
+
+  return (
+    <div className="flex w-full items-center gap-2">
+      <Clock size={14} className={urgent ? 'text-red-400' : 'text-text-muted'} />
+      <div className="flex-1 rounded-full bg-white/[.08] h-2 overflow-hidden">
+        <div
+          className={`h-full rounded-full transition-all duration-1000 linear ${
+            urgent ? 'bg-red-400' : isMyTurn ? 'bg-accent' : 'bg-text-muted/50'
+          }`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <span className={`text-xs font-mono font-semibold min-w-[2rem] text-right ${
+        urgent ? 'text-red-400 animate-pulse' : 'text-text-secondary'
+      }`}>
+        {timeLeft}s
+      </span>
+    </div>
+  );
+}
+
 function WaitingScreen({ playerCount }: { playerCount: number }) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
@@ -41,20 +65,26 @@ function WaitingScreen({ playerCount }: { playerCount: number }) {
         <div className="h-2 w-2 animate-pulse rounded-full bg-green-400" />
         <span className="text-sm text-text-secondary">대기 중... ({playerCount}/2명)</span>
       </div>
-      <div className="mt-4 rounded-lg bg-white/[.04] p-4 text-xs text-text-muted leading-relaxed">
-        <p>규칙: 흑돌과 백돌을 번갈아 놓아</p>
-        <p>가로·세로·대각선으로 5개 연속 놓으면 승리!</p>
+      <div className="mt-4 rounded-lg bg-white/[.04] p-4 text-xs text-text-muted leading-relaxed space-y-1">
+        <p>흑돌 선공, 번갈아 착수 (턴당 60초)</p>
+        <p>5목 연속 놓으면 승리! (렌주룰 적용)</p>
+        <p className="text-red-400/70">흑 금수: 장목(6+) / 삼삼(3-3) / 사사(4-4)</p>
       </div>
     </div>
   );
 }
 
-function ResultCard({ iWon, opponent, onReset }: { iWon: boolean; opponent?: OmokPlayer; onReset: () => void }) {
+function ResultCard({ iWon, opponent, reason, onReset }: {
+  iWon: boolean; opponent?: OmokPlayer; reason?: string; onReset: () => void;
+}) {
   return (
     <div className="w-full rounded-xl border border-white/[.08] bg-white/[.04] p-4">
-      <div className="mb-3 text-center text-lg font-bold">
+      <div className="mb-1 text-center text-lg font-bold">
         {iWon ? <span className="text-accent">승리!</span> : <span className="text-red-400">패배</span>}
       </div>
+      {reason && (
+        <p className="mb-3 text-center text-xs text-text-muted">{reason}</p>
+      )}
       {opponent && (
         <div className="mb-3 rounded-lg bg-white/[.06] p-3">
           <p className="mb-1 text-xs text-text-muted">상대방</p>
@@ -142,11 +172,16 @@ function RankingTab() {
 
 export default function OmokPanel({ onClose }: { onClose: () => void }) {
   const { profile } = useAuthStore();
-  const { board, status, currentTurn, myColor, players, winner, lastMove, makeMove, resetGame } = useOmokGame();
+  const {
+    board, status, currentTurn, myColor, players, winner, lastMove,
+    timeLeft, forbiddenCells, makeMove, resetGame, TURN_TIME,
+  } = useOmokGame();
   const [tab, setTab] = useState<'game' | 'ranking'>('game');
 
   const myName = profile?.nickname || profile?.name || '나';
   const opponentName = players.find((p) => p.id !== profile?.id)?.name || '상대방';
+  const isMyTurn = currentTurn === myColor;
+  const timeoutReason = timeLeft <= 0 ? '시간 초과' : undefined;
 
   return (
     <div className="flex h-full flex-col">
@@ -199,17 +234,23 @@ export default function OmokPanel({ onClose }: { onClose: () => void }) {
             </span>
           </div>
 
+          {/* 타이머 */}
+          {status === 'playing' && !winner && (
+            <Timer timeLeft={timeLeft} isMyTurn={isMyTurn} turnTime={TURN_TIME} />
+          )}
+
           {/* 턴/결과 */}
           {status === 'finished' ? (
             <ResultCard
               iWon={winner === myColor}
               opponent={players.find((p) => p.id !== profile?.id)}
+              reason={timeoutReason}
               onReset={resetGame}
             />
           ) : (
             <div className="text-sm font-medium">
-              <span className={currentTurn === myColor ? 'text-green-400' : 'text-text-muted'}>
-                {currentTurn === myColor ? '내 차례' : `${opponentName} 차례`}
+              <span className={isMyTurn ? 'text-green-400' : 'text-text-muted'}>
+                {isMyTurn ? '내 차례' : `${opponentName} 차례`}
                 {currentTurn === 1 ? ' (흑)' : ' (백)'}
               </span>
             </div>
@@ -234,10 +275,23 @@ export default function OmokPanel({ onClose }: { onClose: () => void }) {
               row.map((cell, c) => (
                 <div key={`${r}-${c}`} className="absolute cursor-pointer" style={{ left: c * CELL, top: r * CELL, width: CELL, height: CELL }} onClick={() => makeMove(r, c)}>
                   {cell !== 0 && <StoneDot stone={cell} isLast={lastMove?.row === r && lastMove?.col === c} />}
+                  {/* 금수 표시 (흑 차례 + 빈칸) */}
+                  {cell === 0 && forbiddenCells?.[r]?.[c] && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <span className="text-[9px] font-bold text-red-500/70 select-none">X</span>
+                    </div>
+                  )}
                 </div>
               )),
             )}
           </div>
+
+          {/* 렌주룰 안내 */}
+          {currentTurn === 1 && status === 'playing' && (
+            <p className="text-[10px] text-red-400/60">
+              렌주룰: 흑 금수 (장목/삼삼/사사) 위치에 X 표시
+            </p>
+          )}
         </div>
       )}
     </div>
