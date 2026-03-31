@@ -78,7 +78,7 @@ export default function MetaverseLayout() {
   // 초기 로드 + 방 이동 시 알림 체크
   useEffect(() => {
     if (profile?.id && profile?.team) {
-      checkAlerts(profile.id, profile.team);
+      checkAlerts(profile.id, profile.team, profile.created_at);
     }
   }, [profile?.id, profile?.team, currentRoom, checkAlerts]);
 

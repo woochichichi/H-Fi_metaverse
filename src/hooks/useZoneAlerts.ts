@@ -26,7 +26,7 @@ export function useZoneAlerts() {
   const [zoneAlerts, setZoneAlerts] = useState<ZoneAlertMap>({});
   const [loading, setLoading] = useState(false);
 
-  const checkAlerts = useCallback(async (userId: string, userTeam: string) => {
+  const checkAlerts = useCallback(async (userId: string, userTeam: string, userCreatedAt?: string) => {
     setLoading(true);
     try {
       // 1) 내 zone_visits 가져오기
@@ -55,7 +55,7 @@ export function useZoneAlerts() {
       // 3) 각 존별로 last_seen_at 이후 새 글 존재 여부 체크
       const alerts: ZoneAlertMap = {};
       const queries = targetZones.map(async ({ zoneId, table, teamCol }) => {
-        const lastSeen = visitMap.get(zoneId) || '1970-01-01T00:00:00Z';
+        const lastSeen = visitMap.get(zoneId) || userCreatedAt || new Date().toISOString();
         let q = supabase.from(table).select('id', { count: 'exact', head: true })
           .gt('created_at', lastSeen);
 
