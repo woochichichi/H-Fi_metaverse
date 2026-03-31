@@ -8,6 +8,7 @@ import NicknameEditor from './NicknameEditor';
 import CharacterCustomModal from '../metaverse/CharacterCustomModal';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
+import { useMetaverseStore } from '../../stores/metaverseStore';
 import { useDeviceMode } from '../../hooks/useDeviceMode';
 import { useNotices } from '../../hooks/useNotices';
 import { useInbox } from '../../hooks/useInbox';
@@ -16,6 +17,7 @@ import { TEAM_TO_ROOM } from '../../lib/constants';
 export default function TopBar() {
   const { profile, user, logout } = useAuthStore();
   const { sidebarOpen, toggleSidebar, openModal, closeModal, modalOpen } = useUiStore();
+  const setCurrentRoom = useMetaverseStore((s) => s.setCurrentRoom);
   const { fetchUnreadCount } = useNotices();
   const { unreadCount: inboxUnread } = useInbox(user?.id ?? null);
   const mode = useDeviceMode();
@@ -90,13 +92,22 @@ export default function TopBar() {
   return (
     <>
       <header className="flex h-12 flex-shrink-0 items-center justify-between border-b border-white/[.06] px-4" style={{ background: 'rgba(42,31,40,.97)', backdropFilter: 'blur(12px)' }}>
-        {/* 왼쪽: 로고 */}
-        <div className="flex items-center gap-2">
+        {/* 왼쪽: 로고 — 클릭 시 내 팀 방(홈)으로 이동 */}
+        <button
+          onClick={() => {
+            const homeRoom = profile?.team ? TEAM_TO_ROOM[profile.team as keyof typeof TEAM_TO_ROOM] : null;
+            if (homeRoom) setCurrentRoom(homeRoom);
+            closeModal();
+            if (sidebarOpen) toggleSidebar();
+            setShowAdmin(false);
+          }}
+          className="flex items-center gap-2 rounded-lg px-1 -ml-1 transition-colors hover:bg-bg-tertiary"
+        >
           <img src="/favicon.svg" alt="한울타리" className="h-7 w-7" />
           <h1 className="font-heading text-base font-bold tracking-tight text-text-primary">
             한울타리
           </h1>
-        </div>
+        </button>
 
         {/* 오른쪽: 액션 버튼들 */}
         <div className="flex items-center gap-2">

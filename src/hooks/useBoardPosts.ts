@@ -12,7 +12,7 @@ const ZONE_TABLES: { zone: string; table: string; filterDeleted?: boolean }[] = 
   { zone: 'idea', table: 'ideas' },
 ];
 
-const MAX_DOTS = 12;
+const MAX_DOTS = 30;
 
 export function useBoardPosts() {
   const [counts, setCounts] = useState<BoardPostCounts>({});

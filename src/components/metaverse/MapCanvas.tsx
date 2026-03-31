@@ -364,8 +364,17 @@ function PixelCopier({ x, y }: { x: number; y: number }) {
   );
 }
 
-// 코르크 게시판 (포스트잇 붙어있음)
-function PixelCorkboard({ x, y, frameColor = '#8B6914' }: { x: number; y: number; frameColor?: string }) {
+// 코르크 게시판 (포스트잇 — postCount 연동)
+const POSTIT_SLOTS = [
+  { x: 3, y: 3, w: 5, h: 5, fill: '#FDCB6E', top: '#F0B830', pin: { cx: 5, cy: 3, fill: '#E74C3C' } },
+  { x: 10, y: 2, w: 5, h: 5, fill: '#FF6B9D', top: '#E05580', pin: { cx: 12, cy: 2, fill: '#3498DB' } },
+  { x: 17, y: 4, w: 4, h: 4, fill: '#74B9FF', top: '#5AA0E8', pin: { cx: 19, cy: 4, fill: '#2ECC71' } },
+  { x: 5, y: 10, w: 5, h: 4, fill: '#55EFC4', top: '#3DD8A8', pin: null },
+  { x: 13, y: 9, w: 6, h: 5, fill: '#FFF3B0', top: '#E8DC98', pin: null },
+];
+
+function PixelCorkboard({ x, y, frameColor = '#8B6914', postCount = 0 }: { x: number; y: number; frameColor?: string; postCount?: number }) {
+  const slots = Math.min(postCount, POSTIT_SLOTS.length);
   return (
     <div className="absolute z-[5]" style={{ left: x, top: y }}>
       <svg width="96" height="72" viewBox="0 0 24 18" style={{ imageRendering: 'pixelated' }}>
@@ -374,21 +383,17 @@ function PixelCorkboard({ x, y, frameColor = '#8B6914' }: { x: number; y: number
         {/* 코르크 */}
         <rect x="1" y="1" width="22" height="16" fill="#D4A06E" />
         <rect x="2" y="2" width="20" height="14" fill="#C4966A" />
-        {/* 포스트잇 */}
-        <rect x="3" y="3" width="5" height="5" fill="#FDCB6E" />
-        <rect x="3" y="3" width="5" height="1" fill="#F0B830" />
-        <rect x="10" y="2" width="5" height="5" fill="#FF6B9D" />
-        <rect x="10" y="2" width="5" height="1" fill="#E05580" />
-        <rect x="17" y="4" width="4" height="4" fill="#74B9FF" />
-        <rect x="17" y="4" width="4" height="1" fill="#5AA0E8" />
-        <rect x="5" y="10" width="5" height="4" fill="#55EFC4" />
-        <rect x="5" y="10" width="5" height="1" fill="#3DD8A8" />
-        <rect x="13" y="9" width="6" height="5" fill="#FFF3B0" />
-        <rect x="13" y="9" width="6" height="1" fill="#E8DC98" />
-        {/* 핀 */}
-        <circle cx="5" cy="3" r="0.7" fill="#E74C3C" />
-        <circle cx="12" cy="2" r="0.7" fill="#3498DB" />
-        <circle cx="19" cy="4" r="0.7" fill="#2ECC71" />
+        {/* 포스트잇 — postCount만큼 표시 */}
+        {Array.from({ length: slots }).map((_, i) => {
+          const s = POSTIT_SLOTS[i];
+          return (
+            <g key={i}>
+              <rect x={s.x} y={s.y} width={s.w} height={s.h} fill={s.fill} />
+              <rect x={s.x} y={s.y} width={s.w} height={1} fill={s.top} />
+              {s.pin && <circle cx={s.pin.cx} cy={s.pin.cy} r={0.7} fill={s.pin.fill} />}
+            </g>
+          );
+        })}
       </svg>
     </div>
   );
@@ -1099,9 +1104,9 @@ const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme, po
       {/* 네온 뉴스 사인 */}
       <PixelNeonSign x={530} y={468} text="NEWS!" color="#FFD93D" />
       {/* 컬러풀 게시판 갤러리 */}
-      <PixelCorkboard x={380} y={490} frameColor="#E91E63" />
-      <PixelCorkboard x={560} y={490} frameColor="#FF9800" />
-      <PixelCorkboard x={740} y={490} frameColor="#6BC5FF" />
+      <PixelCorkboard x={380} y={490} frameColor="#E91E63" postCount={Math.min(postCounts.notice ?? 0, 5)} />
+      <PixelCorkboard x={560} y={490} frameColor="#FF9800" postCount={Math.min(Math.max((postCounts.notice ?? 0) - 5, 0), 5)} />
+      <PixelCorkboard x={740} y={490} frameColor="#6BC5FF" postCount={Math.min(Math.max((postCounts.notice ?? 0) - 10, 0), 5)} />
       {/* 카페 스타일 라운지 */}
       <PixelSofa90s x={400} y={620} color={teamColor} />
       <PixelSofa90s x={600} y={620} color={teamColor} />
@@ -1140,7 +1145,7 @@ const PlazaFurniture = memo(function PlazaFurniture({ postCounts }: { postCounts
       <PixelBeerSet x={250} y={350} />
       {/* 오른쪽 편의시설 */}
       <PixelChalkboard x={100} y={80} w={140} postCount={postCounts.voc ?? 0} />
-      <PixelCorkboard x={500} y={100} />
+      <PixelCorkboard x={500} y={100} postCount={Math.min(postCounts.voc ?? 0, 5)} />
       <PixelVending90s x={600} y={140} />
       {/* 이전: <PixelArcade x={600} y={290} accent="#FF6B9D" /> */}
       <PixelMailbox x={600} y={290} />
@@ -1168,8 +1173,8 @@ const PlazaFurniture = memo(function PlazaFurniture({ postCounts }: { postCounts
       <PixelChair90s x={1100} y={360} />
       {/* 아이디어 벽 — 게시판 + 화이트보드 */}
       <PixelChalkboard x={880} y={80} w={140} postCount={postCounts.idea ?? 0} />
-      <PixelCorkboard x={1350} y={120} />
-      <PixelCorkboard x={1350} y={250} />
+      <PixelCorkboard x={1350} y={120} postCount={Math.min(postCounts.idea ?? 0, 5)} />
+      <PixelCorkboard x={1350} y={250} postCount={Math.min(Math.max((postCounts.idea ?? 0) - 5, 0), 5)} />
       {/* 영감 코너 */}
       <PixelGuitar x={1400} y={360} />
       {/* 이전: <PixelArcade x={860} y={300} accent="#FFD93D" /> */}

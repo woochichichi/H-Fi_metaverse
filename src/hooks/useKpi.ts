@@ -14,6 +14,15 @@ export interface MemberActivity {
   exchangeJoinCount: number;
 }
 
+/** 활동 상세 1건 */
+export interface ActivityDetail {
+  id: string;
+  activityType: string;
+  refId: string | null;
+  title: string | null;
+  createdAt: string;
+}
+
 export function useKpi() {
   const [kpiItems, setKpiItems] = useState<KpiItem[]>([]);
   const [kpiRecords, setKpiRecords] = useState<KpiRecord[]>([]);
@@ -196,6 +205,66 @@ export function useKpi() {
     []
   );
 
+  /** 특정 팀원의 활동 상세 조회 (제목 포함) */
+  const fetchMemberDetail = useCallback(async (
+    userId: string,
+    quarter?: string,
+  ): Promise<ActivityDetail[]> => {
+    const { start, end } = getQuarterRange(quarter ?? getCurrentQuarter());
+
+    const { data, error: err } = await withTimeout(
+      () => supabase
+        .from('user_activities')
+        .select('id, activity_type, ref_id, created_at')
+        .eq('user_id', userId)
+        .gte('created_at', start)
+        .lt('created_at', end)
+        .order('created_at', { ascending: false }),
+      8000, 'memberDetail',
+    );
+    if (err || !data) return [];
+
+    const activities = data as { id: string; activity_type: string; ref_id: string | null; created_at: string }[];
+
+    // ref_id → 제목 매핑 (타입별 소스 테이블)
+    const tableMap: Record<string, string> = {
+      voc_submit: 'vocs',
+      idea_submit: 'ideas',
+      event_join: 'gatherings',
+      exchange_join: 'gatherings',
+    };
+
+    const refsByTable = new Map<string, Set<string>>();
+    activities.forEach((a) => {
+      const table = tableMap[a.activity_type];
+      if (table && a.ref_id) {
+        if (!refsByTable.has(table)) refsByTable.set(table, new Set());
+        refsByTable.get(table)!.add(a.ref_id);
+      }
+    });
+
+    const titleMap = new Map<string, string>();
+    await Promise.all(
+      Array.from(refsByTable.entries()).map(async ([table, ids]) => {
+        const { data: rows } = await supabase
+          .from(table)
+          .select('id, title')
+          .in('id', Array.from(ids));
+        (rows ?? []).forEach((r: { id: string; title: string }) => {
+          titleMap.set(r.id, r.title);
+        });
+      }),
+    );
+
+    return activities.map((a) => ({
+      id: a.id,
+      activityType: a.activity_type,
+      refId: a.ref_id,
+      title: a.ref_id ? (titleMap.get(a.ref_id) ?? null) : null,
+      createdAt: a.created_at,
+    }));
+  }, []);
+
   return {
     kpiItems,
     kpiRecords,
@@ -204,6 +273,7 @@ export function useKpi() {
     error,
     fetchKpiItems,
     fetchMemberActivities,
+    fetchMemberDetail,
     fetchKpiRecords,
     fetchAllRecords,
     upsertKpiRecord,

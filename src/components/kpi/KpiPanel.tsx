@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { X, RefreshCw, ChevronDown } from 'lucide-react';
+import { X, RefreshCw, ChevronDown, PenLine } from 'lucide-react';
 import KpiMemberRow from './KpiMemberRow';
+import KpiForm from './KpiForm';
 import { useKpi } from '../../hooks/useKpi';
 import { useAuthStore } from '../../stores/authStore';
 import { UNITS } from '../../lib/constants';
@@ -9,28 +10,23 @@ interface KpiPanelProps {
   onClose?: () => void;
 }
 
-/** 분기 목록 생성 (현재 ~ 2분기 전) */
+/** 2026년 1~4분기 고정 목록 */
 function getQuarterOptions(): { value: string; label: string }[] {
-  const now = new Date();
-  const options: { value: string; label: string }[] = [];
-  for (let i = 0; i < 3; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i * 3, 1);
-    const q = Math.ceil((d.getMonth() + 1) / 3);
-    const val = `${d.getFullYear()}-Q${q}`;
-    if (options.find((o) => o.value === val)) continue;
-    options.push({ value: val, label: `${d.getFullYear()}년 ${q}분기` });
-  }
-  return options;
+  return [1, 2, 3, 4].map((q) => ({
+    value: `2026-Q${q}`,
+    label: `2026년 ${q}분기`,
+  }));
 }
 
 export default function KpiPanel({ onClose }: KpiPanelProps) {
   const { profile } = useAuthStore();
-  const { kpiItems, members, loading, error, fetchKpiItems, fetchMemberActivities } = useKpi();
+  const { kpiItems, members, loading, error, fetchKpiItems, fetchMemberActivities, fetchMemberDetail } = useKpi();
 
   const quarters = getQuarterOptions();
   const [selectedQuarter, setSelectedQuarter] = useState(quarters[0]?.value ?? '');
   const [filterUnit, setFilterUnit] = useState<string>('');
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
 
   const isAdmin = profile?.role === 'admin' || profile?.role === 'director';
   const isLeader = isAdmin || profile?.role === 'leader';
@@ -46,7 +42,7 @@ export default function KpiPanel({ onClose }: KpiPanelProps) {
     if (userTeam) loadData();
   }, [loadData, userTeam]);
 
-  // 권한별 멤버 필터
+  // 권한별 멤버 필터 (유닛은 KPI 항목에만 적용 — profiles.unit 미설정)
   const visibleMembers = isLeader
     ? members
     : members.filter((m) => m.userId === profile?.id);
@@ -55,12 +51,31 @@ export default function KpiPanel({ onClose }: KpiPanelProps) {
   const toggleItem = (id: string) =>
     setExpandedItem((prev) => (prev === id ? null : id));
 
+  if (showForm) {
+    return (
+      <KpiForm
+        items={kpiItems}
+        onClose={() => setShowForm(false)}
+        onSaved={() => { setShowForm(false); loadData(); }}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col h-full">
       {/* 헤더 */}
       <div className="flex items-center justify-between border-b border-white/[.06] px-4 py-3">
         <h2 className="font-heading text-base font-bold text-text-primary">📊 KPI 활동 현황</h2>
         <div className="flex items-center gap-1">
+          {kpiItems.length > 0 && (
+            <button
+              onClick={() => setShowForm(true)}
+              className="flex h-7 items-center gap-1 rounded-lg px-2 text-[11px] font-medium text-accent transition-colors hover:bg-accent/10"
+              title="실적 입력"
+            >
+              <PenLine size={13} /> 실적 입력
+            </button>
+          )}
           <button
             onClick={loadData}
             className="flex h-7 w-7 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-white/10 hover:text-text-primary"
@@ -191,15 +206,20 @@ export default function KpiPanel({ onClose }: KpiPanelProps) {
               ) : (
                 <div className="space-y-2">
                   {/* 헤더 */}
-                  <div className="grid grid-cols-[1fr_repeat(4,40px)] gap-1 px-2 text-[9px] font-medium text-text-muted text-center">
+                  <div className="grid grid-cols-[1fr_repeat(4,40px)_20px] gap-1 px-2 text-[9px] font-medium text-text-muted text-center">
                     <span className="text-left">이름</span>
                     <span title="VoC 제출">VoC</span>
                     <span title="아이디어 제안">💡</span>
                     <span title="이벤트 참석">🎪</span>
                     <span title="교류+커피챗">☕</span>
+                    <span />
                   </div>
                   {visibleMembers.map((m) => (
-                    <KpiMemberRow key={m.userId} member={m} />
+                    <KpiMemberRow
+                      key={m.userId}
+                      member={m}
+                      onExpand={(uid) => fetchMemberDetail(uid, selectedQuarter)}
+                    />
                   ))}
                 </div>
               )}

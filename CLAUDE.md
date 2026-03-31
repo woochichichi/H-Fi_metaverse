@@ -35,7 +35,7 @@ supabase/migrations/ — 001_init.sql, 002_rls.sql, 003_triggers.sql
 7. `message_threads`: `sender_role`만 기록 (user_id 절대 저장 안 함)
 8. `user_activities`: 자동 기록 전용 (사용자 직접 수정 불가)
 9. 이메일 도메인: @hanwha 계열만 허용
-10. 컴포넌트 200줄 이하 (넘으면 분리)
+10. 컴포넌트는 간결하게 유지 (200줄 초과 시 분리 검토, 단 억지 분리 금지 — 응집도 우선)
 
 ## 시행착오 기록 (MUST)
 작업 중 시행착오·삽질·비자명한 교훈이 발생하면 `docs/ARCHITECTURE.md`의 `## 트러블슈팅 & 시행착오` 섹션에 기록한다.
