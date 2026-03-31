@@ -77,17 +77,13 @@ export function useUserActivities() {
     try {
       const { from, to } = getPeriodRange(period);
 
-      let query = supabase
-        .from('user_activities')
-        .select('*')
-        .gte('created_at', from)
-        .lte('created_at', to);
+      const buildQuery = () => {
+        let q = supabase.from('user_activities').select('*').gte('created_at', from).lte('created_at', to);
+        if (team) q = q.eq('team', team);
+        return q;
+      };
 
-      if (team) {
-        query = query.eq('team', team);
-      }
-
-      const { data: activities, error } = await withTimeout(query, 8000, 'teamStats');
+      const { data: activities, error } = await withTimeout(buildQuery, 8000, 'teamStats');
       if (error) {
         console.error('활동 통계 조회 실패:', error.message);
         return;
@@ -95,14 +91,18 @@ export function useUserActivities() {
 
       // 프로필에서 팀별 인원수
       const { data: profiles, error: profilesError } = await withTimeout(
-        supabase.from('profiles').select('id, team'), 8000, 'teamProfiles'
+        () => supabase.from('profiles').select('id, team'), 8000, 'teamProfiles',
       );
       if (profilesError) console.error('프로필 조회 실패:', profilesError.message);
 
       // 커스텀 평가 항목 조회
-      let customQuery = supabase.from('custom_eval_items').select('*').eq('active', true);
-      if (team) customQuery = customQuery.eq('team', team);
-      const { data: customItems, error: customError } = await withTimeout(customQuery, 8000, 'customEval');
+      const { data: customItems, error: customError } = await withTimeout(
+        () => {
+          let q = supabase.from('custom_eval_items').select('*').eq('active', true);
+          if (team) q = q.eq('team', team);
+          return q;
+        }, 8000, 'customEval',
+      );
       if (customError) console.error('커스텀 항목 조회 실패:', customError.message);
       setCustomEvalItems(customItems ?? []);
 
@@ -153,28 +153,25 @@ export function useUserActivities() {
     try {
       const { from, to } = getPeriodRange(period);
 
-      let activityQuery = supabase
-        .from('user_activities')
-        .select('*')
-        .gte('created_at', from)
-        .lte('created_at', to)
-        .not('user_id', 'is', null);
+      const buildActivityQuery = () => {
+        let q = supabase.from('user_activities').select('*').gte('created_at', from).lte('created_at', to).not('user_id', 'is', null);
+        if (team) q = q.eq('team', team);
+        return q;
+      };
 
-      if (team) {
-        activityQuery = activityQuery.eq('team', team);
-      }
-
-      const { data: activities, error } = await withTimeout(activityQuery, 8000, 'userStats');
+      const { data: activities, error } = await withTimeout(buildActivityQuery, 8000, 'userStats');
       if (error) {
         console.error('개인 통계 조회 실패:', error.message);
         return;
       }
 
-      let profileQuery = supabase.from('profiles').select('*');
-      if (team) {
-        profileQuery = profileQuery.eq('team', team);
-      }
-      const { data: profiles, error: profilesError } = await withTimeout(profileQuery, 8000, 'userProfiles');
+      const { data: profiles, error: profilesError } = await withTimeout(
+        () => {
+          let q = supabase.from('profiles').select('*');
+          if (team) q = q.eq('team', team);
+          return q;
+        }, 8000, 'userProfiles',
+      );
       if (profilesError) console.error('프로필 조회 실패:', profilesError.message);
 
       const userMap = new Map<string, UserStat>();

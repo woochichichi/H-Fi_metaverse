@@ -21,19 +21,14 @@ export function useNotices() {
     setError(null);
 
     try {
-      let query = supabase.from('notices').select('*');
+      const buildQuery = () => {
+        let q = supabase.from('notices').select('*');
+        if (filters.urgency) q = q.eq('urgency', filters.urgency);
+        if (filters.category) q = q.eq('category', filters.category);
+        return q.order('pinned', { ascending: false }).order('created_at', { ascending: false });
+      };
 
-      if (filters.urgency) {
-        query = query.eq('urgency', filters.urgency);
-      }
-      if (filters.category) {
-        query = query.eq('category', filters.category);
-      }
-
-      // 고정 공지 상단 + 최신순
-      query = query.order('pinned', { ascending: false }).order('created_at', { ascending: false });
-
-      const { data, error: fetchError } = await withTimeout(query, 8000, 'notices');
+      const { data, error: fetchError } = await withTimeout(buildQuery, 8000, 'notices');
 
       if (fetchError) throw fetchError;
       setNotices(data ?? []);
@@ -48,10 +43,10 @@ export function useNotices() {
 
   // 현재 사용자의 읽음 상태 조회
   const fetchMyReads = useCallback(async (userId: string) => {
-    const { data, error } = await supabase
-      .from('notice_reads')
-      .select('notice_id')
-      .eq('user_id', userId);
+    const { data, error } = await withTimeout(
+      () => supabase.from('notice_reads').select('notice_id').eq('user_id', userId),
+      8000, 'myReads',
+    );
     if (error) console.error('읽음 상태 조회 실패:', error.message);
 
     const ids = new Set((data ?? []).map((r) => r.notice_id));
@@ -169,20 +164,20 @@ export function useNotices() {
   // 특정 공지의 읽음 현황 (리더용)
   const fetchReadStatus = useCallback(
     async (noticeId: string): Promise<{ readers: Profile[]; total: number }> => {
-      const { data, error } = await supabase
-        .from('notice_reads')
-        .select('user_id')
-        .eq('notice_id', noticeId);
+      const { data, error } = await withTimeout(
+        () => supabase.from('notice_reads').select('user_id').eq('notice_id', noticeId),
+        8000, 'readStatus',
+      );
 
       if (error || !data) return { readers: [], total: 0 };
 
       const userIds = data.map((r) => r.user_id);
       if (userIds.length === 0) return { readers: [], total: 0 };
 
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('*')
-        .in('id', userIds);
+      const { data: profiles } = await withTimeout(
+        () => supabase.from('profiles').select('*').in('id', userIds),
+        8000, 'readStatusProfiles',
+      );
 
       return { readers: (profiles as Profile[]) ?? [], total: userIds.length };
     },
@@ -191,14 +186,15 @@ export function useNotices() {
 
   // 안읽은 공지 수 (알림 벨용)
   const fetchUnreadCount = useCallback(async (userId: string): Promise<number> => {
-    const { count: totalCount } = await supabase
-      .from('notices')
-      .select('*', { count: 'exact', head: true });
+    const { count: totalCount } = await withTimeout(
+      () => supabase.from('notices').select('*', { count: 'exact', head: true }),
+      8000, 'noticeCount',
+    );
 
-    const { count: readCount } = await supabase
-      .from('notice_reads')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId);
+    const { count: readCount } = await withTimeout(
+      () => supabase.from('notice_reads').select('*', { count: 'exact', head: true }).eq('user_id', userId),
+      8000, 'readCount',
+    );
 
     return (totalCount ?? 0) - (readCount ?? 0);
   }, []);

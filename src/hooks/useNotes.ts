@@ -23,23 +23,15 @@ export function useNotes() {
     setError(null);
 
     try {
-      let query = supabase.from('anonymous_notes').select('*');
+      const buildQuery = () => {
+        let q = supabase.from('anonymous_notes').select('*');
+        if (filters.category) q = q.eq('category', filters.category);
+        if (filters.status) q = q.eq('status', filters.status);
+        if (filters.team) q = q.eq('team', filters.team);
+        return q.order('created_at', { ascending: filters.sort === 'oldest' });
+      };
 
-      if (filters.category) {
-        query = query.eq('category', filters.category);
-      }
-      if (filters.status) {
-        query = query.eq('status', filters.status);
-      }
-      if (filters.team) {
-        query = query.eq('team', filters.team);
-      }
-
-      query = query.order('created_at', {
-        ascending: filters.sort === 'oldest',
-      });
-
-      const { data, error: fetchError } = await withTimeout(query, 8000, 'notes');
+      const { data, error: fetchError } = await withTimeout(buildQuery, 8000, 'notes');
 
       if (fetchError) throw fetchError;
       setNotes(data ?? []);
@@ -58,11 +50,10 @@ export function useNotes() {
     setError(null);
 
     try {
-      const { data, error: fetchError } = await withTimeout(supabase
-        .from('anonymous_notes')
-        .select('*')
-        .eq('sender_id', userId)
-        .order('created_at', { ascending: false }), 8000, 'myNotes');
+      const { data, error: fetchError } = await withTimeout(
+        () => supabase.from('anonymous_notes').select('*').eq('sender_id', userId).order('created_at', { ascending: false }),
+        8000, 'myNotes',
+      );
 
       if (fetchError) throw fetchError;
       setNotes(data ?? []);

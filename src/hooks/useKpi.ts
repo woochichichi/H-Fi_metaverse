@@ -14,15 +14,13 @@ export function useKpi() {
     setError(null);
 
     try {
-      let query = supabase.from('kpi_items').select('*');
+      const buildQuery = () => {
+        let q = supabase.from('kpi_items').select('*');
+        if (unit) q = q.eq('unit', unit);
+        return q.order('created_at', { ascending: true });
+      };
 
-      if (unit) {
-        query = query.eq('unit', unit);
-      }
-
-      query = query.order('created_at', { ascending: true });
-
-      const { data, error: fetchError } = await withTimeout(query, 8000, 'kpi');
+      const { data, error: fetchError } = await withTimeout(buildQuery, 8000, 'kpi');
 
       if (fetchError) throw fetchError;
       setKpiItems(data ?? []);
@@ -36,15 +34,13 @@ export function useKpi() {
   }, []);
 
   const fetchKpiRecords = useCallback(async (kpiItemId?: string) => {
-    let query = supabase.from('kpi_records').select('*');
+    const buildQuery = () => {
+      let q = supabase.from('kpi_records').select('*');
+      if (kpiItemId) q = q.eq('kpi_item_id', kpiItemId);
+      return q.order('month', { ascending: true });
+    };
 
-    if (kpiItemId) {
-      query = query.eq('kpi_item_id', kpiItemId);
-    }
-
-    query = query.order('month', { ascending: true });
-
-    const { data, error: fetchError } = await withTimeout(query, 8000, 'kpiRecords');
+    const { data, error: fetchError } = await withTimeout(buildQuery, 8000, 'kpiRecords');
 
     if (fetchError) {
       console.error('KPI 실적 조회 실패:', fetchError.message);
@@ -58,12 +54,8 @@ export function useKpi() {
     if (kpiItemIds.length === 0) return;
 
     const { data, error: fetchError } = await withTimeout(
-      supabase
-        .from('kpi_records')
-        .select('*')
-        .in('kpi_item_id', kpiItemIds)
-        .order('month', { ascending: true }),
-      8000, 'kpiAllRecords'
+      () => supabase.from('kpi_records').select('*').in('kpi_item_id', kpiItemIds).order('month', { ascending: true }),
+      8000, 'kpiAllRecords',
     );
 
     if (fetchError) {

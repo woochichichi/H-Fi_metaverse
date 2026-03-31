@@ -19,19 +19,14 @@ export function useGatherings() {
     setError(null);
 
     try {
-      let query = supabase
-        .from('gatherings')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const buildQuery = () => {
+        let q = supabase.from('gatherings').select('*').order('created_at', { ascending: false });
+        if (filters.category) q = q.eq('category', filters.category);
+        if (filters.status) q = q.eq('status', filters.status);
+        return q;
+      };
 
-      if (filters.category) {
-        query = query.eq('category', filters.category);
-      }
-      if (filters.status) {
-        query = query.eq('status', filters.status);
-      }
-
-      const { data, error: fetchError } = await withTimeout(query, 8000, 'gatherings');
+      const { data, error: fetchError } = await withTimeout(buildQuery, 8000, 'gatherings');
       if (fetchError) throw fetchError;
       setGatherings((data as Gathering[]) ?? []);
     } catch (err) {
@@ -173,20 +168,20 @@ export function useGatherings() {
 
   // 내가 참여한 모임 ID 세트
   const fetchMyJoins = useCallback(async (userId: string) => {
-    const { data, error } = await supabase
-      .from('gathering_members')
-      .select('gathering_id')
-      .eq('user_id', userId);
+    const { data, error } = await withTimeout(
+      () => supabase.from('gathering_members').select('gathering_id').eq('user_id', userId),
+      8000, 'myJoins',
+    );
     if (error) console.error('참여 목록 조회 실패:', error.message);
     return new Set((data ?? []).map((m) => m.gathering_id));
   }, []);
 
   // 마감된 모임의 참여자 목록 (프로필 포함)
   const fetchMembers = useCallback(async (gatheringId: string) => {
-    const { data, error: fetchError } = await supabase
-      .from('gathering_members')
-      .select('gathering_id, user_id, joined_at')
-      .eq('gathering_id', gatheringId);
+    const { data, error: fetchError } = await withTimeout(
+      () => supabase.from('gathering_members').select('gathering_id, user_id, joined_at').eq('gathering_id', gatheringId),
+      8000, 'gatheringMembers',
+    );
 
     if (fetchError) {
       console.error('참여자 조회 실패:', fetchError.message);
@@ -197,10 +192,10 @@ export function useGatherings() {
     if (members.length === 0) return { members, profiles: [] };
 
     const userIds = members.map((m) => m.user_id);
-    const { data: profiles, error: profilesError } = await supabase
-      .from('profiles')
-      .select('id, name, nickname, team, avatar_emoji, avatar_color')
-      .in('id', userIds);
+    const { data: profiles, error: profilesError } = await withTimeout(
+      () => supabase.from('profiles').select('id, name, nickname, team, avatar_emoji, avatar_color').in('id', userIds),
+      8000, 'memberProfiles',
+    );
     if (profilesError) console.error('참여자 프로필 조회 실패:', profilesError.message);
 
     return { members, profiles: (profiles ?? []) as Pick<Profile, 'id' | 'name' | 'nickname' | 'team' | 'avatar_emoji' | 'avatar_color'>[] };

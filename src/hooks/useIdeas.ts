@@ -20,22 +20,16 @@ export function useIdeas() {
     setError(null);
 
     try {
-      let query = supabase.from('idea_with_votes').select('*');
+      const buildQuery = () => {
+        let q = supabase.from('idea_with_votes').select('*');
+        if (filters.category) q = q.eq('category', filters.category);
+        if (filters.status) q = q.eq('status', filters.status);
+        return filters.sort === 'popular'
+          ? q.order('vote_count', { ascending: false })
+          : q.order('created_at', { ascending: false });
+      };
 
-      if (filters.category) {
-        query = query.eq('category', filters.category);
-      }
-      if (filters.status) {
-        query = query.eq('status', filters.status);
-      }
-
-      if (filters.sort === 'popular') {
-        query = query.order('vote_count', { ascending: false });
-      } else {
-        query = query.order('created_at', { ascending: false });
-      }
-
-      const { data, error: fetchError } = await withTimeout(query, 8000, 'ideas');
+      const { data, error: fetchError } = await withTimeout(buildQuery, 8000, 'ideas');
 
       if (fetchError) throw fetchError;
       setIdeas((data as IdeaWithVotes[]) ?? []);
@@ -230,10 +224,10 @@ export function useIdeas() {
 
   // 사용자 투표 여부 일괄 조회
   const fetchUserVotes = useCallback(async (userId: string) => {
-    const { data, error } = await supabase
-      .from('idea_votes')
-      .select('idea_id')
-      .eq('user_id', userId);
+    const { data, error } = await withTimeout(
+      () => supabase.from('idea_votes').select('idea_id').eq('user_id', userId),
+      8000, 'userVotes',
+    );
     if (error) console.error('투표 조회 실패:', error.message);
 
     const votedIds = new Set((data ?? []).map((v) => v.idea_id));

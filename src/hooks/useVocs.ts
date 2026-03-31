@@ -21,23 +21,15 @@ export function useVocs() {
     setError(null);
 
     try {
-      let query = supabase.from('vocs').select('*').eq('is_deleted', false);
+      const buildQuery = () => {
+        let q = supabase.from('vocs').select('*').eq('is_deleted', false);
+        if (filters.category) q = q.eq('category', filters.category);
+        if (filters.status) q = q.eq('status', filters.status);
+        if (filters.team) q = q.eq('team', filters.team);
+        return q.order('created_at', { ascending: filters.sort === 'oldest' });
+      };
 
-      if (filters.category) {
-        query = query.eq('category', filters.category);
-      }
-      if (filters.status) {
-        query = query.eq('status', filters.status);
-      }
-      if (filters.team) {
-        query = query.eq('team', filters.team);
-      }
-
-      query = query.order('created_at', {
-        ascending: filters.sort === 'oldest',
-      });
-
-      const { data, error: fetchError } = await withTimeout(query, 8000, 'vocs');
+      const { data, error: fetchError } = await withTimeout(buildQuery, 8000, 'vocs');
 
       if (fetchError) throw fetchError;
       setVocs(data ?? []);
@@ -194,11 +186,10 @@ export function useVocs() {
 
   // 같은 팀의 리더/관리자 목록 (담당자 배정용)
   const fetchAssignees = useCallback(async (team: string) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id, name, nickname, role, team')
-      .in('role', ['leader', 'admin'])
-      .eq('team', team);
+    const { data, error } = await withTimeout(
+      () => supabase.from('profiles').select('id, name, nickname, role, team').in('role', ['leader', 'admin']).eq('team', team),
+      8000, 'assignees',
+    );
     if (error) console.error('담당자 조회 실패:', error.message);
     return data ?? [];
   }, []);

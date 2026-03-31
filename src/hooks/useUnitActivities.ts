@@ -24,13 +24,8 @@ export function useUnitActivities() {
     setError(null);
     try {
       const { data, error: fetchErr } = await withTimeout(
-        supabase
-          .from('unit_activities')
-          .select('*')
-          .eq('team', team)
-          .order('status', { ascending: true })
-          .order('created_at', { ascending: false }),
-        8000, 'unitActivities'
+        () => supabase.from('unit_activities').select('*').eq('team', team).order('status', { ascending: true }).order('created_at', { ascending: false }),
+        8000, 'unitActivities',
       );
 
       if (fetchErr) throw fetchErr;
@@ -42,10 +37,10 @@ export function useUnitActivities() {
       let myReactions = new Set<string>();
 
       if (ids.length > 0) {
-        const { data: reactions, error: reactErr } = await supabase
-          .from('activity_reactions')
-          .select('activity_id, user_id')
-          .in('activity_id', ids);
+        const { data: reactions, error: reactErr } = await withTimeout(
+          () => supabase.from('activity_reactions').select('activity_id, user_id').in('activity_id', ids),
+          8000, 'activityReactions',
+        );
         if (reactErr) console.error('반응 조회 실패:', reactErr.message);
 
         (reactions ?? []).forEach((r) => {
@@ -54,10 +49,10 @@ export function useUnitActivities() {
         });
 
         // 댓글 수 조회
-        const { data: cmts, error: cmtErr } = await supabase
-          .from('activity_comments')
-          .select('activity_id')
-          .in('activity_id', ids);
+        const { data: cmts, error: cmtErr } = await withTimeout(
+          () => supabase.from('activity_comments').select('activity_id').in('activity_id', ids),
+          8000, 'activityComments',
+        );
         if (cmtErr) console.error('댓글 수 조회 실패:', cmtErr.message);
 
         var commentCounts = new Map<string, number>();
@@ -160,12 +155,8 @@ export function useUnitActivities() {
 
   const fetchComments = useCallback(async (activityId: string) => {
     const { data, error } = await withTimeout(
-      supabase
-        .from('activity_comments')
-        .select('*')
-        .eq('activity_id', activityId)
-        .order('created_at', { ascending: true }),
-      8000, 'comments'
+      () => supabase.from('activity_comments').select('*').eq('activity_id', activityId).order('created_at', { ascending: true }),
+      8000, 'comments',
     );
 
     if (error) throw error;
@@ -173,10 +164,10 @@ export function useUnitActivities() {
     const authorIds = [...new Set((data ?? []).filter((c) => c.author_id).map((c) => c.author_id!))];
     let nameMap = new Map<string, string>();
     if (authorIds.length > 0) {
-      const { data: profiles, error: profileErr } = await supabase
-        .from('profiles')
-        .select('id, name')
-        .in('id', authorIds);
+      const { data: profiles, error: profileErr } = await withTimeout(
+        () => supabase.from('profiles').select('id, name').in('id', authorIds),
+        8000, 'commentAuthors',
+      );
       if (profileErr) console.error('댓글 작성자 조회 실패:', profileErr.message);
       (profiles ?? []).forEach((p) => nameMap.set(p.id, p.name));
     }

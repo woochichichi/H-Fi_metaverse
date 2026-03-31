@@ -20,11 +20,10 @@ export function useInbox(userId: string | null) {
     setLoading(true);
 
     try {
-      const { data, error } = await withTimeout(supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false }), 8000, 'inbox');
+      const { data, error } = await withTimeout(
+        () => supabase.from('notifications').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+        8000, 'inbox',
+      );
 
       if (error) {
         console.error('수집함 조회 실패:', error.message);

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { withTimeout } from '../lib/utils';
 import type { ReactionRanking } from '../types/database';
 
 export function useReactionRanking() {
@@ -9,11 +10,10 @@ export function useReactionRanking() {
   const fetchRanking = useCallback(async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('reaction_ranking')
-        .select('*')
-        .order('best_avg_ms', { ascending: true })
-        .limit(20);
+      const { data, error } = await withTimeout(
+        () => supabase.from('reaction_ranking').select('*').order('best_avg_ms', { ascending: true }).limit(20),
+        8000, 'reactionRanking',
+      );
       if (error) {
         console.error('반응속도 랭킹 조회 실패:', error.message);
       }

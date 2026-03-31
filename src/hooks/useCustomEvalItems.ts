@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { withTimeout } from '../lib/utils';
 import type { CustomEvalItem } from '../types';
 
 export function useCustomEvalItems() {
@@ -9,17 +10,13 @@ export function useCustomEvalItems() {
   const fetchItems = useCallback(async (team?: string) => {
     setLoading(true);
     try {
-      let query = supabase
-        .from('custom_eval_items')
-        .select('*')
-        .eq('active', true)
-        .order('created_at', { ascending: true });
+      const buildQuery = () => {
+        let q = supabase.from('custom_eval_items').select('*').eq('active', true).order('created_at', { ascending: true });
+        if (team) q = q.eq('team', team);
+        return q;
+      };
 
-      if (team) {
-        query = query.eq('team', team);
-      }
-
-      const { data, error } = await query;
+      const { data, error } = await withTimeout(buildQuery, 8000, 'evalItems');
       if (error) {
         console.error('커스텀 평가 항목 조회 실패:', error.message);
         return;
@@ -33,10 +30,10 @@ export function useCustomEvalItems() {
   const fetchAllItems = useCallback(async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('custom_eval_items')
-        .select('*')
-        .order('created_at', { ascending: true });
+      const { data, error } = await withTimeout(
+        () => supabase.from('custom_eval_items').select('*').order('created_at', { ascending: true }),
+        8000, 'evalAllItems',
+      );
 
       if (error) {
         console.error('커스텀 평가 항목 조회 실패:', error.message);

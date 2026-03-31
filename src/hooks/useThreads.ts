@@ -12,12 +12,10 @@ export function useThreads(refType: 'voc' | 'note', refId: string | null) {
     setLoading(true);
 
     try {
-      const { data, error } = await withTimeout(supabase
-        .from('message_threads')
-        .select('*')
-        .eq('ref_type', refType)
-        .eq('ref_id', refId)
-        .order('created_at', { ascending: true }), 8000, 'threads');
+      const { data, error } = await withTimeout(
+        () => supabase.from('message_threads').select('*').eq('ref_type', refType).eq('ref_id', refId).order('created_at', { ascending: true }),
+        8000, 'threads',
+      );
 
       if (error) {
         console.error('대화 조회 실패:', error.message);

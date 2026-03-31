@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { withTimeout } from '../lib/utils';
 import type { OmokRanking } from '../types/database';
 
 export function useOmokRanking() {
@@ -9,11 +10,10 @@ export function useOmokRanking() {
   const fetchRanking = useCallback(async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('omok_ranking')
-        .select('*')
-        .order('wins', { ascending: false })
-        .limit(20);
+      const { data, error } = await withTimeout(
+        () => supabase.from('omok_ranking').select('*').order('wins', { ascending: false }).limit(20),
+        8000, 'omokRanking',
+      );
       if (error) {
         console.error('오목 랭킹 조회 실패:', error.message);
       }
