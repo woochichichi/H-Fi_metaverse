@@ -314,30 +314,6 @@ function PixelPlant90s({ x, y, size = 'large' }: { x: number; y: number; size?: 
   );
 }
 
-// 사무실 파티션 (회색 패브릭, H자형)
-function PixelPartition({ x, y, w = 120 }: { x: number; y: number; w?: number }) {
-  const vw = w / 4;
-  return (
-    <div className="absolute z-[5]" style={{ left: x, top: y }}>
-      <svg width={w} height="60" viewBox={`0 0 ${vw} 15`} style={{ imageRendering: 'pixelated' }}>
-        {/* 프레임 */}
-        <rect x="0" y="0" width="1" height="15" fill="#C0C0C0" />
-        <rect x={vw - 1} y="0" width="1" height="15" fill="#C0C0C0" />
-        {/* 패브릭 */}
-        <rect x="1" y="0" width={vw - 2} height="13" fill="#A0A0A0" />
-        <rect x="1" y="0" width={vw - 2} height="1" fill="#B0B0B0" />
-        {/* 텍스처 */}
-        <rect x="2" y="2" width={vw - 4} height="1" fill="rgba(255,255,255,0.05)" />
-        <rect x="2" y="5" width={vw - 4} height="1" fill="rgba(255,255,255,0.05)" />
-        <rect x="2" y="8" width={vw - 4} height="1" fill="rgba(255,255,255,0.05)" />
-        {/* 발 */}
-        <rect x="1" y="13" width="2" height="2" fill="#888" />
-        <rect x={vw - 3} y="13" width="2" height="2" fill="#888" />
-      </svg>
-    </div>
-  );
-}
-
 // 복사기
 function PixelCopier({ x, y }: { x: number; y: number }) {
   return (
@@ -1051,29 +1027,25 @@ const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme, po
       <PixelPlant90s x={380} y={340} size="small" />
 
       {/* ═══ KPI Zone (640,60 ~ 1140,400) — 업무 공간 ═══ */}
-      <PixelPartition x={660} y={80} w={100} />
-      <PixelPartition x={820} y={80} w={100} />
-      <PixelPartition x={980} y={80} w={100} />
-      {/* 책상 2x3 배치 */}
-      {[0, 1, 2].map((i) => (
+      <PixelWhiteboard x={780} y={68} w={180} />
+      {/* 책상 2x2 배치 (여유 간격) */}
+      {[0, 1].map((i) => (
         <span key={`kd1-${i}`}>
-          <PixelDesk90s x={660 + i * 160} y={140} />
-          <PixelCRT x={690 + i * 160} y={110} />
-          <PixelChair90s x={700 + i * 160} y={220} />
+          <PixelDesk90s x={690 + i * 200} y={160} />
+          <PixelCRT x={720 + i * 200} y={130} />
+          <PixelChair90s x={730 + i * 200} y={240} />
         </span>
       ))}
-      {[0, 1, 2].map((i) => (
+      {[0, 1].map((i) => (
         <span key={`kd2-${i}`}>
-          <PixelDesk90s x={660 + i * 160} y={280} />
-          <PixelCRT x={690 + i * 160} y={250} />
-          <PixelChair90s x={700 + i * 160} y={360} />
+          <PixelDesk90s x={690 + i * 200} y={290} />
+          <PixelCRT x={720 + i * 200} y={260} />
+          <PixelChair90s x={730 + i * 200} y={370} />
         </span>
       ))}
-      <PixelWhiteboard x={700} y={68} w={160} />
-      <PixelFileCabinet x={1080} y={100} />
-      <PixelFileCabinet x={1080} y={200} />
-      <PixelCopier x={1060} y={320} />
-      <PixelPlant90s x={640} y={340} size="small" />
+      <PixelFileCabinet x={1090} y={160} />
+      <PixelCopier x={1070} y={300} />
+      <PixelPlant90s x={660} y={350} size="small" />
 
       {/* ═══ 공지 Zone (350,460 ~ 850,760) — 뉴스 카페 ═══ */}
       {/* 네온 뉴스 사인 */}
