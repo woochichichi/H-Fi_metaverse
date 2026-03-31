@@ -11,7 +11,7 @@
 [Supabase Cloud]
   ├── Auth           ← 이메일(@hanwha) + 비밀번호 + 초대 코드
   ├── PostgreSQL     ← 데이터 (RLS 권한 제어)
-  ├── Realtime       ← 실시간 알림 (Postgres Changes)
+  ├── Realtime       ← 실시간 동기화 (Presence + Broadcast + Postgres Changes)
   ├── Storage        ← 파일 첨부 (VOC/공지/프로필)
   └── Edge Functions ← 초대 코드 검증, 향후 텔레그램 웹훅
 ```
@@ -21,13 +21,13 @@
 | 영역 | 선택 | 근거 |
 |------|------|------|
 | 언어 | TypeScript | 타입 안전 → AI 코딩 오류 감소 |
-| 프론트 | React 18 + Vite + Tailwind | 메타버스 캔버스 + 대시보드에 최적 |
+| 프론트 | React 19 + Vite + Tailwind | 메타버스 캔버스 + 대시보드에 최적 |
 | 상태 | Zustand | 가볍고 보일러플레이트 최소 |
-| 라우팅 | React Router v6 | SPA 표준 |
+| 라우팅 | React Router v7 | SPA 표준 |
 | 차트 | Recharts | React 네이티브, VOC/KPI 통계용 |
 | DB | Supabase PostgreSQL | 무료 500MB, RLS |
 | 인증 | Supabase Auth | 이메일/비번 + 도메인 제한 |
-| 실시간 | Supabase Realtime | Postgres Changes 구독 |
+| 실시간 | Supabase Realtime | Presence(위치 동기화) + Broadcast(게임/채팅) + Postgres Changes(알림) |
 | 파일 | Supabase Storage | 3개 버킷 |
 | 호스팅 | Cloudflare Pages | 무료, CDN, Git 자동 배포 |
 | 아이콘 | Lucide React | 이모지 아이콘 금지 (Zone 라벨 등 장식 예외) |
@@ -84,49 +84,68 @@ ito-metaverse/
 │   │   └── MainPage.tsx       ← PC: MetaverseLayout / 모바일: MobileLayout
 │   │
 │   ├── components/
-│   │   ├── metaverse/         ← PC 전용: MapCanvas, PlayerCharacter, NPCCharacter, Zone, CharacterSVG, ChatBubble
+│   │   ├── metaverse/         ← PC 전용: MetaverseLayout, MapCanvas, PlayerCharacter,
+│   │   │                        OtherPlayers, Zone, CharacterSVG, ChatBubble, EmojiFloat,
+│   │   │                        BottomBar, TouchDpad, ChatInput, LobbyPanel,
+│   │   │                        MoodPicker, NicknameEditor
 │   │   ├── mobile/            ← 모바일 전용: MobileLayout, MobileHome, BottomTabBar
+│   │   ├── game/              ← 미니게임: JumpRopePanel, OmokPanel, ReactionPanel
 │   │   ├── voc/               ← VocPanel, VocForm, VocList, VocDetail, VocStats, VocCard
 │   │   ├── idea/              ← IdeaPanel, IdeaCard, IdeaForm
 │   │   ├── notice/            ← NoticePanel, NoticeList, NoticeDetail, NoticeForm
-│   │   ├── note/              ← NotePanel, NoteForm, NoteList, NoteDetail, NoteCard (익명 쪽지함)
+│   │   ├── note/              ← NotePanel, NoteForm, NoteList, NoteDetail, NoteCard
+│   │   ├── gathering/         ← GatheringPanel, GatheringForm, GatheringList, GatheringDetail
 │   │   ├── thread/            ← ThreadPanel, ThreadMessage (양방향 익명 대화)
 │   │   ├── inbox/             ← InboxPanel, InboxCard, InboxBadge (개인 수집함)
 │   │   ├── dashboard/         ← EvalDashboard, TeamHeatmap, UserActivityCard, ExportCsv
 │   │   ├── kpi/               ← KpiPanel, KpiCard, KpiChart, KpiForm
-│   │   ├── admin/             ← InviteManager, UserManager
+│   │   ├── admin/             ← InviteManager, UserManager, EvalItemManager, EvalDashboard
 │   │   ├── layout/            ← TopBar, Sidebar, BottomBar, NotificationBell
-│   │   └── common/            ← Modal, Toast, Button, Badge, UrgencyBadge, FileUpload, EmptyState, Skeleton, StatusBadge
+│   │   └── common/            ← Modal, Toast, ConfirmDialog, Button, Badge,
+│   │                            UrgencyBadge, StatusBadge, FileUpload, EmptyState,
+│   │                            Skeleton, LoadMore, ErrorBoundary
 │   │
 │   ├── hooks/
 │   │   ├── useAuth.ts
-│   │   ├── useDeviceMode.ts   ← PC/모바일 분기 (1024px)
-│   │   ├── useRealtime.ts
+│   │   ├── useDeviceMode.ts   ← PC/모바일 분기 (700px)
+│   │   ├── usePlayerSync.ts   ← 실시간 위치 동기화
+│   │   ├── useZoneAlerts.ts   ← Zone 접근 알림
 │   │   ├── useVocs.ts
+│   │   ├── useVocRealtime.ts  ← VOC 실시간 알림
 │   │   ├── useIdeas.ts
 │   │   ├── useNotices.ts
 │   │   ├── useKpi.ts
-│   │   ├── useNotifications.ts
 │   │   ├── useNotes.ts
-│   │   ├── useThreads.ts
 │   │   ├── useInbox.ts
+│   │   ├── useGatherings.ts
+│   │   ├── useFileUpload.ts
 │   │   ├── useUserActivities.ts
-│   │   └── useFileUpload.ts
+│   │   ├── useUnitActivities.ts
+│   │   ├── useCustomEvalItems.ts
+│   │   ├── useJumpRopeGame.ts      ← 줄넘기 멀티플레이어 로직
+│   │   ├── useJumpRopeRanking.ts
+│   │   ├── useOmokGame.ts          ← 오목 대전 로직 + 렌주룰
+│   │   ├── useOmokRanking.ts
+│   │   ├── useReactionGame.ts      ← 반응속도 게임 로직
+│   │   └── useReactionRanking.ts
 │   │
 │   ├── stores/
-│   │   ├── authStore.ts
-│   │   ├── metaverseStore.ts
-│   │   └── uiStore.ts
+│   │   ├── authStore.ts       ← 사용자 세션, 프로필, 로그인/로그아웃
+│   │   ├── metaverseStore.ts  ← 위치, 방, Zone, 채팅, 이모지, 다른 플레이어
+│   │   └── uiStore.ts         ← 사이드바, 모달, 토스트
 │   │
 │   ├── lib/
 │   │   ├── supabase.ts        ← 클라이언트 초기화
-│   │   ├── constants.ts       ← 맵 데이터, Zone 정의, 허용 이메일 도메인, 팀 목록, 시급성 레벨
-│   │   └── utils.ts           ← 날짜 포맷, 파일 크기 포맷 등
+│   │   ├── constants.ts       ← 맵 데이터, Zone 정의, 팀 설정, 캐릭터 커스텀 옵션,
+│   │   │                        포탈 정의, 이모지/리액션, 게이미피케이션 포인트
+│   │   ├── utils.ts           ← 날짜 포맷, withTimeout, 파일 크기 포맷 등
+│   │   ├── renju.ts           ← 오목 렌주룰 판정 (삼삼/사사/장목 금지)
+│   │   └── profanityFilter.ts ← 비속어 필터
 │   │
 │   ├── types/
 │   │   ├── database.ts        ← supabase gen types
-│   │   ├── metaverse.ts
-│   │   └── index.ts
+│   │   ├── metaverse.ts       ← Room, Zone, Portal, Player 타입
+│   │   └── index.ts           ← 공용 타입 (Profile, Voc, Idea, Notice, Note, Gathering 등)
 │   │
 │   └── assets/
 │
@@ -137,7 +156,11 @@ ito-metaverse/
 ## DB 테이블
 profiles, invite_codes, vocs, ideas, idea_votes (+ idea_with_votes VIEW),
 notices, notice_reads, kpi_items, kpi_records, activities,
-notifications, anonymous_notes, message_threads, user_activities
+notifications, anonymous_notes, message_threads, user_activities,
+gatherings, gathering_members, gathering_comments, custom_eval_items,
+jump_rope_records (+ jump_rope_ranking VIEW),
+omok_records (+ omok_ranking VIEW),
+reaction_records (+ reaction_ranking VIEW)
 
 - 권한: RLS 기반 (admin / leader / member)
 - 트리거: auth.users INSERT → profiles 자동 생성, updated_at 자동 갱신, 활동 자동 기록 (user_activities)
@@ -151,7 +174,7 @@ notifications, anonymous_notes, message_threads, user_activities
 | avatars | 프로필 사진 | 2MB | image/* | 전체 읽기, 본인만 쓰기 |
 
 ## 인증 플로우
-1. URL 접속 → 로그인 화면
+1. URL 접속 → 로그인 화면 (SSO 미연동 안내 포함)
 2. "가입하기" 클릭
 3. [Step 1] 초대 코드 입력 → 존재 + active + 횟수 미초과 + 미만료 검증
 4. [Step 2] 이메일 입력 (@hanwha 계열만: hanwha.com, hanwhasystems.com 등)
@@ -163,23 +186,34 @@ notifications, anonymous_notes, message_threads, user_activities
 - 역할: admin | leader | member
 
 ## 적응형 UX
-- **PC (>=1024px)**: 메타버스 맵 + WASD 캐릭터 이동 + Zone 입장 + 사이드바
-- **모바일 (<1024px)**: 하단 탭바(VOC/아이디어/공지/쪽지/더보기) + 카드 대시보드
+- **PC (>=700px)**: 메타버스 맵 + WASD/방향키 캐릭터 이동 + Zone 입장 + 사이드바 + 클릭 이동
+- **모바일 (<700px)**: 하단 탭바(VOC/아이디어/공지/모임/더보기) + 터치 D-pad + 카드 대시보드
 - `useDeviceMode` 훅으로 분기, 기능 컴포넌트(VOC/아이디어 등)는 공유
 
 ```typescript
 // src/hooks/useDeviceMode.ts
 const useDeviceMode = () => {
-  const isPC = useMediaQuery('(min-width: 1024px)')
+  const isPC = useMediaQuery('(min-width: 700px)')
   return isPC ? 'metaverse' : 'mobile'
 }
 ```
+
+## Realtime 채널
+| 채널 | 용도 | 방식 |
+|------|------|------|
+| metaverse-presence | 플레이어 위치/상태 동기화 | Presence |
+| chat | 채팅 메시지 브로드캐스트 | Broadcast |
+| jumprope-game | 줄넘기 멀티플레이어 동기화 | Broadcast |
+| omok-game | 오목 수 동기화 | Broadcast |
+| sidebar-profiles | 사용자 목록 업데이트 | Postgres Changes |
+| voc-realtime | VOC 실시간 알림 | Postgres Changes |
 
 ## 배포
 - 프론트: Cloudflare Pages (`https://ito-metaverse.pages.dev`)
 - 백엔드: Supabase Cloud (`https://{ref}.supabase.co`)
 - 접근 제어: 초대 코드 + @hanwha 이메일만 가입 가능
 - SPA 라우팅: `public/_redirects` → `/* /index.html 200`
+- Cloudflare 환경변수: `NODE_VERSION=22` 필수
 
 ## 트러블슈팅 & 시행착오
 
@@ -192,3 +226,7 @@ const useDeviceMode = () => {
 2. 8개 fetch hooks에 `withTimeout(query)` 래퍼 적용
 3. VocPanel, NoticePanel, NotePanel에서 `error`/`onRetry` props 연결
 **교훈:** fetch 쿼리에는 반드시 타임아웃 설정. Panel→List 간 error props 전달 누락 주의
+
+### backdrop-filter + fixed 스택킹 이슈
+**증상:** 오버레이 UI가 부모 기준으로 잡혀 backdrop-filter 깨짐
+**해결:** 오버레이 UI는 `createPortal(document.body)` 필수

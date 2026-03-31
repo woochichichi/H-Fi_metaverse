@@ -1,6 +1,6 @@
 # FEATURES.md — 기능 상세 & DB 스키마
 
-## 핵심 기능 9개
+## 핵심 기능 13개
 
 ### 1. VOC (Voice of Customer)
 - 익명/실명 접수 → 카테고리/상태 관리 → 양방향 익명 대화 → 통계
@@ -42,6 +42,7 @@
 ### 7. 평가 대시보드
 - 활동 자동 축적 → 팀별 히트맵 + 개인별 요약 + CSV 내보내기
 - `user_activities`: 자동 기록 전용 (사용자 직접 수정 불가)
+- 커스텀 평가 항목: 팀별 맞춤 활동 항목 정의 가능 (관리자 패널에서 관리)
 
 **자동 기록 포인트**:
 | 활동 | 포인트 |
@@ -57,11 +58,91 @@
 ### 8. 관리자 패널
 - 초대 코드 관리 (생성/목록/비활성화/복사)
 - 사용자 관리 (목록/역할 변경/비활성화)
+- 커스텀 평가 항목 관리 (생성/수정/삭제)
+- 평가 대시보드 (팀별/사용자별 통계 조회)
 
 ### 9. 라운지
 - 기분 이모지 (8개: 😆최고 😊좋아요 😐보통 😰힘들어 🤯바빠 😴졸려 🔥열정 ☕커피중)
 - 활동 타임라인 (최근 VOC/공지/아이디어/입장 피드)
 - 이모지 → `profiles.mood_emoji` UPDATE → 메타버스 캐릭터 위에 표시
+
+### 10. 모임 (인적교류 / Gathering)
+- 운동/맛집/스터디/취미 등 소셜 이벤트 생성 및 참여
+- 모집 마감일, 최대 인원 설정
+- 참여/탈퇴 기능 + 댓글 소통
+- 연락처 정보 공유 (주최자)
+
+**폼 필드**: 제목, 설명, 카테고리(운동/맛집/스터디/취미), 마감일, 최대 인원, 연락처
+
+**상태 흐름**: 모집중 → 마감 → 완료
+
+### 11. 줄넘기 게임 (Jump Rope)
+- **실시간 멀티플레이어** (Supabase Realtime 채널)
+- 로비 시스템: 방 생성 → 대기 → 전원 준비 → 시작
+- 물리 시뮬레이션: 줄 회전 + 충돌 판정
+- 난이도: 15초마다 속도 증가
+- 생존 방식: 줄에 맞으면 탈락
+- Space/탭으로 점프
+- 기록: 생존 시간, 점프 횟수, 최고 속도
+- 랭킹: 생존 시간 기준 순위
+
+### 12. 오목 게임 (Omok / Five-in-a-Row)
+- **실시간 2인 대전** (Supabase Realtime 채널)
+- 15×15 바둑판, 턴제 (60초 턴 타이머)
+- 흑 먼저 두기 + **렌주룰** 적용
+  - 장목(6목 이상) 금지
+  - 삼삼(3-3) 금지
+  - 사사(4-4) 금지
+- 매치메이킹: 2인 로비
+- 타임아웃 시 패배
+- 랭킹: 승률 기준
+
+### 13. 반응속도 게임 (Reaction Speed)
+- **싱글 플레이어** 스킬 테스트
+- 화면 색상 변화 → 최대한 빨리 클릭
+- 5라운드 진행
+- 기록: 평균 반응시간(ms), 최고 기록
+- 너무 일찍 클릭 감지 (too early)
+- 랭킹: 평균 시간 기준
+
+---
+
+## 메타버스 코어 기능
+
+### 멀티룸 시스템
+4개 방 + 포탈 이동:
+| 방 | 팀 | 색상 | 설명 |
+|----|-----|------|------|
+| Stock Room | 증권ITO | 초록(#00D68F) | 증권 팀 전용 공간 |
+| Life Room | 생명ITO | 보라(#6C5CE7) | 생명 팀 전용 공간 |
+| Shield Room | 손보ITO | 파랑(#0984E3) | 손보 팀 전용 공간 |
+| Plaza | 한금서/공용 | 금(#F8B500) | 중앙 광장 (공용 Zone) |
+
+- 포탈: 방 간 자동 이동 (쿨다운 적용)
+- 각 방에 팀 전용 Zone (로비, KPI, 공지) + 공용 Zone (VOC, 아이디어, 게임 등)
+
+### 캐릭터 커스텀
+- 피부색 (5종)
+- 머리색 (8종)
+- 몸 색상 (10종)
+- 헤어스타일 (5종)
+- 악세서리 (6종)
+- 프로필에 저장, 메타버스에서 실시간 반영
+
+### 실시간 기능
+- **플레이어 동기화**: Supabase Realtime으로 위치 실시간 동기화
+- **채팅 말풍선**: 캐릭터 위에 15초간 표시
+- **이모지 리액션**: 근처 플레이어에게 이모지 전송 (1.5초 애니메이션)
+- **기분 이모지**: 캐릭터 위에 현재 기분 표시
+- **온라인 상태**: 사이드바에서 접속자 목록 실시간 확인
+
+### Zone 인터랙션
+플레이어가 Zone 위를 걸으면 진입 가능 (13+ Zone):
+- **공용**: VOC 센터, 아이디어 보드, 모임 광장, 반응속도 게임, 오목, 줄넘기
+- **팀 전용**: 팀 로비, 팀 KPI, 팀 공지
+
+### 비속어 필터
+- `lib/profanityFilter.ts`로 채팅/게시 내용 필터링
 
 ---
 
@@ -85,6 +166,13 @@ CREATE TABLE profiles (
   mood_emoji    TEXT,
   position_x    REAL DEFAULT 430,
   position_y    REAL DEFAULT 380,
+  -- 캐릭터 커스텀 필드
+  skin_color    TEXT,
+  hair_color    TEXT,
+  body_color    TEXT,
+  hair_style    TEXT,
+  accessory     TEXT,
+  nickname      TEXT,
   created_at    TIMESTAMPTZ DEFAULT now(),
   updated_at    TIMESTAMPTZ DEFAULT now()
 );
@@ -200,7 +288,7 @@ CREATE TABLE activities (
   created_at    TIMESTAMPTZ DEFAULT now()
 );
 
--- 알림 (Phase 2 텔레그램 확장 대비)
+-- 알림
 CREATE TABLE notifications (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id       UUID REFERENCES auth.users(id),  -- NULL = 전체 알림
@@ -245,6 +333,94 @@ CREATE TABLE user_activities (
   created_at    TIMESTAMPTZ DEFAULT now()
 );
 
+-- 모임 (인적교류)
+CREATE TABLE gatherings (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  author_id     UUID REFERENCES auth.users(id),
+  title         TEXT NOT NULL,
+  description   TEXT,
+  category      TEXT CHECK (category IN ('운동','맛집','스터디','취미','기타')),
+  max_members   INTEGER,
+  deadline      TIMESTAMPTZ,
+  contact       TEXT,
+  status        TEXT DEFAULT '모집중' CHECK (status IN ('모집중','마감','완료')),
+  created_at    TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE gathering_members (
+  gathering_id  UUID REFERENCES gatherings(id) ON DELETE CASCADE,
+  user_id       UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  created_at    TIMESTAMPTZ DEFAULT now(),
+  PRIMARY KEY (gathering_id, user_id)
+);
+
+CREATE TABLE gathering_comments (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  gathering_id  UUID REFERENCES gatherings(id) ON DELETE CASCADE,
+  user_id       UUID REFERENCES auth.users(id),
+  content       TEXT NOT NULL,
+  created_at    TIMESTAMPTZ DEFAULT now()
+);
+
+-- 커스텀 평가 항목
+CREATE TABLE custom_eval_items (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  team          TEXT NOT NULL,
+  title         TEXT NOT NULL,
+  description   TEXT,
+  points        REAL DEFAULT 1,
+  created_at    TIMESTAMPTZ DEFAULT now()
+);
+
+-- 줄넘기 게임 기록
+CREATE TABLE jump_rope_records (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id       UUID REFERENCES auth.users(id),
+  duration_ms   INTEGER NOT NULL,
+  jump_count    INTEGER DEFAULT 0,
+  max_speed     REAL,
+  created_at    TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE VIEW jump_rope_ranking AS
+SELECT user_id, MAX(duration_ms) as best_duration, MAX(jump_count) as best_jumps
+FROM jump_rope_records GROUP BY user_id;
+
+-- 오목 게임 기록
+CREATE TABLE omok_records (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  winner_id     UUID REFERENCES auth.users(id),
+  loser_id      UUID REFERENCES auth.users(id),
+  black_id      UUID REFERENCES auth.users(id),
+  white_id      UUID REFERENCES auth.users(id),
+  total_moves   INTEGER,
+  created_at    TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE VIEW omok_ranking AS
+SELECT user_id,
+  COUNT(*) FILTER (WHERE user_id = winner_id) as wins,
+  COUNT(*) FILTER (WHERE user_id = loser_id) as losses
+FROM (
+  SELECT winner_id as user_id, winner_id, loser_id FROM omok_records
+  UNION ALL
+  SELECT loser_id as user_id, winner_id, loser_id FROM omok_records
+) sub GROUP BY user_id;
+
+-- 반응속도 게임 기록
+CREATE TABLE reaction_records (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id       UUID REFERENCES auth.users(id),
+  avg_time_ms   REAL NOT NULL,
+  best_time_ms  REAL,
+  rounds        INTEGER DEFAULT 5,
+  created_at    TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE VIEW reaction_ranking AS
+SELECT user_id, MIN(avg_time_ms) as best_avg, MIN(best_time_ms) as best_single
+FROM reaction_records GROUP BY user_id;
+
 -- 인덱스
 CREATE INDEX idx_vocs_team ON vocs(team);
 CREATE INDEX idx_vocs_status ON vocs(status);
@@ -258,6 +434,10 @@ CREATE INDEX idx_invite_codes_code ON invite_codes(code);
 CREATE INDEX idx_notifications_user ON notifications(user_id, read, created_at DESC);
 CREATE INDEX idx_user_activities_user ON user_activities(user_id, created_at DESC);
 CREATE INDEX idx_message_threads_ref ON message_threads(reference_type, reference_id);
+CREATE INDEX idx_gatherings_status ON gatherings(status);
+CREATE INDEX idx_jump_rope_user ON jump_rope_records(user_id);
+CREATE INDEX idx_omok_winner ON omok_records(winner_id);
+CREATE INDEX idx_reaction_user ON reaction_records(user_id);
 ```
 
 ### 002_rls.sql
@@ -277,6 +457,13 @@ ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE anonymous_notes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE message_threads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_activities ENABLE ROW LEVEL SECURITY;
+ALTER TABLE gatherings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE gathering_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE gathering_comments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE custom_eval_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE jump_rope_records ENABLE ROW LEVEL SECURITY;
+ALTER TABLE omok_records ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reaction_records ENABLE ROW LEVEL SECURITY;
 
 -- profiles
 CREATE POLICY "profiles_select" ON profiles FOR SELECT USING (auth.uid() IS NOT NULL);
@@ -346,6 +533,33 @@ CREATE POLICY "threads_insert" ON message_threads FOR INSERT WITH CHECK (auth.ui
 
 -- user_activities (읽기만 — 쓰기는 트리거로만)
 CREATE POLICY "user_activities_select" ON user_activities FOR SELECT USING (auth.uid() IS NOT NULL);
+
+-- gatherings
+CREATE POLICY "gatherings_select" ON gatherings FOR SELECT USING (auth.uid() IS NOT NULL);
+CREATE POLICY "gatherings_insert" ON gatherings FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "gatherings_update_own" ON gatherings FOR UPDATE USING (author_id = auth.uid());
+
+-- gathering_members
+CREATE POLICY "gathering_members_select" ON gathering_members FOR SELECT USING (auth.uid() IS NOT NULL);
+CREATE POLICY "gathering_members_insert" ON gathering_members FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "gathering_members_delete_own" ON gathering_members FOR DELETE USING (auth.uid() = user_id);
+
+-- gathering_comments
+CREATE POLICY "gathering_comments_select" ON gathering_comments FOR SELECT USING (auth.uid() IS NOT NULL);
+CREATE POLICY "gathering_comments_insert" ON gathering_comments FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+
+-- custom_eval_items
+CREATE POLICY "custom_eval_items_select" ON custom_eval_items FOR SELECT USING (auth.uid() IS NOT NULL);
+CREATE POLICY "custom_eval_items_insert_admin" ON custom_eval_items FOR INSERT
+  WITH CHECK (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
+
+-- game records (로그인 사용자 읽기/쓰기)
+CREATE POLICY "jump_rope_select" ON jump_rope_records FOR SELECT USING (auth.uid() IS NOT NULL);
+CREATE POLICY "jump_rope_insert" ON jump_rope_records FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "omok_select" ON omok_records FOR SELECT USING (auth.uid() IS NOT NULL);
+CREATE POLICY "omok_insert" ON omok_records FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "reaction_select" ON reaction_records FOR SELECT USING (auth.uid() IS NOT NULL);
+CREATE POLICY "reaction_insert" ON reaction_records FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 ```
 
 ### 003_triggers.sql

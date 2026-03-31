@@ -4,7 +4,7 @@
 
 ## 프로젝트
 금융ITO 4팀(증권ITO/생명ITO/손보ITO/한금서) 조직문화 플랫폼 **한울타리**.
-게더타운 스타일 메타버스 UI · VOC · 아이디어 · 공지 · KPI · 익명 쪽지 · 평가 대시보드.
+게더타운 스타일 메타버스 UI · VOC · 아이디어 · 공지 · KPI · 익명 쪽지 · 모임 · 평가 대시보드 · 미니게임 3종(줄넘기/오목/반응속도).
 비공식 프로젝트 (비용 0원). 대상: 관리자 1 + 리더 4 + 팀원 ~60 + 팀장 1.
 
 ## 기술 스택
@@ -15,11 +15,12 @@ Supabase (PostgreSQL + Auth + Realtime + Storage) / Cloudflare Pages / Lucide Re
 ```
 src/
 ├── routes/          — Login, Register, Main
-├── components/      — metaverse/ mobile/ voc/ idea/ notice/ note/ thread/
-│                      inbox/ dashboard/ kpi/ admin/ layout/ common/
+├── components/      — metaverse/ mobile/ game/ voc/ idea/ notice/ note/
+│                      gathering/ thread/ inbox/ dashboard/ kpi/ admin/
+│                      layout/ common/
 ├── hooks/           — Supabase 쿼리 래퍼 (컴포넌트에서 직접 호출 금지)
 ├── stores/          — authStore, metaverseStore, uiStore
-├── lib/             — supabase.ts, constants.ts, utils.ts
+├── lib/             — supabase.ts, constants.ts, utils.ts, renju.ts, profanityFilter.ts
 └── types/           — database.ts, metaverse.ts, index.ts
 supabase/migrations/ — 001_init.sql, 002_rls.sql, 003_triggers.sql
 ```
@@ -41,8 +42,8 @@ supabase/migrations/ — 001_init.sql, 002_rls.sql, 003_triggers.sql
 |------|------|
 | `docs/ARCHITECTURE.md` | 기술 스택, 디렉토리 구조 상세, DB 테이블/RLS/트리거, Storage, 인증, 배포 |
 | `docs/DESIGN.md` | 디자인 시스템(색상/폰트/호버), 적응형 UX, 코딩 규칙(SHOULD/PRACTICE) |
-| `docs/FEATURES.md` | 9개 핵심 기능 상세, DB 스키마(CREATE TABLE), 사용자 플로우, 평가 포인트 |
-| `docs/ROADMAP.md` | Phase 1/2/3, Sprint 0~9 체크리스트, 텔레그램 봇 확장 설계 |
+| `docs/FEATURES.md` | 13개 핵심 기능 상세, DB 스키마(CREATE TABLE), 게임/모임/캐릭터 커스텀, 평가 포인트 |
+| `docs/ROADMAP.md` | Phase 1(완료)/2/3, Sprint 0~11 체크리스트, 텔레그램 봇 확장 설계 |
 | `ITO_METAVERSE_PLAN.md` | 마스터 기획서 (의사결정 히스토리, 전체 맥락) |
 | `OPERATIONS.md` | 관리자 운영 매뉴얼 |
 | `README.md` | 사용자 안내 |
