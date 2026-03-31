@@ -1,5 +1,7 @@
-import { useEffect, useRef, useCallback } from 'react';
-import CharacterSVG from './CharacterSVG';
+import { useEffect, useRef, useCallback, useState } from 'react';
+import CharacterSVG, { type IdleAnim } from './CharacterSVG';
+import SpawnEffect from './SpawnEffect';
+import TypingBubble from './TypingBubble';
 import { useMetaverseStore } from '../../stores/metaverseStore';
 import { useUiStore } from '../../stores/uiStore';
 import { ROOMS_DATA, TEAM_TO_ROOM, type HairStyle, type Accessory } from '../../lib/constants';
@@ -8,9 +10,14 @@ import { useAuthStore } from '../../stores/authStore';
 const SPEED = 4;
 const CHAR_W = 34;
 const CHAR_H = 46;
+const IDLE_TIMEOUT = 5000;
+const WALK_FRAME_INTERVAL = 150;
+const IDLE_ANIM_INTERVAL = 3000;
+
+const IDLE_ANIMS: IdleAnim[] = ['tilt', 'sleep', 'stretch', 'dance'];
 
 export default function PlayerCharacter() {
-  const { playerPosition, setPlayerPosition, setNearZone, nearZone, nearPortal, moveTarget, setMoveTarget, currentRoom, setNearPortal, enterRoom } = useMetaverseStore();
+  const { playerPosition, setPlayerPosition, setNearZone, nearZone, nearPortal, moveTarget, setMoveTarget, currentRoom, setNearPortal, enterRoom, setPlayerDirection, playerDirection, isTyping, spawnKey } = useMetaverseStore();
   const { modalOpen, openModal } = useUiStore();
   const { profile } = useAuthStore();
   const keysRef = useRef<Set<string>>(new Set());
@@ -18,13 +25,23 @@ export default function PlayerCharacter() {
   const posRef = useRef(playerPosition);
   const spawnedRef = useRef(false);
 
-  // 팀 기반 스폰 → 해당 룸으로 진입
+  // 걷기 애니메이션
+  const [animFrame, setAnimFrame] = useState(0);
+  const [isMoving, setIsMoving] = useState(false);
+  const isMovingRef = useRef(false);
+
+  // idle 애니메이션
+  const [idleAnim, setIdleAnim] = useState<IdleAnim>('none');
+  const lastMoveTimeRef = useRef(Date.now());
+  const directionRef = useRef(playerDirection);
+  const idleAnimRef = useRef<IdleAnim>('none');
+
+  // 팀 기반 스폰
   useEffect(() => {
     if (spawnedRef.current) return;
     const team = profile?.team;
     if (team) {
-      const roomId = TEAM_TO_ROOM[team] || 'stock';
-      enterRoom(roomId);
+      enterRoom(TEAM_TO_ROOM[team] || 'stock');
     }
     spawnedRef.current = true;
   }, [profile?.team, enterRoom]);
@@ -37,9 +54,7 @@ export default function PlayerCharacter() {
       keysRef.current.add(e.key);
       if (e.key === ' ') {
         e.preventDefault();
-        if (nearZone) {
-          openModal(nearZone);
-        }
+        if (nearZone) openModal(nearZone);
       }
     };
     const handleKeyUp = (e: KeyboardEvent) => {
@@ -65,7 +80,6 @@ export default function PlayerCharacter() {
     const cx = px + CHAR_W / 2;
     const cy = py + CHAR_H / 2;
 
-    // Zone 체크
     let foundZone: string | null = null;
     for (const z of room.zones) {
       if (cx > z.x && cx < z.x + z.width && cy > z.y && cy < z.y + z.height) {
@@ -75,7 +89,6 @@ export default function PlayerCharacter() {
     }
     setNearZone(foundZone);
 
-    // Portal 체크
     let foundPortal = null;
     for (const p of room.portals) {
       if (cx > p.x && cx < p.x + p.w && cy > p.y && cy < p.y + p.h) {
@@ -98,10 +111,35 @@ export default function PlayerCharacter() {
     return () => window.removeEventListener('keydown', cancelAutoMove);
   }, [setMoveTarget]);
 
+  // 걷기 프레임 토글
+  useEffect(() => {
+    if (!isMoving) { setAnimFrame(0); return; }
+    const timer = setInterval(() => {
+      setAnimFrame((f) => (f === 1 ? 2 : 1));
+    }, WALK_FRAME_INTERVAL);
+    return () => clearInterval(timer);
+  }, [isMoving]);
+
+  // idle 감지 + 모션 순환
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (Date.now() - lastMoveTimeRef.current >= IDLE_TIMEOUT && !isMovingRef.current) {
+        setIdleAnim((prev) => {
+          const next = IDLE_ANIMS[(IDLE_ANIMS.indexOf(prev) + 1) % IDLE_ANIMS.length];
+          idleAnimRef.current = next;
+          return next;
+        });
+      }
+    }, IDLE_ANIM_INTERVAL);
+    return () => clearInterval(timer);
+  }, []);
+
   // 게임루프
   useEffect(() => {
     const AUTO_SPEED = 5;
     const ARRIVE_DIST = 6;
+    let moving = false;
+
     const loop = () => {
       if (!modalOpen) {
         const room = ROOMS_DATA[currentRoom];
@@ -117,12 +155,22 @@ export default function PlayerCharacter() {
             checkZoneAndPortal(posRef.current.x, posRef.current.y);
             setMoveTarget(null);
             openModal(target.zoneId);
+            moving = false;
           } else {
             const nx = Math.max(20, Math.min(mapW - 40, posRef.current.x + (diffX / dist) * AUTO_SPEED));
             const ny = Math.max(20, Math.min(mapH - 40, posRef.current.y + (diffY / dist) * AUTO_SPEED));
             posRef.current = { x: nx, y: ny };
             setPlayerPosition(posRef.current);
             checkZoneAndPortal(nx, ny);
+            if (Math.abs(diffX) > 1) {
+              const newDir = diffX > 0 ? 'right' : 'left';
+              if (directionRef.current !== newDir) {
+                directionRef.current = newDir;
+                setPlayerDirection(newDir);
+              }
+            }
+            moving = true;
+            lastMoveTimeRef.current = Date.now();
           }
         } else {
           const keys = keysRef.current;
@@ -137,14 +185,36 @@ export default function PlayerCharacter() {
             posRef.current = { x: nx, y: ny };
             setPlayerPosition(posRef.current);
             checkZoneAndPortal(nx, ny);
+            if (dx !== 0) {
+              const newDir = dx > 0 ? 'right' : 'left';
+              if (directionRef.current !== newDir) {
+                directionRef.current = newDir;
+                setPlayerDirection(newDir);
+              }
+            }
+            moving = true;
+            lastMoveTimeRef.current = Date.now();
+            if (idleAnimRef.current !== 'none') {
+              idleAnimRef.current = 'none';
+              setIdleAnim('none');
+            }
+          } else {
+            moving = false;
           }
         }
+      } else {
+        moving = false;
+      }
+
+      if (moving !== isMovingRef.current) {
+        isMovingRef.current = moving;
+        setIsMoving(moving);
       }
       rafRef.current = requestAnimationFrame(loop);
     };
     rafRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [modalOpen, currentRoom, setPlayerPosition, checkZoneAndPortal, setMoveTarget, openModal]);
+  }, [modalOpen, currentRoom, setPlayerPosition, checkZoneAndPortal, setMoveTarget, openModal, setPlayerDirection]);
 
   // posRef sync
   useEffect(() => {
@@ -162,6 +232,9 @@ export default function PlayerCharacter() {
         filter: 'drop-shadow(0 3px 2px rgba(0,0,0,.25))',
       }}
     >
+      <SpawnEffect key={spawnKey} />
+      {isTyping && <TypingBubble />}
+
       <div
         className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1 whitespace-nowrap rounded-[10px] px-[10px] py-[2px] text-[10px] font-semibold text-white"
         style={{
@@ -173,6 +246,7 @@ export default function PlayerCharacter() {
         <span className="inline-block h-[6px] w-[6px] rounded-full bg-success" />
         {displayName}
       </div>
+
       <CharacterSVG
         color={profile?.avatar_color ?? '#6C5CE7'}
         skinColor={profile?.skin_color ?? '#FFE0BD'}
@@ -180,7 +254,12 @@ export default function PlayerCharacter() {
         hairStyle={(profile?.hair_style as HairStyle) ?? 'default'}
         accessory={(profile?.accessory as Accessory) ?? 'none'}
         size={CHAR_W}
+        direction={playerDirection}
+        animFrame={isMoving ? animFrame : 0}
+        idleAnim={isMoving ? 'none' : idleAnim}
       />
+
+      {/* 펫: DB pet 필드 활성화 시 연동 */}
     </div>
   );
 }

@@ -9,4 +9,8 @@ export { default as BottomBar } from './BottomBar';
 export { default as MetaverseLayout } from './MetaverseLayout';
 export { default as LobbyPanel } from './LobbyPanel';
 export { default as MoodPanel } from './MoodPanel';
+export { default as KudosPanel } from './KudosPanel';
+export { default as KudosCard } from './KudosCard';
+export { default as TeamBoardPanel } from './TeamBoardPanel';
+export { default as TeamPostCard } from './TeamPostCard';
 export { default as ActivityTimeline } from './ActivityTimeline';

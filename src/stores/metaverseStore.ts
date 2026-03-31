@@ -47,6 +47,9 @@ export interface OtherPlayer {
   hairColor?: string;
   hairStyle?: string;
   accessory?: string;
+  direction?: 'left' | 'right';
+  isTyping?: boolean;
+  pet?: string;
 }
 
 export interface GlobalPresenceUser {
@@ -70,6 +73,10 @@ interface MetaverseState {
   otherPlayers: Map<string, OtherPlayer>;
   chatBubbles: Map<string, ChatBubble>;
   chatLog: ChatLogEntry[];
+  playerDirection: 'left' | 'right';
+  isTyping: boolean;
+  typingUsers: Set<string>;
+  spawnKey: number;
   addChatBubble: (bubble: ChatBubble) => void;
   removeChatBubble: (userId: string) => void;
   setActiveZone: (zone: ZoneId | null) => void;
@@ -86,6 +93,9 @@ interface MetaverseState {
   updateOtherPlayer: (player: OtherPlayer) => void;
   removeOtherPlayer: (userId: string) => void;
   clearOtherPlayers: () => void;
+  setPlayerDirection: (dir: 'left' | 'right') => void;
+  setIsTyping: (v: boolean) => void;
+  setTypingUser: (userId: string, isTyping: boolean) => void;
 }
 
 // 말풍선 자동 삭제 타이머 (store 외부에서 관리 — 인터페이스 오염 방지)
@@ -104,6 +114,10 @@ export const useMetaverseStore = create<MetaverseState>((set, get) => ({
   otherPlayers: new Map(),
   chatBubbles: new Map(),
   chatLog: [],
+  playerDirection: 'right',
+  isTyping: false,
+  typingUsers: new Set(),
+  spawnKey: 0,
   addChatBubble: (bubble) => {
     // 같은 유저의 이전 타이머 취소
     const prevTimer = _bubbleTimers.get(bubble.userId);
@@ -160,7 +174,7 @@ export const useMetaverseStore = create<MetaverseState>((set, get) => ({
     // 이전 방 말풍선 타이머 전부 정리
     _bubbleTimers.forEach((t) => clearTimeout(t));
     _bubbleTimers.clear();
-    set({
+    set((s) => ({
       currentRoom: roomId,
       playerPosition: spawn,
       nearZone: null,
@@ -170,7 +184,9 @@ export const useMetaverseStore = create<MetaverseState>((set, get) => ({
       otherPlayers: new Map(),
       chatBubbles: new Map(),
       chatLog: [],
-    });
+      typingUsers: new Set(),
+      spawnKey: s.spawnKey + 1,
+    }));
   },
   updateOtherPlayer: (player) =>
     set((s) => {
@@ -190,4 +206,13 @@ export const useMetaverseStore = create<MetaverseState>((set, get) => ({
       return { otherPlayers: next };
     }),
   clearOtherPlayers: () => set({ otherPlayers: new Map() }),
+  setPlayerDirection: (dir) => set({ playerDirection: dir }),
+  setIsTyping: (v) => set({ isTyping: v }),
+  setTypingUser: (userId, typing) =>
+    set((s) => {
+      const next = new Set(s.typingUsers);
+      if (typing) next.add(userId);
+      else next.delete(userId);
+      return { typingUsers: next };
+    }),
 }));

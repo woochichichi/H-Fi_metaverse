@@ -24,9 +24,19 @@ export function sendChatMessage(message: string) {
   useMetaverseStore.getState().addChatBubble({ ...bubble, id: crypto.randomUUID() });
 }
 
+export function sendTypingState(isTyping: boolean) {
+  const { user } = useAuthStore.getState();
+  if (!sharedChannel || !user?.id) return;
+  sharedChannel.send({
+    type: 'broadcast',
+    event: 'typing',
+    payload: { userId: user.id, isTyping },
+  });
+}
+
 export default function usePlayerSync() {
   const { profile, user } = useAuthStore();
-  const { currentRoom, playerPosition } =
+  const { currentRoom, playerPosition, playerDirection } =
     useMetaverseStore();
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const globalChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
@@ -56,9 +66,10 @@ export default function usePlayerSync() {
         hairColor: profile?.hair_color || undefined,
         hairStyle: profile?.hair_style || undefined,
         accessory: profile?.accessory || undefined,
+        direction: playerDirection,
       },
     });
-  }, [playerPosition, user?.id, profile?.nickname, profile?.name, profile?.team, profile?.mood_emoji, profile?.avatar_color, profile?.skin_color, profile?.hair_color, profile?.hair_style, profile?.accessory, currentRoom]);
+  }, [playerPosition, user?.id, profile?.nickname, profile?.name, profile?.team, profile?.mood_emoji, profile?.avatar_color, profile?.skin_color, profile?.hair_color, profile?.hair_style, profile?.accessory, currentRoom, playerDirection]);
 
   // ── 글로벌 Presence 채널 (모든 방의 접속자를 한 곳에서 추적) ──
   useEffect(() => {
@@ -179,7 +190,14 @@ export default function usePlayerSync() {
         hairColor: payload.hairColor,
         hairStyle: payload.hairStyle,
         accessory: payload.accessory,
+        direction: payload.direction,
       });
+    });
+
+    // Broadcast: 타이핑 상태 수신
+    channel.on('broadcast', { event: 'typing' }, ({ payload }) => {
+      if (payload.userId === user.id) return;
+      useMetaverseStore.getState().setTypingUser(payload.userId, payload.isTyping);
     });
 
     // Broadcast: 채팅 수신

@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send } from 'lucide-react';
-import { sendChatMessage } from '../../hooks/usePlayerSync';
+import { sendChatMessage, sendTypingState } from '../../hooks/usePlayerSync';
+import { useMetaverseStore } from '../../stores/metaverseStore';
 
 export default function ChatInput() {
   const [message, setMessage] = useState('');
   const [active, setActive] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const setIsTyping = useMetaverseStore((s) => s.setIsTyping);
 
   // Enter 키로 포커스 토글
   useEffect(() => {
@@ -22,6 +24,18 @@ export default function ChatInput() {
   useEffect(() => {
     if (active) inputRef.current?.focus();
   }, [active]);
+
+  // 타이핑 상태 broadcast
+  const hasText = message.length > 0;
+  useEffect(() => {
+    const typing = active && hasText;
+    setIsTyping(typing);
+    sendTypingState(typing);
+    return () => {
+      setIsTyping(false);
+      sendTypingState(false);
+    };
+  }, [active, hasText, setIsTyping]);
 
   const handleSend = () => {
     if (!message.trim()) return;

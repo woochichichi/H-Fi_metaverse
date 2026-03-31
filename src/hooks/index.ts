@@ -9,3 +9,5 @@ export { useKpi } from './useKpi';
 export { useNotes, useNoteRealtime } from './useNotes';
 export { useInbox } from './useInbox';
 export { useUserActivities } from './useUserActivities';
+export { useKudos } from './useKudos';
+export { useTeamPosts } from './useTeamPosts';

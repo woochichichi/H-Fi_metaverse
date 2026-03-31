@@ -52,6 +52,8 @@ export default function VocForm({ onClose, onCreated }: VocFormProps) {
     [title, content]
   );
 
+  const showConfirm = showProfanityWarning && detectedWords.length > 0;
+
   // submitting 타임아웃 15초
   useEffect(() => {
     if (!submitting) {
@@ -336,7 +338,7 @@ export default function VocForm({ onClose, onCreated }: VocFormProps) {
       </div>
 
       {/* ④ 금칙어 확인 팝업 */}
-      {showProfanityWarning && (
+      {showConfirm && (
         <div className="border-t border-danger/20 bg-danger/[.08] px-4 py-3 space-y-2">
           <div className="flex items-start gap-2">
             <AlertTriangle size={14} className="text-danger mt-0.5 shrink-0" />
@@ -363,7 +365,7 @@ export default function VocForm({ onClose, onCreated }: VocFormProps) {
       )}
 
       {/* 제출 */}
-      {!showProfanityWarning && (
+      {!showConfirm && (
         <div className="border-t border-white/[.06] px-4 py-3">
           {submitting && uploading && (
             <div className="mb-2">

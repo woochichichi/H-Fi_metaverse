@@ -103,6 +103,9 @@ export const ACTIVITY_TYPES = [
   'event_join',
   'note_send',
   'exchange_join',
+  'kudos_send',
+  'kudos_receive',
+  'team_post',
 ] as const;
 export type ActivityType = (typeof ACTIVITY_TYPES)[number];
 
@@ -115,7 +118,14 @@ export const ACTIVITY_POINTS: Record<ActivityType, number> = {
   event_join: 2,
   note_send: 0.5,
   exchange_join: 2,
+  kudos_send: 0.5,
+  kudos_receive: 0.5,
+  team_post: 0.5,
 };
+
+// 팀 게시판 카테고리
+export const TEAM_POST_CATEGORIES = ['자유', '질문', '정보', '잡담'] as const;
+export type TeamPostCategory = (typeof TEAM_POST_CATEGORIES)[number];
 
 // 팀별 캐릭터 색상 (메타버스 멀티플레이어)
 export const TEAM_COLORS: Record<string, { body: string; hair: string }> = {
@@ -270,7 +280,7 @@ export const ROOMS_DATA: Record<RoomId, RoomDef> = {
         id: 'portal-stock-plaza',
         x: 540, y: 830, w: 120, h: 50,
         targetRoom: 'plaza',
-        spawnPoint: { x: 190, y: 110 },
+        spawnPoint: { x: 100, y: 100 },
         label: '중앙 광장',
       },
     ],
@@ -293,7 +303,7 @@ export const ROOMS_DATA: Record<RoomId, RoomDef> = {
         id: 'portal-life-plaza',
         x: 540, y: 830, w: 120, h: 50,
         targetRoom: 'plaza',
-        spawnPoint: { x: 740, y: 110 },
+        spawnPoint: { x: 100, y: 100 },
         label: '중앙 광장',
       },
     ],
@@ -316,7 +326,7 @@ export const ROOMS_DATA: Record<RoomId, RoomDef> = {
         id: 'portal-shield-plaza',
         x: 540, y: 830, w: 120, h: 50,
         targetRoom: 'plaza',
-        spawnPoint: { x: 1330, y: 110 },
+        spawnPoint: { x: 100, y: 100 },
         label: '중앙 광장',
       },
     ],
@@ -341,21 +351,21 @@ export const ROOMS_DATA: Record<RoomId, RoomDef> = {
         id: 'portal-plaza-stock',
         x: 100, y: 880, w: 110, h: 48,
         targetRoom: 'stock',
-        spawnPoint: { x: 600, y: 780 },
+        spawnPoint: { x: 100, y: 100 },
         label: '증권ITO',
       },
       {
         id: 'portal-plaza-life',
         x: 680, y: 880, w: 110, h: 48,
         targetRoom: 'life',
-        spawnPoint: { x: 600, y: 780 },
+        spawnPoint: { x: 100, y: 100 },
         label: '생명ITO',
       },
       {
         id: 'portal-plaza-shield',
         x: 1270, y: 880, w: 110, h: 48,
         targetRoom: 'shield',
-        spawnPoint: { x: 600, y: 780 },
+        spawnPoint: { x: 100, y: 100 },
         label: '손보ITO',
       },
     ],

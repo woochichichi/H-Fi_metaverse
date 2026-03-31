@@ -1,10 +1,11 @@
-import { useState } from 'react';
-import { X } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { X, AlertTriangle } from 'lucide-react';
 import { useNotes } from '../../hooks/useNotes';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
 import { NOTE_CATEGORIES } from '../../lib/constants';
 import type { NoteCategory } from '../../lib/constants';
+import { detectBannedWords } from '../../lib/profanityFilter';
 
 interface NoteFormProps {
   onClose: () => void;
@@ -23,11 +24,28 @@ export default function NoteForm({ onClose, onCreated, targetName, targetId }: N
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showProfanityWarning, setShowProfanityWarning] = useState(false);
 
   const isValid = category && title.trim() && content.trim();
 
+  // 금칙어 실시간 감지
+  const detectedWords = useMemo(
+    () => detectBannedWords(title + ' ' + content),
+    [title, content]
+  );
+
+  const showConfirm = showProfanityWarning && detectedWords.length > 0;
+
   const handleSubmit = async () => {
     if (!isValid || submitting || !profile) return;
+
+    // 금칙어 감지 시 경고 팝업
+    if (detectedWords.length > 0 && !showProfanityWarning) {
+      setShowProfanityWarning(true);
+      return;
+    }
+
+    setShowProfanityWarning(false);
     setSubmitting(true);
 
     try {
@@ -154,6 +172,22 @@ export default function NoteForm({ onClose, onCreated, targetName, targetId }: N
           <p className="text-[10px] text-text-muted mt-1 text-right">{content.length}/1000</p>
         </div>
 
+        {/* 금칙어 실시간 경고 */}
+        {detectedWords.length > 0 && (
+          <div className="rounded-xl bg-danger/10 border border-danger/20 p-3">
+            <div className="flex items-start gap-2">
+              <AlertTriangle size={14} className="text-danger mt-0.5 shrink-0" />
+              <div className="text-[11px] text-text-secondary">
+                <p className="font-semibold text-danger mb-0.5">부적절한 표현이 감지되었습니다</p>
+                <p className="text-text-muted">
+                  비방·욕설이 포함된 편지는 운영자 검토 후 <b className="text-danger">비공개 처리</b>될 수 있습니다.
+                  건설적인 표현으로 수정해 주세요.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* 익명 안내 */}
         {anonymous && (
           <p className="rounded-lg bg-white/[.04] px-3 py-2 text-[11px] text-text-muted">
@@ -162,16 +196,45 @@ export default function NoteForm({ onClose, onCreated, targetName, targetId }: N
         )}
       </div>
 
+      {/* 금칙어 확인 팝업 */}
+      {showConfirm && (
+        <div className="border-t border-danger/20 bg-danger/[.08] px-4 py-3 space-y-2">
+          <div className="flex items-start gap-2">
+            <AlertTriangle size={14} className="text-danger mt-0.5 shrink-0" />
+            <p className="text-xs text-text-secondary">
+              부적절한 표현이 포함되어 있습니다. 그래도 제출하시겠습니까?
+              비방성 내용은 <b className="text-danger">비공개 처리</b>될 수 있습니다.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowProfanityWarning(false)}
+              className="flex-1 rounded-lg bg-white/[.08] py-2 text-xs font-medium text-text-secondary hover:bg-white/[.12]"
+            >
+              수정하기
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="flex-1 rounded-lg bg-danger/80 py-2 text-xs font-medium text-white hover:bg-danger"
+            >
+              그래도 제출
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 제출 */}
-      <div className="border-t border-white/[.06] px-4 py-3">
-        <button
-          onClick={handleSubmit}
-          disabled={!isValid || submitting}
-          className="w-full rounded-xl bg-accent py-2.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-accent/80 disabled:opacity-40"
-        >
-          {submitting ? '전송 중...' : '💌 편지 보내기'}
-        </button>
-      </div>
+      {!showConfirm && (
+        <div className="border-t border-white/[.06] px-4 py-3">
+          <button
+            onClick={handleSubmit}
+            disabled={!isValid || submitting}
+            className="w-full rounded-xl bg-accent py-2.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-accent/80 disabled:opacity-40"
+          >
+            {submitting ? '전송 중...' : '💌 편지 보내기'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
