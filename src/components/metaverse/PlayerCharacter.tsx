@@ -159,18 +159,10 @@ export default function PlayerCharacter() {
         filter: 'drop-shadow(0 3px 2px rgba(0,0,0,.25))',
       }}
     >
-      {profile?.mood_emoji && (
-        <div
-          className="absolute left-1/2 -translate-x-1/2 text-sm"
-          style={{ top: -36, filter: 'drop-shadow(0 1px 2px rgba(0,0,0,.3))' }}
-        >
-          {profile.mood_emoji}
-        </div>
-      )}
       <div
         className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1 whitespace-nowrap rounded-[10px] px-[10px] py-[2px] text-[10px] font-semibold text-white"
         style={{
-          top: profile?.mood_emoji ? -18 : -22,
+          top: -22,
           background: 'rgba(108,92,231,.9)',
           boxShadow: '0 2px 8px rgba(108,92,231,.3)',
         }}

@@ -19,18 +19,10 @@ function OtherPlayerSprite({ player }: { player: OtherPlayer }) {
         opacity: 0.85,
       }}
     >
-      {player.moodEmoji && (
-        <div
-          className="absolute left-1/2 -translate-x-1/2 text-xs"
-          style={{ top: -32, filter: 'drop-shadow(0 1px 2px rgba(0,0,0,.3))' }}
-        >
-          {player.moodEmoji}
-        </div>
-      )}
       <div
         className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1 whitespace-nowrap rounded-[10px] px-[8px] py-[2px] text-[11px] font-semibold text-white"
         style={{
-          top: player.moodEmoji ? -16 : -20,
+          top: -20,
           background: `${colors.body}cc`,
           boxShadow: `0 2px 6px ${colors.body}40`,
         }}
