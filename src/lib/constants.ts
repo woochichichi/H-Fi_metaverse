@@ -193,33 +193,40 @@ export type PetType =
   | 'none' | 'cat' | 'dog' | 'bird' | 'rabbit'
   | 'hamster' | 'turtle' | 'frog' | 'penguin' | 'fox'
   | 'hedgehog' | 'snake' | 'fish' | 'owl' | 'dragon'
-  | 'unicorn' | 'slime' | 'bat' | 'panda' | 'duck'
-  | 'mushroom' | 'alien' | 'ghost' | 'crab' | 'butterfly';
+  | 'unicorn' | 'panda' | 'duck'
+  | 'crab' | 'butterfly'
+  | 'tiger' | 'rat' | 'ox' | 'horse' | 'sheep'
+  | 'monkey' | 'rooster' | 'pig';
 
 export const PETS: { id: PetType; label: string; emoji: string }[] = [
   { id: 'none',      label: '없음',     emoji: '❌' },
+  // ── 12간지 ──
+  { id: 'rat',       label: '쥐(자)',    emoji: '🐭' },
+  { id: 'ox',        label: '소(축)',    emoji: '🐮' },
+  { id: 'tiger',     label: '호랑이(인)', emoji: '🐯' },
+  { id: 'rabbit',    label: '토끼(묘)',  emoji: '🐰' },
+  { id: 'dragon',    label: '용(진)',    emoji: '🐉' },
+  { id: 'snake',     label: '뱀(사)',    emoji: '🐍' },
+  { id: 'horse',     label: '말(오)',    emoji: '🐴' },
+  { id: 'sheep',     label: '양(미)',    emoji: '🐑' },
+  { id: 'monkey',    label: '원숭이(신)', emoji: '🐵' },
+  { id: 'rooster',   label: '닭(유)',    emoji: '🐔' },
+  { id: 'dog',       label: '강아지(술)', emoji: '🐶' },
+  { id: 'pig',       label: '돼지(해)',  emoji: '🐷' },
+  // ── 기타 ──
   { id: 'cat',       label: '고양이',   emoji: '🐱' },
-  { id: 'dog',       label: '강아지',   emoji: '🐶' },
   { id: 'bird',      label: '새',       emoji: '🐦' },
-  { id: 'rabbit',    label: '토끼',     emoji: '🐰' },
   { id: 'hamster',   label: '햄스터',   emoji: '🐹' },
   { id: 'turtle',    label: '거북이',   emoji: '🐢' },
   { id: 'frog',      label: '개구리',   emoji: '🐸' },
   { id: 'penguin',   label: '펭귄',     emoji: '🐧' },
   { id: 'fox',       label: '여우',     emoji: '🦊' },
   { id: 'hedgehog',  label: '고슴도치', emoji: '🦔' },
-  { id: 'snake',     label: '뱀',       emoji: '🐍' },
   { id: 'fish',      label: '물고기',   emoji: '🐠' },
   { id: 'owl',       label: '부엉이',   emoji: '🦉' },
-  { id: 'dragon',    label: '드래곤',   emoji: '🐉' },
   { id: 'unicorn',   label: '유니콘',   emoji: '🦄' },
-  { id: 'slime',     label: '슬라임',   emoji: '🟢' },
-  { id: 'bat',       label: '박쥐',     emoji: '🦇' },
   { id: 'panda',     label: '판다',     emoji: '🐼' },
   { id: 'duck',      label: '오리',     emoji: '🦆' },
-  { id: 'mushroom',  label: '버섯',     emoji: '🍄' },
-  { id: 'alien',     label: '외계인',   emoji: '👽' },
-  { id: 'ghost',     label: '유령',     emoji: '👻' },
   { id: 'crab',      label: '게',       emoji: '🦀' },
   { id: 'butterfly', label: '나비',     emoji: '🦋' },
 ];
