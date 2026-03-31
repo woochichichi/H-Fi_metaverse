@@ -22,12 +22,16 @@ export function useKudos() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchKudos = useCallback(async (team: string, userId?: string) => {
+  const fetchKudos = useCallback(async (team: string, userId?: string, since?: string) => {
     setLoading(true);
     setError(null);
     try {
       const { data, error: fetchErr } = await withTimeout(
-        () => supabase.from('kudos').select('*').eq('team', team).order('created_at', { ascending: false }).limit(100),
+        () => {
+          let q = supabase.from('kudos').select('*').eq('team', team);
+          if (since) q = q.gte('created_at', since);
+          return q.order('created_at', { ascending: false }).limit(100);
+        },
         8000, 'kudos',
       );
       if (fetchErr) throw fetchErr;

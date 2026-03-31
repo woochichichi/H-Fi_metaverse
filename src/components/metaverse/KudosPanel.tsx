@@ -1,10 +1,31 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Plus, Eye, RefreshCw, Send, X, ChevronDown } from 'lucide-react';
 import { useKudos, type ReactionType } from '../../hooks/useKudos';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
 import KudosCard from './KudosCard';
 import LoadMore from '../common/LoadMore';
+
+type PeriodFilter = 'week' | 'month' | 'all';
+const PERIOD_OPTIONS: { key: PeriodFilter; label: string }[] = [
+  { key: 'week', label: '이번 주' },
+  { key: 'month', label: '이번 달' },
+  { key: 'all', label: '전체' },
+];
+
+function getSinceDate(period: PeriodFilter): string | undefined {
+  if (period === 'all') return undefined;
+  const now = new Date();
+  if (period === 'week') {
+    const day = now.getDay();
+    const diff = day === 0 ? 6 : day - 1; // 월요일 기준
+    now.setDate(now.getDate() - diff);
+  } else {
+    now.setDate(1);
+  }
+  now.setHours(0, 0, 0, 0);
+  return now.toISOString();
+}
 
 interface KudosPanelProps {
   team: string;
@@ -22,10 +43,13 @@ export default function KudosPanel({ team, readOnly }: KudosPanelProps) {
   const [members, setMembers] = useState<{ id: string; name: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [displayCount, setDisplayCount] = useState(20);
+  const [period, setPeriod] = useState<PeriodFilter>('month');
+
+  const since = useMemo(() => getSinceDate(period), [period]);
 
   const reload = useCallback(() => {
-    fetchKudos(team, profile?.id);
-  }, [fetchKudos, team, profile?.id]);
+    fetchKudos(team, profile?.id, since);
+  }, [fetchKudos, team, profile?.id, since]);
 
   useEffect(() => { reload(); }, [reload]);
 
@@ -89,6 +113,23 @@ export default function KudosPanel({ team, readOnly }: KudosPanelProps) {
             </button>
           )}
         </div>
+      </div>
+
+      {/* 기간 필터 */}
+      <div className="flex items-center gap-1">
+        {PERIOD_OPTIONS.map(({ key, label }) => (
+          <button
+            key={key}
+            onClick={() => { setPeriod(key); setDisplayCount(20); }}
+            className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium transition-colors ${
+              period === key
+                ? 'bg-accent/25 text-accent ring-1 ring-accent/30'
+                : 'bg-white/[.06] text-text-muted hover:bg-white/[.1]'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* 작성 폼 */}
