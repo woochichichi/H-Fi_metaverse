@@ -1,11 +1,21 @@
 import { useMetaverseStore } from '../../stores/metaverseStore';
 import { useAuthStore } from '../../stores/authStore';
+import { TEAM_COLORS } from '../../lib/constants';
+
+const BUBBLE_COLORS: Record<string, { bg: string; text: string; border: string }> = {
+  '증권ITO': { bg: '#e6fff5', text: '#1a6b4a', border: 'rgba(0,214,143,.25)' },
+  '생명ITO': { bg: '#f0edff', text: '#3d2f8c', border: 'rgba(108,92,231,.25)' },
+  '손보ITO': { bg: '#e8f4ff', text: '#1a4b7a', border: 'rgba(9,132,227,.25)' },
+  '한금서':  { bg: '#fff8e1', text: '#6b5a10', border: 'rgba(248,181,0,.25)' },
+};
+
+const DEFAULT_BUBBLE = { bg: '#fff', text: '#555', border: 'rgba(0,0,0,.08)' };
 
 export default function ChatBubble() {
   const chatBubbles = useMetaverseStore((s) => s.chatBubbles);
   const otherPlayers = useMetaverseStore((s) => s.otherPlayers);
   const playerPosition = useMetaverseStore((s) => s.playerPosition);
-  const user = useAuthStore((s) => s.user);
+  const { user, profile } = useAuthStore();
 
   return (
     <>
@@ -14,6 +24,9 @@ export default function ChatBubble() {
         const other = otherPlayers.get(bubble.userId);
         const x = isMe ? playerPosition.x : (other?.x ?? 0);
         const y = isMe ? playerPosition.y : (other?.y ?? 0);
+        const team = isMe ? (profile?.team || '') : (bubble.team || other?.team || '');
+        const colors = BUBBLE_COLORS[team] || DEFAULT_BUBBLE;
+        const teamColor = TEAM_COLORS[team]?.body || '#999';
 
         if (!isMe && !other) return null;
 
@@ -27,20 +40,21 @@ export default function ChatBubble() {
               transform: 'translateX(-50%)',
             }}
           >
-            {/* 구름형 말풍선 */}
+            {/* 구름형 말풍선 — 팀 색상 */}
             <div
-              className="relative max-w-[200px] px-[12px] py-[6px] text-[10px] font-medium text-gray-700"
+              className="relative max-w-[200px] px-[12px] py-[6px] text-[10px] font-medium"
               style={{
-                background: '#fff',
+                background: colors.bg,
+                color: colors.text,
                 borderRadius: '18px 18px 18px 4px',
-                boxShadow: '0 2px 12px rgba(0,0,0,.12), 0 1px 3px rgba(0,0,0,.08)',
-                border: '1px solid rgba(0,0,0,.06)',
+                boxShadow: `0 2px 12px rgba(0,0,0,.1), 0 0 0 1px ${colors.border}`,
+                borderLeft: `3px solid ${teamColor}`,
                 wordBreak: 'break-word',
               }}
             >
               {bubble.message}
             </div>
-            {/* 구름 꼬리 — 동그란 원 2개 */}
+            {/* 구름 꼬리 */}
             <div
               className="absolute"
               style={{
@@ -49,9 +63,8 @@ export default function ChatBubble() {
                 width: 8,
                 height: 8,
                 borderRadius: '50%',
-                background: '#fff',
-                boxShadow: '0 1px 3px rgba(0,0,0,.1)',
-                border: '1px solid rgba(0,0,0,.06)',
+                background: colors.bg,
+                boxShadow: `0 1px 3px rgba(0,0,0,.08), 0 0 0 1px ${colors.border}`,
               }}
             />
             <div
@@ -62,9 +75,8 @@ export default function ChatBubble() {
                 width: 5,
                 height: 5,
                 borderRadius: '50%',
-                background: '#fff',
-                boxShadow: '0 1px 2px rgba(0,0,0,.08)',
-                border: '1px solid rgba(0,0,0,.06)',
+                background: colors.bg,
+                boxShadow: `0 1px 2px rgba(0,0,0,.06), 0 0 0 1px ${colors.border}`,
               }}
             />
           </div>

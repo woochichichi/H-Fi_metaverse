@@ -13,6 +13,7 @@ export interface ChatBubble {
   id: string;
   userId: string;
   message: string;
+  team?: string;
   timestamp: number;
 }
 

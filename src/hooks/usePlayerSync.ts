@@ -17,6 +17,7 @@ export function sendChatMessage(message: string) {
     userId: user.id,
     name: profile?.nickname || profile?.name || '???',
     message: message.trim(),
+    team: profile?.team || '',
     timestamp: Date.now(),
   };
   sharedChannel.send({ type: 'broadcast', event: 'chat', payload: bubble });
@@ -117,6 +118,7 @@ export default function usePlayerSync() {
         id: crypto.randomUUID(),
         userId: payload.userId,
         message: payload.message,
+        team: payload.team || '',
         timestamp: payload.timestamp,
       });
     });
