@@ -154,7 +154,7 @@ export default function PlayerCharacter() {
           if (dist < ARRIVE_DIST) {
             checkZoneAndPortal(posRef.current.x, posRef.current.y);
             setMoveTarget(null);
-            openModal(target.zoneId);
+            if (target.zoneId) openModal(target.zoneId);
             moving = false;
           } else {
             const nx = Math.max(20, Math.min(mapW - 40, posRef.current.x + (diffX / dist) * AUTO_SPEED));

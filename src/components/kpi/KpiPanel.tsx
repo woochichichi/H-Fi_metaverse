@@ -216,7 +216,7 @@ export default function KpiPanel({ onClose }: KpiPanelProps) {
                   </div>
                   {visibleMembers.map((m) => (
                     <KpiMemberRow
-                      key={m.userId}
+                      key={`${m.userId}-${selectedQuarter}`}
                       member={m}
                       onExpand={(uid) => fetchMemberDetail(uid, selectedQuarter)}
                     />

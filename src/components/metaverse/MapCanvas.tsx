@@ -1,4 +1,4 @@
-import { type ReactNode, type JSX, useMemo, memo } from 'react';
+import { type ReactNode, type JSX, useMemo, useCallback, memo, type MouseEvent } from 'react';
 import { ROOMS_DATA } from '../../lib/constants';
 import type { RoomDef, RoomId } from '../../lib/constants';
 import { getMapTimeTheme, type MapTimeTheme } from '../../lib/utils';
@@ -1253,6 +1253,7 @@ interface MapCanvasProps {
 export default function MapCanvas({ children, roomAlerts }: MapCanvasProps) {
   const theme = useMemo(() => getMapTimeTheme(), []);
   const currentRoom = useMetaverseStore((s) => s.currentRoom);
+  const setMoveTarget = useMetaverseStore((s) => s.setMoveTarget);
   const room = ROOMS_DATA[currentRoom];
   const { w: mapW, h: mapH } = room.mapSize;
   const postCounts = useBoardPosts();
@@ -1261,8 +1262,18 @@ export default function MapCanvas({ children, roomAlerts }: MapCanvasProps) {
     ? (room.id === 'stock' ? 'stock' : room.id === 'life' ? 'life' : 'shield')
     : '';
 
+  const handleMapClick = useCallback((e: MouseEvent<HTMLDivElement>) => {
+    // 버튼/링크 등 interactive 요소 클릭 시 무시
+    const target = e.target as HTMLElement;
+    if (target.closest('button, a, [role="button"]')) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    setMoveTarget({ x: x - 17, y: y - 23 }); // 캐릭터 중심 보정
+  }, [setMoveTarget]);
+
   return (
-    <div className="absolute" style={{ width: mapW, height: mapH }}>
+    <div className="absolute cursor-pointer" style={{ width: mapW, height: mapH }} onClick={handleMapClick}>
       <RoomGround room={room} theme={theme} />
 
       {/* Zone 표지판 */}

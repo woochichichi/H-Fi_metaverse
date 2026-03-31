@@ -29,7 +29,7 @@ export interface ChatLogEntry {
 interface MoveTarget {
   x: number;
   y: number;
-  zoneId: ZoneId;
+  zoneId?: ZoneId;
 }
 
 export interface OtherPlayer {

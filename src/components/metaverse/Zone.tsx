@@ -34,7 +34,7 @@ export default function Zone() {
             left: z.x, top: z.y, width: z.width, height: z.height,
             background: hoveredZone === z.id ? 'rgba(255,255,255,0.04)' : 'transparent',
           }}
-          onClick={() => handleZoneClick(z.id, z.x, z.y, z.width, z.height)}
+          onClick={(e) => { e.stopPropagation(); handleZoneClick(z.id, z.x, z.y, z.width, z.height); }}
           onMouseEnter={() => setHoveredZone(z.id)}
           onMouseLeave={() => setHoveredZone(null)}
         >

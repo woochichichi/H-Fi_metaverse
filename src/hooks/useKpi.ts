@@ -246,10 +246,10 @@ export function useKpi() {
     const titleMap = new Map<string, string>();
     await Promise.all(
       Array.from(refsByTable.entries()).map(async ([table, ids]) => {
-        const { data: rows } = await supabase
-          .from(table)
-          .select('id, title')
-          .in('id', Array.from(ids));
+        const { data: rows } = await withTimeout(
+          () => supabase.from(table).select('id, title').in('id', Array.from(ids)),
+          8000, `kpiTitle_${table}`,
+        );
         (rows ?? []).forEach((r: { id: string; title: string }) => {
           titleMap.set(r.id, r.title);
         });
