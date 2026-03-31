@@ -319,7 +319,7 @@ export function useGatherings() {
     }
 
     // 관련 알림 정리 (실패해도 무시)
-    supabase.from('notifications').delete().like('link', `/gathering/${id}%`).then();
+    supabase.from('notifications').delete().eq('link', `/gathering/${id}`).then();
 
     setGatherings((prev) => prev.filter((g) => g.id !== id));
     return { error: null };

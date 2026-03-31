@@ -253,8 +253,8 @@ CREATE POLICY "idea_votes_delete_own" ON idea_votes FOR DELETE USING (auth.uid()
 
 -- notices
 CREATE POLICY "notices_select" ON notices FOR SELECT USING (auth.uid() IS NOT NULL);
-CREATE POLICY "notices_insert_leader" ON notices FOR INSERT
-  WITH CHECK (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin','leader')));
+CREATE POLICY "notices_insert_authenticated" ON notices FOR INSERT
+  WITH CHECK (auth.uid() IS NOT NULL);
 
 -- notice_reads
 CREATE POLICY "notice_reads_select" ON notice_reads FOR SELECT USING (auth.uid() IS NOT NULL);

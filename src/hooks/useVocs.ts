@@ -195,6 +195,9 @@ export function useVocs() {
       return { error: deleteError.message };
     }
 
+    // 관련 알림 정리 (실패해도 무시)
+    supabase.from('notifications').delete().eq('link', `/voc/${id}`).then();
+
     setVocs((prev) => prev.filter((v) => v.id !== id));
     return { error: null };
   }, []);

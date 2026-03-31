@@ -35,7 +35,8 @@ export default function NoteDetail({ note, onBack, onUpdated, onDeleted }: NoteD
   const canReplyAsAuthor = note.anonymous
     ? isAnonymousAuthor(note.id, note.session_token)
     : note.sender_id === profile?.id;
-  const canDelete = isAdmin || canReplyAsAuthor;
+  // 익명 쪽지는 sender_id=NULL → RLS가 차단하므로 관리자만 삭제 가능
+  const canDelete = isAdmin || (!note.anonymous && note.sender_id === profile?.id);
 
   const statusConfig = STATUS_CONFIG[note.status] ?? STATUS_CONFIG['미읽음'];
 

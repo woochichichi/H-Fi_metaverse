@@ -5,6 +5,14 @@
 -- gathering_members, gathering_comments)은 부모 삭제 시 DB가 자동 삭제하므로
 -- 프론트에서 수동 삭제하지 않음. 단, message_threads는 FK가 없어 수동 삭제 필요.
 
+-- ===== 알림 테이블 =====
+
+-- notifications: 본인 알림만 삭제 가능 (게시글 삭제 시 본인 알림 정리용)
+-- 타 사용자 알림은 DB 트리거 또는 dead-link 핸들링으로 처리
+CREATE POLICY "notifications_delete_own" ON notifications
+  FOR DELETE TO authenticated
+  USING (auth.uid() = user_id);
+
 -- ===== 메인 테이블 =====
 
 -- ideas: 작성자 또는 관리자 삭제

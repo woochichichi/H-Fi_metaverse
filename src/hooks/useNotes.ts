@@ -200,6 +200,9 @@ export function useNotes() {
       return { error: deleteError.message };
     }
 
+    // 관련 알림 정리 (실패해도 무시)
+    supabase.from('notifications').delete().eq('link', `/note/${id}`).then();
+
     setNotes((prev) => prev.filter((n) => n.id !== id));
     return { error: null };
   }, []);

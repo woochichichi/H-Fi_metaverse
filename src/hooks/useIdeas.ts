@@ -329,7 +329,7 @@ export function useIdeas() {
     }
 
     // 관련 알림 정리 (실패해도 무시)
-    supabase.from('notifications').delete().like('link', `/idea/${id}%`).then();
+    supabase.from('notifications').delete().eq('link', `/idea/${id}`).then();
 
     setIdeas((prev) => prev.filter((i) => i.id !== id));
     return { error: null };

@@ -214,7 +214,7 @@ export function useNotices() {
     }
 
     // 관련 알림 정리 (실패해도 무시)
-    supabase.from('notifications').delete().like('link', `/notice/${id}%`).then();
+    supabase.from('notifications').delete().eq('link', `/notice/${id}`).then();
 
     setNotices((prev) => prev.filter((n) => n.id !== id));
     return { error: null };

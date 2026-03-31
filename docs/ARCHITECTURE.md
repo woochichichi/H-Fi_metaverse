@@ -227,6 +227,18 @@ const useDeviceMode = () => {
 3. VocPanel, NoticePanel, NotePanel에서 `error`/`onRetry` props 연결
 **교훈:** fetch 쿼리에는 반드시 타임아웃 설정. Panel→List 간 error props 전달 누락 주의
 
+### 공지사항 멤버 작성 권한 개방 (2026-03-31)
+**목표:** 기존 리더(admin/leader)만 가능하던 공지 작성을 모든 멤버에게 개방
+**시행착오:**
+1. 프론트(`NoticePanel`)의 `isLeader` 가드만 제거하면 끝이라 판단 → 실제로는 RLS `notices_insert_leader` 정책이 DB에서 INSERT를 차단하고 있어 멤버가 등록 시 에러 발생
+2. RLS 마이그레이션(`020`)으로 DB 정책 수정 후, `full_setup.sql`에 구 정책이 남아있는 것을 발견 → DB 리셋 시 권한이 원복될 위험
+**해결:**
+1. RLS: `notices_insert_leader` → `notices_insert_authenticated` (모든 인증 사용자 INSERT 허용)
+2. `full_setup.sql` 동기화
+3. `NoticeForm`에 멤버 안전 제한 추가: 긴급 시급성 비활성, 상단 고정 숨김, 대상 팀 본인 팀 고정
+4. 삭제는 기존 RLS(`019`)가 `author_id` 기준으로 이미 안전 → 추가 변경 불필요
+**교훈:** 프론트 권한 변경 시 반드시 RLS 정책 + full_setup.sql 동기화 확인. 보안은 RLS, 프론트는 UX 목적(CLAUDE.md 원칙 #4)
+
 ### backdrop-filter + fixed 스택킹 이슈
 **증상:** 오버레이 UI가 부모 기준으로 잡혀 backdrop-filter 깨짐
 **해결:** 오버레이 UI는 `createPortal(document.body)` 필수
