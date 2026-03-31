@@ -133,19 +133,6 @@ export default function TopBar() {
               <Inbox size={18} />
               <InboxBadge count={inboxUnread} />
             </button>
-
-            {/* 수집함 드롭다운 */}
-            {showInbox && (
-              <div className="absolute right-0 top-full mt-2 z-[200] rounded-xl border border-white/[.08] bg-bg-secondary shadow-2xl">
-                <InboxPanel
-                  items={items}
-                  loading={inboxLoading}
-                  onMarkAsRead={markAsRead}
-                  onMarkAllAsRead={markAllAsRead}
-                  onClose={() => setShowInbox(false)}
-                />
-              </div>
-            )}
           </div>
 
           {/* 알림 (공지 안읽은 수) */}
@@ -204,6 +191,20 @@ export default function TopBar() {
           )}
         </div>
       </header>
+
+      {/* 수집함 드롭다운 — createPortal로 body에 렌더링 (backdrop-filter stacking context 회피) */}
+      {showInbox && createPortal(
+        <div ref={inboxRef} className="fixed z-[200] rounded-xl border border-white/[.08] bg-bg-secondary shadow-2xl" style={{ top: 48, right: 180 }}>
+          <InboxPanel
+            items={items}
+            loading={inboxLoading}
+            onMarkAsRead={markAsRead}
+            onMarkAllAsRead={markAllAsRead}
+            onClose={() => setShowInbox(false)}
+          />
+        </div>,
+        document.body
+      )}
 
       {/* 기분/감정 표현 드롭다운 — createPortal로 body에 렌더링 (backdrop-filter stacking context 회피) */}
       {showMood && createPortal(
