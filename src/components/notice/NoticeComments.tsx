@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, Trash2, MessageCircle } from 'lucide-react';
-import { useNotices } from '../../hooks/useNotices';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
 import type { NoticeComment, Profile } from '../../types';
@@ -9,6 +8,9 @@ type CommentProfile = Pick<Profile, 'id' | 'name' | 'nickname' | 'avatar_emoji' 
 
 interface NoticeCommentsProps {
   noticeId: string;
+  fetchComments: (noticeId: string) => Promise<{ comments: NoticeComment[]; profiles: CommentProfile[]; error: string | null }>;
+  addComment: (noticeId: string, authorId: string, content: string) => Promise<{ data: NoticeComment | null; error: string | null }>;
+  deleteComment: (commentId: string) => Promise<{ error: string | null }>;
 }
 
 function timeAgo(dateStr: string): string {
@@ -22,10 +24,9 @@ function timeAgo(dateStr: string): string {
   return `${days}일 전`;
 }
 
-export default function NoticeComments({ noticeId }: NoticeCommentsProps) {
+export default function NoticeComments({ noticeId, fetchComments, addComment, deleteComment }: NoticeCommentsProps) {
   const { user } = useAuthStore();
   const { addToast } = useUiStore();
-  const { fetchNoticeComments, addNoticeComment, deleteNoticeComment } = useNotices();
 
   const [comments, setComments] = useState<NoticeComment[]>([]);
   const [profiles, setProfiles] = useState<Map<string, CommentProfile>>(new Map());
@@ -36,7 +37,7 @@ export default function NoticeComments({ noticeId }: NoticeCommentsProps) {
 
   const loadComments = async () => {
     setLoading(true);
-    const result = await fetchNoticeComments(noticeId);
+    const result = await fetchComments(noticeId);
     setComments(result.comments);
     if (result.profiles) {
       const map = new Map<string, CommentProfile>();
@@ -59,7 +60,7 @@ export default function NoticeComments({ noticeId }: NoticeCommentsProps) {
   const handleSubmit = async () => {
     if (!user || !input.trim()) return;
     setSubmitting(true);
-    const { data, error } = await addNoticeComment(noticeId, user.id, input.trim());
+    const { data, error } = await addComment(noticeId, user.id, input.trim());
     setSubmitting(false);
     if (error) {
       addToast(`댓글 등록 실패: ${error}`, 'error');
@@ -70,7 +71,7 @@ export default function NoticeComments({ noticeId }: NoticeCommentsProps) {
   };
 
   const handleDelete = async (commentId: string) => {
-    const { error } = await deleteNoticeComment(commentId);
+    const { error } = await deleteComment(commentId);
     if (error) {
       addToast(`삭제 실패: ${error}`, 'error');
     } else {

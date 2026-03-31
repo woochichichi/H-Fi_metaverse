@@ -204,7 +204,7 @@ export function useNotices() {
   }, []);
 
   const deleteNotice = useCallback(async (id: string) => {
-    // notice_reads는 FK CASCADE로 자동 삭제
+    // notice_reads, notice_comments는 FK CASCADE로 자동 삭제
     const { error: deleteError } = await supabase
       .from('notices')
       .delete()

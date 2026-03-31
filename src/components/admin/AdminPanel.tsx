@@ -11,10 +11,10 @@ interface AdminPanelProps {
 }
 
 const ALL_TABS: readonly { id: 'invite' | 'users' | 'eval-items' | 'eval'; label: string; icon: typeof KeyRound; roles: string[] }[] = [
-  { id: 'invite', label: '초대 코드', icon: KeyRound, roles: ['admin', 'director'] },
+  { id: 'invite', label: '초대 코드', icon: KeyRound, roles: ['admin'] },
   { id: 'users', label: '사용자 관리', icon: Users, roles: ['admin', 'director', 'leader'] },
-  { id: 'eval-items', label: '평가 항목', icon: ListChecks, roles: ['admin', 'director'] },
-  { id: 'eval', label: '평가 대시보드', icon: BarChart3, roles: ['admin', 'director'] },
+  { id: 'eval-items', label: '평가 항목', icon: ListChecks, roles: ['admin', 'director', 'leader'] },
+  { id: 'eval', label: '평가 대시보드', icon: BarChart3, roles: ['admin', 'director', 'leader'] },
 ];
 
 type TabId = (typeof ALL_TABS)[number]['id'];

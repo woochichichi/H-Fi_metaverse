@@ -47,11 +47,9 @@ export default function EvalDashboard() {
   // 사용자 목록 (수동 기록용)
   useEffect(() => {
     if (showManualForm && allUsers.length === 0) {
-      supabase
-        .from('profiles')
-        .select('*')
-        .order('name')
-        .then(({ data }) => setAllUsers(data ?? []));
+      const q = supabase.from('profiles').select('*').order('name');
+      if (!canSeeAll && profile?.team) q.eq('team', profile.team);
+      q.then(({ data }) => setAllUsers(data ?? []));
     }
   }, [showManualForm, allUsers.length]);
 

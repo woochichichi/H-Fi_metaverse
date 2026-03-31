@@ -17,7 +17,7 @@ interface NoticeDetailProps {
 
 export default function NoticeDetail({ notice, onBack, onDeleted }: NoticeDetailProps) {
   const { profile, user } = useAuthStore();
-  const { markAsRead, fetchReadStatus, deleteNotice } = useNotices();
+  const { markAsRead, fetchReadStatus, deleteNotice, fetchNoticeComments, addNoticeComment, deleteNoticeComment } = useNotices();
   const { addToast } = useUiStore();
 
   const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
@@ -136,7 +136,12 @@ export default function NoticeDetail({ notice, onBack, onDeleted }: NoticeDetail
         )}
 
         {/* 댓글 */}
-        <NoticeComments noticeId={notice.id} />
+        <NoticeComments
+          noticeId={notice.id}
+          fetchComments={fetchNoticeComments}
+          addComment={addNoticeComment}
+          deleteComment={deleteNoticeComment}
+        />
 
         {/* 리더 전용: 읽음 현황 */}
         {isLeader && (
