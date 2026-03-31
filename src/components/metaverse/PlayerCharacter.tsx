@@ -171,6 +171,10 @@ export default function PlayerCharacter() {
             }
             moving = true;
             lastMoveTimeRef.current = Date.now();
+            if (idleAnimRef.current !== 'none') {
+              idleAnimRef.current = 'none';
+              setIdleAnim('none');
+            }
           }
         } else {
           const keys = keysRef.current;
