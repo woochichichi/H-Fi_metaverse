@@ -126,7 +126,7 @@ export default function MetaverseLayout() {
 
       <div className="relative flex-1 flex flex-col overflow-hidden">
         <div ref={containerRef} className="relative flex-1 overflow-hidden" style={{ background: mapTheme.outerBg }}>
-          <div ref={viewportRef} className="absolute" style={{ width: mapW, height: mapH }}>
+          <div ref={viewportRef} className="absolute" style={{ width: mapW, height: mapH, willChange: 'transform' }}>
             <MapCanvas>
               <Zone />
               {/* <NPCCharacter /> */}

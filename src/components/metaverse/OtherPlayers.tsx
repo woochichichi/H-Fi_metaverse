@@ -56,29 +56,28 @@ export default function OtherPlayers() {
     playersRef.current = otherPlayers;
   }, [otherPlayers]);
 
-  // Lerp 루프: targetX/Y → x/y 보간
+  // Lerp 루프: targetX/Y → x/y 보간 (Map 복사는 변경 시에만)
   useEffect(() => {
     const store = useMetaverseStore;
 
     const loop = () => {
       const players = playersRef.current;
-      let changed = false;
+      let next: Map<string, OtherPlayer> | null = null;
 
-      const next = new Map(players);
-      for (const [id, p] of next) {
+      for (const [id, p] of players) {
         const dx = p.targetX - p.x;
         const dy = p.targetY - p.y;
         if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+          if (!next) next = new Map(players);
           next.set(id, {
             ...p,
             x: p.x + dx * LERP_SPEED,
             y: p.y + dy * LERP_SPEED,
           });
-          changed = true;
         }
       }
 
-      if (changed) {
+      if (next) {
         store.setState({ otherPlayers: next });
       }
 

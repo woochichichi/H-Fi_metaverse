@@ -1,4 +1,4 @@
-import { type ReactNode, type JSX, useMemo } from 'react';
+import { type ReactNode, type JSX, useMemo, memo } from 'react';
 import { ROOMS_DATA } from '../../lib/constants';
 import type { RoomDef } from '../../lib/constants';
 import { getMapTimeTheme, type MapTimeTheme } from '../../lib/utils';
@@ -413,7 +413,7 @@ function getZoneFloorColor(zoneId: string): string {
 }
 
 // ═══ Room Ground (룸별 바닥 — Zone 영역은 바닥색으로만 구분) ═══
-function RoomGround({ room, theme }: { room: RoomDef; theme: MapTimeTheme }) {
+const RoomGround = memo(function RoomGround({ room, theme }: { room: RoomDef; theme: MapTimeTheme }) {
   const { w, h } = room.mapSize;
 
   return (
@@ -442,26 +442,17 @@ function RoomGround({ room, theme }: { room: RoomDef; theme: MapTimeTheme }) {
             opacity="0.85"
             rx="6"
           />
-          {/* 타일 패턴 */}
+          {/* Zone 내부 타일 느낌 — 격자 대신 단일 패턴으로 대체 */}
           <rect
             x={z.x} y={z.y} width={z.width} height={z.height}
             fill="none" rx="6"
-            style={{ filter: 'url(#tile-pattern)' }}
+            stroke="rgba(255,255,255,0.03)" strokeWidth="0.5"
           />
-          {/* Zone 내부 격자 (미묘한 타일) */}
-          <g opacity="0.04">
-            {Array.from({ length: Math.floor(z.width / 32) + 1 }, (_, i) => (
-              <line key={`v${z.id}${i}`} x1={z.x + i * 32} y1={z.y} x2={z.x + i * 32} y2={z.y + z.height} stroke="white" strokeWidth="0.5" />
-            ))}
-            {Array.from({ length: Math.floor(z.height / 32) + 1 }, (_, i) => (
-              <line key={`h${z.id}${i}`} x1={z.x} y1={z.y + i * 32} x2={z.x + z.width} y2={z.y + i * 32} stroke="white" strokeWidth="0.5" />
-            ))}
-          </g>
         </g>
       ))}
     </svg>
   );
-}
+});
 
 // ═══ Zone 표지판 (떠있는 텍스트 대신 작은 나무 표지판) ═══
 function ZoneSigns({ room }: { room: RoomDef }) {
@@ -498,8 +489,8 @@ function ZoneSigns({ room }: { room: RoomDef }) {
   );
 }
 
-// ═══ 포탈 아치형 문 ═══
-function PortalArch({ room }: { room: RoomDef }) {
+// ═══ 포탈 아치형 문 (CSS animation으로 교체 — SVG animate는 매 프레임 repaint) ═══
+const PortalArch = memo(function PortalArch({ room }: { room: RoomDef }) {
   return (
     <>
       {room.portals.map((p) => (
@@ -511,9 +502,7 @@ function PortalArch({ room }: { room: RoomDef }) {
           <svg width={p.w} height={p.h + 30} viewBox="0 0 120 80" preserveAspectRatio="none">
             <defs>
               <radialGradient id={`portal-glow-${p.id}`} cx="50%" cy="50%">
-                <stop offset="0%" stopColor={room.theme.border} stopOpacity="0.5">
-                  <animate attributeName="stop-opacity" values="0.3;0.6;0.3" dur="2s" repeatCount="indefinite" />
-                </stop>
+                <stop offset="0%" stopColor={room.theme.border} stopOpacity="0.45" />
                 <stop offset="100%" stopColor={room.theme.border} stopOpacity="0.05" />
               </radialGradient>
             </defs>
@@ -525,22 +514,13 @@ function PortalArch({ room }: { room: RoomDef }) {
             <rect x="100" y="15" width="10" height="55" fill="#8B6914" />
             <rect x="10" y="10" width="100" height="10" rx="4" fill="#A07030" />
             <rect x="15" y="12" width="90" height="6" fill="#B8843A" />
-            {/* 포탈 안쪽 빛 */}
+            {/* 포탈 안쪽 빛 — 정적 glow */}
             <rect x="20" y="20" width="80" height="48" rx="4" fill={`url(#portal-glow-${p.id})`} />
-            <rect x="25" y="25" width="70" height="38" rx="3" fill={room.theme.border} opacity="0.08">
-              <animate attributeName="opacity" values="0.05;0.15;0.05" dur="2s" repeatCount="indefinite" />
-            </rect>
-            {/* 빛 파티클 */}
-            <circle cx="40" cy="35" r="1.5" fill={room.theme.border} opacity="0.4">
-              <animate attributeName="cy" values="35;28;35" dur="3s" repeatCount="indefinite" />
-              <animate attributeName="opacity" values="0.4;0.1;0.4" dur="3s" repeatCount="indefinite" />
-            </circle>
-            <circle cx="70" cy="40" r="1" fill={room.theme.border} opacity="0.3">
-              <animate attributeName="cy" values="40;32;40" dur="2.5s" repeatCount="indefinite" />
-            </circle>
-            <circle cx="55" cy="50" r="1.2" fill={room.theme.border} opacity="0.35">
-              <animate attributeName="cy" values="50;42;50" dur="2.8s" repeatCount="indefinite" />
-            </circle>
+            <rect x="25" y="25" width="70" height="38" rx="3" fill={room.theme.border} opacity="0.1" />
+            {/* 빛 파티클 — 정적 */}
+            <circle cx="40" cy="32" r="1.5" fill={room.theme.border} opacity="0.25" />
+            <circle cx="70" cy="36" r="1" fill={room.theme.border} opacity="0.2" />
+            <circle cx="55" cy="46" r="1.2" fill={room.theme.border} opacity="0.22" />
           </svg>
           {/* 행선지 표지판 */}
           <div
@@ -558,7 +538,7 @@ function PortalArch({ room }: { room: RoomDef }) {
       ))}
     </>
   );
-}
+});
 
 // ═══ 팀별 픽셀 장식 (증권-차트, 생명-하트, 손보-자동차) ═══
 function PixelTeamDeco({ x, y, type }: { x: number; y: number; type: 'chart' | 'heart' | 'car' }) {
@@ -614,7 +594,7 @@ function PixelTeamDeco({ x, y, type }: { x: number; y: number; type: 'chart' | '
 }
 
 // ═══ 팀 타운 가구 배치 (1200x900, 로컬좌표) ═══
-function TeamTownFurniture({ teamColor, theme }: { teamColor: string; theme: string }) {
+const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme }: { teamColor: string; theme: string }) {
   const decoType = theme === 'stock' ? 'chart' : theme === 'life' ? 'heart' : 'car';
   return (
     <>
@@ -677,10 +657,10 @@ function TeamTownFurniture({ teamColor, theme }: { teamColor: string; theme: str
       <PixelPlant90s x={360} y={740} size="small" />
     </>
   );
-}
+});
 
 // ═══ 중앙 광장 가구 (1600x1000, 로컬좌표) ═══
-function PlazaFurniture() {
+const PlazaFurniture = memo(function PlazaFurniture() {
   return (
     <>
       {/* ═══ VOC Zone (60,60 ~ 720,440) — 접수 공간 ═══ */}
@@ -781,7 +761,7 @@ function PlazaFurniture() {
       <PixelPlant90s x={100} y={880} />
     </>
   );
-}
+});
 
 // ═══ Main MapCanvas ═══
 interface MapCanvasProps {

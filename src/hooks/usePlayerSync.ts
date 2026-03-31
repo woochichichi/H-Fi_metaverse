@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../stores/authStore';
 import { useMetaverseStore } from '../stores/metaverseStore';
+import { useUiStore } from '../stores/uiStore';
 import type { RoomId } from '../lib/constants';
 
 const BROADCAST_INTERVAL = 150; // ms
@@ -28,6 +29,7 @@ export default function usePlayerSync() {
     useMetaverseStore();
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const lastSentRef = useRef(0);
+  const prevOnlineIdsRef = useRef<Set<string>>(new Set());
 
   // playerPosition 변경 시 throttled broadcast
   useEffect(() => {
@@ -61,11 +63,29 @@ export default function usePlayerSync() {
       config: { presence: { key: user.id } },
     });
 
-    // Presence: 접속/퇴장 감지
+    // Presence: 접속/퇴장 감지 + 새 유저 알림
     channel.on('presence', { event: 'sync' }, () => {
       const state = channel.presenceState();
       const onlineIds = Object.keys(state);
       useMetaverseStore.getState().setOnlineUsers(onlineIds);
+
+      // 이전 목록과 비교하여 새로 접속한 유저 감지
+      const prev = prevOnlineIdsRef.current;
+      if (prev.size > 0) {
+        const newUsers = onlineIds.filter((id) => !prev.has(id) && id !== user?.id);
+        if (newUsers.length > 0) {
+          // presence state에서 이름 추출
+          const names = newUsers.map((id) => {
+            const presences = state[id] as Array<{ name?: string }> | undefined;
+            return presences?.[0]?.name || '알 수 없음';
+          });
+          const msg = names.length === 1
+            ? `🟢 ${names[0]}님이 접속했습니다`
+            : `🟢 ${names[0]}님 외 ${names.length - 1}명이 접속했습니다`;
+          useUiStore.getState().addToast(msg, 'info');
+        }
+      }
+      prevOnlineIdsRef.current = new Set(onlineIds);
     });
 
     channel.on('presence', { event: 'leave' }, ({ key }) => {
@@ -120,6 +140,7 @@ export default function usePlayerSync() {
       supabase.removeChannel(channel);
       channelRef.current = null;
       sharedChannel = null;
+      prevOnlineIdsRef.current = new Set();
     };
   }, [user?.id, currentRoom]);
 
