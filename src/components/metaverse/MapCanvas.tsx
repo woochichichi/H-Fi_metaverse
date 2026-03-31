@@ -1054,10 +1054,11 @@ const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme, po
       {/* ═══ 로비 Zone (60,60 ~ 560,400) — 활기찬 라운지 ═══ */}
       {/* 네온 환영 사인 */}
       <PixelNeonSign x={200} y={68} text="환영합니다!" color={teamColor} />
-      {/* 칠판 (로비 활동 도트) */}
-      <PixelChalkboard x={340} y={260} w={120} postCount={
-        (postCounts.notice ?? 0) + (postCounts.voc ?? 0) + (postCounts.idea ?? 0) + (postCounts.gathering ?? 0)
-      } />
+      {/* 존별 코르크보드 (공지/VOC/아이디어/모임) */}
+      <PixelCorkboard x={80} y={100} frameColor="#E91E63" postCount={Math.min(postCounts.notice ?? 0, 5)} />
+      <PixelCorkboard x={200} y={100} frameColor="#FF9800" postCount={Math.min(postCounts.voc ?? 0, 5)} />
+      <PixelCorkboard x={320} y={100} frameColor="#6BC5FF" postCount={Math.min(postCounts.idea ?? 0, 5)} />
+      <PixelCorkboard x={440} y={100} frameColor="#2ECC71" postCount={Math.min(postCounts.gathering ?? 0, 5)} />
       {/* 편안한 소파 + 라운드 테이블 */}
       <PixelSofa90s x={100} y={130} color={teamColor} />
       <PixelSofa90s x={300} y={130} color={teamColor} />
