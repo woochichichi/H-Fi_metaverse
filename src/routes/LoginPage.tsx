@@ -88,6 +88,13 @@ export default function LoginPage() {
             </div>
           </div>
 
+          {/* 안내 */}
+          <p className="mb-4 rounded-lg bg-warning/10 px-3 py-2 text-xs text-warning">
+            본 서비스는 실제 SSO/사내 시스템과 연동되지 않습니다.
+            <br />
+            회사 비밀번호가 아닌, <strong>가입 시 설정한 비밀번호</strong>를 입력해주세요.
+          </p>
+
           {/* 에러 메시지 */}
           {error && (
             <p className="mb-4 rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
