@@ -115,8 +115,8 @@ export default function CharacterCustomModal({ onClose }: Props) {
           ))}
         </div>
 
-        {/* 옵션 패널 — 탭 전환 시 높이 고정 */}
-        <div className="overflow-y-auto px-4 py-4 h-[200px]">
+        {/* 옵션 패널 — 탭 전환 시 높이 고정 (펫 탭은 항목 많아 더 큼) */}
+        <div className={`overflow-y-auto px-4 py-4 ${activeTab === 'pet' ? 'h-[280px]' : 'h-[200px]'}`}>
           {activeTab === 'body' && (
             <ColorGrid
               items={BODY_COLORS}
@@ -193,7 +193,7 @@ export default function CharacterCustomModal({ onClose }: Props) {
             </div>
           )}
           {activeTab === 'pet' && (
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-4 gap-2">
               {PETS.map((p) => (
                 <button
                   key={p.id}
@@ -204,7 +204,7 @@ export default function CharacterCustomModal({ onClose }: Props) {
                       : 'bg-white/5 hover:bg-white/10'
                   }`}
                 >
-                  <span className="text-2xl">{p.emoji}</span>
+                  <span className="text-lg">{p.emoji}</span>
                   <span className="text-[10px] text-text-secondary">{p.label}</span>
                 </button>
               ))}
