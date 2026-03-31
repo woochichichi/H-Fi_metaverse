@@ -88,6 +88,7 @@ export default function NotePanel({ onClose }: NotePanelProps) {
         note={selectedNote}
         onBack={handleBack}
         onUpdated={handleNoteUpdated}
+        onDeleted={handleBack}
       />
     );
   }

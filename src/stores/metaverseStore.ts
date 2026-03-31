@@ -88,6 +88,9 @@ interface MetaverseState {
   clearOtherPlayers: () => void;
 }
 
+// 말풍선 자동 삭제 타이머 (store 외부에서 관리 — 인터페이스 오염 방지)
+const _bubbleTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
 export const useMetaverseStore = create<MetaverseState>((set, get) => ({
   activeZone: null,
   nearZone: null,
@@ -101,11 +104,9 @@ export const useMetaverseStore = create<MetaverseState>((set, get) => ({
   otherPlayers: new Map(),
   chatBubbles: new Map(),
   chatLog: [],
-  _bubbleTimers: new Map<string, ReturnType<typeof setTimeout>>(),
   addChatBubble: (bubble) => {
-    const store = get() as any;
     // 같은 유저의 이전 타이머 취소
-    const prevTimer = store._bubbleTimers.get(bubble.userId);
+    const prevTimer = _bubbleTimers.get(bubble.userId);
     if (prevTimer) clearTimeout(prevTimer);
 
     set((s) => {
@@ -124,10 +125,10 @@ export const useMetaverseStore = create<MetaverseState>((set, get) => ({
     });
 
     const timer = setTimeout(() => {
-      (get() as any)._bubbleTimers.delete(bubble.userId);
+      _bubbleTimers.delete(bubble.userId);
       get().removeChatBubble(bubble.userId);
     }, 8000);
-    store._bubbleTimers.set(bubble.userId, timer);
+    _bubbleTimers.set(bubble.userId, timer);
   },
   removeChatBubble: (userId) =>
     set((s) => {
@@ -156,6 +157,9 @@ export const useMetaverseStore = create<MetaverseState>((set, get) => ({
   enterRoom: (roomId, spawnPoint) => {
     const room = ROOMS_DATA[roomId];
     const spawn = spawnPoint || room.spawnPoint;
+    // 이전 방 말풍선 타이머 전부 정리
+    _bubbleTimers.forEach((t) => clearTimeout(t));
+    _bubbleTimers.clear();
     set({
       currentRoom: roomId,
       playerPosition: spawn,
@@ -164,6 +168,8 @@ export const useMetaverseStore = create<MetaverseState>((set, get) => ({
       activeZone: null,
       moveTarget: null,
       otherPlayers: new Map(),
+      chatBubbles: new Map(),
+      chatLog: [],
     });
   },
   updateOtherPlayer: (player) =>

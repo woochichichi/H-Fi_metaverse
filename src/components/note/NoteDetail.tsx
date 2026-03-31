@@ -78,6 +78,20 @@ export default function NoteDetail({ note, onBack, onUpdated, onDeleted }: NoteD
     }
   };
 
+  const handleDelete = async () => {
+    if (deleting) return;
+    setDeleting(true);
+    const { error } = await deleteNote(note.id);
+    setDeleting(false);
+    setShowDeleteConfirm(false);
+    if (error) {
+      addToast(`삭제 실패: ${error}`, 'error');
+      return;
+    }
+    addToast('쪽지가 삭제되었습니다', 'success');
+    onDeleted?.();
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* 헤더 */}
@@ -91,6 +105,16 @@ export default function NoteDetail({ note, onBack, onUpdated, onDeleted }: NoteD
         <h2 className="flex-1 font-heading text-base font-bold text-text-primary truncate">
           쪽지 상세
         </h2>
+        {canDelete && (
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            disabled={deleting}
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-danger/20 hover:text-danger disabled:opacity-40"
+            title="삭제"
+          >
+            <Trash2 size={15} />
+          </button>
+        )}
         <span
           className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
           style={{ color: statusConfig.color, backgroundColor: statusConfig.bg }}
@@ -156,6 +180,16 @@ export default function NoteDetail({ note, onBack, onUpdated, onDeleted }: NoteD
           onMessageSent={isRecipient ? handleThreadReply : undefined}
         />
       </div>
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        title="쪽지 삭제"
+        message="이 쪽지를 삭제하시겠습니까? 대화 내역도 함께 삭제됩니다."
+        confirmLabel="삭제"
+        danger
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </div>
   );
 }

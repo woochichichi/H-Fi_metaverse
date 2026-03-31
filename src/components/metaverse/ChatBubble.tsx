@@ -55,9 +55,9 @@ function BubbleItem({ bubble, x, y, team }: {
         top: y - 52,
         transform: `translateX(-50%) translateY(${translateY}px) scale(${scale})`,
         opacity,
-        transition: phase === 'enter'
-          ? 'opacity 0.25s ease-out, transform 0.25s ease-out'
-          : 'opacity 0.6s ease-in, transform 0.6s ease-in',
+        transition: phase === 'exit'
+          ? 'opacity 0.6s ease-in, transform 0.6s ease-in'
+          : 'opacity 0.25s ease-out, transform 0.25s ease-out',
       }}
     >
       {/* 말풍선 본체 */}

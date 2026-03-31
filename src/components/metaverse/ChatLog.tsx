@@ -10,16 +10,18 @@ const TEAM_NAME_COLORS: Record<string, string> = {
 
 export default function ChatLog() {
   const chatLog = useMetaverseStore((s) => s.chatLog);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const el = containerRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
   }, [chatLog.length]);
 
   if (chatLog.length === 0) return null;
 
   return (
     <div
+      ref={containerRef}
       className="absolute bottom-14 left-3 z-[70] flex flex-col gap-[2px] pointer-events-none select-none no-scrollbar"
       style={{ maxHeight: 160, maxWidth: 320, overflowY: 'auto', overflowX: 'hidden' }}
     >
@@ -37,7 +39,6 @@ export default function ChatLog() {
           </div>
         );
       })}
-      <div ref={bottomRef} />
     </div>
   );
 }
