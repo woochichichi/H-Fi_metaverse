@@ -382,6 +382,14 @@ export interface GatheringComment {
   created_at: string;
 }
 
+export interface VocComment {
+  id: string;
+  voc_id: string;
+  author_id: string | null;
+  content: string;
+  created_at: string;
+}
+
 export interface OmokRecord {
   id: string;
   winner_id: string;

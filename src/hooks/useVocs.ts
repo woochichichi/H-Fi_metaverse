@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { withTimeout } from '../lib/utils';
-import type { Voc } from '../types';
+import type { Voc, VocComment, Profile } from '../types';
 import type { VocCategory, VocStatus } from '../lib/constants';
 
 export interface VocFilters {
@@ -216,6 +216,68 @@ export function useVocs() {
     return data ?? [];
   }, []);
 
+  // ===== 댓글 =====
+
+  const fetchVocComments = useCallback(async (vocId: string) => {
+    const { data, error: fetchError } = await withTimeout(
+      () =>
+        supabase
+          .from('voc_comments')
+          .select('id, voc_id, author_id, content, created_at')
+          .eq('voc_id', vocId)
+          .order('created_at', { ascending: true }),
+      8000,
+      'vocComments',
+    );
+
+    if (fetchError) {
+      console.error('VOC 댓글 조회 실패:', fetchError.message);
+      return { comments: [] as VocComment[], profiles: [] as Pick<Profile, 'id' | 'name' | 'nickname' | 'avatar_emoji' | 'avatar_color'>[], error: fetchError.message };
+    }
+
+    const comments = (data ?? []) as VocComment[];
+    const authorIds = [...new Set(comments.map((c) => c.author_id).filter(Boolean))] as string[];
+    let profiles: Pick<Profile, 'id' | 'name' | 'nickname' | 'avatar_emoji' | 'avatar_color'>[] = [];
+
+    if (authorIds.length > 0) {
+      const { data: pData } = await withTimeout(
+        () => supabase.from('profiles').select('id, name, nickname, avatar_emoji, avatar_color').in('id', authorIds),
+        8000,
+        'vocCommentProfiles',
+      );
+      profiles = (pData ?? []) as typeof profiles;
+    }
+
+    return { comments, profiles, error: null };
+  }, []);
+
+  const addVocComment = useCallback(async (vocId: string, authorId: string, content: string) => {
+    const { data, error: insertError } = await supabase
+      .from('voc_comments')
+      .insert({ voc_id: vocId, author_id: authorId, content })
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error('VOC 댓글 등록 실패:', insertError.message);
+      return { data: null, error: insertError.message };
+    }
+    return { data: data as VocComment, error: null };
+  }, []);
+
+  const deleteVocComment = useCallback(async (commentId: string) => {
+    const { error: deleteError } = await supabase
+      .from('voc_comments')
+      .delete()
+      .eq('id', commentId);
+
+    if (deleteError) {
+      console.error('VOC 댓글 삭제 실패:', deleteError.message);
+      return { error: deleteError.message };
+    }
+    return { error: null };
+  }, []);
+
   return {
     vocs,
     loading,
@@ -227,6 +289,9 @@ export function useVocs() {
     deleteVoc,
     isAnonymousAuthor,
     fetchAssignees,
+    fetchVocComments,
+    addVocComment,
+    deleteVocComment,
   };
 }
 

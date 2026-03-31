@@ -19,6 +19,7 @@ export type {
   Gathering,
   GatheringMember,
   GatheringComment,
+  VocComment,
   UnitActivity,
   ActivityReaction,
   ActivityComment,

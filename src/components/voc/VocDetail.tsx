@@ -8,6 +8,7 @@ import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
 import { formatRelativeTime } from '../../lib/utils';
 import { VOC_STATUSES, VOC_SEVERITY_LABELS } from '../../lib/constants';
+import VocComments from './VocComments';
 import type { Voc } from '../../types';
 import type { VocStatus } from '../../lib/constants';
 
@@ -311,6 +312,9 @@ export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDeta
             </button>
           </div>
         )}
+
+        {/* 공감 댓글 */}
+        <VocComments vocId={voc.id} />
 
         {/* 대화 스레드 */}
         <ThreadPanel
