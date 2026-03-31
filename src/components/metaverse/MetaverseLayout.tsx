@@ -26,6 +26,7 @@ import { useUiStore } from '../../stores/uiStore';
 import { ROOMS_DATA, TEAM_ZONES } from '../../lib/constants';
 import { getMapTimeTheme } from '../../lib/utils';
 import { useAuthStore } from '../../stores/authStore';
+import { useZoneAlerts } from '../../hooks/useZoneAlerts';
 
 // Zone ID → 패널 매핑 (v4: 팀별 zone ID를 기능별 패널로 매핑)
 function getZonePanel(zoneId: string, userTeam: string | undefined): React.FC<{ onClose: () => void }> | null {
@@ -72,6 +73,23 @@ export default function MetaverseLayout() {
   const mapTheme = useMemo(() => getMapTimeTheme(), []);
   const [isTouchDevice] = useState(() => 'ontouchstart' in window || navigator.maxTouchPoints > 0);
   usePlayerSync();
+  const { zoneAlerts, checkAlerts, markZoneVisited, getRoomAlerts } = useZoneAlerts();
+
+  // 초기 로드 + 방 이동 시 알림 체크
+  useEffect(() => {
+    if (profile?.id && profile?.team) {
+      checkAlerts(profile.id, profile.team);
+    }
+  }, [profile?.id, profile?.team, currentRoom, checkAlerts]);
+
+  // 존 패널 열릴 때 방문 기록 갱신
+  useEffect(() => {
+    if (modalOpen && profile?.id) {
+      markZoneVisited(profile.id, modalOpen);
+    }
+  }, [modalOpen, profile?.id, markZoneVisited]);
+
+  const roomAlerts = getRoomAlerts();
 
   const room = ROOMS_DATA[currentRoom];
   const mapW = room.mapSize.w;
@@ -126,12 +144,12 @@ export default function MetaverseLayout() {
 
   return (
     <div className="flex flex-1 overflow-hidden">
-      <BottomBar />
+      <BottomBar roomAlerts={roomAlerts} zoneAlerts={zoneAlerts} />
 
       <div className="relative flex-1 flex flex-col overflow-hidden">
         <div ref={containerRef} className="relative flex-1 overflow-hidden" style={{ background: mapTheme.outerBg }}>
           <div ref={viewportRef} className="absolute" style={{ width: mapW, height: mapH, willChange: 'transform' }}>
-            <MapCanvas>
+            <MapCanvas roomAlerts={roomAlerts}>
               <Zone />
               {/* <NPCCharacter /> */}
               <ChatBubble />

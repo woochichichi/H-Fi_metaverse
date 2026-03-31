@@ -5,8 +5,14 @@ import { useMetaverseStore } from '../../stores/metaverseStore';
 import { useAuthStore } from '../../stores/authStore';
 import { ROOMS_DATA, TEAM_TO_ROOM } from '../../lib/constants';
 import type { RoomId } from '../../lib/constants';
+import type { RoomAlertMap, ZoneAlertMap } from '../../hooks/useZoneAlerts';
 
-export default function BottomBar() {
+interface BottomBarProps {
+  roomAlerts: RoomAlertMap;
+  zoneAlerts: ZoneAlertMap;
+}
+
+export default function BottomBar({ roomAlerts, zoneAlerts }: BottomBarProps) {
   const { openModal } = useUiStore();
   const { currentRoom, enterRoom } = useMetaverseStore();
   const { profile } = useAuthStore();
@@ -51,22 +57,35 @@ export default function BottomBar() {
                 className="rounded-lg px-3 py-1.5 text-center text-[11px] font-bold text-white"
                 style={{ background: `${room.theme.main}44`, border: `1px solid ${room.theme.main}66` }}
               >
-                📍 {room.label}
+                <span>📍 {room.label}</span>
+                {roomAlerts[currentRoom] && (
+                  <span className="ml-1.5 inline-block h-2 w-2 rounded-full bg-red-500 shadow-[0_0_6px_rgba(239,68,68,.6)]" />
+                )}
               </div>
             </div>
 
             {/* 액션 버튼 */}
             <div className="flex flex-col gap-1">
-              {actions.map((a) => (
-                <button
-                  key={a.id}
-                  onClick={() => handleAction(a.id)}
-                  className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[12px] font-semibold text-text-secondary transition-all duration-150 hover:bg-accent/15 hover:text-accent-light"
-                >
-                  <span className="text-base">{a.emoji}</span>
-                  {a.label}
-                </button>
-              ))}
+              {actions.map((a) => {
+                // zone alert 매핑: kpi → {myRoom}-kpi, note → 알림 없음
+                const alertZoneId = a.id === 'kpi'
+                  ? `${ROOMS_DATA[TEAM_TO_ROOM[profile?.team || ''] || 'stock'].id}-kpi`
+                  : a.id;
+                const hasAlert = !!zoneAlerts[alertZoneId];
+                return (
+                  <button
+                    key={a.id}
+                    onClick={() => handleAction(a.id)}
+                    className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[12px] font-semibold text-text-secondary transition-all duration-150 hover:bg-accent/15 hover:text-accent-light"
+                  >
+                    <span className="text-base">{a.emoji}</span>
+                    {a.label}
+                    {hasAlert && (
+                      <span className="ml-auto h-2 w-2 rounded-full bg-red-500 shadow-[0_0_6px_rgba(239,68,68,.6)]" />
+                    )}
+                  </button>
+                );
+              })}
             </div>
 
             {/* 룸 이동 바로가기 */}
@@ -82,6 +101,9 @@ export default function BottomBar() {
                   >
                     <span className="h-2 w-2 rounded-full" style={{ background: r.theme.main }} />
                     {r.label}
+                    {roomAlerts[id] && (
+                      <span className="ml-auto h-1.5 w-1.5 rounded-full bg-red-500 shadow-[0_0_4px_rgba(239,68,68,.6)]" />
+                    )}
                   </button>
                 );
               })}

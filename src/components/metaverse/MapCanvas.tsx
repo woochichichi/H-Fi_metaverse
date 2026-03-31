@@ -1,8 +1,9 @@
 import { type ReactNode, type JSX, useMemo, memo } from 'react';
 import { ROOMS_DATA } from '../../lib/constants';
-import type { RoomDef } from '../../lib/constants';
+import type { RoomDef, RoomId } from '../../lib/constants';
 import { getMapTimeTheme, type MapTimeTheme } from '../../lib/utils';
 import { useMetaverseStore } from '../../stores/metaverseStore';
+import type { RoomAlertMap } from '../../hooks/useZoneAlerts';
 
 // ═══════════════════════════════════════════════════════
 // 90년대 사무실 아이소메트릭 픽셀 가구 (게더타운 스타일)
@@ -791,7 +792,7 @@ function ZoneSigns({ room }: { room: RoomDef }) {
 }
 
 // ═══ 포탈 아치형 문 (CSS animation으로 교체 — SVG animate는 매 프레임 repaint) ═══
-const PortalArch = memo(function PortalArch({ room }: { room: RoomDef }) {
+const PortalArch = memo(function PortalArch({ room, roomAlerts }: { room: RoomDef; roomAlerts?: RoomAlertMap }) {
   return (
     <>
       {room.portals.map((p) => (
@@ -834,6 +835,12 @@ const PortalArch = memo(function PortalArch({ room }: { room: RoomDef }) {
             }}
           >
             {p.label} →
+            {roomAlerts?.[p.targetRoom as RoomId] && (
+              <span
+                className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse"
+                style={{ boxShadow: '0 0 6px rgba(239,68,68,.7)' }}
+              />
+            )}
           </div>
         </div>
       ))}
@@ -1070,9 +1077,10 @@ const PlazaFurniture = memo(function PlazaFurniture() {
 // ═══ Main MapCanvas ═══
 interface MapCanvasProps {
   children?: ReactNode;
+  roomAlerts?: RoomAlertMap;
 }
 
-export default function MapCanvas({ children }: MapCanvasProps) {
+export default function MapCanvas({ children, roomAlerts }: MapCanvasProps) {
   const theme = useMemo(() => getMapTimeTheme(), []);
   const currentRoom = useMetaverseStore((s) => s.currentRoom);
   const room = ROOMS_DATA[currentRoom];
@@ -1148,7 +1156,7 @@ export default function MapCanvas({ children }: MapCanvasProps) {
       )}
 
       {/* 포탈 아치형 문 */}
-      <PortalArch room={room} />
+      <PortalArch room={room} roomAlerts={roomAlerts} />
 
       {/* 미션/비전 바닥 슬로건 (중앙 광장 전용) */}
       {!room.team && (
