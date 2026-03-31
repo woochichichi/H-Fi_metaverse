@@ -8,6 +8,7 @@ export type {
   IdeaWithVotes,
   Notice,
   NoticeRead,
+  NoticeComment,
   KpiItem,
   KpiRecord,
   Activity,

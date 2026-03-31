@@ -254,6 +254,14 @@ export interface NoticeRead {
   read_at: string;
 }
 
+export interface NoticeComment {
+  id: string;
+  notice_id: string;
+  author_id: string;
+  content: string;
+  created_at: string;
+}
+
 export interface KpiItem {
   id: string;
   team: string | null;

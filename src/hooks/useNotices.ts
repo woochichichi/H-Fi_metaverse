@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { withTimeout } from '../lib/utils';
 import { ACTIVITY_POINTS } from '../lib/constants';
-import type { Notice, Profile } from '../types';
+import type { Notice, NoticeComment, Profile } from '../types';
 import type { UrgencyLevel, NoticeCategory } from '../lib/constants';
 
 export interface NoticeFilters {
@@ -133,10 +133,12 @@ export function useNotices() {
 
       const { error } = await supabase
         .from('notice_reads')
-        .insert({ notice_id: noticeId, user_id: userId, read_at: new Date().toISOString() });
+        .upsert(
+          { notice_id: noticeId, user_id: userId, read_at: new Date().toISOString() },
+          { onConflict: 'notice_id,user_id', ignoreDuplicates: true },
+        );
 
-      // 이미 읽은 경우 (unique constraint) 무시
-      if (error && !error.message.includes('duplicate')) {
+      if (error) {
         console.error('읽음 처리 실패:', error.message);
       }
 
@@ -220,6 +222,68 @@ export function useNotices() {
     return { error: null };
   }, []);
 
+  // ── 댓글 ──
+
+  const fetchNoticeComments = useCallback(async (noticeId: string) => {
+    const { data, error: fetchError } = await withTimeout(
+      () =>
+        supabase
+          .from('notice_comments')
+          .select('id, notice_id, author_id, content, created_at')
+          .eq('notice_id', noticeId)
+          .order('created_at', { ascending: true }),
+      8000,
+      'noticeComments',
+    );
+
+    if (fetchError) {
+      console.error('공지 댓글 조회 실패:', fetchError.message);
+      return { comments: [] as NoticeComment[], profiles: [] as Pick<Profile, 'id' | 'name' | 'nickname' | 'avatar_emoji' | 'avatar_color'>[], error: fetchError.message };
+    }
+
+    const comments = (data ?? []) as NoticeComment[];
+    const authorIds = [...new Set(comments.map((c) => c.author_id).filter(Boolean))] as string[];
+    let profiles: Pick<Profile, 'id' | 'name' | 'nickname' | 'avatar_emoji' | 'avatar_color'>[] = [];
+
+    if (authorIds.length > 0) {
+      const { data: pData } = await withTimeout(
+        () => supabase.from('profiles').select('id, name, nickname, avatar_emoji, avatar_color').in('id', authorIds),
+        8000,
+        'noticeCommentProfiles',
+      );
+      profiles = (pData ?? []) as typeof profiles;
+    }
+
+    return { comments, profiles, error: null };
+  }, []);
+
+  const addNoticeComment = useCallback(async (noticeId: string, authorId: string, content: string) => {
+    const { data, error: insertError } = await supabase
+      .from('notice_comments')
+      .insert({ notice_id: noticeId, author_id: authorId, content })
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error('공지 댓글 등록 실패:', insertError.message);
+      return { data: null, error: insertError.message };
+    }
+    return { data: data as NoticeComment, error: null };
+  }, []);
+
+  const deleteNoticeComment = useCallback(async (commentId: string) => {
+    const { error: deleteError } = await supabase
+      .from('notice_comments')
+      .delete()
+      .eq('id', commentId);
+
+    if (deleteError) {
+      console.error('공지 댓글 삭제 실패:', deleteError.message);
+      return { error: deleteError.message };
+    }
+    return { error: null };
+  }, []);
+
   return {
     notices,
     loading,
@@ -232,5 +296,8 @@ export function useNotices() {
     fetchReadStatus,
     fetchUnreadCount,
     deleteNotice,
+    fetchNoticeComments,
+    addNoticeComment,
+    deleteNoticeComment,
   };
 }

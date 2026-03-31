@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, Paperclip, Users, Trash2 } from 'lucide-react';
 import UrgencyBadge from '../common/UrgencyBadge';
 import ConfirmDialog from '../common/ConfirmDialog';
+import NoticeComments from './NoticeComments';
 import { useNotices } from '../../hooks/useNotices';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
@@ -133,6 +134,9 @@ export default function NoticeDetail({ notice, onBack, onDeleted }: NoticeDetail
             ))}
           </div>
         )}
+
+        {/* 댓글 */}
+        <NoticeComments noticeId={notice.id} />
 
         {/* 리더 전용: 읽음 현황 */}
         {isLeader && (

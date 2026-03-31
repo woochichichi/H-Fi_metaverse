@@ -128,16 +128,16 @@ export default function CharacterSVG({
     if (animFrame === 1) {
       return (
         <>
-          <rect x="2" y="11" width="1" height="1" fill={skinColor} />
-          <rect x="13" y="13" width="1" height="1" fill={skinColor} />
+          <rect x="2" y="13" width="1" height="1" fill={skinColor} />
+          <rect x="13" y="11" width="1" height="1" fill={skinColor} />
         </>
       );
     }
     if (animFrame === 2) {
       return (
         <>
-          <rect x="2" y="13" width="1" height="1" fill={skinColor} />
-          <rect x="13" y="11" width="1" height="1" fill={skinColor} />
+          <rect x="2" y="11" width="1" height="1" fill={skinColor} />
+          <rect x="13" y="13" width="1" height="1" fill={skinColor} />
         </>
       );
     }
