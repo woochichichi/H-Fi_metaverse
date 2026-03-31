@@ -1,10 +1,26 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../stores/authStore';
 import { useMetaverseStore } from '../stores/metaverseStore';
 import type { RoomId } from '../lib/constants';
 
 const BROADCAST_INTERVAL = 150; // ms
+
+// 채널 ref를 모듈 레벨에서 공유 (ChatInput에서 접근)
+let sharedChannel: ReturnType<typeof supabase.channel> | null = null;
+
+export function sendChatMessage(message: string) {
+  const { user, profile } = useAuthStore.getState();
+  if (!sharedChannel || !user?.id || !message.trim()) return;
+  const bubble = {
+    userId: user.id,
+    name: profile?.nickname || profile?.name || '???',
+    message: message.trim(),
+    timestamp: Date.now(),
+  };
+  sharedChannel.send({ type: 'broadcast', event: 'chat', payload: bubble });
+  useMetaverseStore.getState().addChatBubble({ ...bubble, id: crypto.randomUUID() });
+}
 
 export default function usePlayerSync() {
   const { profile, user } = useAuthStore();
@@ -66,11 +82,22 @@ export default function usePlayerSync() {
         name: payload.name,
         team: payload.team,
         room: payload.room as RoomId,
-        x: 0, // lerp에서 처리
+        x: 0,
         y: 0,
         targetX: payload.x,
         targetY: payload.y,
         moodEmoji: payload.moodEmoji,
+      });
+    });
+
+    // Broadcast: 채팅 수신
+    channel.on('broadcast', { event: 'chat' }, ({ payload }) => {
+      if (payload.userId === user.id) return;
+      useMetaverseStore.getState().addChatBubble({
+        id: crypto.randomUUID(),
+        userId: payload.userId,
+        message: payload.message,
+        timestamp: payload.timestamp,
       });
     });
 
@@ -87,11 +114,14 @@ export default function usePlayerSync() {
     });
 
     channelRef.current = channel;
+    sharedChannel = channel;
 
     return () => {
       supabase.removeChannel(channel);
       channelRef.current = null;
+      sharedChannel = null;
     };
   }, [user?.id, currentRoom]);
 
+  return { sendChat: useCallback((msg: string) => sendChatMessage(msg), []) };
 }

@@ -33,6 +33,7 @@ export default function PlayerCharacter() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (modalOpen) return;
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       keysRef.current.add(e.key);
       if (e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();

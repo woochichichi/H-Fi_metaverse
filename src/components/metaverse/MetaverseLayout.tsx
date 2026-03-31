@@ -4,7 +4,8 @@ import PlayerCharacter from './PlayerCharacter';
 import OtherPlayers from './OtherPlayers';
 // import NPCCharacter from './NPCCharacter';
 import Zone from './Zone';
-// import ChatBubble from './ChatBubble';
+import ChatBubble from './ChatBubble';
+import ChatInput from './ChatInput';
 import EmojiFloat from './EmojiFloat';
 import BottomBar from './BottomBar';
 import TouchDpad from './TouchDpad';
@@ -129,13 +130,14 @@ export default function MetaverseLayout() {
             <MapCanvas>
               <Zone />
               {/* <NPCCharacter /> */}
-              {/* <ChatBubble /> */}
+              <ChatBubble />
               <OtherPlayers />
               <PlayerCharacter />
               <EmojiFloat />
             </MapCanvas>
           </div>
 
+          {!modalOpen && <ChatInput />}
           {isTouchDevice && !modalOpen && <TouchDpad />}
 
           {PanelComponent && (

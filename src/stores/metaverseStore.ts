@@ -9,6 +9,13 @@ interface EmojiFloat {
   y: number;
 }
 
+export interface ChatBubble {
+  id: string;
+  userId: string;
+  message: string;
+  timestamp: number;
+}
+
 interface MoveTarget {
   x: number;
   y: number;
@@ -37,6 +44,9 @@ interface MetaverseState {
   currentRoom: RoomId;
   nearPortal: PortalDef | null;
   otherPlayers: Map<string, OtherPlayer>;
+  chatBubbles: Map<string, ChatBubble>;
+  addChatBubble: (bubble: ChatBubble) => void;
+  removeChatBubble: (userId: string) => void;
   setActiveZone: (zone: ZoneId | null) => void;
   setNearZone: (zone: ZoneId | null) => void;
   setPlayerPosition: (pos: { x: number; y: number }) => void;
@@ -62,6 +72,21 @@ export const useMetaverseStore = create<MetaverseState>((set, get) => ({
   currentRoom: 'stock',
   nearPortal: null,
   otherPlayers: new Map(),
+  chatBubbles: new Map(),
+  addChatBubble: (bubble) => {
+    set((s) => {
+      const next = new Map(s.chatBubbles);
+      next.set(bubble.userId, bubble);
+      return { chatBubbles: next };
+    });
+    setTimeout(() => get().removeChatBubble(bubble.userId), 5000);
+  },
+  removeChatBubble: (userId) =>
+    set((s) => {
+      const next = new Map(s.chatBubbles);
+      next.delete(userId);
+      return { chatBubbles: next };
+    }),
   setActiveZone: (zone) => set({ activeZone: zone }),
   setNearZone: (zone) => set({ nearZone: zone }),
   setPlayerPosition: (pos) => set({ playerPosition: pos }),
