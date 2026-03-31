@@ -76,24 +76,7 @@ export default function Zone() {
         );
       })()}
 
-      {/* 프록시미티 힌트: Portal */}
-      {nearPortal && (
-        <div
-          className="absolute z-[90] flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-[5px] text-[12px] font-semibold text-white pointer-events-none animate-[fadeIn_.2s]"
-          style={{
-            left: playerPosition.x + 17,
-            top: playerPosition.y + 58,
-            transform: 'translateX(-50%)',
-            background: 'rgba(248,181,0,.92)',
-            boxShadow: '0 3px 12px rgba(248,181,0,.35)',
-          }}
-        >
-          <span className="rounded bg-white/20 px-[6px] py-[1px] font-mono text-[10px] font-semibold text-white/90">
-            Space
-          </span>
-          {nearPortal.label}
-        </div>
-      )}
+      {/* 프록시미티 힌트: Portal — 자동 이동이므로 힌트 불필요 */}
     </>
   );
 }

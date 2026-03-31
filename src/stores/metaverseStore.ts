@@ -96,7 +96,7 @@ export const useMetaverseStore = create<MetaverseState>((set, get) => ({
       next.set(bubble.userId, bubble);
       return { chatBubbles: next };
     });
-    setTimeout(() => get().removeChatBubble(bubble.userId), 5000);
+    setTimeout(() => get().removeChatBubble(bubble.userId), 15000);
   },
   removeChatBubble: (userId) =>
     set((s) => {

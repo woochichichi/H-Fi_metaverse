@@ -10,7 +10,7 @@ const CHAR_W = 34;
 const CHAR_H = 46;
 
 export default function PlayerCharacter() {
-  const { playerPosition, setPlayerPosition, setNearZone, nearZone, moveTarget, setMoveTarget, currentRoom, setNearPortal, enterRoom } = useMetaverseStore();
+  const { playerPosition, setPlayerPosition, setNearZone, nearZone, nearPortal, moveTarget, setMoveTarget, currentRoom, setNearPortal, enterRoom } = useMetaverseStore();
   const { modalOpen, openModal } = useUiStore();
   const { profile } = useAuthStore();
   const keysRef = useRef<Set<string>>(new Set());
@@ -37,10 +37,7 @@ export default function PlayerCharacter() {
       keysRef.current.add(e.key);
       if (e.key === ' ') {
         e.preventDefault();
-        const portal = useMetaverseStore.getState().nearPortal;
-        if (portal) {
-          enterRoom(portal.targetRoom, portal.spawnPoint);
-        } else if (nearZone) {
+        if (nearZone) {
           openModal(nearZone);
         }
       }
@@ -54,7 +51,13 @@ export default function PlayerCharacter() {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [modalOpen, nearZone, openModal, enterRoom]);
+  }, [modalOpen, nearZone, openModal]);
+
+  // 포탈 근처 → 자동 이동
+  useEffect(() => {
+    if (modalOpen || !nearPortal) return;
+    enterRoom(nearPortal.targetRoom, nearPortal.spawnPoint);
+  }, [nearPortal, modalOpen, enterRoom]);
 
   // Zone + Portal 체크
   const checkZoneAndPortal = useCallback((px: number, py: number) => {
