@@ -76,7 +76,7 @@ export default function GatheringCard({ gathering, joined, onClick }: GatheringC
       </div>
 
       {/* 제목 */}
-      <h3 className="text-sm font-semibold text-text-primary line-clamp-1">{gathering.title}</h3>
+      <h3 className="text-sm font-semibold text-text-primary line-clamp-2">{gathering.title}</h3>
 
       {/* 설명 */}
       <p className="text-xs text-text-muted line-clamp-2">{gathering.description}</p>

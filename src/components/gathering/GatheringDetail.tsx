@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Users, Calendar, Clock, Link2, LogIn, LogOut, Lock } from 'lucide-react';
+import { ArrowLeft, Users, Calendar, Clock, Link2, LogIn, LogOut, Lock, Pencil } from 'lucide-react';
 import { useGatherings } from '../../hooks/useGatherings';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
@@ -13,6 +13,7 @@ interface GatheringDetailProps {
   isAuthor: boolean;
   onClose: () => void;
   onRefresh: () => void;
+  onEdit?: () => void;
 }
 
 type MemberProfile = Pick<Profile, 'id' | 'name' | 'nickname' | 'team' | 'avatar_emoji' | 'avatar_color'>;
@@ -22,7 +23,7 @@ function formatDate(dateStr: string): string {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
-export default function GatheringDetail({ gathering, joined, isAuthor, onClose, onRefresh }: GatheringDetailProps) {
+export default function GatheringDetail({ gathering, joined, isAuthor, onClose, onRefresh, onEdit }: GatheringDetailProps) {
   const { user } = useAuthStore();
   const { addToast } = useUiStore();
   const { joinGathering, leaveGathering, closeGathering, fetchMembers } = useGatherings();
@@ -97,7 +98,16 @@ export default function GatheringDetail({ gathering, joined, isAuthor, onClose, 
         >
           <ArrowLeft size={16} />
         </button>
-        <h2 className="font-heading text-base font-bold text-text-primary truncate flex-1">{gathering.title}</h2>
+        <h2 className="font-heading text-base font-bold text-text-primary truncate flex-1 min-w-0">{gathering.title}</h2>
+        {isAuthor && !isClosed && onEdit && (
+          <button
+            onClick={onEdit}
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-white/[.08] hover:text-text-primary"
+            title="수정"
+          >
+            <Pencil size={14} />
+          </button>
+        )}
         <span
           className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
             gathering.status === 'recruiting'

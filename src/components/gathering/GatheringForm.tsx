@@ -5,23 +5,34 @@ import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
 import { GATHERING_CATEGORIES } from '../../lib/constants';
 import type { GatheringCategory } from '../../lib/constants';
+import type { Gathering } from '../../types';
 
 interface GatheringFormProps {
   onClose: () => void;
   onCreated: () => void;
+  editData?: Gathering;
 }
 
-export default function GatheringForm({ onClose, onCreated }: GatheringFormProps) {
+function toLocalDatetime(iso: string | null): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+export default function GatheringForm({ onClose, onCreated, editData }: GatheringFormProps) {
   const { user } = useAuthStore();
   const { addToast } = useUiStore();
-  const { createGathering } = useGatherings();
+  const { createGathering, updateGathering } = useGatherings();
 
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState<GatheringCategory>('기타');
-  const [maxMembers, setMaxMembers] = useState('');
-  const [contactInfo, setContactInfo] = useState('');
-  const [deadline, setDeadline] = useState('');
+  const isEdit = !!editData;
+
+  const [title, setTitle] = useState(editData?.title ?? '');
+  const [description, setDescription] = useState(editData?.description ?? '');
+  const [category, setCategory] = useState<GatheringCategory>(editData?.category ?? '기타');
+  const [maxMembers, setMaxMembers] = useState(editData?.max_members?.toString() ?? '');
+  const [contactInfo, setContactInfo] = useState(editData?.contact_info ?? '');
+  const [deadline, setDeadline] = useState(toLocalDatetime(editData?.deadline ?? null));
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async () => {
@@ -33,25 +44,41 @@ export default function GatheringForm({ onClose, onCreated }: GatheringFormProps
 
     setSubmitting(true);
     try {
-      const { error } = await createGathering({
-        author_id: user.id,
-        title: title.trim(),
-        description: description.trim(),
-        category,
-        max_members: maxMembers ? parseInt(maxMembers, 10) : null,
-        contact_info: contactInfo.trim() || null,
-        deadline: deadline ? new Date(deadline).toISOString() : null,
-      });
-
-      if (error) {
-        addToast(`등록 실패: ${error}`, 'error');
+      if (isEdit) {
+        const { error } = await updateGathering(editData.id, {
+          title: title.trim(),
+          description: description.trim(),
+          category,
+          max_members: maxMembers ? parseInt(maxMembers, 10) : null,
+          contact_info: contactInfo.trim() || null,
+          deadline: deadline ? new Date(deadline).toISOString() : null,
+        });
+        if (error) {
+          addToast(`수정 실패: ${error}`, 'error');
+        } else {
+          addToast('모임이 수정되었습니다', 'success');
+          onCreated();
+        }
       } else {
-        addToast('모임이 등록되었습니다', 'success');
-        onCreated();
+        const { error } = await createGathering({
+          author_id: user.id,
+          title: title.trim(),
+          description: description.trim(),
+          category,
+          max_members: maxMembers ? parseInt(maxMembers, 10) : null,
+          contact_info: contactInfo.trim() || null,
+          deadline: deadline ? new Date(deadline).toISOString() : null,
+        });
+        if (error) {
+          addToast(`등록 실패: ${error}`, 'error');
+        } else {
+          addToast('모임이 등록되었습니다', 'success');
+          onCreated();
+        }
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : '알 수 없는 오류';
-      addToast(`등록 실패: ${msg}`, 'error');
+      addToast(`${isEdit ? '수정' : '등록'} 실패: ${msg}`, 'error');
     } finally {
       setSubmitting(false);
     }
@@ -67,7 +94,7 @@ export default function GatheringForm({ onClose, onCreated }: GatheringFormProps
         >
           <ArrowLeft size={16} />
         </button>
-        <h2 className="font-heading text-base font-bold text-text-primary">새 모임 만들기</h2>
+        <h2 className="font-heading text-base font-bold text-text-primary">{isEdit ? '모임 수정' : '새 모임 만들기'}</h2>
       </div>
 
       {/* 폼 */}
@@ -161,7 +188,7 @@ export default function GatheringForm({ onClose, onCreated }: GatheringFormProps
           disabled={submitting || !title.trim() || !description.trim()}
           className="w-full rounded-lg bg-accent py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent/80 disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          {submitting ? '등록 중...' : '모임 등록'}
+          {submitting ? (isEdit ? '수정 중...' : '등록 중...') : (isEdit ? '수정 완료' : '모임 등록')}
         </button>
       </div>
     </div>

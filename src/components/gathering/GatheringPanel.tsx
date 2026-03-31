@@ -9,7 +9,7 @@ import { GATHERING_CATEGORIES, GATHERING_STATUSES, GATHERING_STATUS_LABELS } fro
 import type { GatheringCategory, GatheringStatus } from '../../lib/constants';
 import type { Gathering } from '../../types';
 
-type ViewMode = 'list' | 'form' | 'detail';
+type ViewMode = 'list' | 'form' | 'detail' | 'edit';
 
 interface GatheringPanelProps {
   onClose?: () => void;
@@ -73,6 +73,16 @@ export default function GatheringPanel({ onClose }: GatheringPanelProps) {
     return <GatheringForm onClose={() => setView('list')} onCreated={handleCreated} />;
   }
 
+  if (view === 'edit' && selected) {
+    return (
+      <GatheringForm
+        onClose={() => setView('detail')}
+        onCreated={() => { handleRefresh(); setView('detail'); }}
+        editData={selected}
+      />
+    );
+  }
+
   if (view === 'detail' && selected) {
     // 최신 데이터 반영
     const latest = gatherings.find((g) => g.id === selected.id) ?? selected;
@@ -83,6 +93,7 @@ export default function GatheringPanel({ onClose }: GatheringPanelProps) {
         isAuthor={latest.author_id === user?.id}
         onClose={() => { setView('list'); setSelected(null); }}
         onRefresh={handleRefresh}
+        onEdit={() => { setSelected(latest); setView('edit'); }}
       />
     );
   }

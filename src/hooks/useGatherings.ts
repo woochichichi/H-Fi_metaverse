@@ -79,6 +79,38 @@ export function useGatherings() {
     []
   );
 
+  const updateGathering = useCallback(
+    async (
+      id: string,
+      updates: {
+        title?: string;
+        description?: string;
+        category?: GatheringCategory;
+        max_members?: number | null;
+        contact_info?: string | null;
+        deadline?: string | null;
+      },
+    ) => {
+      const { data, error: updateError } = await supabase
+        .from('gatherings')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (updateError) {
+        console.error('모임 수정 실패:', updateError.message);
+        return { data: null, error: updateError.message };
+      }
+
+      setGatherings((prev) =>
+        prev.map((g) => (g.id === id ? { ...g, ...data } : g))
+      );
+      return { data: data as Gathering, error: null };
+    },
+    []
+  );
+
   const closeGathering = useCallback(async (id: string) => {
     const { error: updateError } = await supabase
       .from('gatherings')
@@ -278,6 +310,7 @@ export function useGatherings() {
     error,
     fetchGatherings,
     createGathering,
+    updateGathering,
     closeGathering,
     joinGathering,
     leaveGathering,
