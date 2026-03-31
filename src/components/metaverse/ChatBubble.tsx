@@ -20,33 +20,53 @@ export default function ChatBubble() {
         return (
           <div
             key={bubble.id}
-            className="absolute z-[60] pointer-events-none whitespace-nowrap"
+            className="absolute z-[60] pointer-events-none"
             style={{
               left: x + 17,
-              top: y - 48,
+              top: y - 56,
               transform: 'translateX(-50%)',
-              animation: 'bubbleFadeIn .2s ease-out',
             }}
           >
+            {/* 구름형 말풍선 */}
             <div
-              className="relative rounded-xl px-[10px] py-[5px] text-[10px] font-medium text-gray-700"
+              className="relative max-w-[200px] px-[12px] py-[6px] text-[10px] font-medium text-gray-700"
               style={{
                 background: '#fff',
-                boxShadow: '0 4px 16px rgba(0,0,0,.15)',
+                borderRadius: '18px 18px 18px 4px',
+                boxShadow: '0 2px 12px rgba(0,0,0,.12), 0 1px 3px rgba(0,0,0,.08)',
+                border: '1px solid rgba(0,0,0,.06)',
+                wordBreak: 'break-word',
               }}
             >
               {bubble.message}
-              {/* 삼각형 꼬리 */}
-              <div
-                className="absolute left-1/2 -translate-x-1/2"
-                style={{
-                  bottom: -5,
-                  borderLeft: '5px solid transparent',
-                  borderRight: '5px solid transparent',
-                  borderTop: '6px solid #fff',
-                }}
-              />
             </div>
+            {/* 구름 꼬리 — 동그란 원 2개 */}
+            <div
+              className="absolute"
+              style={{
+                left: 14,
+                bottom: -6,
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: '#fff',
+                boxShadow: '0 1px 3px rgba(0,0,0,.1)',
+                border: '1px solid rgba(0,0,0,.06)',
+              }}
+            />
+            <div
+              className="absolute"
+              style={{
+                left: 8,
+                bottom: -12,
+                width: 5,
+                height: 5,
+                borderRadius: '50%',
+                background: '#fff',
+                boxShadow: '0 1px 2px rgba(0,0,0,.08)',
+                border: '1px solid rgba(0,0,0,.06)',
+              }}
+            />
           </div>
         );
       })}

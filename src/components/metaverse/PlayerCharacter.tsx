@@ -35,7 +35,7 @@ export default function PlayerCharacter() {
       if (modalOpen) return;
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       keysRef.current.add(e.key);
-      if (e.key === ' ' || e.key === 'Enter') {
+      if (e.key === ' ') {
         e.preventDefault();
         const portal = useMetaverseStore.getState().nearPortal;
         if (portal) {
