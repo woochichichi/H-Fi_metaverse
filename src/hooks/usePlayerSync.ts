@@ -188,6 +188,7 @@ export default function usePlayerSync() {
       useMetaverseStore.getState().addChatBubble({
         id: crypto.randomUUID(),
         userId: payload.userId,
+        name: payload.name || '???',
         message: payload.message,
         team: payload.team || '',
         timestamp: payload.timestamp,

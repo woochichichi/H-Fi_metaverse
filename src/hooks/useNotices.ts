@@ -201,6 +201,24 @@ export function useNotices() {
     return (totalCount ?? 0) - (readCount ?? 0);
   }, []);
 
+  const deleteNotice = useCallback(async (id: string) => {
+    // 관련 읽음 기록 먼저 삭제
+    await supabase.from('notice_reads').delete().eq('notice_id', id);
+
+    const { error: deleteError } = await supabase
+      .from('notices')
+      .delete()
+      .eq('id', id);
+
+    if (deleteError) {
+      console.error('공지 삭제 실패:', deleteError.message);
+      return { error: deleteError.message };
+    }
+
+    setNotices((prev) => prev.filter((n) => n.id !== id));
+    return { error: null };
+  }, []);
+
   return {
     notices,
     loading,
@@ -212,5 +230,6 @@ export function useNotices() {
     markAsRead,
     fetchReadStatus,
     fetchUnreadCount,
+    deleteNotice,
   };
 }

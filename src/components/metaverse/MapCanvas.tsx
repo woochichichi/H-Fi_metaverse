@@ -348,22 +348,6 @@ function PixelRoundTable({ x, y, size = 72 }: { x: number; y: number; size?: num
   );
 }
 
-// 벽시계
-function PixelWallClock({ x, y }: { x: number; y: number }) {
-  return (
-    <div className="absolute z-[6]" style={{ left: x, top: y }}>
-      <svg width="28" height="28" viewBox="0 0 7 7" style={{ imageRendering: 'pixelated' }}>
-        <circle cx="3.5" cy="3.5" r="3" fill="#F5F5F0" stroke="#666" strokeWidth="0.5" />
-        <circle cx="3.5" cy="3.5" r="0.5" fill="#333" />
-        {/* 시침 */}
-        <rect x="3.25" y="1.5" width="0.5" height="2" fill="#333" />
-        {/* 분침 */}
-        <rect x="3.5" y="2" width="2" height="0.4" fill="#333" />
-      </svg>
-    </div>
-  );
-}
-
 // ═══ 반응속도방 전용 스프라이트 ═══
 
 // 아케이드 캐비넷
@@ -912,17 +896,25 @@ const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme }: 
       <PixelTeamDeco x={800} y={470} type={decoType} />
       <PixelTeamDeco x={280} y={340} type={decoType} />
 
-      {/* ═══ 로비 Zone (60,60 ~ 560,400) — 편안한 휴식 공간 ═══ */}
-      <PixelSofa90s x={100} y={120} color={teamColor} />
-      <PixelSofa90s x={300} y={120} color={teamColor} />
-      <PixelSofa90s x={100} y={240} color={teamColor} />
-      <PixelRoundTable x={240} y={180} size={72} />
-      <PixelRoundTable x={400} y={180} size={72} />
-      <PixelWaterCooler x={80} y={80} />
-      <PixelCorkboard x={160} y={72} />
+      {/* ═══ 로비 Zone (60,60 ~ 560,400) — 활기찬 라운지 ═══ */}
+      {/* 네온 환영 사인 */}
+      <PixelNeonSign x={200} y={68} text="WELCOME!" color={teamColor} />
+      {/* 편안한 소파 + 라운드 테이블 */}
+      <PixelSofa90s x={100} y={130} color={teamColor} />
+      <PixelSofa90s x={300} y={130} color={teamColor} />
+      <PixelRoundTable x={240} y={200} size={72} />
+      <PixelBeerSet x={250} y={180} />
+      {/* 미니 아케이드 코너 */}
+      <PixelArcade x={470} y={110} accent={teamColor} />
+      <PixelGuitar x={80} y={240} />
+      <PixelBasketball x={160} y={310} />
+      {/* 자판기 + 간식 */}
+      <PixelVending90s x={440} y={230} />
+      <PixelDumbbell x={80} y={340} />
+      {/* 분위기 식물 */}
       <PixelPlant90s x={480} y={80} />
-      <PixelPlant90s x={70} y={320} size="small" />
-      <PixelWallClock x={350} y={70} />
+      <PixelPlant90s x={70} y={80} size="small" />
+      <PixelPlant90s x={380} y={340} size="small" />
 
       {/* ═══ KPI Zone (640,60 ~ 1140,400) — 업무 공간 ═══ */}
       <PixelPartition x={660} y={80} w={100} />
@@ -949,20 +941,26 @@ const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme }: 
       <PixelCopier x={1060} y={320} />
       <PixelPlant90s x={640} y={340} size="small" />
 
-      {/* ═══ 공지 Zone (350,460 ~ 850,760) — 열람 공간 ═══ */}
-      <PixelCorkboard x={380} y={480} />
-      <PixelCorkboard x={560} y={480} />
-      <PixelWhiteboard x={400} y={560} w={140} />
-      <PixelFileCabinet x={370} y={600} />
-      <PixelFileCabinet x={370} y={680} />
-      {/* 열람 벤치 */}
-      <PixelSofa90s x={540} y={620} color="#666" />
-      <PixelSofa90s x={540} y={690} color="#666" />
-      <PixelRoundTable x={700} y={600} size={60} />
-      <PixelChair90s x={720} y={670} />
-      <PixelChair90s x={770} y={620} />
-      <PixelPlant90s x={820} y={480} />
-      <PixelPlant90s x={360} y={740} size="small" />
+      {/* ═══ 공지 Zone (350,460 ~ 850,760) — 뉴스 카페 ═══ */}
+      {/* 네온 뉴스 사인 */}
+      <PixelNeonSign x={530} y={468} text="NEWS!" color="#FFD93D" />
+      {/* 컬러풀 게시판 갤러리 */}
+      <PixelCorkboard x={380} y={490} />
+      <PixelCorkboard x={560} y={490} />
+      <PixelCorkboard x={740} y={490} />
+      {/* 카페 스타일 라운지 */}
+      <PixelSofa90s x={400} y={620} color={teamColor} />
+      <PixelSofa90s x={600} y={620} color={teamColor} />
+      <PixelRoundTable x={540} y={690} size={60} />
+      <PixelBeerSet x={550} y={670} />
+      {/* 화이트보드 (아이디어 낙서) */}
+      <PixelWhiteboard x={380} y={560} w={140} />
+      {/* 분위기 */}
+      <PixelVending90s x={790} y={600} />
+      <PixelGuitar x={780} y={710} />
+      <PixelPlant90s x={820} y={490} />
+      <PixelPlant90s x={360} y={720} size="small" />
+      <PixelPlant90s x={830} y={720} size="small" />
     </>
   );
 });
@@ -971,54 +969,61 @@ const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme }: 
 const PlazaFurniture = memo(function PlazaFurniture() {
   return (
     <>
-      {/* ═══ VOC Zone (60,60 ~ 720,440) — 접수 공간 ═══ */}
-      {/* L자형 접수 데스크 */}
+      {/* ═══ VOC Zone (60,60 ~ 720,440) — 소통 라운지 ═══ */}
+      {/* 네온 사인 */}
+      <PixelNeonSign x={300} y={68} text="VOICE!" color="#FF6B9D" />
+      {/* 접수 데스크 (컴팩트) */}
       <PixelDesk90s x={120} y={140} />
       <PixelDesk90s x={240} y={140} />
-      <PixelDesk90s x={360} y={140} />
       <PixelCRT x={150} y={110} />
       <PixelCRT x={270} y={110} />
-      <PixelCRT x={390} y={110} />
       <PixelChair90s x={160} y={220} />
       <PixelChair90s x={280} y={220} />
-      <PixelChair90s x={400} y={220} />
-      {/* 하단 열 */}
-      <PixelDesk90s x={120} y={290} />
-      <PixelDesk90s x={240} y={290} />
-      <PixelCRT x={150} y={260} />
-      <PixelCRT x={270} y={260} />
-      <PixelChair90s x={160} y={370} />
-      <PixelChair90s x={280} y={370} />
-      <PixelFileCabinet x={530} y={120} />
-      <PixelFileCabinet x={530} y={220} />
-      <PixelFileCabinet x={530} y={320} />
-      <PixelWhiteboard x={100} y={80} w={160} />
-      <PixelPartition x={500} y={100} w={80} />
-      <PixelCopier x={600} y={140} />
+      {/* 편안한 상담 라운지 */}
+      <PixelSofa90s x={100} y={300} color="#FF6B9D" />
+      <PixelSofa90s x={300} y={300} color="#6C5CE7" />
+      <PixelRoundTable x={240} y={370} size={60} />
+      <PixelBeerSet x={250} y={350} />
+      {/* 오른쪽 편의시설 */}
+      <PixelWhiteboard x={100} y={80} w={140} />
+      <PixelCorkboard x={500} y={100} />
+      <PixelVending90s x={600} y={140} />
+      <PixelArcade x={600} y={290} accent="#FF6B9D" />
+      <PixelWaterCooler x={500} y={300} />
+      {/* 분위기 */}
       <PixelPlant90s x={80} y={80} />
-      <PixelPlant90s x={620} y={340} size="small" />
-      <PixelWaterCooler x={660} y={120} />
+      <PixelPlant90s x={660} y={380} size="small" />
+      <PixelPlant90s x={500} y={380} size="small" />
+      <PixelBasketball x={660} y={100} />
 
-      {/* ═══ 아이디어 Zone (860,60 ~ 1520,440) — 브레인스토밍 ═══ */}
-      <PixelRoundTable x={920} y={140} size={80} />
-      <PixelRoundTable x={1100} y={140} size={80} />
-      <PixelRoundTable x={920} y={300} size={80} />
-      <PixelRoundTable x={1100} y={300} size={80} />
-      <PixelChair90s x={900} y={230} />
-      <PixelChair90s x={1000} y={180} />
-      <PixelChair90s x={1080} y={230} />
-      <PixelChair90s x={1180} y={180} />
-      <PixelChair90s x={900} y={380} />
-      <PixelChair90s x={1000} y={340} />
-      <PixelChair90s x={1080} y={380} />
-      <PixelChair90s x={1180} y={340} />
-      <PixelWhiteboard x={920} y={80} w={180} />
-      <PixelWhiteboard x={1200} y={80} w={140} />
-      <PixelCorkboard x={1350} y={140} />
-      <PixelCorkboard x={1350} y={260} />
-      <PixelPlant90s x={880} y={80} />
+      {/* ═══ 아이디어 Zone (860,60 ~ 1520,440) — 크리에이티브 스튜디오 ═══ */}
+      {/* 네온 사인 */}
+      <PixelNeonSign x={1050} y={68} text="IDEA!" color="#FFD93D" />
+      <PixelNeonSign x={1300} y={68} text="WOW!" color="#4ECDC4" />
+      {/* 브레인스토밍 테이블 */}
+      <PixelRoundTable x={920} y={160} size={80} />
+      <PixelRoundTable x={1100} y={160} size={80} />
+      <PixelRoundTable x={1020} y={310} size={80} />
+      <PixelChair90s x={900} y={240} />
+      <PixelChair90s x={1000} y={200} />
+      <PixelChair90s x={1080} y={240} />
+      <PixelChair90s x={1180} y={200} />
+      <PixelChair90s x={1000} y={380} />
+      <PixelChair90s x={1100} y={360} />
+      {/* 아이디어 벽 — 게시판 + 화이트보드 */}
+      <PixelWhiteboard x={880} y={80} w={140} />
+      <PixelCorkboard x={1350} y={120} />
+      <PixelCorkboard x={1350} y={250} />
+      {/* 영감 코너 */}
+      <PixelGuitar x={1400} y={360} />
+      <PixelArcade x={860} y={300} accent="#FFD93D" />
+      <PixelBeerSet x={1030} y={290} />
+      {/* 편의 + 분위기 */}
+      <PixelSofa90s x={1200} y={340} color="#F8B500" />
+      <PixelVending90s x={860} y={140} />
       <PixelPlant90s x={1440} y={80} />
       <PixelPlant90s x={1440} y={380} size="small" />
+      <PixelPlant90s x={860} y={380} size="small" />
 
       {/* ═══ 모임방 Zone (60,520 ~ 520,820) — 취미/사교 공간 ═══ */}
       {/* 피크닉 테이블 2개 */}

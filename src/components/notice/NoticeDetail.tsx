@@ -1,24 +1,33 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Paperclip, Users } from 'lucide-react';
+import { ArrowLeft, Paperclip, Users, Trash2 } from 'lucide-react';
 import UrgencyBadge from '../common/UrgencyBadge';
+import ConfirmDialog from '../common/ConfirmDialog';
 import { useNotices } from '../../hooks/useNotices';
 import { useAuthStore } from '../../stores/authStore';
+import { useUiStore } from '../../stores/uiStore';
 import { formatRelativeTime, getDisplayName } from '../../lib/utils';
 import type { Notice, Profile } from '../../types';
 
 interface NoticeDetailProps {
   notice: Notice;
   onBack: () => void;
+  onDeleted?: () => void;
 }
 
-export default function NoticeDetail({ notice, onBack }: NoticeDetailProps) {
+export default function NoticeDetail({ notice, onBack, onDeleted }: NoticeDetailProps) {
   const { profile, user } = useAuthStore();
-  const { markAsRead, fetchReadStatus } = useNotices();
+  const { markAsRead, fetchReadStatus, deleteNotice } = useNotices();
+  const { addToast } = useUiStore();
 
   const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
+  const isAdmin = profile?.role === 'admin' || profile?.role === 'director';
+  const isAuthor = notice.author_id === profile?.id;
+  const canDelete = isAdmin || isAuthor;
   const [readers, setReaders] = useState<Profile[]>([]);
   const [readTotal, setReadTotal] = useState(0);
   const [showReaders, setShowReaders] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // 열리면 자동으로 읽음 처리
   useEffect(() => {
@@ -37,6 +46,20 @@ export default function NoticeDetail({ notice, onBack }: NoticeDetailProps) {
     }
   }, [isLeader, notice.id, fetchReadStatus]);
 
+  const handleDelete = async () => {
+    if (deleting) return;
+    setDeleting(true);
+    const { error } = await deleteNotice(notice.id);
+    setDeleting(false);
+    setShowDeleteConfirm(false);
+    if (error) {
+      addToast(`삭제 실패: ${error}`, 'error');
+      return;
+    }
+    addToast('공지가 삭제되었습니다', 'success');
+    onDeleted?.();
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* 헤더 */}
@@ -50,6 +73,16 @@ export default function NoticeDetail({ notice, onBack }: NoticeDetailProps) {
         <h2 className="flex-1 font-heading text-base font-bold text-text-primary truncate">
           공지 상세
         </h2>
+        {canDelete && (
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            disabled={deleting}
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-danger/20 hover:text-danger disabled:opacity-40"
+            title="삭제"
+          >
+            <Trash2 size={15} />
+          </button>
+        )}
         <UrgencyBadge urgency={notice.urgency} size="md" />
       </div>
 
@@ -132,6 +165,16 @@ export default function NoticeDetail({ notice, onBack }: NoticeDetailProps) {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        title="공지 삭제"
+        message="이 공지를 삭제하시겠습니까? 삭제 후 복구할 수 없습니다."
+        confirmLabel="삭제"
+        danger
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </div>
   );
 }

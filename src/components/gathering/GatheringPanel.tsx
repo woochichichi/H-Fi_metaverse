@@ -98,6 +98,7 @@ export default function GatheringPanel({ onClose }: GatheringPanelProps) {
         onClose={() => { setView('list'); setSelected(null); }}
         onRefresh={handleRefresh}
         onEdit={() => { setSelected(latest); setView('edit'); }}
+        onDeleted={() => { setView('list'); setSelected(null); handleRefresh(); }}
       />
     );
   }

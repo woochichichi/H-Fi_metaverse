@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Users, Calendar, Clock, Link2, LogIn, LogOut, Lock, Pencil } from 'lucide-react';
+import { ArrowLeft, Users, Calendar, Clock, Link2, LogIn, LogOut, Lock, Pencil, Trash2 } from 'lucide-react';
+import ConfirmDialog from '../common/ConfirmDialog';
 import { useGatherings } from '../../hooks/useGatherings';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
@@ -14,6 +15,7 @@ interface GatheringDetailProps {
   onClose: () => void;
   onRefresh: () => void;
   onEdit?: () => void;
+  onDeleted?: () => void;
 }
 
 type MemberProfile = Pick<Profile, 'id' | 'name' | 'nickname' | 'team' | 'avatar_emoji' | 'avatar_color'>;
@@ -23,14 +25,19 @@ function formatDate(dateStr: string): string {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
-export default function GatheringDetail({ gathering, joined, isAuthor, onClose, onRefresh, onEdit }: GatheringDetailProps) {
-  const { user } = useAuthStore();
+export default function GatheringDetail({ gathering, joined, isAuthor, onClose, onRefresh, onEdit, onDeleted }: GatheringDetailProps) {
+  const { user, profile } = useAuthStore();
   const { addToast } = useUiStore();
-  const { joinGathering, leaveGathering, closeGathering, fetchMembers } = useGatherings();
+  const { joinGathering, leaveGathering, closeGathering, fetchMembers, deleteGathering } = useGatherings();
 
   const [members, setMembers] = useState<MemberProfile[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [acting, setActing] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const isAdmin = profile?.role === 'admin' || profile?.role === 'director';
+  const canDelete = isAdmin || isAuthor;
 
   const isDeadlinePassed = gathering.deadline ? new Date(gathering.deadline) < new Date() : false;
   const isClosed = gathering.status !== 'recruiting' || isDeadlinePassed;
@@ -73,6 +80,20 @@ export default function GatheringDetail({ gathering, joined, isAuthor, onClose, 
     }
   };
 
+  const handleDelete = async () => {
+    if (deleting) return;
+    setDeleting(true);
+    const { error } = await deleteGathering(gathering.id);
+    setDeleting(false);
+    setShowDeleteConfirm(false);
+    if (error) {
+      addToast(`삭제 실패: ${error}`, 'error');
+      return;
+    }
+    addToast('모임이 삭제되었습니다', 'success');
+    onDeleted?.();
+  };
+
   const handleClose = async () => {
     setActing(true);
     const { error } = await closeGathering(gathering.id);
@@ -106,6 +127,16 @@ export default function GatheringDetail({ gathering, joined, isAuthor, onClose, 
             title="수정"
           >
             <Pencil size={14} />
+          </button>
+        )}
+        {canDelete && (
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            disabled={deleting}
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-danger/20 hover:text-danger disabled:opacity-40"
+            title="삭제"
+          >
+            <Trash2 size={15} />
           </button>
         )}
         <span
@@ -249,6 +280,16 @@ export default function GatheringDetail({ gathering, joined, isAuthor, onClose, 
           </button>
         )}
       </div>
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        title="모임 삭제"
+        message="이 모임을 삭제하시겠습니까? 참여자 정보와 댓글도 함께 삭제됩니다."
+        confirmLabel="삭제"
+        danger
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </div>
   );
 }

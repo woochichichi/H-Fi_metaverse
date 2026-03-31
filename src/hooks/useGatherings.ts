@@ -306,6 +306,25 @@ export function useGatherings() {
     return { error: null };
   }, []);
 
+  const deleteGathering = useCallback(async (id: string) => {
+    // 관련 참여자·댓글 먼저 삭제
+    await supabase.from('gathering_members').delete().eq('gathering_id', id);
+    await supabase.from('gathering_comments').delete().eq('gathering_id', id);
+
+    const { error: deleteError } = await supabase
+      .from('gatherings')
+      .delete()
+      .eq('id', id);
+
+    if (deleteError) {
+      console.error('모임 삭제 실패:', deleteError.message);
+      return { error: deleteError.message };
+    }
+
+    setGatherings((prev) => prev.filter((g) => g.id !== id));
+    return { error: null };
+  }, []);
+
   return {
     gatherings,
     loading,
@@ -321,5 +340,6 @@ export function useGatherings() {
     fetchComments,
     addComment,
     deleteComment,
+    deleteGathering,
   };
 }

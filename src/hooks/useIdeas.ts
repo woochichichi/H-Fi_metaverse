@@ -316,6 +316,25 @@ export function useIdeas() {
     return counts;
   }, []);
 
+  const deleteIdea = useCallback(async (id: string) => {
+    // 관련 투표·댓글 먼저 삭제
+    await supabase.from('idea_votes').delete().eq('idea_id', id);
+    await supabase.from('idea_comments').delete().eq('idea_id', id);
+
+    const { error: deleteError } = await supabase
+      .from('ideas')
+      .delete()
+      .eq('id', id);
+
+    if (deleteError) {
+      console.error('아이디어 삭제 실패:', deleteError.message);
+      return { error: deleteError.message };
+    }
+
+    setIdeas((prev) => prev.filter((i) => i.id !== id));
+    return { error: null };
+  }, []);
+
   return {
     ideas,
     loading,
@@ -328,6 +347,7 @@ export function useIdeas() {
     fetchIdeaComments,
     addIdeaComment,
     deleteIdeaComment,
+    deleteIdea,
     fetchCommentCounts,
   };
 }

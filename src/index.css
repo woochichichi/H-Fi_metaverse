@@ -147,6 +147,10 @@ svg *, svg {
   background: var(--color-bg-hover);
 }
 
+/* 스크롤바 숨김 유틸 */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
 /* ═══ 버튼/인풋 레트로 스타일 ═══ */
 button {
   border: 2px solid transparent;

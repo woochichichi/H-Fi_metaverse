@@ -69,7 +69,7 @@ export default function NoticePanel({ onClose }: NoticePanelProps) {
   }
 
   if (view === 'detail' && selectedNotice) {
-    return <NoticeDetail notice={selectedNotice} onBack={handleBack} />;
+    return <NoticeDetail notice={selectedNotice} onBack={handleBack} onDeleted={handleBack} />;
   }
 
   const URGENCY_CHIPS: { value: UrgencyLevel | null; label: string }[] = [

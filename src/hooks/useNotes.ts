@@ -178,6 +178,24 @@ export function useNotes() {
     return tokens[noteId] === noteSessionToken;
   }, []);
 
+  const deleteNote = useCallback(async (id: string) => {
+    // 관련 대화 스레드 먼저 삭제
+    await supabase.from('message_threads').delete().eq('ref_id', id).eq('ref_type', 'note');
+
+    const { error: deleteError } = await supabase
+      .from('anonymous_notes')
+      .delete()
+      .eq('id', id);
+
+    if (deleteError) {
+      console.error('쪽지 삭제 실패:', deleteError.message);
+      return { error: deleteError.message };
+    }
+
+    setNotes((prev) => prev.filter((n) => n.id !== id));
+    return { error: null };
+  }, []);
+
   return {
     notes,
     loading,
@@ -187,6 +205,7 @@ export function useNotes() {
     createNote,
     updateNoteStatus,
     isAnonymousAuthor,
+    deleteNote,
   };
 }
 

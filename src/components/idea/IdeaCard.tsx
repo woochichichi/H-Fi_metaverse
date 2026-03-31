@@ -1,6 +1,9 @@
 import { useState } from 'react';
-import { Heart, User, Clock, MessageCircle } from 'lucide-react';
+import { Heart, User, Clock, MessageCircle, Trash2 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
+import { useUiStore } from '../../stores/uiStore';
+import { useIdeas } from '../../hooks/useIdeas';
+import ConfirmDialog from '../common/ConfirmDialog';
 import { IDEA_STATUSES } from '../../lib/constants';
 import { formatRelativeTime } from '../../lib/utils';
 import IdeaComments from './IdeaComments';
@@ -27,14 +30,22 @@ interface IdeaCardProps {
   idea: IdeaWithVotes & { _voted?: boolean; _commentCount?: number };
   onVote: (ideaId: string) => void;
   onStatusChange?: (ideaId: string, status: IdeaStatus) => void;
+  onDeleted?: () => void;
 }
 
-export default function IdeaCard({ idea, onVote, onStatusChange }: IdeaCardProps) {
+export default function IdeaCard({ idea, onVote, onStatusChange, onDeleted }: IdeaCardProps) {
   const { profile } = useAuthStore();
+  const { addToast } = useUiStore();
+  const { deleteIdea } = useIdeas();
   const [animating, setAnimating] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
+  const isAdmin = profile?.role === 'admin' || profile?.role === 'director';
+  const isAuthor = idea.author_id === profile?.id;
+  const canDelete = isAdmin || isAuthor;
   const catConfig = CATEGORY_CONFIG[idea.category ?? '기타'];
   const statusConfig = STATUS_CONFIG[idea.status];
 
@@ -49,6 +60,20 @@ export default function IdeaCard({ idea, onVote, onStatusChange }: IdeaCardProps
     e.stopPropagation();
     const newStatus = e.target.value as IdeaStatus;
     onStatusChange?.(idea.id, newStatus);
+  };
+
+  const handleDelete = async () => {
+    if (deleting) return;
+    setDeleting(true);
+    const { error } = await deleteIdea(idea.id);
+    setDeleting(false);
+    setShowDeleteConfirm(false);
+    if (error) {
+      addToast(`삭제 실패: ${error}`, 'error');
+      return;
+    }
+    addToast('아이디어가 삭제되었습니다', 'success');
+    onDeleted?.();
   };
 
   return (
@@ -122,8 +147,32 @@ export default function IdeaCard({ idea, onVote, onStatusChange }: IdeaCardProps
         </button>
       </div>
 
+      {/* 삭제 (펼침 시 + 본인/관리자) */}
+      {expanded && canDelete && (
+        <div className="flex justify-end pt-1 border-t border-white/[.06]">
+          <button
+            onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(true); }}
+            disabled={deleting}
+            className="flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] text-text-muted transition-colors hover:bg-danger/20 hover:text-danger disabled:opacity-40"
+          >
+            <Trash2 size={12} />
+            삭제
+          </button>
+        </div>
+      )}
+
       {/* 댓글 (펼침 시) */}
       {expanded && <IdeaComments ideaId={idea.id} />}
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        title="아이디어 삭제"
+        message="이 아이디어를 삭제하시겠습니까? 삭제 후 복구할 수 없습니다."
+        confirmLabel="삭제"
+        danger
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </div>
   );
 }

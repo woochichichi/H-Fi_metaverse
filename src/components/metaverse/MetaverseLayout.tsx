@@ -6,6 +6,7 @@ import OtherPlayers from './OtherPlayers';
 import Zone from './Zone';
 import ChatBubble from './ChatBubble';
 import ChatInput from './ChatInput';
+import ChatLog from './ChatLog';
 import EmojiFloat from './EmojiFloat';
 import BottomBar from './BottomBar';
 import TouchDpad from './TouchDpad';
@@ -159,6 +160,7 @@ export default function MetaverseLayout() {
             </MapCanvas>
           </div>
 
+          {!modalOpen && <ChatLog />}
           {!modalOpen && <ChatInput />}
           {isTouchDevice && !modalOpen && <TouchDpad />}
 

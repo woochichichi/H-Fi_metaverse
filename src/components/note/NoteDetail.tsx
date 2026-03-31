@@ -1,5 +1,7 @@
-import { ArrowLeft, EyeOff, User } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowLeft, EyeOff, User, Trash2 } from 'lucide-react';
 import ThreadPanel from '../thread/ThreadPanel';
+import ConfirmDialog from '../common/ConfirmDialog';
 import { useNotes } from '../../hooks/useNotes';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
@@ -17,17 +19,23 @@ interface NoteDetailProps {
   note: AnonymousNote;
   onBack: () => void;
   onUpdated: (note: AnonymousNote) => void;
+  onDeleted?: () => void;
 }
 
-export default function NoteDetail({ note, onBack, onUpdated }: NoteDetailProps) {
+export default function NoteDetail({ note, onBack, onUpdated, onDeleted }: NoteDetailProps) {
   const { profile } = useAuthStore();
-  const { updateNoteStatus, isAnonymousAuthor } = useNotes();
+  const { updateNoteStatus, isAnonymousAuthor, deleteNote } = useNotes();
   const { addToast } = useUiStore();
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
   const isRecipient = note.recipient_id === profile?.id;
+  const isAdmin = profile?.role === 'admin' || profile?.role === 'director';
   const canReplyAsAuthor = note.anonymous
     ? isAnonymousAuthor(note.id, note.session_token)
     : note.sender_id === profile?.id;
+  const canDelete = isAdmin || canReplyAsAuthor;
 
   const statusConfig = STATUS_CONFIG[note.status] ?? STATUS_CONFIG['미읽음'];
 

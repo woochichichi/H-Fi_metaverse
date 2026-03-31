@@ -211,6 +211,7 @@ export default function IdeaPanel({ onClose }: IdeaPanelProps) {
                 idea={{ ...idea, _commentCount: commentCounts.get(idea.id) ?? 0 }}
                 onVote={handleVote}
                 onStatusChange={profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader' ? handleStatusChange : undefined}
+                onDeleted={loadIdeas}
               />
             ))}
             <LoadMore current={Math.min(displayCount, ideas.length)} total={ideas.length} onLoadMore={() => setDisplayCount((c) => c + 20)} />

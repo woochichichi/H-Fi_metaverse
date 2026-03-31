@@ -12,6 +12,15 @@ interface EmojiFloat {
 export interface ChatBubble {
   id: string;
   userId: string;
+  name?: string;
+  message: string;
+  team?: string;
+  timestamp: number;
+}
+
+export interface ChatLogEntry {
+  id: string;
+  name: string;
   message: string;
   team?: string;
   timestamp: number;
@@ -60,6 +69,7 @@ interface MetaverseState {
   nearPortal: PortalDef | null;
   otherPlayers: Map<string, OtherPlayer>;
   chatBubbles: Map<string, ChatBubble>;
+  chatLog: ChatLogEntry[];
   addChatBubble: (bubble: ChatBubble) => void;
   removeChatBubble: (userId: string) => void;
   setActiveZone: (zone: ZoneId | null) => void;
@@ -90,13 +100,34 @@ export const useMetaverseStore = create<MetaverseState>((set, get) => ({
   nearPortal: null,
   otherPlayers: new Map(),
   chatBubbles: new Map(),
+  chatLog: [],
+  _bubbleTimers: new Map<string, ReturnType<typeof setTimeout>>(),
   addChatBubble: (bubble) => {
+    const store = get() as any;
+    // 같은 유저의 이전 타이머 취소
+    const prevTimer = store._bubbleTimers.get(bubble.userId);
+    if (prevTimer) clearTimeout(prevTimer);
+
     set((s) => {
       const next = new Map(s.chatBubbles);
       next.set(bubble.userId, bubble);
-      return { chatBubbles: next };
+      // 채팅 로그에 추가 (최대 50개 유지)
+      const logEntry: ChatLogEntry = {
+        id: bubble.id,
+        name: bubble.name || '???',
+        message: bubble.message,
+        team: bubble.team,
+        timestamp: bubble.timestamp,
+      };
+      const newLog = [...s.chatLog, logEntry].slice(-50);
+      return { chatBubbles: next, chatLog: newLog };
     });
-    setTimeout(() => get().removeChatBubble(bubble.userId), 15000);
+
+    const timer = setTimeout(() => {
+      (get() as any)._bubbleTimers.delete(bubble.userId);
+      get().removeChatBubble(bubble.userId);
+    }, 8000);
+    store._bubbleTimers.set(bubble.userId, timer);
   },
   removeChatBubble: (userId) =>
     set((s) => {
