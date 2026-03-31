@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, Trophy, Users } from 'lucide-react';
 import { useJumpRopeGame, formatDuration, type JumpRopePlayer } from '../../hooks/useJumpRopeGame';
 import JumpRopeRankingTab from './JumpRopeRanking';
+import JumpRopeResult from './JumpRopeResult';
 import CharacterSVG from '../metaverse/CharacterSVG';
 import type { HairStyle, Accessory } from '../../lib/constants';
 
@@ -50,94 +51,83 @@ function Lobby({ players, canStart, onStart }: { players: JumpRopePlayer[]; canS
   );
 }
 
-// ─── 게임 캔버스 (다중 캐릭터) ───
+// ─── 3D 게임 캔버스 (줄 앞/뒤 레이어 분리) ───
 function GameCanvas({ players, ropeAngle, phase, onTap }: {
   players: JumpRopePlayer[]; ropeAngle: number; phase: string; onTap: () => void;
 }) {
-  const W = 380, H = 200, groundY = 170, jumpH = 50;
+  const W = 400, H = 260, groundY = 195, jumpH = 60;
   const alive = players.filter((p) => p.isAlive);
   const dead = players.filter((p) => !p.isAlive);
-  const ropeP = Math.sin(ropeAngle);
-  const ropeCY = groundY - 45 - ropeP * 50;
-  const ropeSag = 16 + Math.abs(ropeP) * 8;
-  const nearBottom = Math.abs(ropeAngle - Math.PI) < 0.4;
+
+  const cosA = Math.cos(ropeAngle);
+  const ropeBaseY = groundY - 55;
+  const ropeCY = ropeBaseY - cosA * 62;
+  const isFront = cosA < 0; // 줄이 캐릭터 앞(아래)으로 내려올 때
+  const dangerDist = Math.abs(ropeAngle - Math.PI);
+  const nearBottom = dangerDist < 0.5;
   const ropeColor = nearBottom ? '#EF4444' : '#F8B500';
+  // 앞에 올 때 두껍고 선명, 뒤에 갈 때 얇고 흐릿
+  const thick = isFront ? 3.5 + Math.abs(cosA) * 2 : 1.5;
+  const sag = isFront ? 14 + Math.abs(cosA) * 14 : 8;
+  const danger01 = Math.max(0, 1 - dangerDist / 1.2);
+  const gW = W - 60;
+
+  const ropePath = `M 39 ${ropeCY} Q ${W / 2} ${ropeCY + sag} ${W - 39} ${ropeCY}`;
 
   return (
     <div className="relative w-full rounded-xl overflow-hidden" style={{ height: H, background: '#1a1a2e' }} onClick={onTap}>
-      {/* 바닥 + 줄 SVG */}
-      <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 w-full h-full">
-        <rect x="0" y={groundY} width={W} height={H - groundY} fill="#2d5a3e" />
-        <line x1="0" y1={groundY} x2={W} y2={groundY} stroke="#4ade80" strokeWidth="1.5" opacity="0.3" />
-        <rect x="30" y={groundY - 70} width="6" height="70" rx="2" fill="#8B7355" />
-        <rect x={W - 36} y={groundY - 70} width="6" height="70" rx="2" fill="#8B7355" />
-        {phase === 'playing' && (
-          <path
-            d={`M 33 ${ropeCY} Q ${W / 2} ${ropeCY + ropeSag} ${W - 33} ${ropeCY}`}
-            stroke={ropeColor} strokeWidth="2.5" fill="none" strokeLinecap="round"
-            style={{ filter: nearBottom ? 'drop-shadow(0 0 3px #EF4444)' : 'none' }}
-          />
+      {/* Layer 1: 바닥 + 기둥 + 뒤쪽 줄 */}
+      <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 w-full h-full" style={{ zIndex: 1 }}>
+        <polygon points={`0,${groundY} ${W},${groundY} ${W - 15},${H} 15,${H}`} fill="#2d5a3e" />
+        <line x1="0" y1={groundY} x2={W} y2={groundY} stroke="#4ade80" strokeWidth="1.5" opacity="0.25" />
+        {[1, 2, 3].map((i) => (
+          <line key={i} x1={i * 5} y1={groundY + i * 14} x2={W - i * 5} y2={groundY + i * 14} stroke="#4ade80" strokeWidth="0.5" opacity={0.08} />
+        ))}
+        <rect x="35" y={groundY - 85} width="8" height="85" rx="2" fill="#8B7355" />
+        <rect x={W - 43} y={groundY - 85} width="8" height="85" rx="2" fill="#8B7355" />
+        <circle cx="39" cy={groundY - 85} r="4" fill="#A0895C" />
+        <circle cx={W - 39} cy={groundY - 85} r="4" fill="#A0895C" />
+        {phase === 'playing' && !isFront && (
+          <path d={ropePath} stroke={ropeColor} strokeWidth={thick} fill="none" strokeLinecap="round"
+            opacity="0.3" strokeDasharray="6 4" />
         )}
       </svg>
 
-      {/* 캐릭터들 */}
-      {alive.map((p, i) => {
-        const x = W / 2 + (i - (alive.length - 1) / 2) * 36;
-        return (
-          <div key={p.id} className="absolute transition-none" style={{
-            left: x - 14, bottom: (H - groundY) + p.jumpY * jumpH,
-          }}>
-            <Char p={p} />
-            <p className="text-[8px] text-center text-white/70 mt-[-2px] truncate w-8">{p.name}</p>
-          </div>
-        );
-      })}
-
-      {/* 탈락 캐릭터 (바닥 옆에 앉아있음) */}
-      {dead.map((p, i) => (
-        <div key={p.id} className="absolute opacity-40" style={{ left: 10 + i * 28, bottom: H - groundY }}>
-          <Char p={p} size={22} />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ─── 게임오버 결과 ───
-function GameOverView({ players, survivalMs, jumpCount, currentSpeed, onReset }: {
-  players: JumpRopePlayer[]; survivalMs: number; jumpCount: number; currentSpeed: number; onReset: () => void;
-}) {
-  const sorted = [...players].sort((a, b) => b.survivalMs - a.survivalMs);
-  const MEDAL = ['🥇', '🥈', '🥉'];
-  return (
-    <div className="space-y-3">
-      <div className="w-full rounded-xl bg-white/[.06] p-4 text-center space-y-2">
-        <p className="text-lg font-bold text-red-400">게임 종료!</p>
-        <div className="flex justify-center gap-6">
-          <div>
-            <p className="text-xl font-mono font-black text-text-primary">{formatDuration(survivalMs)}</p>
-            <p className="text-xs text-text-muted">내 생존시간</p>
-          </div>
-          <div>
-            <p className="text-xl font-mono font-black text-text-primary">{jumpCount}</p>
-            <p className="text-xs text-text-muted">점프</p>
-          </div>
-        </div>
-        <p className="text-xs text-text-muted">최종 속도 x{currentSpeed.toFixed(1)}</p>
-      </div>
-      <div className="rounded-lg bg-white/[.04] p-3 space-y-1.5">
-        {sorted.map((p, i) => (
-          <div key={p.id} className="flex items-center gap-2 text-sm">
-            <span className="w-6 text-center font-bold">{i < 3 ? MEDAL[i] : `${i + 1}`}</span>
+      {/* Layer 2: 캐릭터 */}
+      <div className="absolute inset-0" style={{ zIndex: 2 }}>
+        {alive.map((p, i) => {
+          const x = W / 2 + (i - (alive.length - 1) / 2) * 40;
+          return (
+            <div key={p.id} className="absolute" style={{ left: x - 14, bottom: (H - groundY) + p.jumpY * jumpH }}>
+              <Char p={p} />
+              <p className="text-[8px] text-center text-white/70 truncate w-8">{p.name}</p>
+            </div>
+          );
+        })}
+        {dead.map((p, i) => (
+          <div key={p.id} className="absolute opacity-30" style={{ left: 8 + i * 28, bottom: H - groundY }}>
             <Char p={p} size={22} />
-            <span className="flex-1 truncate text-text-primary">{p.name}</span>
-            <span className="font-mono text-text-secondary">{formatDuration(p.survivalMs)}</span>
           </div>
         ))}
       </div>
-      <button onClick={onReset} className="w-full rounded-xl bg-accent/90 py-3 text-sm font-bold text-white hover:bg-accent active:scale-[.97]">
-        다시 도전
-      </button>
+
+      {/* Layer 3: 앞쪽 줄 + 경고 + 게이지 */}
+      <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 3 }}>
+        {phase === 'playing' && <>
+          <ellipse cx={W / 2} cy={groundY - 1} rx={90 - cosA * 35} ry={3} fill="#EF4444" opacity={Math.max(0, -cosA * 0.4)} />
+          {isFront && (
+            <path d={ropePath} stroke={ropeColor} strokeWidth={thick} fill="none" strokeLinecap="round"
+              style={{ filter: nearBottom ? 'drop-shadow(0 0 8px #EF4444)' : 'none' }} />
+          )}
+          {dangerDist < 0.7 && (
+            <text x={W / 2} y="24" textAnchor="middle" fontSize="15" fontWeight="900"
+              fill="#EF4444" opacity={Math.min(1, (0.7 - dangerDist) * 2.5)}>JUMP!</text>
+          )}
+          <rect x={30} y={H - 20} width={gW} height={8} rx={4} fill="#ffffff10" />
+          <rect x={30} y={H - 20} width={gW * danger01} height={8} rx={4}
+            fill={danger01 > 0.7 ? '#EF4444' : danger01 > 0.3 ? '#F59E0B' : '#22C55E'} />
+        </>}
+      </svg>
     </div>
   );
 }
@@ -191,7 +181,7 @@ export default function JumpRopePanel({ onClose }: { onClose: () => void }) {
           )}
 
           {game.phase === 'gameover' && (
-            <GameOverView players={game.players} survivalMs={game.survivalMs} jumpCount={game.jumpCount} currentSpeed={game.currentSpeed} onReset={game.resetAll} />
+            <JumpRopeResult players={game.players} survivalMs={game.survivalMs} jumpCount={game.jumpCount} currentSpeed={game.currentSpeed} onReset={game.resetAll} />
           )}
         </div>
       )}
