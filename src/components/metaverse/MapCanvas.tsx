@@ -653,32 +653,6 @@ function PixelBBQ({ x, y }: { x: number; y: number }) {
   );
 }
 
-// 맥주잔 세트
-function PixelBeerSet({ x, y }: { x: number; y: number }) {
-  return (
-    <div className="absolute z-[6]" style={{ left: x, top: y }}>
-      <svg width="52" height="44" viewBox="0 0 13 11" style={{ imageRendering: 'pixelated' }}>
-        {/* 잔 1 */}
-        <rect x="1" y="3" width="4" height="6" rx="0.5" fill="#FFD93D" opacity="0.85" />
-        <rect x="1" y="3" width="4" height="1" fill="#FFFFFF" opacity="0.4" />
-        <rect x="1" y="4" width="1" height="4" fill="rgba(255,255,255,0.15)" />
-        <rect x="5" y="5" width="1.5" height="2" rx="0.5" fill="#FFD93D" opacity="0.5" />
-        {/* 거품 */}
-        <ellipse cx="3" cy="3" rx="2.5" ry="1.2" fill="#FFF8DC" />
-        {/* 잔 2 */}
-        <rect x="8" y="3" width="4" height="6" rx="0.5" fill="#FFD93D" opacity="0.85" />
-        <rect x="8" y="3" width="4" height="1" fill="#FFFFFF" opacity="0.4" />
-        <rect x="8" y="4" width="1" height="4" fill="rgba(255,255,255,0.15)" />
-        <rect x="6.5" y="5" width="1.5" height="2" rx="0.5" fill="#FFD93D" opacity="0.5" />
-        <ellipse cx="10" cy="3" rx="2.5" ry="1.2" fill="#FFF8DC" />
-        {/* 바닥 */}
-        <rect x="1" y="9" width="4" height="1" fill="#C8A82E" />
-        <rect x="8" y="9" width="4" height="1" fill="#C8A82E" />
-      </svg>
-    </div>
-  );
-}
-
 // 덤벨
 function PixelDumbbell({ x, y }: { x: number; y: number }) {
   return (
@@ -1063,7 +1037,7 @@ const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme, po
       <PixelSofa90s x={100} y={130} color={teamColor} />
       <PixelSofa90s x={300} y={130} color={teamColor} />
       <PixelRoundTable x={240} y={200} size={72} />
-      <PixelBeerSet x={250} y={180} />
+
       {/* 미니 아케이드 코너 */}
       <PixelArcade x={470} y={110} accent={teamColor} />
       <PixelGuitar x={80} y={240} />
@@ -1112,7 +1086,7 @@ const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme, po
       <PixelSofa90s x={400} y={620} color={teamColor} />
       <PixelSofa90s x={600} y={620} color={teamColor} />
       <PixelRoundTable x={540} y={690} size={60} />
-      <PixelBeerSet x={550} y={670} />
+
       {/* 칠판 (공지 게시글 도트) */}
       <PixelChalkboard x={380} y={560} w={140} postCount={postCounts.notice ?? 0} />
       {/* 분위기 */}
@@ -1143,7 +1117,7 @@ const PlazaFurniture = memo(function PlazaFurniture({ postCounts }: { postCounts
       <PixelSofa90s x={100} y={300} color="#FF6B9D" />
       <PixelSofa90s x={300} y={300} color="#6C5CE7" />
       <PixelRoundTable x={240} y={370} size={60} />
-      <PixelBeerSet x={250} y={350} />
+
       {/* 오른쪽 편의시설 */}
       <PixelChalkboard x={100} y={80} w={140} postCount={postCounts.voc ?? 0} />
       <PixelCorkboard x={500} y={100} postCount={Math.min(postCounts.voc ?? 0, 5)} />
@@ -1181,7 +1155,7 @@ const PlazaFurniture = memo(function PlazaFurniture({ postCounts }: { postCounts
       {/* 이전: <PixelArcade x={860} y={300} accent="#FFD93D" /> */}
       <PixelLightbulb x={860} y={300} />
       <PixelPlant90s x={905} y={320} size="small" />
-      <PixelBeerSet x={1030} y={290} />
+
       {/* 편의 + 분위기 */}
       <PixelSofa90s x={1200} y={340} color="#F8B500" />
       <PixelVending90s x={860} y={140} />
@@ -1197,8 +1171,7 @@ const PlazaFurniture = memo(function PlazaFurniture({ postCounts }: { postCounts
       <PixelPicnicTable x={280} y={580} />
       {/* 바베큐 + 맥주 */}
       <PixelBBQ x={380} y={530} />
-      <PixelBeerSet x={120} y={560} />
-      <PixelBeerSet x={300} y={560} />
+
       {/* 운동/취미 소품 */}
       <PixelDumbbell x={100} y={720} />
       <PixelBasketball x={180} y={730} />
