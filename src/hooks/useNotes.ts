@@ -71,6 +71,7 @@ export function useNotes() {
       anonymous: boolean;
       recipient_role: 'leader' | 'admin' | 'team_leaders';
       recipient_team?: string | null;
+      recipient_id?: string | null;
       category: NoteCategory;
       title: string;
       content: string;
@@ -86,6 +87,7 @@ export function useNotes() {
         anonymous: input.anonymous,
         recipient_role: input.recipient_role,
         recipient_team: input.recipient_team ?? null,
+        recipient_id: input.recipient_id ?? null,
         category: input.category,
         title: input.title,
         content: input.content,
@@ -119,7 +121,7 @@ export function useNotes() {
       }
 
       // 수신 대상 리더에게 notification 생성
-      await createNoteNotification(data, input.recipient_role, input.recipient_team ?? null);
+      await createNoteNotification(data, input.recipient_role, input.recipient_team ?? null, input.recipient_id ?? null);
 
       // user_activities 기록 (트리거 미커버 항목)
       try {
@@ -192,8 +194,29 @@ export function useNotes() {
 async function createNoteNotification(
   note: AnonymousNote,
   recipientRole: string,
-  recipientTeam: string | null
+  recipientTeam: string | null,
+  recipientId: string | null
 ) {
+  // 특정 수신자가 지정된 경우 그 사람에게만 알림
+  if (recipientId) {
+    const { data: recipients } = await supabase.from('profiles').select('id').eq('id', recipientId);
+    if (!recipients || recipients.length === 0) return;
+
+    const notifications = recipients.map((r) => ({
+      user_id: r.id,
+      type: 'new_note',
+      urgency: '할일' as const,
+      title: '새 쪽지가 도착했습니다',
+      body: note.title,
+      link: `/note/${note.id}`,
+      channel: 'in_app',
+    }));
+
+    const { error } = await supabase.from('notifications').insert(notifications);
+    if (error) console.error('쪽지 알림 생성 실패:', error.message);
+    return;
+  }
+
   // 수신 대상 프로필 조회
   let query = supabase.from('profiles').select('id');
 

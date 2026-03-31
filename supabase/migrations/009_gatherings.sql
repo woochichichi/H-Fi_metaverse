@@ -47,7 +47,9 @@ CREATE TRIGGER set_gatherings_updated_at
 
 -- member_count 자동 관리 트리거
 CREATE OR REPLACE FUNCTION update_gathering_member_count()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+SECURITY DEFINER
+AS $$
 BEGIN
   IF TG_OP = 'INSERT' THEN
     UPDATE gatherings SET member_count = member_count + 1 WHERE id = NEW.gathering_id;

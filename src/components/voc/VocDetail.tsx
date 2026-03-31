@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, EyeOff, User, Paperclip, Trash2 } from 'lucide-react';
+import { ArrowLeft, EyeOff, User, Paperclip, Trash2, ShieldOff, Shield } from 'lucide-react';
 import StatusBadge from '../common/StatusBadge';
 import ThreadPanel from '../thread/ThreadPanel';
 import { useVocs } from '../../hooks/useVocs';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
 import { formatRelativeTime } from '../../lib/utils';
-import { VOC_STATUSES } from '../../lib/constants';
+import { VOC_STATUSES, VOC_SEVERITY_LABELS } from '../../lib/constants';
 import type { Voc } from '../../types';
 import type { VocStatus } from '../../lib/constants';
+
+const SEVERITY_COLORS: Record<number, string> = {
+  1: '#22c55e', 2: '#86efac', 3: '#f59e0b', 4: '#f97316', 5: '#ef4444',
+};
 
 interface VocDetailProps {
   voc: Voc;
@@ -19,7 +23,7 @@ interface VocDetailProps {
 
 export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDetailProps) {
   const { profile } = useAuthStore();
-  const { updateVoc, deleteVoc, isAnonymousAuthor, fetchAssignees } = useVocs();
+  const { updateVoc, deleteVoc, hideVoc, isAnonymousAuthor, fetchAssignees } = useVocs();
   const { addToast } = useUiStore();
 
   const [status, setStatus] = useState<VocStatus>(voc.status);
@@ -28,6 +32,7 @@ export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDeta
   const [assignees, setAssignees] = useState<{ id: string; name: string; nickname?: string | null; role: string; team: string }[]>([]);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [hiding, setHiding] = useState(false);
 
   const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
   const isAdmin = profile?.role === 'admin' || profile?.role === 'director';
@@ -37,11 +42,11 @@ export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDeta
       fetchAssignees(voc.team).then(setAssignees).catch(() => setAssignees([]));
     }
   }, [isLeader, voc.team, fetchAssignees]);
+
   const canReplyAsAuthor = voc.anonymous
     ? isAnonymousAuthor(voc.id, voc.session_token)
     : voc.author_id === profile?.id;
 
-  // 삭제 권한: 본인(실명 작성자 또는 익명 세션 토큰 일치) + 관리자
   const canDelete = isAdmin || canReplyAsAuthor;
 
   const handleDelete = async () => {
@@ -59,6 +64,23 @@ export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDeta
 
     addToast('VOC가 삭제되었습니다', 'success');
     onDeleted?.();
+  };
+
+  const handleToggleHidden = async () => {
+    if (hiding) return;
+    const newHidden = !voc.is_hidden;
+    setHiding(true);
+
+    const { data, error } = await hideVoc(voc.id, newHidden);
+    setHiding(false);
+
+    if (error) {
+      addToast(`처리 실패: ${error}`, 'error');
+      return;
+    }
+
+    addToast(newHidden ? 'VOC가 비공개 처리되었습니다' : 'VOC가 공개 전환되었습니다', 'success');
+    if (data) onUpdated(data);
   };
 
   const needsResolution = status === '완료' || status === '보류';
@@ -101,6 +123,22 @@ export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDeta
         <h2 className="flex-1 font-heading text-base font-bold text-text-primary truncate">
           VOC 상세
         </h2>
+        {/* ④ 비공개 처리 토글 (리더 이상) */}
+        {isLeader && (
+          <button
+            onClick={handleToggleHidden}
+            disabled={hiding}
+            className={`flex h-7 items-center gap-1 rounded-lg px-2 text-[11px] font-medium transition-colors disabled:opacity-40 ${
+              voc.is_hidden
+                ? 'bg-success/15 text-success hover:bg-success/25'
+                : 'bg-danger/15 text-danger hover:bg-danger/25'
+            }`}
+            title={voc.is_hidden ? '공개 전환' : '비공개 처리'}
+          >
+            {voc.is_hidden ? <Shield size={13} /> : <ShieldOff size={13} />}
+            {voc.is_hidden ? '공개' : '비공개'}
+          </button>
+        )}
         {canDelete && (
           <button
             onClick={handleDelete}
@@ -114,16 +152,41 @@ export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDeta
         <StatusBadge status={voc.status} size="md" />
       </div>
 
+      {/* 비공개 배너 */}
+      {voc.is_hidden && (
+        <div className="bg-danger/10 border-b border-danger/20 px-4 py-2">
+          <p className="text-[11px] text-danger font-medium">
+            이 VOC는 비공개 처리되었습니다. 관리자만 볼 수 있습니다.
+          </p>
+        </div>
+      )}
+
       {/* 본문 */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* 카테고리 + 메타 */}
-        <div className="flex items-center gap-2 text-xs text-text-muted">
+        <div className="flex items-center gap-2 text-xs text-text-muted flex-wrap">
           <span className="rounded-full bg-accent/20 px-2 py-0.5 text-accent font-medium">
             {voc.category}
           </span>
+          {voc.sub_category && (
+            <span className="rounded-full bg-white/[.08] px-2 py-0.5 text-text-secondary">
+              {voc.sub_category}
+            </span>
+          )}
           {voc.target_area && (
             <span className="rounded-full bg-info/15 px-2 py-0.5 text-info">
               {voc.target_area}
+            </span>
+          )}
+          {voc.severity && (
+            <span
+              className="rounded-full px-2 py-0.5 font-bold text-[11px]"
+              style={{
+                color: SEVERITY_COLORS[voc.severity],
+                backgroundColor: `${SEVERITY_COLORS[voc.severity]}20`,
+              }}
+            >
+              심각도 {voc.severity} — {VOC_SEVERITY_LABELS[voc.severity]}
             </span>
           )}
           <span>·</span>
@@ -175,7 +238,7 @@ export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDeta
           </div>
         )}
 
-        {/* 처리 결과 (있으면 표시) */}
+        {/* ⑤ 처리 결과 (피드백 루프 강화) */}
         {voc.resolution && (
           <div className="rounded-xl bg-success/10 border border-success/20 p-3">
             <p className="text-xs font-medium text-success mb-1">처리 결과</p>
@@ -230,7 +293,7 @@ export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDeta
                 <textarea
                   value={resolution}
                   onChange={(e) => setResolution(e.target.value)}
-                  placeholder="처리 결과를 입력하세요"
+                  placeholder="처리 결과를 입력하세요 — 이 내용은 VOC 목록에 공개됩니다"
                   rows={3}
                   className="w-full resize-none rounded-lg bg-white/[.08] px-3 py-2 text-sm text-text-primary placeholder-text-muted outline-none focus:ring-1 focus:ring-accent"
                 />

@@ -212,8 +212,8 @@ export default function GatheringDetail({ gathering, joined, isAuthor, onClose, 
           </button>
         )}
 
-        {/* 모집중 + 참여중 → 취소 버튼 */}
-        {!isClosed && joined && (
+        {/* 모집중 + 참여중 + 작성자 아님 → 취소 버튼 */}
+        {!isClosed && joined && !isAuthor && (
           <button
             onClick={handleLeave}
             disabled={acting}

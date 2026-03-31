@@ -10,9 +10,10 @@ interface NoteFormProps {
   onClose: () => void;
   onCreated: () => void;
   targetName?: string | null;
+  targetId?: string | null;
 }
 
-export default function NoteForm({ onClose, onCreated, targetName }: NoteFormProps) {
+export default function NoteForm({ onClose, onCreated, targetName, targetId }: NoteFormProps) {
   const { profile, user } = useAuthStore();
   const { createNote } = useNotes();
   const { addToast } = useUiStore();
@@ -34,6 +35,7 @@ export default function NoteForm({ onClose, onCreated, targetName }: NoteFormPro
         anonymous,
         recipient_role: 'leader',
         recipient_team: null,
+        recipient_id: targetId ?? null,
         category: category!,
         title: title.trim(),
         content: content.trim(),

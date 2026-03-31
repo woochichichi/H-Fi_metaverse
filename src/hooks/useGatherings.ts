@@ -66,6 +66,14 @@ export function useGatherings() {
         console.error('모임 등록 실패:', insertError.message);
         return { data: null, error: insertError.message };
       }
+
+      // 작성자를 자동으로 참여자에 추가
+      if (data) {
+        await supabase
+          .from('gathering_members')
+          .insert({ gathering_id: data.id, user_id: input.author_id, joined_at: new Date().toISOString() });
+      }
+
       return { data, error: null };
     },
     []
@@ -111,15 +119,15 @@ export function useGatherings() {
       return { error: joinError.message };
     }
 
-    // DB member_count 동기화
-    const { count } = await supabase
-      .from('gathering_members')
-      .select('*', { count: 'exact', head: true })
-      .eq('gathering_id', gatheringId);
-    if (count !== null) {
-      await supabase.from('gatherings').update({ member_count: count }).eq('id', gatheringId);
+    // 트리거가 member_count를 갱신하므로 DB에서 최신값 반영
+    const { data: updated } = await supabase
+      .from('gatherings')
+      .select('member_count')
+      .eq('id', gatheringId)
+      .single();
+    if (updated) {
       setGatherings((prev) =>
-        prev.map((g) => (g.id === gatheringId ? { ...g, member_count: count } : g))
+        prev.map((g) => (g.id === gatheringId ? { ...g, member_count: updated.member_count } : g))
       );
     }
 
@@ -130,7 +138,7 @@ export function useGatherings() {
     // 낙관적 업데이트
     setGatherings((prev) =>
       prev.map((g) =>
-        g.id === gatheringId ? { ...g, member_count: g.member_count - 1 } : g
+        g.id === gatheringId ? { ...g, member_count: Math.max(0, g.member_count - 1) } : g
       )
     );
 
@@ -151,15 +159,15 @@ export function useGatherings() {
       return { error: leaveError.message };
     }
 
-    // DB member_count 동기화
-    const { count } = await supabase
-      .from('gathering_members')
-      .select('*', { count: 'exact', head: true })
-      .eq('gathering_id', gatheringId);
-    if (count !== null) {
-      await supabase.from('gatherings').update({ member_count: count }).eq('id', gatheringId);
+    // 트리거가 member_count를 갱신하므로 DB에서 최신값 반영
+    const { data: updated } = await supabase
+      .from('gatherings')
+      .select('member_count')
+      .eq('id', gatheringId)
+      .single();
+    if (updated) {
       setGatherings((prev) =>
-        prev.map((g) => (g.id === gatheringId ? { ...g, member_count: count } : g))
+        prev.map((g) => (g.id === gatheringId ? { ...g, member_count: updated.member_count } : g))
       );
     }
 

@@ -187,6 +187,9 @@ export interface Voc {
   attachment_urls: string[] | null;
   session_token: string | null;
   is_deleted: boolean;
+  severity: number | null;
+  sub_category: string | null;
+  is_hidden: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -282,6 +285,7 @@ export interface AnonymousNote {
   anonymous: boolean;
   recipient_role: 'leader' | 'admin' | 'team_leaders';
   recipient_team: string | null;
+  recipient_id: string | null;
   category: '건의' | '질문' | '감사' | '불편' | '기타' | null;
   title: string;
   content: string;

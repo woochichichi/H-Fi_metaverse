@@ -193,8 +193,9 @@ export default function Sidebar() {
           <button
             onClick={() => {
               const targetName = getDisplayName(ctxMenu.person, isAdmin);
+              const targetId = ctxMenu.person.id;
               setCtxMenu(null);
-              openModal('note', { targetName });
+              openModal('note', { targetName, targetId });
             }}
             className="flex w-full items-center gap-2 px-3 py-2 text-sm text-text-secondary transition-colors duration-150 hover:bg-accent/15 hover:text-accent-light"
           >

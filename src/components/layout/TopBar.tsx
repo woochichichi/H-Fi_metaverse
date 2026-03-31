@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Bell, Inbox, Users, LogOut, Settings, Pencil } from 'lucide-react';
-import InboxPanel from '../inbox/InboxPanel';
 import InboxBadge from '../inbox/InboxBadge';
 import AdminPanel from '../admin/AdminPanel';
 import MoodPicker from './MoodPicker';
@@ -15,16 +14,14 @@ import { TEAM_TO_ROOM } from '../../lib/constants';
 
 export default function TopBar() {
   const { profile, user, logout } = useAuthStore();
-  const { sidebarOpen, toggleSidebar, openModal, closeModal } = useUiStore();
+  const { sidebarOpen, toggleSidebar, openModal, closeModal, modalOpen } = useUiStore();
   const { fetchUnreadCount } = useNotices();
-  const { items, loading: inboxLoading, unreadCount: inboxUnread, markAsRead, markAllAsRead } = useInbox(user?.id ?? null);
+  const { unreadCount: inboxUnread } = useInbox(user?.id ?? null);
   const mode = useDeviceMode();
   const [unreadCount, setUnreadCount] = useState(0);
-  const [showInbox, setShowInbox] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const [showMood, setShowMood] = useState(false);
   const [showNicknameEditor, setShowNicknameEditor] = useState(false);
-  const inboxRef = useRef<HTMLDivElement>(null);
   const moodRef = useRef<HTMLDivElement>(null);
   const moodBtnRef = useRef<HTMLDivElement>(null);
 
@@ -40,7 +37,6 @@ export default function TopBar() {
 
   // 패널 간 상호 배타 처리
   const handleToggleSidebar = () => {
-    setShowInbox(false);
     setShowAdmin(false);
     closeModal();
     toggleSidebar();
@@ -48,13 +44,16 @@ export default function TopBar() {
 
   const handleToggleInbox = () => {
     setShowAdmin(false);
-    closeModal();
     if (sidebarOpen) toggleSidebar();
-    setShowInbox((v) => !v);
+    // 이미 inbox 패널이 열려있으면 닫기, 아니면 열기
+    if (modalOpen === 'inbox') {
+      closeModal();
+    } else {
+      openModal('inbox');
+    }
   };
 
   const handleOpenNotice = () => {
-    setShowInbox(false);
     setShowAdmin(false);
     if (sidebarOpen) toggleSidebar();
     // 팀별 공지 zone으로 열기 (예: stock-notice)
@@ -63,24 +62,10 @@ export default function TopBar() {
   };
 
   const handleOpenAdmin = () => {
-    setShowInbox(false);
     closeModal();
     if (sidebarOpen) toggleSidebar();
     setShowAdmin(true);
   };
-
-  // 바깥 클릭으로 수집함 닫기
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (inboxRef.current && !inboxRef.current.contains(e.target as Node)) {
-        setShowInbox(false);
-      }
-    };
-    if (showInbox) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [showInbox]);
 
   // 바깥 클릭으로 기분 선택 닫기
   useEffect(() => {
@@ -124,16 +109,14 @@ export default function TopBar() {
           )}
 
           {/* 수집함 */}
-          <div ref={inboxRef} className="relative">
-            <button
-              onClick={handleToggleInbox}
-              className="relative flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary transition-colors duration-200 hover:bg-bg-tertiary hover:text-text-primary"
-              title="수집함"
-            >
-              <Inbox size={18} />
-              <InboxBadge count={inboxUnread} />
-            </button>
-          </div>
+          <button
+            onClick={handleToggleInbox}
+            className="relative flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary transition-colors duration-200 hover:bg-bg-tertiary hover:text-text-primary"
+            title="수집함"
+          >
+            <Inbox size={18} />
+            <InboxBadge count={inboxUnread} />
+          </button>
 
           {/* 알림 (공지 안읽은 수) */}
           <button
@@ -191,20 +174,6 @@ export default function TopBar() {
           )}
         </div>
       </header>
-
-      {/* 수집함 드롭다운 — createPortal로 body에 렌더링 (backdrop-filter stacking context 회피) */}
-      {showInbox && createPortal(
-        <div ref={inboxRef} className="fixed z-[200] rounded-xl border border-white/[.08] bg-bg-secondary shadow-2xl" style={{ top: 48, right: 180 }}>
-          <InboxPanel
-            items={items}
-            loading={inboxLoading}
-            onMarkAsRead={markAsRead}
-            onMarkAllAsRead={markAllAsRead}
-            onClose={() => setShowInbox(false)}
-          />
-        </div>,
-        document.body
-      )}
 
       {/* 기분/감정 표현 드롭다운 — createPortal로 body에 렌더링 (backdrop-filter stacking context 회피) */}
       {showMood && createPortal(

@@ -51,7 +51,17 @@ supabase/migrations/ — 001_init.sql, 002_rls.sql, 003_triggers.sql
 ```
 VITE_SUPABASE_URL=https://xxxxx.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJxxx...
+SUPABASE_ACCESS_TOKEN=sbp_xxx...
 ```
+- 실제 값은 `.env.local` 참조 (gitignore 대상)
+- DB 스키마 변경, 데이터 수정, 트리거/RLS 점검 등이 필요하면 `.env.local`의 `SUPABASE_ACCESS_TOKEN`으로 Management API 사용:
+  ```
+  curl -s "https://api.supabase.com/v1/projects/{PROJECT_REF}/database/query" \
+    -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d '{"query": "SQL문"}'
+  ```
+  `PROJECT_REF`는 `VITE_SUPABASE_URL`에서 추출 (https://**{ref}**.supabase.co)
 
 ## 배포
 - 프론트: Cloudflare Pages (`https://ito-metaverse.pages.dev`)

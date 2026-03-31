@@ -84,7 +84,7 @@ export default function NotePanel({ onClose }: NotePanelProps) {
 
   // 폼 뷰
   if (view === 'form') {
-    return <NoteForm onClose={handleBack} onCreated={handleCreated} targetName={modalContext?.targetName} />;
+    return <NoteForm onClose={handleBack} onCreated={handleCreated} targetName={modalContext?.targetName} targetId={modalContext?.targetId} />;
   }
 
   // 상세 뷰

@@ -15,6 +15,7 @@ import IdeaPanel from '../idea/IdeaPanel';
 import NoticePanel from '../notice/NoticePanel';
 import KpiPanel from '../kpi/KpiPanel';
 import NotePanel from '../note/NotePanel';
+import InboxPanel from '../inbox/InboxPanel';
 import LobbyPanel from './LobbyPanel';
 import GatheringPanel from '../gathering/GatheringPanel';
 import OmokPanel from '../game/OmokPanel';
@@ -37,6 +38,7 @@ function getZonePanel(zoneId: string, userTeam: string | undefined): React.FC<{ 
     const readOnly = !!userTeam && lobbyTeam !== userTeam;
     return ({ onClose }) => <LobbyPanel onClose={onClose} team={lobbyTeam} readOnly={readOnly} />;
   }
+  if (zoneId === 'inbox') return InboxPanel;
   if (zoneId === 'note') return NotePanel;
   if (zoneId === 'gathering') return GatheringPanel;
   if (zoneId === 'omok') return OmokPanel;

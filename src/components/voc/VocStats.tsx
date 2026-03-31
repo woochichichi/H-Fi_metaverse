@@ -4,6 +4,7 @@ import {
   LineChart, Line, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 import { ArrowLeft } from 'lucide-react';
+import { VOC_SEVERITY_LABELS } from '../../lib/constants';
 import type { Voc } from '../../types';
 
 interface VocStatsProps {
@@ -25,6 +26,10 @@ const STATUS_COLORS: Record<string, string> = {
   '처리중': '#f59e0b',
   '완료': '#22c55e',
   '보류': '#ef4444',
+};
+
+const SEVERITY_COLORS: Record<number, string> = {
+  1: '#22c55e', 2: '#86efac', 3: '#f59e0b', 4: '#f97316', 5: '#ef4444',
 };
 
 export default function VocStats({ vocs, onBack }: VocStatsProps) {
@@ -67,6 +72,35 @@ export default function VocStats({ vocs, onBack }: VocStatsProps) {
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
   }, [vocs]);
 
+  // ③ 심각도별 분포 (정량 분석)
+  const severityData = useMemo(() => {
+    const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    vocs.forEach((v) => {
+      if (v.severity) counts[v.severity] = (counts[v.severity] || 0) + 1;
+    });
+    return Object.entries(counts).map(([level, value]) => ({
+      name: VOC_SEVERITY_LABELS[Number(level)],
+      level: Number(level),
+      value,
+    }));
+  }, [vocs]);
+
+  // ③ 카테고리별 평균 심각도 (정량 패턴 분석)
+  const categorySeverityData = useMemo(() => {
+    const sums: Record<string, { total: number; count: number }> = {};
+    vocs.forEach((v) => {
+      if (v.severity) {
+        if (!sums[v.category]) sums[v.category] = { total: 0, count: 0 };
+        sums[v.category].total += v.severity;
+        sums[v.category].count += 1;
+      }
+    });
+    return Object.entries(sums).map(([name, { total, count }]) => ({
+      name,
+      avg: Math.round((total / count) * 10) / 10,
+    }));
+  }, [vocs]);
+
   // 평균 처리 시간 (완료된 것만)
   const avgProcessTime = useMemo(() => {
     const completed = vocs.filter((v) => v.status === '완료');
@@ -78,6 +112,8 @@ export default function VocStats({ vocs, onBack }: VocStatsProps) {
     }, 0);
     return Math.round(totalHours / completed.length);
   }, [vocs]);
+
+  const hasSeverityData = vocs.some((v) => v.severity !== null);
 
   // 데이터 부족 시 샘플 데이터
   const hasSufficientData = vocs.length >= 3;
@@ -127,6 +163,47 @@ export default function VocStats({ vocs, onBack }: VocStatsProps) {
             {avgProcessTime !== null ? `${avgProcessTime}h` : '-'}
           </p>
         </div>
+
+        {/* ③ 심각도 분포 바 차트 (정량 분석) */}
+        {hasSeverityData && (
+          <div className="rounded-xl bg-white/[.04] p-4">
+            <h3 className="text-xs font-semibold text-text-secondary mb-3">심각도별 분포</h3>
+            <ResponsiveContainer width="100%" height={140}>
+              <BarChart data={severityData}>
+                <XAxis dataKey="name" tick={{ fill: '#cbd5e1', fontSize: 10 }} />
+                <YAxis tick={{ fill: '#94a3b8', fontSize: 10 }} />
+                <Tooltip
+                  contentStyle={{ background: '#2d2d44', border: 'none', borderRadius: 8, fontSize: 12 }}
+                  itemStyle={{ color: '#e2e8f0' }}
+                />
+                <Bar dataKey="value" name="건수">
+                  {severityData.map((entry) => (
+                    <Cell key={entry.level} fill={SEVERITY_COLORS[entry.level] || '#94a3b8'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {/* ③ 카테고리별 평균 심각도 (패턴 분석) */}
+        {categorySeverityData.length > 0 && (
+          <div className="rounded-xl bg-white/[.04] p-4">
+            <h3 className="text-xs font-semibold text-text-secondary mb-3">카테고리별 평균 심각도</h3>
+            <ResponsiveContainer width="100%" height={140}>
+              <BarChart data={categorySeverityData} layout="vertical">
+                <XAxis type="number" domain={[0, 5]} tick={{ fill: '#94a3b8', fontSize: 10 }} />
+                <YAxis type="category" dataKey="name" tick={{ fill: '#cbd5e1', fontSize: 11 }} width={50} />
+                <Tooltip
+                  contentStyle={{ background: '#2d2d44', border: 'none', borderRadius: 8, fontSize: 12 }}
+                  itemStyle={{ color: '#e2e8f0' }}
+                  formatter={(value) => [`${value} / 5`, '평균 심각도']}
+                />
+                <Bar dataKey="avg" fill="#f59e0b" radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
 
         {/* 카테고리별 도넛 */}
         <div className="rounded-xl bg-white/[.04] p-4">

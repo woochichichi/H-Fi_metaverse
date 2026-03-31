@@ -31,6 +31,26 @@ export type VocTargetArea = (typeof VOC_TARGET_AREAS)[number];
 export const VOC_STATUSES = ['접수', '검토중', '처리중', '완료', '보류'] as const;
 export type VocStatus = (typeof VOC_STATUSES)[number];
 
+// VOC 심각도 (1~5)
+export const VOC_SEVERITY_LEVELS = [1, 2, 3, 4, 5] as const;
+export type VocSeverity = (typeof VOC_SEVERITY_LEVELS)[number];
+export const VOC_SEVERITY_LABELS: Record<number, string> = {
+  1: '매우 낮음',
+  2: '낮음',
+  3: '보통',
+  4: '높음',
+  5: '매우 높음',
+};
+
+// VOC 카테고리별 세부항목
+export const VOC_SUB_CATEGORIES: Record<string, string[]> = {
+  '불편': ['시스템 장애', '속도 저하', '사용성 불편', 'UI 오류', '기타'],
+  '요청': ['신규 기능', '기능 개선', '권한 요청', '환경 변경', '기타'],
+  '칭찬': ['동료 칭찬', '리더 칭찬', '프로세스 칭찬', '기타'],
+  '개선': ['프로세스 개선', '커뮤니케이션', '업무 환경', '교육/성장', '기타'],
+  '기타': ['기타'],
+};
+
 // 아이디어 카테고리
 export const IDEA_CATEGORIES = ['이벤트', '인적교류', '업무개선', '기타'] as const;
 export type IdeaCategory = (typeof IDEA_CATEGORIES)[number];

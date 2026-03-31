@@ -50,6 +50,8 @@ export function useVocs() {
       content: string;
       team: string;
       target_area?: string | null;
+      severity?: number | null;
+      sub_category?: string | null;
       attachment_urls?: string[];
       author_id?: string | null;
     }) => {
@@ -65,6 +67,8 @@ export function useVocs() {
           content: input.content,
           team: input.team,
           target_area: input.target_area ?? null,
+          severity: input.severity ?? null,
+          sub_category: input.sub_category ?? null,
           attachment_urls: input.attachment_urls ?? null,
           session_token: sessionToken,
         })
@@ -91,7 +95,7 @@ export function useVocs() {
                 user_id: l.id,
                 type: 'new_voc',
                 urgency: '할일' as const,
-                title: `📞 새 VOC: ${data.title}`,
+                title: `새 VOC: ${data.title}`,
                 body: data.content.slice(0, 100),
                 link: `/voc/${data.id}`,
                 channel: 'in_app',
@@ -105,7 +109,7 @@ export function useVocs() {
         }
       }
 
-      // 익명 VOC → localStorage에 session_token 저장
+      // 익명 VOC → sessionStorage에 session_token 저장
       if (input.anonymous && data && sessionToken) {
         const tokens = JSON.parse(sessionStorage.getItem('voc_tokens') || '{}');
         tokens[data.id] = sessionToken;
@@ -145,7 +149,7 @@ export function useVocs() {
             user_id: data.author_id,
             type: 'voc_status',
             urgency: '참고' as const,
-            title: `📞 VOC 상태가 '${updates.status}'로 변경되었습니다`,
+            title: `VOC 상태가 '${updates.status}'로 변경되었습니다`,
             body: data.title,
             link: `/voc/${data.id}`,
             channel: 'in_app',
@@ -160,6 +164,24 @@ export function useVocs() {
     },
     []
   );
+
+  // ④ 비공개 처리 / 공개 전환
+  const hideVoc = useCallback(async (id: string, hidden: boolean) => {
+    const { data, error: hideError } = await supabase
+      .from('vocs')
+      .update({ is_hidden: hidden })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (hideError) {
+      console.error('VOC 비공개 처리 실패:', hideError.message);
+      return { data: null, error: hideError.message };
+    }
+
+    setVocs((prev) => prev.map((v) => (v.id === id ? data : v)));
+    return { data, error: null };
+  }, []);
 
   // VOC 소프트 삭제 (본인 또는 관리자)
   const deleteVoc = useCallback(async (id: string) => {
@@ -201,6 +223,7 @@ export function useVocs() {
     fetchVocs,
     createVoc,
     updateVoc,
+    hideVoc,
     deleteVoc,
     isAnonymousAuthor,
     fetchAssignees,

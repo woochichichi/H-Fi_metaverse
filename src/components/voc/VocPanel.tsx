@@ -217,9 +217,16 @@ export default function VocPanel({ onClose }: VocPanelProps) {
         </div>
       )}
 
-      {/* VOC 목록 */}
+      {/* VOC 목록 — 비공개(is_hidden) VOC는 리더 이상에게만 표시 */}
       <div className="flex-1 overflow-y-auto p-4">
-        <VocList vocs={vocs} loading={loading} error={error} onSelect={handleSelectVoc} onRetry={loadVocs} assigneeNames={assigneeNames} />
+        <VocList
+          vocs={isLeader ? vocs : vocs.filter((v) => !v.is_hidden)}
+          loading={loading}
+          error={error}
+          onSelect={handleSelectVoc}
+          onRetry={loadVocs}
+          assigneeNames={assigneeNames}
+        />
       </div>
 
       {/* FAB: 새 VOC */}
