@@ -11,3 +11,4 @@ export { useInbox } from './useInbox';
 export { useUserActivities } from './useUserActivities';
 export { useKudos } from './useKudos';
 export { useTeamPosts } from './useTeamPosts';
+export { useSiteReports } from './useSiteReports';

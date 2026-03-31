@@ -481,4 +481,8 @@ export const FILE_LIMITS = {
   voc: { maxSize: 5 * 1024 * 1024, maxFiles: 3, accept: ['image/*', 'application/pdf'] },
   notice: { maxSize: 10 * 1024 * 1024, maxFiles: 5, accept: ['image/*', 'application/pdf'] },
   avatar: { maxSize: 2 * 1024 * 1024, maxFiles: 1, accept: ['image/*'] },
+  report: { maxSize: 5 * 1024 * 1024, maxFiles: 3, accept: ['image/*'] },
 } as const;
+
+// 사이트 건의 1일 최대 제출 수
+export const SITE_REPORT_DAILY_LIMIT = 10;

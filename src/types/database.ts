@@ -129,6 +129,12 @@ export interface Database {
         Update: Record<string, never>;
         Relationships: [];
       };
+      site_reports: {
+        Row: SiteReport;
+        Insert: Omit<SiteReport, 'id' | 'created_at' | 'updated_at' | 'status' | 'admin_memo'>;
+        Update: Partial<Omit<SiteReport, 'id'>>;
+        Relationships: [];
+      };
     };
     Views: {
       idea_with_votes: {
@@ -488,4 +494,20 @@ export interface ActivityComment {
   author_id: string | null;
   content: string;
   created_at: string;
+}
+
+export interface SiteReport {
+  id: string;
+  author_id: string;
+  title: string;
+  content: string;
+  user_agent: string | null;
+  screen_size: string | null;
+  current_url: string | null;
+  console_logs: string | null;
+  attachment_urls: string[] | null;
+  status: '접수' | '확인' | '처리중' | '완료';
+  admin_memo: string | null;
+  created_at: string;
+  updated_at: string;
 }
