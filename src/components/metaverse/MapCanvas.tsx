@@ -1043,8 +1043,8 @@ const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme, po
           <PixelChair90s x={730 + i * 200} y={370} />
         </span>
       ))}
-      <PixelFileCabinet x={1090} y={160} />
-      <PixelCopier x={1070} y={300} />
+      <PixelFileCabinet x={1060} y={160} />
+      <PixelCopier x={1050} y={300} />
       <PixelPlant90s x={660} y={350} size="small" />
 
       {/* ═══ 공지 Zone (350,460 ~ 850,760) — 뉴스 카페 ═══ */}
