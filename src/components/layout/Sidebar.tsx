@@ -4,7 +4,7 @@ import { Search, Heart } from 'lucide-react';
 import { useUiStore } from '../../stores/uiStore';
 import { useAuthStore } from '../../stores/authStore';
 import { useMetaverseStore } from '../../stores/metaverseStore';
-import { ROOMS_DATA } from '../../lib/constants';
+import { ROOMS_DATA, type RoomId } from '../../lib/constants';
 import { getDisplayName } from '../../lib/utils';
 import { supabase } from '../../lib/supabase';
 import type { Profile } from '../../types/database';
@@ -27,7 +27,7 @@ export default function Sidebar() {
   const { sidebarOpen, openModal } = useUiStore();
   const { profile: myProfile, user } = useAuthStore();
   const currentRoom = useMetaverseStore((s) => s.currentRoom);
-  const otherPlayers = useMetaverseStore((s) => s.otherPlayers);
+  const globalOnlineUsers = useMetaverseStore((s) => s.globalOnlineUsers);
   const room = ROOMS_DATA[currentRoom];
   const isAdmin = myProfile?.role === 'admin' || myProfile?.role === 'director';
   const [search, setSearch] = useState('');
@@ -76,16 +76,21 @@ export default function Sidebar() {
 
   if (!sidebarOpen) return null;
 
-  // 온라인 유저: 현재 Realtime presence에 있는 유저들
-  const onlinePlayerIds = new Set<string>();
-  otherPlayers.forEach((_, id) => onlinePlayerIds.add(id));
-  if (user?.id) onlinePlayerIds.add(user.id);
+  // 글로벌 온라인 유저: 모든 방의 접속자
+  const globalOnlineIds = new Set<string>();
+  globalOnlineUsers.forEach((_, id) => globalOnlineIds.add(id));
+  if (user?.id) globalOnlineIds.add(user.id);
 
-  // 프로필에 실시간 상태 반영
-  const peopleWithStatus = profiles.map((p) => ({
-    ...p,
-    status: onlinePlayerIds.has(p.id) ? ('online' as const) : ('offline' as const),
-  }));
+  // 프로필에 실시간 상태 반영 + 현재 위치 정보
+  const peopleWithStatus = profiles.map((p) => {
+    const globalUser = globalOnlineUsers.get(p.id);
+    return {
+      ...p,
+      status: globalOnlineIds.has(p.id) ? ('online' as const) : ('offline' as const),
+      currentRoomId: p.id === user?.id ? currentRoom : (globalUser?.room as RoomId | undefined),
+      mood_emoji: globalUser?.moodEmoji || p.mood_emoji,
+    };
+  });
 
   const filtered = peopleWithStatus.filter((p) => {
     const display = getDisplayName(p, isAdmin);
@@ -161,7 +166,14 @@ export default function Sidebar() {
                       </span>
                       {p.mood_emoji && <span className="text-xs">{p.mood_emoji}</span>}
                     </div>
-                    <span className="text-xs text-text-secondary">{p.team}</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-text-secondary">{p.team}</span>
+                      {p.status === 'online' && p.currentRoomId && (
+                        <span className="text-[10px] text-text-muted">
+                          · {ROOMS_DATA[p.currentRoomId]?.label || p.currentRoomId}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}

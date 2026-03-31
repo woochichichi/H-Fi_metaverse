@@ -35,12 +35,21 @@ export interface OtherPlayer {
   moodEmoji?: string;
 }
 
+export interface GlobalPresenceUser {
+  userId: string;
+  name: string;
+  team: string;
+  room: RoomId;
+  moodEmoji?: string;
+}
+
 interface MetaverseState {
   activeZone: ZoneId | null;
   nearZone: ZoneId | null;
   playerPosition: { x: number; y: number };
   moveTarget: MoveTarget | null;
   onlineUsers: string[];
+  globalOnlineUsers: Map<string, GlobalPresenceUser>;
   emojiFloats: EmojiFloat[];
   currentRoom: RoomId;
   nearPortal: PortalDef | null;
@@ -53,6 +62,7 @@ interface MetaverseState {
   setPlayerPosition: (pos: { x: number; y: number }) => void;
   setMoveTarget: (target: MoveTarget | null) => void;
   setOnlineUsers: (users: string[]) => void;
+  setGlobalOnlineUsers: (users: Map<string, GlobalPresenceUser>) => void;
   addEmojiFloat: (emoji: string) => void;
   removeEmojiFloat: (id: string) => void;
   setCurrentRoom: (roomId: RoomId) => void;
@@ -69,6 +79,7 @@ export const useMetaverseStore = create<MetaverseState>((set, get) => ({
   playerPosition: { x: 400, y: 100 },
   moveTarget: null,
   onlineUsers: [],
+  globalOnlineUsers: new Map(),
   emojiFloats: [],
   currentRoom: 'stock',
   nearPortal: null,
@@ -93,6 +104,7 @@ export const useMetaverseStore = create<MetaverseState>((set, get) => ({
   setPlayerPosition: (pos) => set({ playerPosition: pos }),
   setMoveTarget: (target) => set({ moveTarget: target }),
   setOnlineUsers: (users) => set({ onlineUsers: users }),
+  setGlobalOnlineUsers: (users) => set({ globalOnlineUsers: users }),
   addEmojiFloat: (emoji) => {
     const { playerPosition } = get();
     const id = crypto.randomUUID();
