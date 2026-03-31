@@ -52,20 +52,24 @@ export default function BottomBar({ roomAlerts, zoneAlerts }: BottomBarProps) {
   const [collapsed, setCollapsed] = useState(false);
 
   const myTeamRoom = TEAM_TO_ROOM[profile?.team || ''] || 'stock';
+  const isAdmin = profile?.role === 'admin';
 
   const handleMenuClick = (menuId: string, targetRoom: RoomId) => {
     if (currentRoom !== targetRoom) enterRoom(targetRoom);
     openModal(menuId);
   };
 
-  // 방 표시 순서: 내 팀 방 → 중앙 광장 → 나머지 팀 방
-  const roomOrder: RoomId[] = [
-    myTeamRoom,
-    'plaza',
-    ...(Object.keys(ROOMS_DATA) as RoomId[]).filter(
-      (id) => id !== myTeamRoom && id !== 'plaza'
-    ),
-  ];
+  // 관리자: 내 팀 방 → 중앙 광장 → 나머지 팀 방
+  // 일반: 내 팀 방 → 중앙 광장만
+  const roomOrder: RoomId[] = isAdmin
+    ? [
+        myTeamRoom,
+        'plaza',
+        ...(Object.keys(ROOMS_DATA) as RoomId[]).filter(
+          (id) => id !== myTeamRoom && id !== 'plaza'
+        ),
+      ]
+    : [myTeamRoom, 'plaza'];
 
   return (
     <div className="relative flex h-full flex-shrink-0">
