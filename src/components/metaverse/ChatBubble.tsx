@@ -20,28 +20,30 @@ export default function ChatBubble() {
         return (
           <div
             key={bubble.id}
-            className="absolute z-[60] pointer-events-none"
-            style={{ left: x + 17, top: y - 52, transform: 'translateX(-50%)' }}
+            className="absolute z-[60] pointer-events-none whitespace-nowrap"
+            style={{
+              left: x + 17,
+              top: y - 48,
+              transform: 'translateX(-50%)',
+              animation: 'bubbleFadeIn .2s ease-out',
+            }}
           >
             <div
-              className="relative max-w-[180px] rounded-lg px-3 py-1.5 text-[12px] leading-tight"
+              className="relative rounded-xl px-[10px] py-[5px] text-[10px] font-medium text-gray-700"
               style={{
-                background: isMe ? 'rgba(108,92,231,.92)' : 'rgba(50,45,55,.92)',
-                color: '#fff',
-                boxShadow: '0 2px 8px rgba(0,0,0,.3)',
-                wordBreak: 'break-word',
+                background: '#fff',
+                boxShadow: '0 4px 16px rgba(0,0,0,.15)',
               }}
             >
               {bubble.message}
+              {/* 삼각형 꼬리 */}
               <div
                 className="absolute left-1/2 -translate-x-1/2"
                 style={{
-                  bottom: -6,
-                  width: 0,
-                  height: 0,
+                  bottom: -5,
                   borderLeft: '5px solid transparent',
                   borderRight: '5px solid transparent',
-                  borderTop: `6px solid ${isMe ? 'rgba(108,92,231,.92)' : 'rgba(50,45,55,.92)'}`,
+                  borderTop: '6px solid #fff',
                 }}
               />
             </div>
