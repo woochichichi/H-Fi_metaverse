@@ -156,7 +156,7 @@ export default function Sidebar() {
                     className="flex h-7 w-7 items-center justify-center rounded-full text-xs"
                     style={{ backgroundColor: p.avatar_color }}
                   >
-                    {p.avatar_emoji}
+                    {p.mood_emoji || p.avatar_emoji}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1">
@@ -164,7 +164,6 @@ export default function Sidebar() {
                         {getDisplayName(p, isAdmin)}
                         {p.id === user?.id && <span className="ml-1 text-xs text-accent">(나)</span>}
                       </span>
-                      {p.mood_emoji && <span className="text-xs">{p.mood_emoji}</span>}
                     </div>
                     <div className="flex items-center gap-1">
                       <span className="text-xs text-text-secondary">{p.team}</span>
