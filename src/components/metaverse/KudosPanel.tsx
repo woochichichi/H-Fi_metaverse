@@ -137,7 +137,7 @@ export default function KudosPanel({ team, readOnly }: KudosPanelProps) {
           <p className="text-[10px] text-text-muted mt-1">{readOnly ? '' : '첫 칭찬을 보내보세요!'}</p>
         </div>
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {kudosList.slice(0, displayCount).map((k) => (
             <KudosCard key={k.id} kudos={k} readOnly={readOnly} userId={profile?.id} onToggleReaction={handleToggleReaction} onDelete={handleDelete} />
           ))}
