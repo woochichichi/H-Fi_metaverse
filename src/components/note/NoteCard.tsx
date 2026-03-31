@@ -54,7 +54,7 @@ export default function NoteCard({ note, onClick }: NoteCardProps) {
       </div>
 
       {/* 제목 */}
-      <h3 className="text-sm font-semibold text-text-primary line-clamp-1">{note.title}</h3>
+      <h3 className="text-sm font-semibold text-text-primary line-clamp-1 tracking-wide">{note.title}</h3>
 
       {/* 하단: 메타 정보 */}
       <div className="flex items-center gap-2 text-[11px] text-text-muted">

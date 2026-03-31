@@ -69,7 +69,7 @@ export default function VocCard({ voc, onClick, assigneeName }: VocCardProps) {
       </div>
 
       {/* 제목 */}
-      <h3 className="text-sm font-semibold text-text-primary line-clamp-1">{voc.title}</h3>
+      <h3 className="text-sm font-semibold text-text-primary line-clamp-1 tracking-wide">{voc.title}</h3>
 
       {/* ⑤ 피드백 루프: 완료 + resolution 있으면 미리보기 */}
       {voc.status === '완료' && voc.resolution && (

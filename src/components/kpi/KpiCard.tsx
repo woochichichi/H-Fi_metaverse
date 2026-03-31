@@ -37,7 +37,7 @@ export default function KpiCard({ item, records, onClick }: KpiCardProps) {
     >
       {/* 제목 + 변화량 */}
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-text-primary line-clamp-1">{item.title}</h3>
+        <h3 className="text-sm font-semibold text-text-primary line-clamp-1 tracking-wide">{item.title}</h3>
         {change !== null && (
           <span className={`flex items-center gap-0.5 text-[11px] font-mono font-medium ${
             change >= 0 ? 'text-success' : 'text-danger'

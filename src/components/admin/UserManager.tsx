@@ -133,7 +133,7 @@ export default function UserManager() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h3 className="text-sm font-bold text-text-primary">
+      <h3 className="text-base font-bold text-text-primary font-heading">
         사용자 관리 {isLeader && myProfile?.team && <span className="font-normal text-text-muted">({myProfile.team})</span>}
       </h3>
 

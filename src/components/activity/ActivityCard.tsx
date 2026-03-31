@@ -72,7 +72,7 @@ export default function ActivityCard({
           {activity.category && (
             <span className="text-sm">{CATEGORY_LABELS[activity.category] ?? '📋'}</span>
           )}
-          <h4 className="text-sm font-semibold text-text-primary line-clamp-1">
+          <h4 className="text-sm font-semibold text-text-primary line-clamp-1 tracking-wide">
             {activity.title}
           </h4>
         </div>

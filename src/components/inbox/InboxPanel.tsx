@@ -48,7 +48,7 @@ export default function InboxPanel({ onClose }: InboxPanelProps) {
       <div className="flex items-center justify-between border-b border-white/[.06] px-4 py-3">
         <div className="flex items-center gap-2">
           <Inbox size={18} className="text-accent" />
-          <h3 className="font-heading text-sm font-bold text-text-primary">수집함</h3>
+          <h3 className="font-heading text-base font-bold text-text-primary">수집함</h3>
         </div>
         <div className="flex items-center gap-1">
           {unreadItems.length > 0 && (

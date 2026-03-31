@@ -67,7 +67,7 @@ export default function CharacterCustomModal({ onClose }: Props) {
       >
         {/* 헤더 */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-white/10">
-          <h2 className="text-sm font-bold text-text-primary">캐릭터 꾸미기</h2>
+          <h2 className="text-base font-bold text-text-primary font-heading">캐릭터 꾸미기</h2>
           <button onClick={onClose} className="text-text-muted hover:text-text-primary transition-colors">
             <X size={18} />
           </button>

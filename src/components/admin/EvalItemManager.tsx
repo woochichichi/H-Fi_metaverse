@@ -78,7 +78,7 @@ export default function EvalItemManager() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold text-text-primary">팀별 평가 항목 관리</h3>
+        <h3 className="text-base font-bold text-text-primary font-heading">팀별 평가 항목 관리</h3>
         <div className="flex gap-2">
           <button
             onClick={load}

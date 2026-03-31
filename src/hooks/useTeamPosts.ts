@@ -104,10 +104,14 @@ export function useTeamPosts() {
 
   const createPost = useCallback(
     async (authorId: string, team: string, content: string, category: string) => {
-      const { error } = await supabase
-        .from('team_posts')
-        .insert({ author_id: authorId, team, content, category });
-      if (error) throw error;
+      const { error } = await withTimeout(
+        () => supabase.from('team_posts').insert({ author_id: authorId, team, content, category }),
+        8000, 'createPost',
+      );
+      if (error) {
+        console.error('게시글 등록 실패:', error.code, error.message, error.details, { authorId, team, category });
+        throw error;
+      }
     },
     [],
   );

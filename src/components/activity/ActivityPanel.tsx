@@ -106,7 +106,7 @@ export default function ActivityPanel({ team, readOnly }: ActivityPanelProps) {
     <div className="flex flex-col gap-3">
       {/* 헤더 */}
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold text-text-primary">활동 타임라인</h3>
+        <h3 className="text-base font-bold text-text-primary font-heading">활동 타임라인</h3>
         <div className="flex items-center gap-2">
           {readOnly && (
             <span className="flex items-center gap-1 rounded-full bg-white/[.06] px-2 py-0.5 text-[10px] text-text-muted">

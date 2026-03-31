@@ -141,7 +141,7 @@ export default function TutorialModal({ onClose }: TutorialModalProps) {
             </div>
           )}
 
-          <h3 className="mb-2 text-center text-sm font-bold text-text-primary">
+          <h3 className="mb-2 text-center text-base font-bold text-text-primary font-heading">
             {current.title}
           </h3>
           <p className="whitespace-pre-line text-center text-xs leading-relaxed text-text-secondary">

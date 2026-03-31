@@ -115,7 +115,7 @@ export default function InviteManager() {
     <div className="flex flex-col gap-4">
       {/* 헤더 */}
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold text-text-primary">초대 코드 관리</h3>
+        <h3 className="text-base font-bold text-text-primary font-heading">초대 코드 관리</h3>
         <div className="flex gap-2">
           <button
             onClick={fetchCodes}

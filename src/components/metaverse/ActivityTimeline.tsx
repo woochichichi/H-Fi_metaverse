@@ -95,7 +95,7 @@ export default function ActivityTimeline() {
 
   return (
     <div className="flex flex-col gap-3">
-      <h3 className="text-sm font-bold text-text-primary">최근 활동</h3>
+      <h3 className="text-base font-bold text-text-primary font-heading">최근 활동</h3>
 
       {loading ? (
         <div className="py-4 text-center text-xs text-text-muted">로딩 중...</div>

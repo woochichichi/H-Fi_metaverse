@@ -85,7 +85,7 @@ export default function MoodPanel() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h3 className="text-sm font-bold text-text-primary">오늘 나의 기분은?</h3>
+      <h3 className="text-base font-bold text-text-primary font-heading">오늘 나의 기분은?</h3>
 
       {/* 이모지 그리드 */}
       <div className="grid grid-cols-4 gap-2">

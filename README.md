@@ -43,9 +43,9 @@
 
 ## 시작하기
 
-1. https://ito-metaverse.pages.dev 접속
+1. https://h-fi-metaverse.pages.dev/ 접속
 2. **가입하기** 클릭
-3. 관리자에게 받은 **초대 코드** 입력
+3. 관리자에게 받은 **초대 코드** 입력 (증권ITO 전우형 프로에게 문의)
 4. 한화 계열사 이메일(@hanwha.com 등)로 가입
 5. 이름과 소속 팀을 선택하면 완료!
 
@@ -64,6 +64,20 @@
 - **초대 코드 필수**: 코드 없이는 가입할 수 없습니다
 - **한화 계열사 이메일만**: @hanwha 도메인 외 가입 불가
 - **완전한 익명 보장**: 익명 VOC·쪽지는 관리자도 작성자를 알 수 없습니다
+
+(정말입니다. 그렇다고 욕설,비하는 안됩니다. 비겁합니다!
+매우 자세한 설명을 하자면,
+- 익명 VOC
+author_id: anonymous ? null : user?.id — 익명 선택 시 author_id에 null 저장
+및 동일하게 author_id: null로 INSERT
+- 익명 쪽지
+sender_id: anonymous ? null : user?.id — 익명 선택 시 sender_id에 null 저장
+및 동일하게 sender_id: null로 INSERT
+
+DB에 아예 사용자 ID를 저장하지 않기 때문에, 
+Supabase 콘솔에서 직접 DB를 조회해도 누가 썼는지 알 수 없습니다. 
+anonymous boolean 플래그만 있고, 실제 작성자 정보는 물리적으로 존재하지 않습니다.)
+
 - **역할 기반 접근**: RLS(Row Level Security)로 역할에 따라 데이터 접근이 제한됩니다
 
 ---
