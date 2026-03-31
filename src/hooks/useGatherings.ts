@@ -115,6 +115,19 @@ export function useGatherings() {
       console.error('모임 참여 실패:', joinError.message);
       return { error: joinError.message };
     }
+
+    // DB member_count 동기화
+    const { count } = await supabase
+      .from('gathering_members')
+      .select('*', { count: 'exact', head: true })
+      .eq('gathering_id', gatheringId);
+    if (count !== null) {
+      await supabase.from('gatherings').update({ member_count: count }).eq('id', gatheringId);
+      setGatherings((prev) =>
+        prev.map((g) => (g.id === gatheringId ? { ...g, member_count: count } : g))
+      );
+    }
+
     return { error: null };
   }, []);
 
@@ -142,6 +155,19 @@ export function useGatherings() {
       console.error('모임 취소 실패:', leaveError.message);
       return { error: leaveError.message };
     }
+
+    // DB member_count 동기화
+    const { count } = await supabase
+      .from('gathering_members')
+      .select('*', { count: 'exact', head: true })
+      .eq('gathering_id', gatheringId);
+    if (count !== null) {
+      await supabase.from('gatherings').update({ member_count: count }).eq('id', gatheringId);
+      setGatherings((prev) =>
+        prev.map((g) => (g.id === gatheringId ? { ...g, member_count: count } : g))
+      );
+    }
+
     return { error: null };
   }, []);
 
