@@ -658,6 +658,39 @@ function PixelOmokTable({ x, y }: { x: number; y: number }) {
   );
 }
 
+// 줄넘기 스프라이트 (두 사람이 줄을 돌리고 가운데서 뛰는 모습)
+function PixelJumpRope({ x, y }: { x: number; y: number }) {
+  return (
+    <div className="absolute z-[4]" style={{ left: x, top: y }}>
+      <svg width="140" height="120" viewBox="0 0 35 30" style={{ imageRendering: 'pixelated' }}>
+        {/* 바닥 그림자 */}
+        <ellipse cx="17.5" cy="28" rx="14" ry="2" fill="rgba(0,0,0,0.12)" />
+        {/* 왼쪽 사람 (줄 돌리는) */}
+        <circle cx="5" cy="16" r="2.5" fill="#FFE0BD" />
+        <rect x="3" y="18" width="4" height="7" rx="1" fill="#E74C3C" />
+        <rect x="3" y="25" width="2" height="3" fill="#444" />
+        <rect x="5" y="25" width="2" height="3" fill="#444" />
+        {/* 오른쪽 사람 (줄 돌리는) */}
+        <circle cx="30" cy="16" r="2.5" fill="#FFE0BD" />
+        <rect x="28" y="18" width="4" height="7" rx="1" fill="#3498DB" />
+        <rect x="28" y="25" width="2" height="3" fill="#444" />
+        <rect x="30" y="25" width="2" height="3" fill="#444" />
+        {/* 줄 (곡선) */}
+        <path d="M 5 17 Q 17.5 4 30 17" stroke="#F8B500" strokeWidth="1" fill="none" strokeLinecap="round" />
+        {/* 가운데 점프하는 사람 */}
+        <circle cx="17.5" cy="12" r="2.5" fill="#FFE0BD" />
+        <rect x="15.5" y="14" width="4" height="6" rx="1" fill="#6C5CE7" />
+        <rect x="15.5" y="20" width="2" height="2" fill="#444" />
+        <rect x="17.5" y="20" width="2" height="2" fill="#444" />
+        {/* 점프 이펙트 */}
+        <line x1="14" y1="23" x2="12" y2="25" stroke="#fff" strokeWidth="0.5" opacity="0.5" />
+        <line x1="17.5" y1="23" x2="17.5" y2="26" stroke="#fff" strokeWidth="0.5" opacity="0.5" />
+        <line x1="21" y1="23" x2="23" y2="25" stroke="#fff" strokeWidth="0.5" opacity="0.5" />
+      </svg>
+    </div>
+  );
+}
+
 // ═══ Zone 바닥 색상 매핑 ═══
 const ZONE_FLOOR_COLORS: Record<string, string> = {
   // 팀 룸 Zone
@@ -670,6 +703,7 @@ const ZONE_FLOOR_COLORS: Record<string, string> = {
   'gathering': '#1e2a18', // 잔디/야외 톤
   'reaction': '#1a0a20', // 진한 보라/네온 톤
   'omok': '#1a2a1a',    // 녹색 톤
+  'jumprope': '#1a1a2e', // 짙은 남색 체육관 톤
 };
 
 function getZoneFloorColor(zoneId: string): string {
@@ -1000,38 +1034,34 @@ const PlazaFurniture = memo(function PlazaFurniture() {
       <PixelPlant90s x={80} y={740} size="small" />
       <PixelPlant90s x={460} y={740} size="small" />
 
-      {/* ═══ 반응속도 Zone (760,520 ~ 1100,820) — 게임 아케이드 ═══ */}
-      {/* 아케이드 캐비넷 2대 */}
-      <PixelArcade x={780} y={550} accent="#FF6B6B" />
-      <PixelArcade x={860} y={550} accent="#4ECDC4" />
-      {/* 스코어보드 */}
-      <PixelScoreboard x={780} y={520} />
-      {/* 버저 버튼 (대결용) */}
-      <PixelBuzzer x={950} y={600} color="#E74C3C" />
-      <PixelBuzzer x={1010} y={600} color="#3498DB" />
-      {/* 대결 테이블 */}
-      <PixelRoundTable x={960} y={640} size={80} />
-      <PixelChair90s x={950} y={720} />
-      <PixelChair90s x={1020} y={720} />
-      {/* 네온 사인 */}
-      <PixelNeonSign x={940} y={530} text="READY?" color="#FFD93D" />
-      {/* 소파 (관전석) */}
-      <PixelSofa90s x={780} y={740} color="#6C5CE7" />
+      {/* ═══ 반응속도 Zone (520,490 ~ 790,770) — 게임 아케이드 ═══ */}
+      <PixelArcade x={540} y={550} accent="#FF6B6B" />
+      <PixelArcade x={620} y={550} accent="#4ECDC4" />
+      <PixelScoreboard x={540} y={520} />
+      <PixelBuzzer x={700} y={600} color="#E74C3C" />
+      <PixelNeonSign x={680} y={530} text="READY?" color="#FFD93D" />
+      <PixelChair90s x={700} y={700} />
+      <PixelSofa90s x={540} y={730} color="#6C5CE7" />
 
-      {/* ═══ 오목 Zone (1140,520 ~ 1540,820) ═══ */}
-      <PixelOmokTable x={1240} y={580} />
-      <PixelChair90s x={1220} y={560} />
-      <PixelChair90s x={1370} y={560} />
-      <PixelChair90s x={1220} y={720} />
-      <PixelChair90s x={1370} y={720} />
-      <PixelSofa90s x={1160} y={740} color="#555" />
-      <PixelFileCabinet x={1160} y={560} />
-      <PixelVending90s x={1480} y={580} />
-      <PixelPlant90s x={1150} y={540} size="small" />
-      <PixelPlant90s x={1500} y={740} size="small" />
+      {/* ═══ 오목 Zone (810,490 ~ 1080,770) ═══ */}
+      <PixelOmokTable x={870} y={570} />
+      <PixelChair90s x={850} y={550} />
+      <PixelChair90s x={990} y={550} />
+      <PixelChair90s x={850} y={710} />
+      <PixelChair90s x={990} y={710} />
+      <PixelPlant90s x={830} y={530} size="small" />
+      <PixelPlant90s x={1050} y={730} size="small" />
+
+      {/* ═══ 줄넘기 Zone (1100,490 ~ 1370,770) — 체육관 ═══ */}
+      <PixelJumpRope x={1160} y={560} />
+      <PixelNeonSign x={1160} y={520} text="JUMP!" color="#4ECDC4" />
+      <PixelScoreboard x={1120} y={520} />
+      <PixelDumbbell x={1320} y={560} />
+      <PixelSofa90s x={1120} y={730} color="#2ecc71" />
+      <PixelPlant90s x={1340} y={730} size="small" />
 
       {/* 광장 추가 가구 */}
-      <PixelPlant90s x={1460} y={880} />
+      <PixelPlant90s x={1420} y={880} />
       <PixelPlant90s x={100} y={880} />
     </>
   );

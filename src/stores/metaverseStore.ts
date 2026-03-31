@@ -33,6 +33,11 @@ export interface OtherPlayer {
   targetX: number;
   targetY: number;
   moodEmoji?: string;
+  avatarColor?: string;
+  skinColor?: string;
+  hairColor?: string;
+  hairStyle?: string;
+  accessory?: string;
 }
 
 export interface GlobalPresenceUser {

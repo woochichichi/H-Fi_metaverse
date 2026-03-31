@@ -125,6 +125,59 @@ export const TEAM_COLORS: Record<string, { body: string; hair: string }> = {
   '한금서':  { body: '#F8B500', hair: '#5a4210' },
 };
 
+// ═══ 캐릭터 커스터마이징 옵션 ═══
+
+export const SKIN_COLORS = [
+  { id: 'light',  hex: '#FFE0BD', label: '밝은 피부' },
+  { id: 'fair',   hex: '#FFDBB4', label: '살구색' },
+  { id: 'medium', hex: '#E8B88A', label: '중간 피부' },
+  { id: 'tan',    hex: '#C68642', label: '황갈색' },
+  { id: 'dark',   hex: '#8D5524', label: '어두운 피부' },
+] as const;
+
+export const HAIR_COLORS = [
+  { id: 'black',    hex: '#222222', label: '검정' },
+  { id: 'brown',    hex: '#5a3e28', label: '갈색' },
+  { id: 'darkbrown',hex: '#3a2010', label: '짙은 갈색' },
+  { id: 'blonde',   hex: '#D4A843', label: '금발' },
+  { id: 'red',      hex: '#A0522D', label: '적갈색' },
+  { id: 'gray',     hex: '#888888', label: '회색' },
+  { id: 'blue',     hex: '#4A6FA5', label: '파랑' },
+  { id: 'pink',     hex: '#D4789C', label: '핑크' },
+] as const;
+
+export const BODY_COLORS = [
+  { id: 'purple',  hex: '#6C5CE7', label: '보라' },
+  { id: 'green',   hex: '#00D68F', label: '초록' },
+  { id: 'blue',    hex: '#0984E3', label: '파랑' },
+  { id: 'gold',    hex: '#F8B500', label: '골드' },
+  { id: 'red',     hex: '#FF6B6B', label: '빨강' },
+  { id: 'pink',    hex: '#FF6B9D', label: '핑크' },
+  { id: 'orange',  hex: '#FF9A6B', label: '오렌지' },
+  { id: 'teal',    hex: '#6BFFD4', label: '청록' },
+  { id: 'navy',    hex: '#2C3E7B', label: '네이비' },
+  { id: 'mint',    hex: '#95E86B', label: '민트' },
+] as const;
+
+export type HairStyle = 'default' | 'short' | 'spiky' | 'long' | 'bob';
+export const HAIR_STYLES: { id: HairStyle; label: string }[] = [
+  { id: 'default', label: '기본' },
+  { id: 'short',   label: '짧은 머리' },
+  { id: 'spiky',   label: '뾰족 머리' },
+  { id: 'long',    label: '긴 머리' },
+  { id: 'bob',     label: '단발' },
+];
+
+export type Accessory = 'none' | 'glasses' | 'sunglasses' | 'cap' | 'headband' | 'crown';
+export const ACCESSORIES: { id: Accessory; label: string; emoji: string }[] = [
+  { id: 'none',       label: '없음',     emoji: '❌' },
+  { id: 'glasses',    label: '안경',     emoji: '👓' },
+  { id: 'sunglasses', label: '선글라스',  emoji: '🕶️' },
+  { id: 'cap',        label: '모자',     emoji: '🧢' },
+  { id: 'headband',   label: '머리띠',   emoji: '🎀' },
+  { id: 'crown',      label: '왕관',     emoji: '👑' },
+];
+
 // 프로필 상태
 export const PROFILE_STATUSES = ['online', 'offline', '재택'] as const;
 export type ProfileStatus = (typeof PROFILE_STATUSES)[number];
@@ -277,9 +330,10 @@ export const ROOMS_DATA: Record<RoomId, RoomDef> = {
     zones: [
       { id: 'voc', team: null, label: '📞 VOC 센터', emoji: '📞', x: 60, y: 60, width: 630, height: 360 },
       { id: 'idea', team: null, label: '💡 아이디어 보드', emoji: '💡', x: 820, y: 60, width: 630, height: 360 },
-      { id: 'gathering', team: null, label: '🎉 모임방', emoji: '🎉', x: 60, y: 490, width: 440, height: 280 },
-      { id: 'reaction', team: null, label: '⚡ 반응속도', emoji: '⚡', x: 720, y: 490, width: 320, height: 280 },
-      { id: 'omok', team: null, label: '⚫ 오목 게임방', emoji: '⚫', x: 1080, y: 490, width: 380, height: 280 },
+      { id: 'gathering', team: null, label: '🎉 모임방', emoji: '🎉', x: 60, y: 490, width: 420, height: 280 },
+      { id: 'reaction', team: null, label: '⚡ 반응속도', emoji: '⚡', x: 520, y: 490, width: 270, height: 280 },
+      { id: 'omok', team: null, label: '⚫ 오목', emoji: '⚫', x: 810, y: 490, width: 270, height: 280 },
+      { id: 'jumprope', team: null, label: '🪢 줄넘기', emoji: '🪢', x: 1100, y: 490, width: 270, height: 280 },
     ],
     portals: [
       {

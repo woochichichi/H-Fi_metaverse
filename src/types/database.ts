@@ -123,6 +123,12 @@ export interface Database {
         Update: Record<string, never>;
         Relationships: [];
       };
+      jump_rope_records: {
+        Row: JumpRopeRecord;
+        Insert: Omit<JumpRopeRecord, 'id' | 'created_at'>;
+        Update: Record<string, never>;
+        Relationships: [];
+      };
     };
     Views: {
       idea_with_votes: {
@@ -135,6 +141,10 @@ export interface Database {
       };
       reaction_ranking: {
         Row: ReactionRanking;
+        Relationships: [];
+      };
+      jump_rope_ranking: {
+        Row: JumpRopeRanking;
         Relationships: [];
       };
     };
@@ -157,6 +167,10 @@ export interface Profile {
   avatar_color: string;
   avatar_emoji: string;
   avatar_url: string | null;
+  skin_color: string;
+  hair_color: string;
+  hair_style: string;
+  accessory: string;
   status: 'online' | 'offline' | '재택';
   mood_emoji: string | null;
   position_x: number;
@@ -401,6 +415,25 @@ export interface ReactionRanking {
   team: string;
   best_avg_ms: number;
   best_single_ms: number;
+  play_count: number;
+}
+
+export interface JumpRopeRecord {
+  id: string;
+  user_id: string;
+  duration_ms: number;
+  jump_count: number;
+  max_speed: number;
+  created_at: string;
+}
+
+export interface JumpRopeRanking {
+  id: string;
+  name: string;
+  nickname: string | null;
+  team: string;
+  best_duration_ms: number;
+  best_jump_count: number;
   play_count: number;
 }
 

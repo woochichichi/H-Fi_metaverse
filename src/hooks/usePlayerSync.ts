@@ -51,9 +51,14 @@ export default function usePlayerSync() {
         x: playerPosition.x,
         y: playerPosition.y,
         moodEmoji: profile?.mood_emoji || undefined,
+        avatarColor: profile?.avatar_color || undefined,
+        skinColor: profile?.skin_color || undefined,
+        hairColor: profile?.hair_color || undefined,
+        hairStyle: profile?.hair_style || undefined,
+        accessory: profile?.accessory || undefined,
       },
     });
-  }, [playerPosition, user?.id, profile?.nickname, profile?.name, profile?.team, profile?.mood_emoji, currentRoom]);
+  }, [playerPosition, user?.id, profile?.nickname, profile?.name, profile?.team, profile?.mood_emoji, profile?.avatar_color, profile?.skin_color, profile?.hair_color, profile?.hair_style, profile?.accessory, currentRoom]);
 
   // ── 글로벌 Presence 채널 (모든 방의 접속자를 한 곳에서 추적) ──
   useEffect(() => {
@@ -169,6 +174,11 @@ export default function usePlayerSync() {
         targetX: payload.x,
         targetY: payload.y,
         moodEmoji: payload.moodEmoji,
+        avatarColor: payload.avatarColor,
+        skinColor: payload.skinColor,
+        hairColor: payload.hairColor,
+        hairStyle: payload.hairStyle,
+        accessory: payload.accessory,
       });
     });
 

@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Bell, Inbox, Users, LogOut, Settings, Pencil } from 'lucide-react';
+import { Bell, Inbox, Users, LogOut, Settings, Pencil, Palette } from 'lucide-react';
 import InboxBadge from '../inbox/InboxBadge';
 import AdminPanel from '../admin/AdminPanel';
 import MoodPicker from './MoodPicker';
 import NicknameEditor from './NicknameEditor';
+import CharacterCustomModal from '../metaverse/CharacterCustomModal';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
 import { useDeviceMode } from '../../hooks/useDeviceMode';
@@ -22,6 +23,7 @@ export default function TopBar() {
   const [showAdmin, setShowAdmin] = useState(false);
   const [showMood, setShowMood] = useState(false);
   const [showNicknameEditor, setShowNicknameEditor] = useState(false);
+  const [showCharacterCustom, setShowCharacterCustom] = useState(false);
   const moodRef = useRef<HTMLDivElement>(null);
   const moodBtnRef = useRef<HTMLDivElement>(null);
 
@@ -156,6 +158,13 @@ export default function TopBar() {
                 </button>
               </div>
               <button
+                onClick={() => setShowCharacterCustom(true)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary transition-colors duration-200 hover:bg-bg-tertiary hover:text-accent"
+                title="캐릭터 꾸미기"
+              >
+                <Palette size={16} />
+              </button>
+              <button
                 onClick={() => setShowNicknameEditor(true)}
                 className="group flex items-center gap-1 rounded-lg px-1.5 py-1 text-xs text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary"
                 title="별명 변경"
@@ -186,6 +195,11 @@ export default function TopBar() {
       {/* 별명 변경 모달 */}
       {showNicknameEditor && (
         <NicknameEditor onClose={() => setShowNicknameEditor(false)} />
+      )}
+
+      {/* 캐릭터 꾸미기 모달 */}
+      {showCharacterCustom && (
+        <CharacterCustomModal onClose={() => setShowCharacterCustom(false)} />
       )}
 
       {/* 관리자 패널 모달 — createPortal로 body에 렌더링 (backdrop-filter stacking context 회피) */}

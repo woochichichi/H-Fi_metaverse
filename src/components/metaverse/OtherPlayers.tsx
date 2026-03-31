@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import CharacterSVG from './CharacterSVG';
 import { useMetaverseStore, type OtherPlayer } from '../../stores/metaverseStore';
-import { TEAM_COLORS } from '../../lib/constants';
+import { TEAM_COLORS, type HairStyle, type Accessory } from '../../lib/constants';
 
 const LERP_SPEED = 0.15;
 const CHAR_W = 30;
@@ -23,8 +23,8 @@ function OtherPlayerSprite({ player }: { player: OtherPlayer }) {
         className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1 whitespace-nowrap rounded-[10px] px-[8px] py-[2px] text-[11px] font-semibold text-white"
         style={{
           top: -20,
-          background: `${colors.body}cc`,
-          boxShadow: `0 2px 6px ${colors.body}40`,
+          background: `${player.avatarColor || colors.body}cc`,
+          boxShadow: `0 2px 6px ${player.avatarColor || colors.body}40`,
         }}
       >
         <span
@@ -33,7 +33,14 @@ function OtherPlayerSprite({ player }: { player: OtherPlayer }) {
         />
         {player.name}
       </div>
-      <CharacterSVG color={colors.body} skinColor="#FFE0BD" hairColor={colors.hair} size={CHAR_W} />
+      <CharacterSVG
+        color={player.avatarColor || colors.body}
+        skinColor={player.skinColor || '#FFE0BD'}
+        hairColor={player.hairColor || colors.hair}
+        hairStyle={(player.hairStyle as HairStyle) || 'default'}
+        accessory={(player.accessory as Accessory) || 'none'}
+        size={CHAR_W}
+      />
     </div>
   );
 }

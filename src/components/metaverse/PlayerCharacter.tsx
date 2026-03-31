@@ -2,7 +2,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import CharacterSVG from './CharacterSVG';
 import { useMetaverseStore } from '../../stores/metaverseStore';
 import { useUiStore } from '../../stores/uiStore';
-import { ROOMS_DATA, TEAM_TO_ROOM } from '../../lib/constants';
+import { ROOMS_DATA, TEAM_TO_ROOM, type HairStyle, type Accessory } from '../../lib/constants';
 import { useAuthStore } from '../../stores/authStore';
 
 const SPEED = 4;
@@ -163,14 +163,21 @@ export default function PlayerCharacter() {
         className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1 whitespace-nowrap rounded-[10px] px-[10px] py-[2px] text-[10px] font-semibold text-white"
         style={{
           top: -22,
-          background: 'rgba(108,92,231,.9)',
-          boxShadow: '0 2px 8px rgba(108,92,231,.3)',
+          background: `${profile?.avatar_color ?? '#6C5CE7'}e6`,
+          boxShadow: `0 2px 8px ${profile?.avatar_color ?? '#6C5CE7'}4d`,
         }}
       >
         <span className="inline-block h-[6px] w-[6px] rounded-full bg-success" />
         {displayName}
       </div>
-      <CharacterSVG color="#6C5CE7" skinColor="#FFE0BD" hairColor="#5a3e28" size={CHAR_W} />
+      <CharacterSVG
+        color={profile?.avatar_color ?? '#6C5CE7'}
+        skinColor={profile?.skin_color ?? '#FFE0BD'}
+        hairColor={profile?.hair_color ?? '#5a3e28'}
+        hairStyle={(profile?.hair_style as HairStyle) ?? 'default'}
+        accessory={(profile?.accessory as Accessory) ?? 'none'}
+        size={CHAR_W}
+      />
     </div>
   );
 }
