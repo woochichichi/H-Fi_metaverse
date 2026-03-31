@@ -220,39 +220,6 @@ function PixelCoffeeMachine({ x, y }: { x: number; y: number }) {
   );
 }
 
-// 서버 랙 (블링킹 LED)
-function PixelServerRack({ x, y }: { x: number; y: number }) {
-  return (
-    <div className="absolute z-[5]" style={{ left: x, top: y }}>
-      <svg width="48" height="76" viewBox="0 0 12 19" style={{ imageRendering: 'pixelated' }}>
-        <ellipse cx="6" cy="18" rx="5" ry="1.5" fill="rgba(0,0,0,0.1)" />
-        {/* 랙 본체 */}
-        <rect x="0" y="0" width="12" height="17" rx="1" fill="#1a1a2e" />
-        <rect x="1" y="1" width="10" height="15" fill="#222" />
-        {/* 서버 유닛 1 */}
-        <rect x="2" y="2" width="8" height="3" fill="#333" />
-        <rect x="3" y="3" width="1" height="1" fill="#4CAF50" opacity="0.9" />
-        <rect x="5" y="3" width="1" height="1" fill="#4CAF50" opacity="0.6" />
-        <rect x="7" y="3" width="2" height="1" fill="#555" />
-        {/* 서버 유닛 2 */}
-        <rect x="2" y="6" width="8" height="3" fill="#333" />
-        <rect x="3" y="7" width="1" height="1" fill="#2196F3" opacity="0.8" />
-        <rect x="5" y="7" width="1" height="1" fill="#FF9800" opacity="0.7" />
-        <rect x="7" y="7" width="2" height="1" fill="#555" />
-        {/* 서버 유닛 3 */}
-        <rect x="2" y="10" width="8" height="3" fill="#333" />
-        <rect x="3" y="11" width="1" height="1" fill="#F44336" opacity="0.5" />
-        <rect x="5" y="11" width="1" height="1" fill="#4CAF50" opacity="0.8" />
-        <rect x="7" y="11" width="2" height="1" fill="#555" />
-        {/* 케이블 포트 */}
-        <rect x="3" y="14" width="6" height="2" fill="#2C2C2C" />
-        <rect x="4" y="14.5" width="1" height="1" fill="#0D47A1" opacity="0.6" />
-        <rect x="6" y="14.5" width="1" height="1" fill="#0D47A1" opacity="0.6" />
-      </svg>
-    </div>
-  );
-}
-
 // 러버덕 (디버깅의 상징)
 function PixelRubberDuck({ x, y }: { x: number; y: number }) {
   return (
@@ -450,33 +417,37 @@ function PixelPlant90s({ x, y, size = 'large' }: { x: number; y: number; size?: 
   );
 }
 
-// 코르크 게시판 (포스트잇 — postCount 연동)
+// 코르크 게시판 (포스트잇 — postCount 연동, 확대 + 포스트잇 축소)
 const POSTIT_SLOTS = [
-  { x: 3, y: 3, w: 5, h: 5, fill: '#FDCB6E', top: '#F0B830', pin: { cx: 5, cy: 3, fill: '#E74C3C' } },
-  { x: 10, y: 2, w: 5, h: 5, fill: '#FF6B9D', top: '#E05580', pin: { cx: 12, cy: 2, fill: '#3498DB' } },
-  { x: 17, y: 4, w: 4, h: 4, fill: '#74B9FF', top: '#5AA0E8', pin: { cx: 19, cy: 4, fill: '#2ECC71' } },
-  { x: 5, y: 10, w: 5, h: 4, fill: '#55EFC4', top: '#3DD8A8', pin: null },
-  { x: 13, y: 9, w: 6, h: 5, fill: '#FFF3B0', top: '#E8DC98', pin: null },
+  { x: 4, y: 3, w: 5, h: 4, fill: '#FDCB6E', top: '#F0B830', pin: { cx: 6, cy: 3, fill: '#E74C3C' } },
+  { x: 12, y: 4, w: 5, h: 4, fill: '#FF6B9D', top: '#E05580', pin: { cx: 14, cy: 4, fill: '#3498DB' } },
+  { x: 21, y: 3, w: 4.5, h: 3.5, fill: '#74B9FF', top: '#5AA0E8', pin: { cx: 23, cy: 3, fill: '#2ECC71' } },
+  { x: 6, y: 13, w: 5, h: 3.5, fill: '#55EFC4', top: '#3DD8A8', pin: null },
+  { x: 16, y: 12, w: 6, h: 4, fill: '#FFF3B0', top: '#E8DC98', pin: null },
 ];
 
 function PixelCorkboard({ x, y, frameColor = '#8B6914', postCount = 0 }: { x: number; y: number; frameColor?: string; postCount?: number }) {
   const slots = Math.min(postCount, POSTIT_SLOTS.length);
   return (
     <div className="absolute z-[5]" style={{ left: x, top: y }}>
-      <svg width="96" height="72" viewBox="0 0 24 18" style={{ imageRendering: 'pixelated' }}>
+      <svg width="140" height="100" viewBox="0 0 35 25" style={{ imageRendering: 'pixelated' }}>
         {/* 프레임 */}
-        <rect x="0" y="0" width="24" height="18" fill={frameColor} />
+        <rect x="0" y="0" width="35" height="25" fill={frameColor} />
         {/* 코르크 */}
-        <rect x="1" y="1" width="22" height="16" fill="#D4A06E" />
-        <rect x="2" y="2" width="20" height="14" fill="#C4966A" />
+        <rect x="1.5" y="1.5" width="32" height="22" fill="#D4A06E" />
+        <rect x="2.5" y="2.5" width="30" height="20" fill="#C4966A" />
+        {/* 코르크 질감 */}
+        <circle cx="8" cy="8" r="0.5" fill="#B8865A" opacity="0.4" />
+        <circle cx="20" cy="15" r="0.4" fill="#B8865A" opacity="0.3" />
+        <circle cx="28" cy="7" r="0.3" fill="#B8865A" opacity="0.3" />
         {/* 포스트잇 — postCount만큼 표시 */}
         {Array.from({ length: slots }).map((_, i) => {
           const s = POSTIT_SLOTS[i];
           return (
             <g key={i}>
               <rect x={s.x} y={s.y} width={s.w} height={s.h} fill={s.fill} />
-              <rect x={s.x} y={s.y} width={s.w} height={1} fill={s.top} />
-              {s.pin && <circle cx={s.pin.cx} cy={s.pin.cy} r={0.7} fill={s.pin.fill} />}
+              <rect x={s.x} y={s.y} width={s.w} height={0.8} fill={s.top} />
+              {s.pin && <circle cx={s.pin.cx} cy={s.pin.cy} r={0.6} fill={s.pin.fill} />}
             </g>
           );
         })}
@@ -891,6 +862,150 @@ function PixelJumpRope({ x, y }: { x: number; y: number }) {
   );
 }
 
+// ═══ 한화/금융 테마 픽셀 장식 ═══
+
+// 금괴
+function PixelGoldBar({ x, y }: { x: number; y: number }) {
+  return (
+    <div className="absolute z-[6]" style={{ left: x, top: y }}>
+      <svg width="48" height="36" viewBox="0 0 12 9" style={{ imageRendering: 'pixelated' }}>
+        <ellipse cx="6" cy="8" rx="5" ry="1" fill="rgba(0,0,0,0.1)" />
+        <polygon points="2,7 10,7 9,3 3,3" fill="#D4A017" />
+        <polygon points="3,3 9,3 8,1 4,1" fill="#F0D060" />
+        <rect x="4" y="4" width="4" height="0.5" fill="#F8E878" opacity="0.5" />
+        <rect x="5" y="5.5" width="2" height="0.8" fill="#C89A15" opacity="0.4" />
+      </svg>
+    </div>
+  );
+}
+
+// 동전 스택
+function PixelCoinStack({ x, y }: { x: number; y: number }) {
+  return (
+    <div className="absolute z-[6]" style={{ left: x, top: y }}>
+      <svg width="36" height="48" viewBox="0 0 9 12" style={{ imageRendering: 'pixelated' }}>
+        <ellipse cx="4.5" cy="11" rx="4" ry="1" fill="rgba(0,0,0,0.1)" />
+        <ellipse cx="4.5" cy="9" rx="3.5" ry="1.5" fill="#C8960F" />
+        <ellipse cx="4.5" cy="8.5" rx="3.5" ry="1.5" fill="#E8B830" />
+        <ellipse cx="4.5" cy="6.5" rx="3.5" ry="1.5" fill="#C8960F" />
+        <ellipse cx="4.5" cy="6" rx="3.5" ry="1.5" fill="#E8B830" />
+        <ellipse cx="4.5" cy="4" rx="3.5" ry="1.5" fill="#C8960F" />
+        <ellipse cx="4.5" cy="3.5" rx="3.5" ry="1.5" fill="#F0D060" />
+        <text x="4.5" y="4.5" textAnchor="middle" fontSize="2.5" fill="#C8960F" fontWeight="bold">₩</text>
+      </svg>
+    </div>
+  );
+}
+
+// 한화 태양 심볼
+function PixelHanwhaSun({ x, y, size = 44 }: { x: number; y: number; size?: number }) {
+  return (
+    <div className="absolute z-[6]" style={{ left: x, top: y }}>
+      <svg width={size} height={size} viewBox="0 0 11 11" style={{ imageRendering: 'pixelated' }}>
+        <rect x="5" y="0" width="1" height="2" fill="#FF8C00" opacity="0.5" />
+        <rect x="5" y="9" width="1" height="2" fill="#FF8C00" opacity="0.5" />
+        <rect x="0" y="5" width="2" height="1" fill="#FF8C00" opacity="0.5" />
+        <rect x="9" y="5" width="2" height="1" fill="#FF8C00" opacity="0.5" />
+        <rect x="1.5" y="1.5" width="1.5" height="0.8" fill="#FF8C00" opacity="0.3" />
+        <rect x="8" y="1.5" width="1.5" height="0.8" fill="#FF8C00" opacity="0.3" />
+        <rect x="1.5" y="8.5" width="1.5" height="0.8" fill="#FF8C00" opacity="0.3" />
+        <rect x="8" y="8.5" width="1.5" height="0.8" fill="#FF8C00" opacity="0.3" />
+        <circle cx="5.5" cy="5.5" r="3" fill="#FF8C00" />
+        <circle cx="5.5" cy="5.5" r="2.5" fill="#FFA500" />
+        <circle cx="5.5" cy="5.5" r="1.8" fill="#FFB830" />
+        <circle cx="4.5" cy="4.5" r="0.8" fill="rgba(255,255,255,0.2)" />
+      </svg>
+    </div>
+  );
+}
+
+// 금고
+function PixelSafe({ x, y }: { x: number; y: number }) {
+  return (
+    <div className="absolute z-[5]" style={{ left: x, top: y }}>
+      <svg width="48" height="56" viewBox="0 0 12 14" style={{ imageRendering: 'pixelated' }}>
+        <ellipse cx="6" cy="13" rx="5" ry="1.5" fill="rgba(0,0,0,0.1)" />
+        <rect x="1" y="1" width="10" height="11" rx="1" fill="#4A4A4A" />
+        <rect x="2" y="2" width="8" height="9" fill="#5A5A5A" />
+        <rect x="2.5" y="2.5" width="7" height="8" fill="#555" />
+        <circle cx="6" cy="6" r="2" fill="#444" />
+        <circle cx="6" cy="6" r="1.5" fill="#666" />
+        <circle cx="6" cy="6" r="0.5" fill="#888" />
+        <rect x="6" y="4.5" width="0.3" height="1.5" fill="#AAA" />
+        <rect x="8" y="5" width="1.5" height="2" rx="0.3" fill="#888" />
+        <rect x="8" y="5" width="1.5" height="0.5" fill="#999" />
+        <rect x="2" y="2" width="1" height="9" fill="rgba(255,255,255,0.05)" />
+      </svg>
+    </div>
+  );
+}
+
+// 63빌딩 (생명ITO 랜드마크)
+function Pixel63Building({ x, y }: { x: number; y: number }) {
+  return (
+    <div className="absolute z-[6]" style={{ left: x, top: y }}>
+      <svg width="48" height="80" viewBox="0 0 12 20" style={{ imageRendering: 'pixelated' }}>
+        <ellipse cx="6" cy="19" rx="5" ry="1" fill="rgba(0,0,0,0.12)" />
+        <rect x="3" y="2" width="6" height="16" fill="#3A6B8C" />
+        <rect x="2" y="4" width="8" height="14" fill="#4A7D9C" />
+        <rect x="5" y="0" width="2" height="3" fill="#5A8DAC" />
+        <rect x="5.5" y="0" width="1" height="1" fill="#88B8D0" />
+        {[0,1,2,3,4,5,6].map(i => (
+          <g key={i}>
+            <rect x="3" y={4 + i * 2} width="2.5" height="1.2" fill="#6BAED0" opacity="0.6" />
+            <rect x="6.5" y={4 + i * 2} width="2.5" height="1.2" fill="#6BAED0" opacity="0.6" />
+          </g>
+        ))}
+        <rect x="3" y="4" width="1" height="14" fill="rgba(255,255,255,0.08)" />
+        <text x="6" y="11" textAnchor="middle" fontSize="3" fill="#FFD700" fontWeight="bold" opacity="0.7">63</text>
+      </svg>
+    </div>
+  );
+}
+
+// 한화손보빌딩 (손보ITO 랜드마크)
+function PixelInsuranceBuilding({ x, y }: { x: number; y: number }) {
+  return (
+    <div className="absolute z-[6]" style={{ left: x, top: y }}>
+      <svg width="52" height="80" viewBox="0 0 13 20" style={{ imageRendering: 'pixelated' }}>
+        <ellipse cx="6.5" cy="19" rx="5.5" ry="1" fill="rgba(0,0,0,0.12)" />
+        <rect x="2" y="3" width="9" height="15" fill="#4A5568" />
+        <rect x="1" y="5" width="11" height="13" fill="#5A6A7E" />
+        <rect x="3" y="1" width="7" height="3" fill="#4A5568" />
+        <rect x="4" y="0" width="5" height="2" fill="#5A6A7E" />
+        {[0,1,2,3,4,5].map(i => (
+          <g key={i}>
+            <rect x="2" y={5 + i * 2} width="2" height="1.2" fill="#8AA8C0" opacity="0.5" />
+            <rect x="5.5" y={5 + i * 2} width="2" height="1.2" fill="#8AA8C0" opacity="0.5" />
+            <rect x="9" y={5 + i * 2} width="2" height="1.2" fill="#8AA8C0" opacity="0.5" />
+          </g>
+        ))}
+        <polygon points="6.5,8 5,9.5 5.3,11.5 6.5,12.5 7.7,11.5 8,9.5" fill="#3498DB" opacity="0.4" />
+      </svg>
+    </div>
+  );
+}
+
+// 대형 캔들스틱 차트 (증권ITO 강조)
+function PixelCandleChart({ x, y }: { x: number; y: number }) {
+  return (
+    <div className="absolute z-[6]" style={{ left: x, top: y }}>
+      <svg width="56" height="72" viewBox="0 0 14 18" style={{ imageRendering: 'pixelated' }}>
+        <rect x="1.5" y="4" width="1" height="2" fill="#00D68F" />
+        <rect x="1" y="6" width="2" height="6" fill="#00D68F" />
+        <rect x="1.5" y="12" width="1" height="2" fill="#00D68F" />
+        <rect x="5.5" y="0" width="1" height="1" fill="#FF4757" />
+        <rect x="5" y="1" width="2" height="10" fill="#FF4757" />
+        <rect x="5.5" y="11" width="1" height="3" fill="#FF4757" />
+        <rect x="9.5" y="2" width="1" height="2" fill="#00D68F" />
+        <rect x="9" y="4" width="2" height="8" fill="#00D68F" />
+        <rect x="9.5" y="12" width="1" height="3" fill="#00D68F" />
+        <line x1="0" y1="15" x2="14" y2="3" stroke="#FFD93D" strokeWidth="0.5" opacity="0.5" />
+      </svg>
+    </div>
+  );
+}
+
 // ═══ Zone 바닥 색상 매핑 ═══
 const ZONE_FLOOR_COLORS: Record<string, string> = {
   // 팀 룸 Zone
@@ -1047,8 +1162,8 @@ const PortalArch = memo(function PortalArch({ room, roomAlerts }: { room: RoomDe
   );
 });
 
-// ═══ 팀별 픽셀 장식 (증권-차트, 생명-하트, 손보-자동차) ═══
-function PixelTeamDeco({ x, y, type }: { x: number; y: number; type: 'chart' | 'heart' | 'car' }) {
+// ═══ 팀별 픽셀 장식 (증권-캔들차트, 생명-63빌딩, 손보-방패) ═══
+function PixelTeamDeco({ x, y, type }: { x: number; y: number; type: 'chart' | 'building63' | 'shield' }) {
   const decos: Record<string, JSX.Element> = {
     chart: (
       <svg width="56" height="44" viewBox="0 0 14 11" style={{ imageRendering: 'pixelated' }}>
@@ -1061,35 +1176,28 @@ function PixelTeamDeco({ x, y, type }: { x: number; y: number; type: 'chart' | '
         <rect x="10" y="1" width="1" height="3" fill="#00D68F" />
       </svg>
     ),
-    heart: (
-      <svg width="52" height="52" viewBox="0 0 13 13" style={{ imageRendering: 'pixelated' }}>
-        <rect x="1" y="0" width="4" height="2" fill="#FFC312" />
-        <rect x="8" y="0" width="4" height="2" fill="#FFC312" />
-        <rect x="0" y="2" width="6" height="2" fill="#6C5CE7" />
-        <rect x="7" y="2" width="6" height="2" fill="#6C5CE7" />
-        <rect x="0" y="4" width="13" height="2" fill="#6C5CE7" />
-        <rect x="0" y="6" width="13" height="2" fill="#7d6df7" />
-        <rect x="1" y="8" width="11" height="1" fill="#7d6df7" />
-        <rect x="2" y="9" width="9" height="1" fill="#6C5CE7" />
-        <rect x="3" y="10" width="7" height="1" fill="#6C5CE7" />
-        <rect x="4" y="11" width="5" height="1" fill="#6C5CE7" />
-        <rect x="5" y="12" width="3" height="1" fill="#6C5CE7" />
+    building63: (
+      <svg width="40" height="56" viewBox="0 0 10 14" style={{ imageRendering: 'pixelated' }}>
+        <rect x="3" y="1" width="4" height="12" fill="#4A7D9C" />
+        <rect x="2" y="3" width="6" height="10" fill="#5A8DAC" />
+        <rect x="4" y="0" width="2" height="2" fill="#6BAED0" />
+        {[0,1,2,3,4].map(i => (
+          <g key={i}>
+            <rect x="3" y={3 + i * 2} width="1.5" height="0.8" fill="#6BAED0" opacity="0.6" />
+            <rect x="5.5" y={3 + i * 2} width="1.5" height="0.8" fill="#6BAED0" opacity="0.6" />
+          </g>
+        ))}
+        <text x="5" y="9" textAnchor="middle" fontSize="2.5" fill="#FFD700" fontWeight="bold" opacity="0.6">63</text>
       </svg>
     ),
-    car: (
-      <svg width="56" height="44" viewBox="0 0 14 11" style={{ imageRendering: 'pixelated' }}>
-        <rect x="4" y="0" width="6" height="2" fill="#3498db" />
-        <rect x="3" y="2" width="8" height="1" fill="#3498db" />
-        <rect x="4" y="2" width="3" height="1" fill="#85C1E9" />
-        <rect x="8" y="2" width="2" height="1" fill="#85C1E9" />
-        <rect x="1" y="3" width="12" height="2" fill="#0984E3" />
-        <rect x="0" y="5" width="14" height="2" fill="#0984E3" />
-        <rect x="0" y="5" width="2" height="1" fill="#FFC312" />
-        <rect x="12" y="5" width="2" height="1" fill="#FD7272" />
-        <rect x="2" y="7" width="3" height="3" fill="#333" />
-        <rect x="9" y="7" width="3" height="3" fill="#333" />
-        <rect x="3" y="8" width="1" height="1" fill="#888" />
-        <rect x="10" y="8" width="1" height="1" fill="#888" />
+    shield: (
+      <svg width="44" height="52" viewBox="0 0 11 13" style={{ imageRendering: 'pixelated' }}>
+        <polygon points="5.5,0 1,2 1,7 5.5,12 10,7 10,2" fill="#2980B9" />
+        <polygon points="5.5,1 2,3 2,6.5 5.5,10.5 9,6.5 9,3" fill="#3498DB" />
+        <polygon points="5.5,2 3,3.5 3,6 5.5,9 8,6 8,3.5" fill="#5DADE2" />
+        <rect x="4" y="4" width="1" height="3" fill="#FFF" opacity="0.7" />
+        <rect x="6" y="4" width="1" height="3" fill="#FFF" opacity="0.7" />
+        <rect x="4" y="5" width="3" height="1" fill="#FFF" opacity="0.7" />
       </svg>
     ),
   };
@@ -1102,45 +1210,38 @@ function PixelTeamDeco({ x, y, type }: { x: number; y: number; type: 'chart' | '
 
 // ═══ 팀 타운 가구 배치 (1200x900, 로컬좌표) ═══
 const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme, postCounts }: { teamColor: string; theme: string; postCounts: BoardPostCounts }) {
-  const decoType = theme === 'stock' ? 'chart' : theme === 'life' ? 'heart' : 'car';
+  const decoType = theme === 'stock' ? 'chart' : theme === 'life' ? 'building63' : 'shield';
   return (
     <>
       {/* ═══ 팀별 픽셀 장식 (곳곳에 배치) ═══ */}
       <PixelTeamDeco x={500} y={70} type={decoType} />
       <PixelTeamDeco x={1100} y={70} type={decoType} />
-      <PixelTeamDeco x={800} y={470} type={decoType} />
-      <PixelTeamDeco x={280} y={340} type={decoType} />
+      <PixelTeamDeco x={600} y={470} type={decoType} />
 
       {/* ═══ 로비 Zone (60,60 ~ 560,400) — 활기찬 라운지 ═══ */}
-      {/* 네온 환영 사인 */}
       <PixelNeonSign x={200} y={68} text="환영합니다!" color={teamColor} />
-      {/* 존별 코르크보드 (공지/VOC/아이디어/모임) */}
-      <PixelCorkboard x={80} y={100} frameColor="#E91E63" postCount={Math.min(postCounts.notice ?? 0, 5)} />
-      <PixelCorkboard x={200} y={100} frameColor="#FF9800" postCount={Math.min(postCounts.voc ?? 0, 5)} />
-      <PixelCorkboard x={320} y={100} frameColor="#6BC5FF" postCount={Math.min(postCounts.idea ?? 0, 5)} />
-      <PixelCorkboard x={440} y={100} frameColor="#2ECC71" postCount={Math.min(postCounts.gathering ?? 0, 5)} />
-      {/* 편안한 소파 + 라운드 테이블 */}
-      <PixelSofa90s x={100} y={130} color={teamColor} />
-      <PixelSofa90s x={300} y={130} color={teamColor} />
-      <PixelRoundTable x={240} y={200} size={72} />
-
-      {/* 미니 아케이드 코너 */}
-      <PixelArcade x={470} y={110} accent={teamColor} />
+      {/* 코르크보드 3장 (공지/VOC/아이디어) */}
+      <PixelCorkboard x={80} y={90} frameColor="#E91E63" postCount={Math.min(postCounts.notice ?? 0, 5)} />
+      <PixelCorkboard x={240} y={90} frameColor="#FF9800" postCount={Math.min(postCounts.voc ?? 0, 5)} />
+      <PixelCorkboard x={400} y={90} frameColor="#6BC5FF" postCount={Math.min(postCounts.idea ?? 0, 5)} />
+      {/* 소파 + 라운드 테이블 */}
+      <PixelSofa90s x={100} y={210} color={teamColor} />
+      <PixelSofa90s x={300} y={210} color={teamColor} />
+      <PixelRoundTable x={240} y={280} size={72} />
       {/* 개발자 코너 */}
-      <PixelCoffeeMachine x={440} y={230} />
-      <PixelRubberDuck x={490} y={290} />
-      <PixelPizzaBox x={160} y={310} />
-      <PixelEnergyDrink x={120} y={250} />
-      <PixelMechKeyboard x={200} y={270} />
-      <PixelDumbbell x={80} y={340} />
-      {/* 분위기 식물 */}
-      <PixelPlant90s x={480} y={80} />
-      <PixelPlant90s x={70} y={80} size="small" />
-      <PixelPlant90s x={380} y={340} size="small" />
+      <PixelCoffeeMachine x={460} y={220} />
+      <PixelRubberDuck x={500} y={310} />
+      <PixelPizzaBox x={140} y={350} />
+      <PixelEnergyDrink x={100} y={310} />
+      <PixelMechKeyboard x={200} y={330} />
+      {/* 금융 장식 (나무 대신) */}
+      <PixelHanwhaSun x={80} y={370} />
+      <PixelGoldBar x={340} y={360} />
+      <PixelCoinStack x={480} y={350} />
 
       {/* ═══ KPI Zone (640,60 ~ 1140,400) — 업무 공간 ═══ */}
       <PixelWhiteboard x={780} y={68} w={180} />
-      {/* 책상 2x2 배치 (여유 간격) */}
+      {/* 책상 2x2 배치 */}
       {[0, 1].map((i) => (
         <span key={`kd1-${i}`}>
           <PixelDesk90s x={690 + i * 200} y={160} />
@@ -1156,28 +1257,33 @@ const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme, po
         </span>
       ))}
       <PixelFileCabinet x={1060} y={160} />
-      <PixelServerRack x={1050} y={280} />
       <PixelRubberDuck x={660} y={350} />
-      <PixelEnergyDrink x={1110} y={180} />
+      {/* KPI 팀별 장식 */}
+      {theme === 'stock' && <PixelCandleChart x={1070} y={270} />}
+      {theme === 'life' && <Pixel63Building x={1080} y={270} />}
+      {theme === 'shield' && <PixelInsuranceBuilding x={1075} y={270} />}
+      <PixelCoinStack x={1110} y={170} />
 
-      {/* ═══ 공지 Zone (350,460 ~ 850,760) — 뉴스 카페 ═══ */}
-      {/* 네온 뉴스 사인 */}
+      {/* ═══ 공지 Zone (350,460 ~ 850,760) — 뉴스룸 ═══ */}
       <PixelNeonSign x={530} y={468} text="NEWS!" color="#FFD93D" />
       {/* 컬러풀 게시판 갤러리 */}
       <PixelCorkboard x={380} y={490} frameColor="#E91E63" postCount={Math.min(postCounts.notice ?? 0, 5)} />
-      <PixelCorkboard x={560} y={490} frameColor="#FF9800" postCount={Math.min(Math.max((postCounts.notice ?? 0) - 5, 0), 5)} />
-      <PixelCorkboard x={740} y={490} frameColor="#6BC5FF" postCount={Math.min(Math.max((postCounts.notice ?? 0) - 10, 0), 5)} />
-      {/* 카페 스타일 라운지 */}
-      <PixelSofa90s x={400} y={620} color={teamColor} />
-      <PixelSofa90s x={600} y={620} color={teamColor} />
-      <PixelRoundTable x={540} y={690} size={60} />
-
-      {/* 개발자 분위기 */}
-      <PixelServerRack x={790} y={580} />
-      <PixelCatDev x={780} y={710} />
-      <PixelPlant90s x={820} y={490} />
-      <PixelPlant90s x={360} y={720} size="small" />
-      <PixelPlant90s x={830} y={720} size="small" />
+      <PixelCorkboard x={540} y={490} frameColor="#FF9800" postCount={Math.min(Math.max((postCounts.notice ?? 0) - 5, 0), 5)} />
+      <PixelCorkboard x={700} y={490} frameColor="#6BC5FF" postCount={Math.min(Math.max((postCounts.notice ?? 0) - 10, 0), 5)} />
+      {/* 라운드 테이블 + 의자 (소파 대신) */}
+      <PixelRoundTable x={430} y={630} size={60} />
+      <PixelRoundTable x={620} y={630} size={60} />
+      <PixelChair90s x={420} y={700} />
+      <PixelChair90s x={530} y={700} />
+      <PixelChair90s x={640} y={700} />
+      {/* 팀별 랜드마크 (오른쪽) */}
+      {theme === 'stock' && <PixelCandleChart x={800} y={580} />}
+      {theme === 'life' && <Pixel63Building x={800} y={560} />}
+      {theme === 'shield' && <PixelInsuranceBuilding x={800} y={560} />}
+      {/* 금융 장식 */}
+      <PixelGoldBar x={370} y={730} />
+      <PixelHanwhaSun x={760} y={730} size={36} />
+      <PixelCatDev x={480} y={730} />
     </>
   );
 });
@@ -1187,36 +1293,30 @@ const PlazaFurniture = memo(function PlazaFurniture({ postCounts }: { postCounts
   return (
     <>
       {/* ═══ VOC Zone (60,60 ~ 720,440) — 소통 라운지 ═══ */}
-      {/* 네온 사인 */}
       <PixelNeonSign x={300} y={68} text="VOICE!" color="#FF6B9D" />
-      {/* 접수 데스크 (컴팩트) */}
+      {/* 접수 데스크 */}
       <PixelDesk90s x={120} y={140} />
       <PixelDesk90s x={240} y={140} />
       <PixelCRT x={150} y={110} />
       <PixelCRT x={270} y={110} />
       <PixelChair90s x={160} y={220} />
       <PixelChair90s x={280} y={220} />
-      {/* 편안한 상담 라운지 */}
+      {/* 상담 라운지 */}
       <PixelSofa90s x={100} y={300} color="#FF6B9D" />
       <PixelSofa90s x={300} y={300} color="#6C5CE7" />
       <PixelRoundTable x={240} y={370} size={60} />
-
-      {/* 오른쪽 편의시설 */}
-      <PixelCorkboard x={500} y={100} postCount={Math.min(postCounts.voc ?? 0, 5)} />
-      <PixelCoffeeMachine x={600} y={140} />
-      <PixelRubberDuck x={660} y={200} />
-      {/* 이전: <PixelArcade x={600} y={290} accent="#FF6B9D" /> */}
-      <PixelMailbox x={600} y={290} />
-      <PixelPlant90s x={650} y={310} size="small" />
-      <PixelWaterCooler x={500} y={300} />
-      {/* 분위기 */}
-      <PixelPlant90s x={80} y={80} />
-      <PixelPlant90s x={660} y={380} size="small" />
-      <PixelPlant90s x={500} y={380} size="small" />
+      {/* 코르크보드 + 편의시설 */}
+      <PixelCorkboard x={470} y={100} postCount={Math.min(postCounts.voc ?? 0, 5)} />
+      <PixelCoffeeMachine x={630} y={140} />
+      <PixelMailbox x={630} y={290} />
+      <PixelWaterCooler x={530} y={300} />
+      {/* 금융 장식 (나무 대신) */}
+      <PixelHanwhaSun x={80} y={80} />
+      <PixelCoinStack x={660} y={380} />
+      <PixelGoldBar x={500} y={390} />
       <PixelBasketball x={660} y={100} />
 
       {/* ═══ 아이디어 Zone (860,60 ~ 1520,440) — 크리에이티브 스튜디오 ═══ */}
-      {/* 네온 사인 */}
       <PixelNeonSign x={1050} y={68} text="IDEA!" color="#FFD93D" />
       <PixelNeonSign x={1300} y={68} text="WOW!" color="#4ECDC4" />
       {/* 브레인스토밍 테이블 */}
@@ -1229,43 +1329,39 @@ const PlazaFurniture = memo(function PlazaFurniture({ postCounts }: { postCounts
       <PixelChair90s x={1180} y={200} />
       <PixelChair90s x={1000} y={380} />
       <PixelChair90s x={1100} y={360} />
-      {/* 아이디어 벽 — 게시판 + 화이트보드 */}
+      {/* 아이디어 벽 — 코르크보드 */}
       <PixelCorkboard x={1350} y={120} postCount={Math.min(postCounts.idea ?? 0, 5)} />
       <PixelCorkboard x={1350} y={250} postCount={Math.min(Math.max((postCounts.idea ?? 0) - 5, 0), 5)} />
       {/* 영감 코너 */}
-      <PixelGuitar x={1400} y={360} />
-      {/* 이전: <PixelArcade x={860} y={300} accent="#FFD93D" /> */}
+      <PixelGuitar x={1400} y={370} />
       <PixelLightbulb x={860} y={300} />
-      <PixelPlant90s x={905} y={320} size="small" />
-
-      {/* 편의 + 분위기 */}
+      {/* 편의 + 금융 장식 */}
       <PixelSofa90s x={1200} y={340} color="#F8B500" />
       <PixelDualMonitor x={860} y={140} />
-      <PixelPlant90s x={1440} y={80} />
-      <PixelPlant90s x={1440} y={380} size="small" />
-      <PixelPlant90s x={860} y={380} size="small" />
+      <PixelHanwhaSun x={1440} y={80} />
+      <PixelSafe x={1440} y={370} />
+      <PixelGoldBar x={860} y={390} />
 
       {/* ═══ 모임방 Zone (60,520 ~ 520,820) — 취미/사교 공간 ═══ */}
-      {/* 피크닉 테이블 2개 */}
-      <PixelPicnicTable x={100} y={580} />
-      <PixelPicnicTable x={280} y={580} />
-      {/* 바베큐 + 맥주 */}
-      <PixelBBQ x={380} y={530} />
-
+      {/* 코르크보드 */}
+      <PixelCorkboard x={80} y={530} frameColor="#2ECC71" postCount={Math.min(postCounts.gathering ?? 0, 5)} />
+      {/* 피크닉 테이블 */}
+      <PixelPicnicTable x={100} y={650} />
+      <PixelPicnicTable x={280} y={650} />
+      {/* 바베큐 */}
+      <PixelBBQ x={380} y={540} />
       {/* 운동/취미 소품 */}
-      <PixelDumbbell x={100} y={720} />
-      <PixelBasketball x={180} y={730} />
-      <PixelGuitar x={240} y={690} />
-      {/* 소파 + 개발자 간식 */}
-      <PixelSofa90s x={300} y={720} color="#6B8E23" />
-      <PixelPizzaBox x={460} y={620} />
-      <PixelEnergyDrink x={430} y={620} />
-      <PixelCatDev x={460} y={680} color="#8D6E63" />
-      {/* 식물 (야외 느낌) */}
-      <PixelPlant90s x={80} y={530} />
-      <PixelPlant90s x={440} y={530} />
-      <PixelPlant90s x={80} y={740} size="small" />
-      <PixelPlant90s x={460} y={740} size="small" />
+      <PixelDumbbell x={80} y={760} />
+      <PixelBasketball x={160} y={770} />
+      <PixelGuitar x={240} y={740} />
+      {/* 소파 + 간식 */}
+      <PixelSofa90s x={300} y={760} color="#6B8E23" />
+      <PixelPizzaBox x={460} y={650} />
+      <PixelCatDev x={460} y={720} color="#8D6E63" />
+      {/* 금융 장식 (나무 대신) */}
+      <PixelHanwhaSun x={440} y={540} size={36} />
+      <PixelCoinStack x={480} y={760} />
+      <PixelPlant90s x={80} y={780} size="small" />
 
       {/* ═══ 반응속도 Zone (520,490 ~ 790,770) — 게임 아케이드 ═══ */}
       <PixelNeonSign x={590} y={495} text="⚡ 반응속도" color="#FFD93D" />
@@ -1275,7 +1371,7 @@ const PlazaFurniture = memo(function PlazaFurniture({ postCounts }: { postCounts
       <PixelBuzzer x={635} y={630} color="#E74C3C" />
       <PixelNeonSign x={640} y={600} text="READY?" color="#FF6B6B" />
       <PixelSofa90s x={580} y={730} color="#6C5CE7" />
-      <PixelChair90s x={720} y={710} />
+      <PixelGoldBar x={730} y={720} />
 
       {/* ═══ 오목 Zone (810,490 ~ 1080,770) ═══ */}
       <PixelOmokTable x={870} y={570} />
@@ -1283,8 +1379,8 @@ const PlazaFurniture = memo(function PlazaFurniture({ postCounts }: { postCounts
       <PixelChair90s x={990} y={550} />
       <PixelChair90s x={850} y={710} />
       <PixelChair90s x={990} y={710} />
-      <PixelPlant90s x={830} y={530} size="small" />
-      <PixelPlant90s x={1050} y={730} size="small" />
+      <PixelHanwhaSun x={830} y={530} size={36} />
+      <PixelCoinStack x={1050} y={730} />
 
       {/* ═══ 줄넘기 Zone (1100,490 ~ 1370,770) — 체육관 ═══ */}
       <PixelJumpRope x={1160} y={560} />
@@ -1292,11 +1388,12 @@ const PlazaFurniture = memo(function PlazaFurniture({ postCounts }: { postCounts
       <PixelScoreboard x={1120} y={520} />
       <PixelDumbbell x={1320} y={560} />
       <PixelSofa90s x={1120} y={730} color="#2ecc71" />
-      <PixelPlant90s x={1340} y={730} size="small" />
+      <PixelSafe x={1340} y={720} />
 
-      {/* 광장 추가 가구 */}
-      <PixelPlant90s x={1420} y={880} />
-      <PixelPlant90s x={100} y={880} />
+      {/* 광장 금융 장식 */}
+      <PixelHanwhaSun x={1420} y={880} />
+      <PixelGoldBar x={100} y={900} />
+      <PixelCoinStack x={750} y={880} />
     </>
   );
 });
