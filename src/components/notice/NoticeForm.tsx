@@ -155,7 +155,7 @@ export default function NoticeForm({ onClose, onCreated }: NoticeFormProps) {
             disabled={!isLeader}
             className="w-full rounded-lg bg-white/[.06] px-3 py-1.5 text-xs text-text-secondary outline-none disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {isLeader && <option value="">전체</option>}
+            <option value="">전체</option>
             {TEAMS.map((t) => (
               <option key={t} value={t}>{t}</option>
             ))}

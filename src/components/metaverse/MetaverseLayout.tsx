@@ -141,7 +141,10 @@ export default function MetaverseLayout() {
     }
   }, [modalOpen, profile?.team, closeModal, addToast]);
 
-  const PanelComponent = modalOpen ? getZonePanel(modalOpen, profile?.team) : null;
+  const PanelComponent = useMemo(
+    () => (modalOpen ? getZonePanel(modalOpen, profile?.team) : null),
+    [modalOpen, profile?.team],
+  );
 
   return (
     <div className="flex flex-1 overflow-hidden">
