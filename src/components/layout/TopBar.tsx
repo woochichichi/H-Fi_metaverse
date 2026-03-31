@@ -28,13 +28,14 @@ export default function TopBar() {
   const moodBtnRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (user) {
-      fetchUnreadCount(user.id).then(setUnreadCount);
-      const interval = setInterval(() => {
-        fetchUnreadCount(user.id).then(setUnreadCount);
-      }, 30000);
-      return () => clearInterval(interval);
-    }
+    if (!user) return;
+    const poll = () => fetchUnreadCount(user.id).then(setUnreadCount).catch(() => {});
+    poll();
+    const interval = setInterval(poll, 30000);
+    // 탭 복귀 시에도 갱신
+    const onVisible = () => { if (document.visibilityState === 'visible') poll(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => { clearInterval(interval); document.removeEventListener('visibilitychange', onVisible); };
   }, [user, fetchUnreadCount]);
 
   // 패널 간 상호 배타 처리

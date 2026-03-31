@@ -71,11 +71,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     // 세션 변경 리스너
     supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
+      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
         set({ user: session.user });
-        await get().fetchProfile(session.user.id);
+        if (!get().profile || get().profile?.id !== session.user.id) {
+          await get().fetchProfile(session.user.id);
+        }
       } else if (event === 'SIGNED_OUT') {
         set({ user: null, profile: null });
+      }
+    });
+
+    // 탭 복귀 시 세션 자동 갱신
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        supabase.auth.getSession();
       }
     });
   },
