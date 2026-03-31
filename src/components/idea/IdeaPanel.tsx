@@ -18,7 +18,7 @@ interface IdeaPanelProps {
 export default function IdeaPanel({ onClose }: IdeaPanelProps) {
   const { profile, user } = useAuthStore();
   const { addToast } = useUiStore();
-  const { ideas, loading, error, fetchIdeas, toggleVote, updateIdeaStatus, fetchUserVotes } = useIdeas();
+  const { ideas, loading, error, fetchIdeas, toggleVote, updateIdeaStatus, fetchUserVotes, fetchCommentCounts } = useIdeas();
 
   const [view, setView] = useState<ViewMode>('list');
   const [skeletonTimeout, setSkeletonTimeout] = useState(false);
@@ -27,6 +27,7 @@ export default function IdeaPanel({ onClose }: IdeaPanelProps) {
   const [filterStatus, setFilterStatus] = useState<IdeaStatus | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [displayCount, setDisplayCount] = useState(20);
+  const [commentCounts, setCommentCounts] = useState<Map<string, number>>(new Map());
 
   const loadIdeas = useCallback(() => {
     fetchIdeas({
@@ -49,12 +50,15 @@ export default function IdeaPanel({ onClose }: IdeaPanelProps) {
     return () => clearTimeout(timer);
   }, [loading]);
 
-  // 사용자 투표 상태 로드
+  // 사용자 투표 상태 + 댓글 수 로드
   useEffect(() => {
     if (user && ideas.length > 0) {
       fetchUserVotes(user.id);
     }
-  }, [user, ideas.length, fetchUserVotes]);
+    if (ideas.length > 0) {
+      fetchCommentCounts(ideas.map((i) => i.id)).then(setCommentCounts).catch(() => {});
+    }
+  }, [user, ideas.length, fetchUserVotes, fetchCommentCounts]);
 
   const handleVote = async (ideaId: string) => {
     if (!user) {
@@ -204,7 +208,7 @@ export default function IdeaPanel({ onClose }: IdeaPanelProps) {
             {ideas.slice(0, displayCount).map((idea) => (
               <IdeaCard
                 key={idea.id}
-                idea={idea}
+                idea={{ ...idea, _commentCount: commentCounts.get(idea.id) ?? 0 }}
                 onVote={handleVote}
                 onStatusChange={profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader' ? handleStatusChange : undefined}
               />

@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { withTimeout } from '../lib/utils';
-import type { IdeaWithVotes } from '../types';
+import type { IdeaWithVotes, IdeaComment, Profile } from '../types';
 import type { IdeaCategory, IdeaStatus } from '../lib/constants';
 
 export interface IdeaFilters {
@@ -242,6 +242,80 @@ export function useIdeas() {
     return votedIds;
   }, []);
 
+  // ===== 댓글 =====
+
+  const fetchIdeaComments = useCallback(async (ideaId: string) => {
+    const { data, error: fetchError } = await withTimeout(
+      () =>
+        supabase
+          .from('idea_comments')
+          .select('id, idea_id, author_id, content, created_at')
+          .eq('idea_id', ideaId)
+          .order('created_at', { ascending: true }),
+      8000,
+      'ideaComments',
+    );
+
+    if (fetchError) {
+      return { comments: [] as IdeaComment[], profiles: [] as Pick<Profile, 'id' | 'name' | 'nickname' | 'avatar_emoji' | 'avatar_color'>[], error: fetchError.message };
+    }
+
+    const comments = (data ?? []) as IdeaComment[];
+    const authorIds = [...new Set(comments.map((c) => c.author_id).filter(Boolean))] as string[];
+    let profiles: Pick<Profile, 'id' | 'name' | 'nickname' | 'avatar_emoji' | 'avatar_color'>[] = [];
+
+    if (authorIds.length > 0) {
+      const { data: pData } = await withTimeout(
+        () => supabase.from('profiles').select('id, name, nickname, avatar_emoji, avatar_color').in('id', authorIds),
+        8000,
+        'ideaCommentProfiles',
+      );
+      profiles = (pData ?? []) as typeof profiles;
+    }
+
+    return { comments, profiles, error: null };
+  }, []);
+
+  const addIdeaComment = useCallback(async (ideaId: string, authorId: string, content: string) => {
+    const { data, error: insertError } = await supabase
+      .from('idea_comments')
+      .insert({ idea_id: ideaId, author_id: authorId, content })
+      .select()
+      .single();
+
+    if (insertError) {
+      return { data: null, error: insertError.message };
+    }
+    return { data: data as IdeaComment, error: null };
+  }, []);
+
+  const deleteIdeaComment = useCallback(async (commentId: string) => {
+    const { error: deleteError } = await supabase
+      .from('idea_comments')
+      .delete()
+      .eq('id', commentId);
+
+    if (deleteError) {
+      return { error: deleteError.message };
+    }
+    return { error: null };
+  }, []);
+
+  // 아이디어별 댓글 수 일괄 조회
+  const fetchCommentCounts = useCallback(async (ideaIds: string[]) => {
+    if (ideaIds.length === 0) return new Map<string, number>();
+    const { data } = await withTimeout(
+      () => supabase.from('idea_comments').select('idea_id').in('idea_id', ideaIds),
+      8000,
+      'ideaCommentCounts',
+    );
+    const counts = new Map<string, number>();
+    (data ?? []).forEach((r: { idea_id: string }) => {
+      counts.set(r.idea_id, (counts.get(r.idea_id) ?? 0) + 1);
+    });
+    return counts;
+  }, []);
+
   return {
     ideas,
     loading,
@@ -251,5 +325,9 @@ export function useIdeas() {
     toggleVote,
     updateIdeaStatus,
     fetchUserVotes,
+    fetchIdeaComments,
+    addIdeaComment,
+    deleteIdeaComment,
+    fetchCommentCounts,
   };
 }

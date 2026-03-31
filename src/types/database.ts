@@ -390,6 +390,14 @@ export interface VocComment {
   created_at: string;
 }
 
+export interface IdeaComment {
+  id: string;
+  idea_id: string;
+  author_id: string | null;
+  content: string;
+  created_at: string;
+}
+
 export interface OmokRecord {
   id: string;
   winner_id: string;

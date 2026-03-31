@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Heart, User, Clock } from 'lucide-react';
+import { Heart, User, Clock, MessageCircle } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { IDEA_STATUSES } from '../../lib/constants';
 import { formatRelativeTime } from '../../lib/utils';
+import IdeaComments from './IdeaComments';
 import type { IdeaWithVotes } from '../../types';
 import type { IdeaStatus } from '../../lib/constants';
 
@@ -23,7 +24,7 @@ const STATUS_CONFIG: Record<IdeaStatus, { color: string; bg: string }> = {
 };
 
 interface IdeaCardProps {
-  idea: IdeaWithVotes & { _voted?: boolean };
+  idea: IdeaWithVotes & { _voted?: boolean; _commentCount?: number };
   onVote: (ideaId: string) => void;
   onStatusChange?: (ideaId: string, status: IdeaStatus) => void;
 }
@@ -31,6 +32,7 @@ interface IdeaCardProps {
 export default function IdeaCard({ idea, onVote, onStatusChange }: IdeaCardProps) {
   const { profile } = useAuthStore();
   const [animating, setAnimating] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
   const catConfig = CATEGORY_CONFIG[idea.category ?? '기타'];
@@ -50,7 +52,10 @@ export default function IdeaCard({ idea, onVote, onStatusChange }: IdeaCardProps
   };
 
   return (
-    <div className="flex flex-col gap-2.5 rounded-xl border border-white/[.06] bg-white/[.03] p-3 transition-colors duration-200 hover:bg-white/[.06]">
+    <div
+      className="flex flex-col gap-2.5 rounded-xl border border-white/[.06] bg-white/[.03] p-3 transition-colors duration-200 hover:bg-white/[.06] cursor-pointer"
+      onClick={() => setExpanded(!expanded)}
+    >
       {/* 상단: 카테고리 + 상태 */}
       <div className="flex items-center justify-between">
         <span
@@ -85,9 +90,9 @@ export default function IdeaCard({ idea, onVote, onStatusChange }: IdeaCardProps
       <h3 className="text-sm font-semibold text-text-primary line-clamp-1">{idea.title}</h3>
 
       {/* 설명 */}
-      <p className="text-xs text-text-muted line-clamp-2 leading-relaxed">{idea.description}</p>
+      <p className={`text-xs text-text-muted leading-relaxed ${expanded ? 'whitespace-pre-wrap' : 'line-clamp-2'}`}>{idea.description}</p>
 
-      {/* 하단: 투표 + 메타 */}
+      {/* 하단: 투표 + 댓글 + 메타 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-[11px] text-text-muted">
           <span className="flex items-center gap-1">
@@ -96,6 +101,10 @@ export default function IdeaCard({ idea, onVote, onStatusChange }: IdeaCardProps
           <span>·</span>
           <span className="flex items-center gap-1">
             <Clock size={11} /> {formatRelativeTime(idea.created_at)}
+          </span>
+          <span>·</span>
+          <span className="flex items-center gap-1">
+            <MessageCircle size={11} /> {idea._commentCount ?? 0}
           </span>
         </div>
 
@@ -112,6 +121,9 @@ export default function IdeaCard({ idea, onVote, onStatusChange }: IdeaCardProps
           <span className="font-mono">{idea.vote_count}</span>
         </button>
       </div>
+
+      {/* 댓글 (펼침 시) */}
+      {expanded && <IdeaComments ideaId={idea.id} />}
     </div>
   );
 }
