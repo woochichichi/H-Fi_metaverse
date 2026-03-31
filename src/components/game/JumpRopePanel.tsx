@@ -44,61 +44,73 @@ function Lobby({ players, canStart, onStart }: { players: JumpRopePlayer[]; canS
 
       <div className="w-full rounded-lg bg-white/[.04] p-4 text-xs text-text-muted leading-relaxed space-y-1">
         <p><span className="font-semibold text-accent">스페이스바</span> 또는 화면 터치로 점프!</p>
-        <p>줄 속도가 점점 빨라집니다 (15초마다 가속)</p>
-        <p>팀별 평균 생존시간으로 순위를 겨룹니다</p>
+        <p>줄 속도가 점점 빨라집니다 (10초마다 가속)</p>
+        <p className="text-danger/80 font-medium">한 명이라도 걸리면 전원 게임오버!</p>
       </div>
     </div>
   );
 }
 
-// ─── 3D 게임 캔버스 (줄 앞/뒤 레이어 분리) ───
+// ─── 2D 사이드뷰 게임 캔버스 ───
 function GameCanvas({ players, ropeAngle, phase, onTap }: {
   players: JumpRopePlayer[]; ropeAngle: number; phase: string; onTap: () => void;
 }) {
-  const W = 400, H = 260, groundY = 195, jumpH = 60;
+  const W = 400, H = 240, groundY = 185, jumpH = 60;
   const alive = players.filter((p) => p.isAlive);
   const dead = players.filter((p) => !p.isAlive);
 
-  const cosA = Math.cos(ropeAngle);
-  const ropeBaseY = groundY - 55;
-  const ropeCY = ropeBaseY - cosA * 62;
-  const isFront = cosA < 0; // 줄이 캐릭터 앞(아래)으로 내려올 때
+  // 줄 높이: sinA로 단순 사이드뷰 (0=위, π=바닥)
+  const sinA = Math.sin(ropeAngle);
+  const ropeY = groundY - 70 + sinA * 65; // 위(115) ↔ 바닥(185)
   const dangerDist = Math.abs(ropeAngle - Math.PI);
   const nearBottom = dangerDist < 0.5;
   const ropeColor = nearBottom ? '#EF4444' : '#F8B500';
-  // 앞에 올 때 두껍고 선명, 뒤에 갈 때 얇고 흐릿
-  const thick = isFront ? 3.5 + Math.abs(cosA) * 2 : 1.5;
-  const sag = isFront ? 14 + Math.abs(cosA) * 14 : 8;
+  const thick = nearBottom ? 4 : 2.5;
   const danger01 = Math.max(0, 1 - dangerDist / 1.2);
   const gW = W - 60;
 
-  const ropePath = `M 39 ${ropeCY} Q ${W / 2} ${ropeCY + sag} ${W - 39} ${ropeCY}`;
-
   return (
     <div className="relative w-full rounded-xl overflow-hidden" style={{ height: H, background: '#1a1a2e' }} onClick={onTap}>
-      {/* Layer 1: 바닥 + 기둥 + 뒤쪽 줄 */}
-      <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 w-full h-full" style={{ zIndex: 1 }}>
-        <polygon points={`0,${groundY} ${W},${groundY} ${W - 15},${H} 15,${H}`} fill="#2d5a3e" />
-        <line x1="0" y1={groundY} x2={W} y2={groundY} stroke="#4ade80" strokeWidth="1.5" opacity="0.25" />
-        {[1, 2, 3].map((i) => (
-          <line key={i} x1={i * 5} y1={groundY + i * 14} x2={W - i * 5} y2={groundY + i * 14} stroke="#4ade80" strokeWidth="0.5" opacity={0.08} />
-        ))}
-        <rect x="35" y={groundY - 85} width="8" height="85" rx="2" fill="#8B7355" />
-        <rect x={W - 43} y={groundY - 85} width="8" height="85" rx="2" fill="#8B7355" />
-        <circle cx="39" cy={groundY - 85} r="4" fill="#A0895C" />
-        <circle cx={W - 39} cy={groundY - 85} r="4" fill="#A0895C" />
-        {phase === 'playing' && !isFront && (
-          <path d={ropePath} stroke={ropeColor} strokeWidth={thick} fill="none" strokeLinecap="round"
-            opacity="0.3" strokeDasharray="6 4" />
+      <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 w-full h-full">
+        {/* 바닥 */}
+        <rect x="0" y={groundY} width={W} height={H - groundY} fill="#2d5a3e" />
+        <line x1="0" y1={groundY} x2={W} y2={groundY} stroke="#4ade80" strokeWidth="1.5" opacity="0.3" />
+
+        {/* 기둥 */}
+        <rect x="32" y={groundY - 90} width="6" height="90" rx="2" fill="#8B7355" />
+        <rect x={W - 38} y={groundY - 90} width="6" height="90" rx="2" fill="#8B7355" />
+        <circle cx="35" cy={groundY - 90} r="3.5" fill="#A0895C" />
+        <circle cx={W - 35} cy={groundY - 90} r="3.5" fill="#A0895C" />
+
+        {/* 줄 */}
+        {phase === 'playing' && (
+          <path
+            d={`M 35 ${ropeY} Q ${W / 2} ${ropeY + 12} ${W - 35} ${ropeY}`}
+            stroke={ropeColor} strokeWidth={thick} fill="none" strokeLinecap="round"
+            style={{ filter: nearBottom ? 'drop-shadow(0 0 6px #EF4444)' : 'none' }}
+          />
         )}
+
+        {/* JUMP 경고 */}
+        {phase === 'playing' && dangerDist < 0.7 && (
+          <text x={W / 2} y="28" textAnchor="middle" fontSize="16" fontWeight="900"
+            fill="#EF4444" opacity={Math.min(1, (0.7 - dangerDist) * 2.5)}>JUMP!</text>
+        )}
+
+        {/* 하단 위험 게이지 */}
+        {phase === 'playing' && <>
+          <rect x={30} y={H - 18} width={gW} height={7} rx={3.5} fill="#ffffff10" />
+          <rect x={30} y={H - 18} width={gW * danger01} height={7} rx={3.5}
+            fill={danger01 > 0.7 ? '#EF4444' : danger01 > 0.3 ? '#F59E0B' : '#22C55E'} />
+        </>}
       </svg>
 
-      {/* Layer 2: 캐릭터 */}
+      {/* 캐릭터 */}
       <div className="absolute inset-0" style={{ zIndex: 2 }}>
         {alive.map((p, i) => {
           const x = W / 2 + (i - (alive.length - 1) / 2) * 40;
           return (
-            <div key={p.id} className="absolute" style={{ left: x - 14, bottom: (H - groundY) + p.jumpY * jumpH }}>
+            <div key={p.id} className="absolute transition-transform" style={{ left: x - 14, bottom: (H - groundY) + p.jumpY * jumpH }}>
               <Char p={p} />
               <p className="text-[8px] text-center text-white/70 truncate w-8">{p.name}</p>
             </div>
@@ -110,24 +122,6 @@ function GameCanvas({ players, ropeAngle, phase, onTap }: {
           </div>
         ))}
       </div>
-
-      {/* Layer 3: 앞쪽 줄 + 경고 + 게이지 */}
-      <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 3 }}>
-        {phase === 'playing' && <>
-          <ellipse cx={W / 2} cy={groundY - 1} rx={90 - cosA * 35} ry={3} fill="#EF4444" opacity={Math.max(0, -cosA * 0.4)} />
-          {isFront && (
-            <path d={ropePath} stroke={ropeColor} strokeWidth={thick} fill="none" strokeLinecap="round"
-              style={{ filter: nearBottom ? 'drop-shadow(0 0 8px #EF4444)' : 'none' }} />
-          )}
-          {dangerDist < 0.7 && (
-            <text x={W / 2} y="24" textAnchor="middle" fontSize="15" fontWeight="900"
-              fill="#EF4444" opacity={Math.min(1, (0.7 - dangerDist) * 2.5)}>JUMP!</text>
-          )}
-          <rect x={30} y={H - 20} width={gW} height={8} rx={4} fill="#ffffff10" />
-          <rect x={30} y={H - 20} width={gW * danger01} height={8} rx={4}
-            fill={danger01 > 0.7 ? '#EF4444' : danger01 > 0.3 ? '#F59E0B' : '#22C55E'} />
-        </>}
-      </svg>
     </div>
   );
 }
@@ -172,7 +166,7 @@ export default function JumpRopePanel({ onClose }: { onClose: () => void }) {
                 <div className="text-4xl font-black text-accent animate-pulse text-center -mt-28 mb-16">{game.countdown}</div>
               )}
               {game.phase === 'playing' && !game.myAlive && (
-                <p className="text-xs text-red-400 text-center">탈락! 다른 플레이어를 응원하세요</p>
+                <p className="text-xs text-red-400 text-center">줄에 걸렸습니다!</p>
               )}
               {game.phase === 'playing' && game.myAlive && (
                 <p className="text-xs text-text-muted animate-pulse text-center">스페이스바 또는 화면 터치로 점프!</p>

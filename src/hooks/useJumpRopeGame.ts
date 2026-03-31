@@ -19,12 +19,12 @@ export interface JumpRopePlayer {
   jumpY: number;
 }
 
-// ─── 난이도 설정 (쉽게) ───
-const INITIAL_SPEED = 0.9;        // 초당 회전수 (느리게 시작)
-const SPEED_INCREMENT = 0.06;     // 15초마다 속도 증가
-const SPEED_INTERVAL = 15000;     // 가속 주기
-const JUMP_DURATION = 520;        // 점프 지속시간 (넉넉)
-const DANGER_ZONE = 0.32;         // 줄 바닥 판정 범위
+// ─── 난이도 설정 ───
+const INITIAL_SPEED = 1.2;        // 초당 회전수 (빠르게 시작)
+const SPEED_INCREMENT = 0.10;     // 10초마다 속도 증가
+const SPEED_INTERVAL = 10000;     // 가속 주기 (10초)
+const JUMP_DURATION = 420;        // 점프 지속시간 (짧게)
+const DANGER_ZONE = 0.38;         // 줄 바닥 판정 범위 (넓게)
 
 export function useJumpRopeGame() {
   const { profile, user } = useAuthStore();
@@ -125,6 +125,23 @@ export function useJumpRopeGame() {
             ? { ...p, isAlive: false, survivalMs: payload.survivalMs, jumpCount: payload.jumpCount }
             : p,
         ));
+        // 한 명이라도 탈락하면 전체 게임오버
+        if (phaseRef.current === 'playing') {
+          const ms = Math.round(performance.now() - startTimeRef.current);
+          // 아직 살아있는 내 기록도 저장
+          if (myAliveRef.current) {
+            myAliveRef.current = false;
+            setMyAlive(false);
+            setSurvivalMs(ms);
+            const spd = INITIAL_SPEED + Math.floor(ms / SPEED_INTERVAL) * SPEED_INCREMENT;
+            updatePlayers((prev) => prev.map((p) =>
+              p.id === myId ? { ...p, isAlive: false, survivalMs: ms, jumpCount: jumpCountRef.current } : p,
+            ));
+            saveRecord(ms, jumpCountRef.current, spd);
+          }
+          phaseRef.current = 'gameover';
+          setPhase('gameover');
+        }
       }
     });
 
@@ -202,27 +219,16 @@ export function useJumpRopeGame() {
         channelRef.current?.send({ type: 'broadcast', event: 'eliminated', payload: { userId: myId, survivalMs: ms, jumpCount: jumpCountRef.current } });
         saveRecord(ms, jumpCountRef.current, speed);
 
-        // 모든 플레이어 탈락 체크
-        const allDead = playersRef.current.every((p) => !p.isAlive || p.id === myId);
-        if (allDead) {
-          phaseRef.current = 'gameover';
-          setPhase('gameover');
-          return;
-        }
+        // 한 명 탈락 = 즉시 전체 게임오버
+        phaseRef.current = 'gameover';
+        setPhase('gameover');
+        return;
       }
       if (ropeBottom && py >= 0.25 && !wasInDangerRef.current) {
         jumpCountRef.current += 1;
         setJumpCount(jumpCountRef.current);
       }
       wasInDangerRef.current = ropeBottom;
-    } else {
-      // 이미 탈락 — 다른 사람 전원 탈락 체크
-      const alive = playersRef.current.filter((p) => p.isAlive);
-      if (alive.length === 0) {
-        phaseRef.current = 'gameover';
-        setPhase('gameover');
-        return;
-      }
     }
 
     setSurvivalMs(Math.round(elapsed));
