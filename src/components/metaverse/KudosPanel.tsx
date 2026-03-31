@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, Eye, RefreshCw, Send, X, ChevronDown } from 'lucide-react';
-import { useKudos } from '../../hooks/useKudos';
+import { useKudos, type ReactionType } from '../../hooks/useKudos';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
 import KudosCard from './KudosCard';
@@ -14,7 +14,7 @@ interface KudosPanelProps {
 export default function KudosPanel({ team, readOnly }: KudosPanelProps) {
   const { profile } = useAuthStore();
   const { addToast } = useUiStore();
-  const { kudosList, loading, error, fetchKudos, createKudos, toggleLike, fetchTeamMembers } = useKudos();
+  const { kudosList, loading, error, fetchKudos, createKudos, toggleReaction, deleteKudos, fetchTeamMembers } = useKudos();
 
   const [showForm, setShowForm] = useState(false);
   const [targetId, setTargetId] = useState('');
@@ -56,17 +56,25 @@ export default function KudosPanel({ team, readOnly }: KudosPanelProps) {
     }
   };
 
-  const handleToggleLike = async (kudosId: string) => {
+  const handleToggleReaction = async (kudosId: string, reaction: ReactionType) => {
     if (!profile) return;
-    try { await toggleLike(kudosId, profile.id); }
-    catch { addToast('좋아요 처리 실패', 'error'); reload(); }
+    try { await toggleReaction(kudosId, profile.id, reaction); }
+    catch { addToast('반응 처리 실패', 'error'); reload(); }
+  };
+
+  const handleDelete = async (kudosId: string) => {
+    if (!confirm('칭찬을 삭제하시겠습니까?')) return;
+    try {
+      await deleteKudos(kudosId);
+      addToast('삭제했습니다', 'success');
+    } catch { addToast('삭제 실패', 'error'); }
   };
 
   return (
     <div className="flex flex-col gap-3">
       {/* 헤더 */}
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold text-text-primary">칭찬 보드</h3>
+        <h3 className="text-base font-bold text-text-primary font-heading">칭찬 보드</h3>
         <div className="flex items-center gap-2">
           {readOnly && (
             <span className="flex items-center gap-1 rounded-full bg-white/[.06] px-2 py-0.5 text-[10px] text-text-muted">
@@ -131,7 +139,7 @@ export default function KudosPanel({ team, readOnly }: KudosPanelProps) {
       ) : (
         <div className="flex flex-col gap-2">
           {kudosList.slice(0, displayCount).map((k) => (
-            <KudosCard key={k.id} kudos={k} readOnly={readOnly} userId={profile?.id} onToggleLike={handleToggleLike} />
+            <KudosCard key={k.id} kudos={k} readOnly={readOnly} userId={profile?.id} onToggleReaction={handleToggleReaction} onDelete={handleDelete} />
           ))}
           <LoadMore current={Math.min(displayCount, kudosList.length)} total={kudosList.length} onLoadMore={() => setDisplayCount((c) => c + 20)} />
         </div>

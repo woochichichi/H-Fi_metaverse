@@ -2,6 +2,9 @@ import { useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { withTimeout } from '../lib/utils';
 
+export const REACTION_EMOJIS = ['👏', '💪', '🔥', '❤️', '😊', '🎉'] as const;
+export type ReactionType = (typeof REACTION_EMOJIS)[number];
+
 export interface KudosWithCounts {
   id: string;
   author_id: string;
@@ -9,10 +12,9 @@ export interface KudosWithCounts {
   team: string;
   message: string;
   created_at: string;
-  author_name: string;
   target_name: string;
-  like_count: number;
-  my_like: boolean;
+  reactions: Record<ReactionType, { count: number; mine: boolean }>;
+  is_mine: boolean;
 }
 
 export function useKudos() {
@@ -31,40 +33,56 @@ export function useKudos() {
       if (fetchErr) throw fetchErr;
       const items = data ?? [];
 
-      // 작성자/대상 이름 조회
-      const userIds = [...new Set(items.flatMap((k: any) => [k.author_id, k.target_id]))];
+      // 대상 이름 조회
+      const targetIds = [...new Set(items.map((k: any) => k.target_id))];
       let nameMap = new Map<string, string>();
-      if (userIds.length > 0) {
+      if (targetIds.length > 0) {
         const { data: profiles, error: profileErr } = await withTimeout(
-          () => supabase.from('profiles').select('id, name').in('id', userIds),
+          () => supabase.from('profiles').select('id, name').in('id', targetIds),
           8000, 'kudosProfiles',
         );
-        if (profileErr) console.error('칭찬 작성자 조회 실패:', profileErr.message);
+        if (profileErr) console.error('칭찬 대상 조회 실패:', profileErr.message);
         (profiles ?? []).forEach((p: any) => nameMap.set(p.id, p.name));
       }
 
-      // 좋아요 수 조회
+      // 반응 조회
       const ids = items.map((k: any) => k.id);
-      let likeCounts = new Map<string, number>();
-      let myLikes = new Set<string>();
+      const reactionsMap = new Map<string, Record<ReactionType, { count: number; mine: boolean }>>();
       if (ids.length > 0) {
         const { data: likes, error: likeErr } = await withTimeout(
-          () => supabase.from('kudos_likes').select('kudos_id, user_id').in('kudos_id', ids),
+          () => supabase.from('kudos_likes').select('kudos_id, user_id, reaction').in('kudos_id', ids),
           8000, 'kudosLikes',
         );
-        if (likeErr) console.error('칭찬 좋아요 조회 실패:', likeErr.message);
+        if (likeErr) console.error('칭찬 반응 조회 실패:', likeErr.message);
         (likes ?? []).forEach((l: any) => {
-          likeCounts.set(l.kudos_id, (likeCounts.get(l.kudos_id) ?? 0) + 1);
-          if (userId && l.user_id === userId) myLikes.add(l.kudos_id);
+          if (!reactionsMap.has(l.kudos_id)) {
+            reactionsMap.set(l.kudos_id, Object.fromEntries(
+              REACTION_EMOJIS.map(e => [e, { count: 0, mine: false }])
+            ) as Record<ReactionType, { count: number; mine: boolean }>);
+          }
+          const r = reactionsMap.get(l.kudos_id)!;
+          const emoji = l.reaction as ReactionType;
+          if (r[emoji]) {
+            r[emoji].count++;
+            if (userId && l.user_id === userId) r[emoji].mine = true;
+          }
         });
       }
 
+      const emptyReactions = () => Object.fromEntries(
+        REACTION_EMOJIS.map(e => [e, { count: 0, mine: false }])
+      ) as Record<ReactionType, { count: number; mine: boolean }>;
+
       const withCounts: KudosWithCounts[] = items.map((k: any) => ({
-        ...k,
-        author_name: nameMap.get(k.author_id) ?? '알 수 없음',
+        id: k.id,
+        author_id: k.author_id,
+        target_id: k.target_id,
+        team: k.team,
+        message: k.message,
+        created_at: k.created_at,
         target_name: nameMap.get(k.target_id) ?? '알 수 없음',
-        like_count: likeCounts.get(k.id) ?? 0,
-        my_like: myLikes.has(k.id),
+        reactions: reactionsMap.get(k.id) ?? emptyReactions(),
+        is_mine: userId === k.author_id,
       }));
 
       setKudosList(withCounts);
@@ -87,15 +105,17 @@ export function useKudos() {
     [],
   );
 
-  const toggleLike = useCallback(
-    async (kudosId: string, userId: string) => {
+  const toggleReaction = useCallback(
+    async (kudosId: string, userId: string, reaction: ReactionType) => {
       // 낙관적 업데이트
       setKudosList((prev) =>
-        prev.map((k) =>
-          k.id === kudosId
-            ? { ...k, my_like: !k.my_like, like_count: k.like_count + (k.my_like ? -1 : 1) }
-            : k,
-        ),
+        prev.map((k) => {
+          if (k.id !== kudosId) return k;
+          const r = { ...k.reactions };
+          const cur = r[reaction];
+          r[reaction] = { count: cur.count + (cur.mine ? -1 : 1), mine: !cur.mine };
+          return { ...k, reactions: r };
+        }),
       );
 
       const { data: existing } = await supabase
@@ -103,6 +123,7 @@ export function useKudos() {
         .select('kudos_id')
         .eq('kudos_id', kudosId)
         .eq('user_id', userId)
+        .eq('reaction', reaction)
         .maybeSingle();
 
       if (existing) {
@@ -110,17 +131,27 @@ export function useKudos() {
           .from('kudos_likes')
           .delete()
           .eq('kudos_id', kudosId)
-          .eq('user_id', userId);
+          .eq('user_id', userId)
+          .eq('reaction', reaction);
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from('kudos_likes')
-          .insert({ kudos_id: kudosId, user_id: userId });
+          .insert({ kudos_id: kudosId, user_id: userId, reaction });
         if (error) throw error;
       }
     },
     [],
   );
+
+  const deleteKudos = useCallback(async (kudosId: string) => {
+    const { error } = await withTimeout(
+      () => supabase.from('kudos').delete().eq('id', kudosId),
+      8000, 'kudosDelete',
+    );
+    if (error) throw error;
+    setKudosList((prev) => prev.filter((k) => k.id !== kudosId));
+  }, []);
 
   const fetchTeamMembers = useCallback(async (team: string) => {
     const { data, error } = await withTimeout(
@@ -131,5 +162,5 @@ export function useKudos() {
     return (data ?? []) as { id: string; name: string }[];
   }, []);
 
-  return { kudosList, loading, error, fetchKudos, createKudos, toggleLike, fetchTeamMembers };
+  return { kudosList, loading, error, fetchKudos, createKudos, toggleReaction, deleteKudos, fetchTeamMembers };
 }
