@@ -23,16 +23,6 @@ const POSTIT_COLORS = [
 
 const POSTIT_ROTATIONS = ['-rotate-1', 'rotate-1', '-rotate-[0.5deg]', 'rotate-[0.5deg]', 'rotate-0'];
 
-/** 텍스트 이모지 (이미지 폰트 미지원 대비) */
-const REACTION_LABELS: Record<ReactionType, string> = {
-  '👏': '👏',
-  '💪': '💪',
-  '🔥': '🔥',
-  '❤️': '❤️',
-  '😊': '😊',
-  '🎉': '🎉',
-};
-
 function getColor(id: string) {
   return POSTIT_COLORS[id.charCodeAt(0) % POSTIT_COLORS.length];
 }
@@ -87,7 +77,7 @@ export default function KudosCard({ kudos, readOnly, userId, onToggleReaction, o
                     : 'bg-white/[.04] opacity-40 hover:opacity-100'
               } ${readOnly ? 'cursor-default' : 'cursor-pointer hover:bg-white/15'}`}
             >
-              <span className="text-[13px] leading-none">{REACTION_LABELS[emoji]}</span>
+              <span className="text-[13px] leading-none">{emoji}</span>
               {hasCount && <span className="font-medium text-text-secondary text-[10px]">{r.count}</span>}
             </button>
           );
