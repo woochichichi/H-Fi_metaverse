@@ -307,10 +307,7 @@ export function useGatherings() {
   }, []);
 
   const deleteGathering = useCallback(async (id: string) => {
-    // 관련 참여자·댓글 먼저 삭제
-    await supabase.from('gathering_members').delete().eq('gathering_id', id);
-    await supabase.from('gathering_comments').delete().eq('gathering_id', id);
-
+    // gathering_members, gathering_comments는 FK CASCADE로 자동 삭제
     const { error: deleteError } = await supabase
       .from('gatherings')
       .delete()
@@ -320,6 +317,9 @@ export function useGatherings() {
       console.error('모임 삭제 실패:', deleteError.message);
       return { error: deleteError.message };
     }
+
+    // 관련 알림 정리 (실패해도 무시)
+    supabase.from('notifications').delete().like('link', `/gathering/${id}%`).then();
 
     setGatherings((prev) => prev.filter((g) => g.id !== id));
     return { error: null };

@@ -16,7 +16,7 @@ interface NoticePanelProps {
 }
 
 export default function NoticePanel({ onClose }: NoticePanelProps) {
-  const { profile, user } = useAuthStore();
+  const { user } = useAuthStore();
   const { notices, loading, error, readIds, fetchNotices, fetchMyReads } = useNotices();
 
   const [view, setView] = useState<ViewMode>('list');
@@ -26,7 +26,6 @@ export default function NoticePanel({ onClose }: NoticePanelProps) {
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [showFilters, setShowFilters] = useState(false);
 
-  const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
 
   const loadNotices = useCallback(() => {
     fetchNotices({
@@ -182,17 +181,15 @@ export default function NoticePanel({ onClose }: NoticePanelProps) {
         />
       </div>
 
-      {/* FAB: 새 공지 (리더만) */}
-      {isLeader && (
-        <button
-          onClick={() => setView('form')}
-          className="absolute bottom-6 right-6 flex h-12 w-12 items-center justify-center rounded-full bg-accent text-white shadow-lg transition-colors duration-200 hover:bg-accent/80"
-          style={{ boxShadow: '0 4px 20px rgba(108,92,231,.4)' }}
-          title="새 공지"
-        >
-          <Plus size={22} />
-        </button>
-      )}
+      {/* FAB: 새 공지 */}
+      <button
+        onClick={() => setView('form')}
+        className="absolute bottom-6 right-6 flex h-12 w-12 items-center justify-center rounded-full bg-accent text-white shadow-lg transition-colors duration-200 hover:bg-accent/80"
+        style={{ boxShadow: '0 4px 20px rgba(108,92,231,.4)' }}
+        title="새 공지"
+      >
+        <Plus size={22} />
+      </button>
     </div>
   );
 }

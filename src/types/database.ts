@@ -256,6 +256,7 @@ export interface NoticeRead {
 
 export interface KpiItem {
   id: string;
+  team: string | null;
   unit: string;
   title: string;
   description: string | null;

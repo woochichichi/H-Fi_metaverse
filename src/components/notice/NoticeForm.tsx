@@ -28,6 +28,8 @@ export default function NoticeForm({ onClose, onCreated }: NoticeFormProps) {
     ...FILE_LIMITS.notice,
   });
 
+  const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
+
   const [urgency, setUrgency] = useState<UrgencyLevel>('참고');
   const [category, setCategory] = useState<NoticeCategory>('일반');
   const [pinned, setPinned] = useState(false);
@@ -101,23 +103,27 @@ export default function NoticeForm({ onClose, onCreated }: NoticeFormProps) {
 
       {/* 폼 */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {/* 시급성 */}
+        {/* 시급성 — 멤버는 '참고'만 사용 가능 */}
         <div>
           <label className="text-xs font-medium text-text-muted mb-1.5 block">시급성</label>
           <div className="flex gap-1.5">
-            {URGENCY_LEVELS.map((u) => (
-              <button
-                key={u}
-                onClick={() => handleUrgencyChange(u)}
-                className={`flex-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors duration-200 ${
-                  urgency === u
-                    ? URGENCY_STYLE[u]
-                    : 'border-white/[.06] bg-white/[.04] text-text-muted hover:bg-white/[.08]'
-                }`}
-              >
-                {u === '긴급' ? '🔴 긴급' : u === '할일' ? '🟡 할일' : '🔵 참고'}
-              </button>
-            ))}
+            {URGENCY_LEVELS.map((u) => {
+              const disabled = !isLeader && u === '긴급';
+              return (
+                <button
+                  key={u}
+                  onClick={() => !disabled && handleUrgencyChange(u)}
+                  disabled={disabled}
+                  className={`flex-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors duration-200 ${
+                    urgency === u
+                      ? URGENCY_STYLE[u]
+                      : 'border-white/[.06] bg-white/[.04] text-text-muted hover:bg-white/[.08]'
+                  } ${disabled ? 'opacity-30 cursor-not-allowed' : ''}`}
+                >
+                  {u === '긴급' ? '🔴 긴급' : u === '할일' ? '🟡 할일' : '🔵 참고'}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -158,35 +164,43 @@ export default function NoticeForm({ onClose, onCreated }: NoticeFormProps) {
           </div>
           <div className="flex-1">
             <label className="text-xs font-medium text-text-muted mb-1.5 block">대상 팀</label>
-            <select
-              value={targetTeam}
-              onChange={(e) => setTargetTeam(e.target.value)}
-              className="w-full rounded-lg bg-white/[.06] px-3 py-1.5 text-xs text-text-secondary outline-none"
-            >
-              <option value="">전체</option>
-              {TEAMS.map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
+            {isLeader ? (
+              <select
+                value={targetTeam}
+                onChange={(e) => setTargetTeam(e.target.value)}
+                className="w-full rounded-lg bg-white/[.06] px-3 py-1.5 text-xs text-text-secondary outline-none"
+              >
+                <option value="">전체</option>
+                {TEAMS.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            ) : (
+              <span className="block w-full rounded-lg bg-white/[.06] px-3 py-1.5 text-xs text-text-secondary">
+                {profile?.team ?? '미지정'}
+              </span>
+            )}
           </div>
         </div>
 
-        {/* 상단 고정 */}
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-text-secondary">📌 상단 고정</span>
-          <button
-            onClick={() => setPinned(!pinned)}
-            className={`relative h-6 w-11 rounded-full transition-colors duration-200 ${
-              pinned ? 'bg-accent' : 'bg-white/20'
-            }`}
-          >
-            <span
-              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform duration-200 ${
-                pinned ? 'left-[22px]' : 'left-0.5'
+        {/* 상단 고정 — 리더 이상만 */}
+        {isLeader && (
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-text-secondary">📌 상단 고정</span>
+            <button
+              onClick={() => setPinned(!pinned)}
+              className={`relative h-6 w-11 rounded-full transition-colors duration-200 ${
+                pinned ? 'bg-accent' : 'bg-white/20'
               }`}
-            />
-          </button>
-        </div>
+            >
+              <span
+                className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform duration-200 ${
+                  pinned ? 'left-[22px]' : 'left-0.5'
+                }`}
+              />
+            </button>
+          </div>
+        )}
 
         {/* 제목 */}
         <div>

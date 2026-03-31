@@ -20,24 +20,22 @@ interface MobileHomeProps {
 }
 
 function DashboardHome({ onNavigate }: { onNavigate: (tab: MobileTab) => void }) {
-  const { user } = useAuthStore();
+  const { user, profile } = useAuthStore();
   const { notices, fetchNotices, fetchMyReads, readIds } = useNotices();
   const { ideas, fetchIdeas } = useIdeas();
-  const { kpiItems, kpiRecords, fetchKpiItems, fetchAllRecords } = useKpi();
+  const { members, fetchKpiItems, fetchMemberActivities } = useKpi();
   const { unreadCount: inboxUnread } = useInbox(user?.id ?? null);
+  const userTeam = profile?.team ?? '';
 
   useEffect(() => {
     fetchNotices({ urgency: '긴급' });
     fetchIdeas({ sort: 'popular' });
-    fetchKpiItems();
-    if (user) fetchMyReads(user.id);
-  }, [fetchNotices, fetchIdeas, fetchKpiItems, fetchMyReads, user]);
-
-  useEffect(() => {
-    if (kpiItems.length > 0) {
-      fetchAllRecords(kpiItems.map((i) => i.id));
+    if (userTeam) {
+      fetchKpiItems(userTeam);
+      fetchMemberActivities(userTeam);  // quarter 생략 → 현재 분기 기본값
     }
-  }, [kpiItems, fetchAllRecords]);
+    if (user) fetchMyReads(user.id);
+  }, [fetchNotices, fetchIdeas, fetchKpiItems, fetchMemberActivities, fetchMyReads, user, userTeam]);
 
   // 긴급 공지 중 안읽은 건수
   const unreadUrgent = notices.filter((n) => n.urgency === '긴급' && !readIds.has(n.id)).length;
@@ -45,14 +43,10 @@ function DashboardHome({ onNavigate }: { onNavigate: (tab: MobileTab) => void })
   // 인기 아이디어 TOP 1
   const topIdea = ideas[0];
 
-  // 첫 번째 KPI
-  const firstKpi = kpiItems[0];
-  const firstKpiRecords = firstKpi
-    ? kpiRecords.filter((r) => r.kpi_item_id === firstKpi.id)
-    : [];
-  const latestRecord = [...firstKpiRecords].sort((a, b) => b.month.localeCompare(a.month))[0];
-  const kpiPercentage = firstKpi && latestRecord
-    ? Math.round(((latestRecord.score ?? 0) / (firstKpi.max_score || 3)) * 100)
+  // 내 활동 요약
+  const myActivity = members.find((m) => m.userId === user?.id);
+  const myTotalActivity = myActivity
+    ? myActivity.vocCount + myActivity.ideaCount + myActivity.eventJoinCount + myActivity.exchangeJoinCount
     : 0;
 
   return (
@@ -117,32 +111,21 @@ function DashboardHome({ onNavigate }: { onNavigate: (tab: MobileTab) => void })
         </p>
       </button>
 
-      {/* KPI 요약 카드 */}
+      {/* KPI 활동 요약 카드 */}
       <button
         onClick={() => onNavigate('more')}
         className="rounded-xl border border-white/[.06] bg-white/[.04] p-3 text-left transition-colors hover:bg-white/[.06]"
       >
-        <span className="text-xs font-semibold text-info">📊 KPI 현황</span>
-        {firstKpi && latestRecord ? (
-          <div className="mt-2">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-sm text-text-primary">{firstKpi.title}</span>
-              <span className="text-xs font-mono text-text-muted">
-                {(latestRecord.score ?? 0).toFixed(1)}/{firstKpi.max_score}
-              </span>
-            </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[.08]">
-              <div
-                className="h-full rounded-full transition-all duration-500"
-                style={{
-                  width: `${Math.min(kpiPercentage, 100)}%`,
-                  backgroundColor: kpiPercentage >= 90 ? '#22c55e' : kpiPercentage >= 70 ? '#f59e0b' : '#ef4444',
-                }}
-              />
-            </div>
+        <span className="text-xs font-semibold text-info">📊 KPI 활동 현황</span>
+        {myActivity ? (
+          <div className="mt-2 flex items-center gap-3">
+            <span className="text-lg font-bold text-text-primary">{myTotalActivity}건</span>
+            <span className="text-[11px] text-text-muted">
+              VoC {myActivity.vocCount} · 아이디어 {myActivity.ideaCount} · 이벤트 {myActivity.eventJoinCount} · 교류 {myActivity.exchangeJoinCount}
+            </span>
           </div>
         ) : (
-          <p className="mt-1 text-sm text-text-secondary">KPI 데이터가 없습니다</p>
+          <p className="mt-1 text-sm text-text-secondary">이번 분기 활동 기록이 없습니다</p>
         )}
       </button>
     </div>

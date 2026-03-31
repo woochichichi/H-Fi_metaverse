@@ -317,10 +317,7 @@ export function useIdeas() {
   }, []);
 
   const deleteIdea = useCallback(async (id: string) => {
-    // 관련 투표·댓글 먼저 삭제
-    await supabase.from('idea_votes').delete().eq('idea_id', id);
-    await supabase.from('idea_comments').delete().eq('idea_id', id);
-
+    // idea_votes, idea_comments는 FK CASCADE로 자동 삭제
     const { error: deleteError } = await supabase
       .from('ideas')
       .delete()
@@ -330,6 +327,9 @@ export function useIdeas() {
       console.error('아이디어 삭제 실패:', deleteError.message);
       return { error: deleteError.message };
     }
+
+    // 관련 알림 정리 (실패해도 무시)
+    supabase.from('notifications').delete().like('link', `/idea/${id}%`).then();
 
     setIdeas((prev) => prev.filter((i) => i.id !== id));
     return { error: null };

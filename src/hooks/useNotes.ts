@@ -179,8 +179,16 @@ export function useNotes() {
   }, []);
 
   const deleteNote = useCallback(async (id: string) => {
-    // 관련 대화 스레드 먼저 삭제
-    await supabase.from('message_threads').delete().eq('ref_id', id).eq('ref_type', 'note');
+    // message_threads는 FK가 없으므로 수동 삭제 (실패해도 본문 삭제 진행)
+    const { error: threadError } = await supabase
+      .from('message_threads')
+      .delete()
+      .eq('ref_id', id)
+      .eq('ref_type', 'note');
+
+    if (threadError) {
+      console.error('쪽지 스레드 삭제 실패 (계속 진행):', threadError.message);
+    }
 
     const { error: deleteError } = await supabase
       .from('anonymous_notes')

@@ -202,9 +202,7 @@ export function useNotices() {
   }, []);
 
   const deleteNotice = useCallback(async (id: string) => {
-    // 관련 읽음 기록 먼저 삭제
-    await supabase.from('notice_reads').delete().eq('notice_id', id);
-
+    // notice_reads는 FK CASCADE로 자동 삭제
     const { error: deleteError } = await supabase
       .from('notices')
       .delete()
@@ -214,6 +212,9 @@ export function useNotices() {
       console.error('공지 삭제 실패:', deleteError.message);
       return { error: deleteError.message };
     }
+
+    // 관련 알림 정리 (실패해도 무시)
+    supabase.from('notifications').delete().like('link', `/notice/${id}%`).then();
 
     setNotices((prev) => prev.filter((n) => n.id !== id));
     return { error: null };
