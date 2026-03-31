@@ -17,7 +17,7 @@ CREATE TABLE profiles (
   avatar_color  TEXT DEFAULT '#6C5CE7',
   avatar_emoji  TEXT DEFAULT '😊',
   avatar_url    TEXT,
-  status        TEXT DEFAULT 'offline' CHECK (status IN ('online','offline','재택')),
+  status        TEXT DEFAULT 'offline' CHECK (status IN ('online','offline','재택','퇴사')),
   mood_emoji    TEXT,
   position_x    REAL DEFAULT 430,
   position_y    REAL DEFAULT 380,
@@ -225,6 +225,11 @@ ALTER TABLE user_activities ENABLE ROW LEVEL SECURITY;
 -- profiles
 CREATE POLICY "profiles_select" ON profiles FOR SELECT USING (auth.uid() IS NOT NULL);
 CREATE POLICY "profiles_update_own" ON profiles FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "profiles_update_admin_leader" ON profiles FOR UPDATE
+  USING (EXISTS (
+    SELECT 1 FROM profiles AS me WHERE me.id = auth.uid()
+    AND (me.role IN ('admin', 'director') OR (me.role = 'leader' AND profiles.team = me.team))
+  ));
 CREATE POLICY "profiles_insert_own" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
 
 -- invite_codes (가입 전 검증: anon 읽기 허용)

@@ -86,13 +86,16 @@ export default function Sidebar() {
     const globalUser = globalOnlineUsers.get(p.id);
     return {
       ...p,
-      status: globalOnlineIds.has(p.id) ? ('online' as const) : ('offline' as const),
+      // 퇴사자는 DB 상태를 그대로 유지 (로그인 차단되어 presence에 없음)
+      status: p.status === '퇴사' ? ('퇴사' as const) : globalOnlineIds.has(p.id) ? ('online' as const) : ('offline' as const),
       currentRoomId: p.id === user?.id ? currentRoom : (globalUser?.room as RoomId | undefined),
       mood_emoji: globalUser?.moodEmoji || p.mood_emoji,
     };
   });
 
   const filtered = peopleWithStatus.filter((p) => {
+    // 퇴사자는 사이드바에서 숨김
+    if (p.status === '퇴사') return false;
     const display = getDisplayName(p, isAdmin);
     return display.includes(search) || p.team.includes(search);
   });

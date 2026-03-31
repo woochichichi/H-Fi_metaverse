@@ -236,13 +236,15 @@ function MoreMenu({ onNavigate }: { onNavigate: (tab: MobileTab) => void }) {
           <span className="text-sm font-semibold text-text-primary">{item.label}</span>
         </button>
       ))}
-      {(profile?.role === 'admin' || profile?.role === 'director') && (
+      {(profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader') && (
         <button
           onClick={() => onNavigate('more_admin' as MobileTab)}
           className="flex items-center gap-3 rounded-xl border border-accent/20 bg-accent/[.05] p-4 text-left transition-colors hover:bg-accent/[.1]"
         >
           <Settings size={20} className="text-accent" />
-          <span className="text-sm font-semibold text-accent">관리자 패널</span>
+          <span className="text-sm font-semibold text-accent">
+            {profile?.role === 'leader' ? '팀 관리' : '관리자 패널'}
+          </span>
         </button>
       )}
     </div>

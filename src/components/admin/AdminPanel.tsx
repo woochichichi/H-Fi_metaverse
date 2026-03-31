@@ -4,29 +4,33 @@ import InviteManager from './InviteManager';
 import UserManager from './UserManager';
 import EvalItemManager from './EvalItemManager';
 import EvalDashboard from '../dashboard/EvalDashboard';
+import { useAuthStore } from '../../stores/authStore';
 
 interface AdminPanelProps {
   onClose: () => void;
 }
 
-const TABS = [
-  { id: 'invite', label: '초대 코드', icon: KeyRound },
-  { id: 'users', label: '사용자 관리', icon: Users },
-  { id: 'eval-items', label: '평가 항목', icon: ListChecks },
-  { id: 'eval', label: '평가 대시보드', icon: BarChart3 },
-] as const;
+const ALL_TABS: readonly { id: 'invite' | 'users' | 'eval-items' | 'eval'; label: string; icon: typeof KeyRound; roles: string[] }[] = [
+  { id: 'invite', label: '초대 코드', icon: KeyRound, roles: ['admin', 'director'] },
+  { id: 'users', label: '사용자 관리', icon: Users, roles: ['admin', 'director', 'leader'] },
+  { id: 'eval-items', label: '평가 항목', icon: ListChecks, roles: ['admin', 'director'] },
+  { id: 'eval', label: '평가 대시보드', icon: BarChart3, roles: ['admin', 'director'] },
+];
 
-type TabId = (typeof TABS)[number]['id'];
+type TabId = (typeof ALL_TABS)[number]['id'];
 
 export default function AdminPanel({ onClose }: AdminPanelProps) {
-  const [activeTab, setActiveTab] = useState<TabId>('invite');
+  const { profile } = useAuthStore();
+  const myRole = profile?.role || 'member';
+  const TABS = ALL_TABS.filter((t) => t.roles.includes(myRole));
+  const [activeTab, setActiveTab] = useState<TabId>(TABS[0]?.id || 'users');
 
   return (
     <div className="flex h-full flex-col">
       {/* 헤더 */}
       <div className="flex items-center justify-between border-b border-white/[.06] px-4 py-3">
         <h2 className="font-heading text-base font-bold text-text-primary">
-          관리자 패널
+          {myRole === 'leader' ? '팀 관리' : '관리자 패널'}
         </h2>
         <button
           onClick={onClose}

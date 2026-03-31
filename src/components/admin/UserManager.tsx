@@ -1,32 +1,51 @@
 import { useState, useEffect, useCallback } from 'react';
-import { createPortal } from 'react-dom';
-import { Search, ChevronDown } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useUiStore } from '../../stores/uiStore';
+import { useAuthStore } from '../../stores/authStore';
 import { TEAMS } from '../../lib/constants';
 import { getDisplayName } from '../../lib/utils';
+import ConfirmChangeModal from './ConfirmChangeModal';
+import ResignModal from './ResignModal';
+import UserRow from './UserRow';
 import type { Profile } from '../../types';
 
 export default function UserManager() {
   const { addToast } = useUiStore();
+  const { profile: myProfile } = useAuthStore();
+  const isAdmin = myProfile?.role === 'admin' || myProfile?.role === 'director';
+  const isLeader = myProfile?.role === 'leader';
+
   const [users, setUsers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
-  const [filterTeam, setFilterTeam] = useState('');
+  const [filterTeam, setFilterTeam] = useState(isLeader ? myProfile?.team || '' : '');
   const [confirmModal, setConfirmModal] = useState<{
     userId: string;
     field: 'role' | 'status';
     value: string;
     userName: string;
   } | null>(null);
+  const [resignModal, setResignModal] = useState<{
+    userId: string;
+    userName: string;
+    isResigned: boolean;
+  } | null>(null);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
+
+      // 리더는 자기 팀만 조회
+      if (isLeader && myProfile?.team) {
+        query = query.eq('team', myProfile.team);
+      }
+
+      const { data, error } = await query;
       if (error) {
         addToast('사용자 조회 실패: ' + error.message, 'error');
       } else {
@@ -37,7 +56,7 @@ export default function UserManager() {
     } finally {
       setLoading(false);
     }
-  }, [addToast]);
+  }, [addToast, isLeader, myProfile?.team]);
 
   useEffect(() => {
     fetchUsers();
@@ -54,9 +73,14 @@ export default function UserManager() {
     setConfirmModal({ userId, field: 'role', value: newRole, userName: getDisplayName(user, true) });
   };
 
-  const handleStatusToggle = (userId: string, user: Profile, currentStatus: string) => {
-    const newStatus = currentStatus === 'offline' ? 'online' : 'offline';
+  const handleStatusToggle = (userId: string, user: Profile) => {
+    const newStatus = user.status === 'offline' ? 'online' : 'offline';
     setConfirmModal({ userId, field: 'status', value: newStatus, userName: getDisplayName(user, true) });
+  };
+
+  const handleResign = (userId: string, user: Profile) => {
+    const isResigned = user.status === '퇴사';
+    setResignModal({ userId, userName: getDisplayName(user, true), isResigned });
   };
 
   const confirmAction = async () => {
@@ -79,6 +103,27 @@ export default function UserManager() {
     setConfirmModal(null);
   };
 
+  const confirmResign = async () => {
+    if (!resignModal) return;
+    const { userId, isResigned } = resignModal;
+    const newStatus = isResigned ? 'offline' : '퇴사';
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({ status: newStatus })
+      .eq('id', userId);
+
+    if (error) {
+      addToast('처리 실패: ' + error.message, 'error');
+    } else {
+      addToast(isResigned ? '퇴사 처리가 복원되었습니다' : '퇴사 처리되었습니다', 'success');
+      setUsers((prev) =>
+        prev.map((u) => (u.id === userId ? { ...u, status: newStatus as Profile['status'] } : u))
+      );
+    }
+    setResignModal(null);
+  };
+
   const roleLabel = (role: string) => {
     if (role === 'admin') return '관리자';
     if (role === 'director') return '금융담당';
@@ -88,7 +133,9 @@ export default function UserManager() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h3 className="text-sm font-bold text-text-primary">사용자 관리</h3>
+      <h3 className="text-sm font-bold text-text-primary">
+        사용자 관리 {isLeader && myProfile?.team && <span className="font-normal text-text-muted">({myProfile.team})</span>}
+      </h3>
 
       {/* 필터 */}
       <div className="flex gap-2">
@@ -101,16 +148,19 @@ export default function UserManager() {
             className="w-full rounded-lg border border-white/[.1] bg-bg-primary py-2 pl-8 pr-3 text-xs text-text-primary placeholder:text-text-muted"
           />
         </div>
-        <select
-          value={filterTeam}
-          onChange={(e) => setFilterTeam(e.target.value)}
-          className="rounded-lg border border-white/[.1] bg-bg-primary px-3 py-2 text-xs text-text-primary"
-        >
-          <option value="">전체 팀</option>
-          {TEAMS.map((t) => (
-            <option key={t} value={t}>{t}</option>
-          ))}
-        </select>
+        {/* 리더는 팀 필터 고정 */}
+        {isAdmin && (
+          <select
+            value={filterTeam}
+            onChange={(e) => setFilterTeam(e.target.value)}
+            className="rounded-lg border border-white/[.1] bg-bg-primary px-3 py-2 text-xs text-text-primary"
+          >
+            <option value="">전체 팀</option>
+            {TEAMS.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+        )}
       </div>
 
       {/* 사용자 목록 */}
@@ -125,7 +175,7 @@ export default function UserManager() {
               <tr className="border-b border-white/[.06] bg-white/[.03]">
                 <th className="px-3 py-2 text-left font-semibold text-text-muted">이름</th>
                 <th className="px-3 py-2 text-left font-semibold text-text-muted">팀</th>
-                <th className="px-3 py-2 text-center font-semibold text-text-muted">역할</th>
+                {isAdmin && <th className="px-3 py-2 text-center font-semibold text-text-muted">역할</th>}
                 <th className="px-3 py-2 text-left font-semibold text-text-muted">가입일</th>
                 <th className="px-3 py-2 text-center font-semibold text-text-muted">상태</th>
                 <th className="px-3 py-2 text-center font-semibold text-text-muted">액션</th>
@@ -133,63 +183,16 @@ export default function UserManager() {
             </thead>
             <tbody>
               {filtered.map((u) => (
-                <tr key={u.id} className="border-b border-white/[.04] transition-colors hover:bg-white/[.02]">
-                  <td className="px-3 py-2">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="flex h-6 w-6 items-center justify-center rounded-full text-[10px]"
-                        style={{ backgroundColor: u.avatar_color }}
-                      >
-                        {u.avatar_emoji}
-                      </div>
-                      <span className="text-text-primary">{getDisplayName(u, true)}</span>
-                    </div>
-                  </td>
-                  <td className="px-3 py-2 text-text-secondary">{u.team}</td>
-                  <td className="px-3 py-2 text-center">
-                    <div className="relative inline-block">
-                      <select
-                        value={u.role}
-                        onChange={(e) => handleRoleChange(u.id, u, e.target.value)}
-                        className="appearance-none rounded-md border border-white/[.1] bg-bg-primary px-2 py-0.5 pr-5 text-[11px] text-text-primary"
-                      >
-                        <option value="member">멤버</option>
-                        <option value="leader">리더</option>
-                        <option value="director">금융담당</option>
-                        <option value="admin">관리자</option>
-                      </select>
-                      <ChevronDown size={10} className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-text-muted" />
-                    </div>
-                  </td>
-                  <td className="px-3 py-2 text-text-muted">
-                    {new Date(u.created_at).toLocaleDateString('ko-KR')}
-                  </td>
-                  <td className="px-3 py-2 text-center">
-                    <span
-                      className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                        u.status === 'online'
-                          ? 'bg-success/20 text-success'
-                          : u.status === '재택'
-                            ? 'bg-info/20 text-info'
-                            : 'bg-white/[.08] text-text-muted'
-                      }`}
-                    >
-                      {u.status}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2 text-center">
-                    <button
-                      onClick={() => handleStatusToggle(u.id, u, u.status)}
-                      className={`rounded-md px-2 py-0.5 text-[10px] font-semibold transition-colors ${
-                        u.status === 'offline'
-                          ? 'bg-success/10 text-success hover:bg-success/20'
-                          : 'bg-danger/10 text-danger hover:bg-danger/20'
-                      }`}
-                    >
-                      {u.status === 'offline' ? '활성화' : '비활성화'}
-                    </button>
-                  </td>
-                </tr>
+                <UserRow
+                  key={u.id}
+                  user={u}
+                  isAdmin={isAdmin}
+                  isLeader={isLeader}
+                  isSelf={u.id === myProfile?.id}
+                  onRoleChange={handleRoleChange}
+                  onStatusToggle={handleStatusToggle}
+                  onResign={handleResign}
+                />
               ))}
             </tbody>
           </table>
@@ -200,36 +203,28 @@ export default function UserManager() {
         총 {filtered.length}명 {filterTeam && `(${filterTeam})`}
       </div>
 
-      {/* 확인 모달 — createPortal로 body에 렌더링 (backdrop-filter stacking context 회피) */}
-      {confirmModal && createPortal(
-        <>
-          <div className="fixed inset-0 z-[300] bg-black/50" onClick={() => setConfirmModal(null)} />
-          <div className="fixed left-1/2 top-1/2 z-[301] w-80 -translate-x-1/2 -translate-y-1/2 rounded-xl border border-white/[.08] bg-bg-secondary p-5 shadow-2xl">
-            <h4 className="mb-3 text-sm font-bold text-text-primary">변경 확인</h4>
-            <p className="mb-4 text-xs text-text-secondary">
-              <strong>{confirmModal.userName}</strong>님의{' '}
-              {confirmModal.field === 'role'
-                ? `역할을 "${roleLabel(confirmModal.value)}"(으)로`
-                : `상태를 "${confirmModal.value}"(으)로`}{' '}
-              변경하시겠습니까?
-            </p>
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setConfirmModal(null)}
-                className="rounded-lg px-4 py-1.5 text-xs text-text-muted hover:bg-white/[.06]"
-              >
-                취소
-              </button>
-              <button
-                onClick={confirmAction}
-                className="rounded-lg bg-accent px-4 py-1.5 text-xs font-semibold text-white hover:bg-accent/80"
-              >
-                확인
-              </button>
-            </div>
-          </div>
-        </>,
-        document.body
+      {/* 역할/상태 변경 확인 모달 */}
+      {confirmModal && (
+        <ConfirmChangeModal
+          userName={confirmModal.userName}
+          description={
+            confirmModal.field === 'role'
+              ? `역할을 "${roleLabel(confirmModal.value)}"(으)로`
+              : `상태를 "${confirmModal.value}"(으)로`
+          }
+          onConfirm={confirmAction}
+          onCancel={() => setConfirmModal(null)}
+        />
+      )}
+
+      {/* 퇴사 처리 확인 모달 */}
+      {resignModal && (
+        <ResignModal
+          userName={resignModal.userName}
+          isResigned={resignModal.isResigned}
+          onConfirm={confirmResign}
+          onCancel={() => setResignModal(null)}
+        />
       )}
     </div>
   );

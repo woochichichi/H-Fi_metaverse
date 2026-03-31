@@ -161,7 +161,7 @@ export interface Profile {
   emp_no: string | null;
   name: string;
   nickname: string | null;
-  team: '증권ITO' | '생명ITO' | '손보ITO' | '한금서';
+  team: '증권ITO' | '생명ITO' | '손보ITO' | '한금서' | '금융ITO';
   role: 'admin' | 'director' | 'leader' | 'member';
   unit: '조직' | '품질' | '전략' | 'AX' | null;
   avatar_color: string;
@@ -171,7 +171,7 @@ export interface Profile {
   hair_color: string;
   hair_style: string;
   accessory: string;
-  status: 'online' | 'offline' | '재택';
+  status: 'online' | 'offline' | '재택' | '퇴사';
   mood_emoji: string | null;
   position_x: number;
   position_y: number;

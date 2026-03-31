@@ -135,12 +135,12 @@ export default function TopBar() {
             )}
           </button>
 
-          {/* 관리자 패널 (admin/director) */}
-          {(profile?.role === 'admin' || profile?.role === 'director') && (
+          {/* 관리자 패널 (admin/director/leader) */}
+          {(profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader') && (
             <button
               onClick={handleOpenAdmin}
               className="flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary transition-colors duration-200 hover:bg-bg-tertiary hover:text-text-primary"
-              title="관리자 패널"
+              title={profile?.role === 'leader' ? '팀 관리' : '관리자 패널'}
             >
               <Settings size={18} />
             </button>

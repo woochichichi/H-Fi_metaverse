@@ -17,6 +17,11 @@ ALTER TABLE user_activities ENABLE ROW LEVEL SECURITY;
 -- profiles
 CREATE POLICY "profiles_select" ON profiles FOR SELECT USING (auth.uid() IS NOT NULL);
 CREATE POLICY "profiles_update_own" ON profiles FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "profiles_update_admin_leader" ON profiles FOR UPDATE
+  USING (EXISTS (
+    SELECT 1 FROM profiles AS me WHERE me.id = auth.uid()
+    AND (me.role IN ('admin', 'director') OR (me.role = 'leader' AND profiles.team = me.team))
+  ));
 CREATE POLICY "profiles_insert_own" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
 
 -- invite_codes (가입 전 검증: anon 읽기 허용)

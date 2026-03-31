@@ -8,7 +8,7 @@ export const ALLOWED_EMAIL_DOMAINS = [
 ] as const;
 
 // 팀 목록
-export const TEAMS = ['증권ITO', '생명ITO', '손보ITO', '한금서'] as const;
+export const TEAMS = ['증권ITO', '생명ITO', '손보ITO', '한금서', '금융ITO'] as const;
 export type Team = (typeof TEAMS)[number];
 
 // 유닛 목록
@@ -123,6 +123,7 @@ export const TEAM_COLORS: Record<string, { body: string; hair: string }> = {
   '생명ITO': { body: '#6C5CE7', hair: '#3a2870' },
   '손보ITO': { body: '#0984E3', hair: '#1a3a5c' },
   '한금서':  { body: '#F8B500', hair: '#5a4210' },
+  '금융ITO': { body: '#FF6348', hair: '#5a2a1e' },
 };
 
 // ═══ 캐릭터 커스터마이징 옵션 ═══
@@ -179,7 +180,7 @@ export const ACCESSORIES: { id: Accessory; label: string; emoji: string }[] = [
 ];
 
 // 프로필 상태
-export const PROFILE_STATUSES = ['online', 'offline', '재택'] as const;
+export const PROFILE_STATUSES = ['online', 'offline', '재택', '퇴사'] as const;
 export type ProfileStatus = (typeof PROFILE_STATUSES)[number];
 
 // 기분 이모지
@@ -260,9 +261,9 @@ export const ROOMS_DATA: Record<RoomId, RoomDef> = {
     mapSize: { w: 1200, h: 900 },
     spawnPoint: { x: 600, y: 150 },
     zones: [
-      { id: 'stock-lobby', team: '증권ITO', label: '🏠 증권 로비', emoji: '💭', x: 60, y: 60, width: 500, height: 340 },
-      { id: 'stock-kpi', team: '증권ITO', label: '📊 증권 KPI', emoji: '📊', x: 640, y: 60, width: 500, height: 340 },
-      { id: 'stock-notice', team: '증권ITO', label: '📢 증권 공지', emoji: '📢', x: 350, y: 460, width: 500, height: 300 },
+      { id: 'stock-lobby', team: '증권ITO', label: '🏠 로비', emoji: '💭', x: 60, y: 60, width: 500, height: 340 },
+      { id: 'stock-kpi', team: '증권ITO', label: '📊 KPI', emoji: '📊', x: 640, y: 60, width: 500, height: 340 },
+      { id: 'stock-notice', team: '증권ITO', label: '📋 공지', emoji: '📢', x: 350, y: 460, width: 500, height: 300 },
     ],
     portals: [
       {
@@ -283,9 +284,9 @@ export const ROOMS_DATA: Record<RoomId, RoomDef> = {
     mapSize: { w: 1200, h: 900 },
     spawnPoint: { x: 600, y: 150 },
     zones: [
-      { id: 'life-lobby', team: '생명ITO', label: '🏠 생명 로비', emoji: '💭', x: 60, y: 60, width: 500, height: 340 },
-      { id: 'life-kpi', team: '생명ITO', label: '📊 생명 KPI', emoji: '📊', x: 640, y: 60, width: 500, height: 340 },
-      { id: 'life-notice', team: '생명ITO', label: '📢 생명 공지', emoji: '📢', x: 350, y: 460, width: 500, height: 300 },
+      { id: 'life-lobby', team: '생명ITO', label: '🏠 로비', emoji: '💭', x: 60, y: 60, width: 500, height: 340 },
+      { id: 'life-kpi', team: '생명ITO', label: '📊 KPI', emoji: '📊', x: 640, y: 60, width: 500, height: 340 },
+      { id: 'life-notice', team: '생명ITO', label: '📋 공지', emoji: '📢', x: 350, y: 460, width: 500, height: 300 },
     ],
     portals: [
       {
@@ -306,9 +307,9 @@ export const ROOMS_DATA: Record<RoomId, RoomDef> = {
     mapSize: { w: 1200, h: 900 },
     spawnPoint: { x: 600, y: 150 },
     zones: [
-      { id: 'shield-lobby', team: '손보ITO', label: '🏠 손보 로비', emoji: '💭', x: 60, y: 60, width: 500, height: 340 },
-      { id: 'shield-kpi', team: '손보ITO', label: '📊 손보 KPI', emoji: '📊', x: 640, y: 60, width: 500, height: 340 },
-      { id: 'shield-notice', team: '손보ITO', label: '📢 손보 공지', emoji: '📢', x: 350, y: 460, width: 500, height: 300 },
+      { id: 'shield-lobby', team: '손보ITO', label: '🏠 로비', emoji: '💭', x: 60, y: 60, width: 500, height: 340 },
+      { id: 'shield-kpi', team: '손보ITO', label: '📊 KPI', emoji: '📊', x: 640, y: 60, width: 500, height: 340 },
+      { id: 'shield-notice', team: '손보ITO', label: '📋 공지', emoji: '📢', x: 350, y: 460, width: 500, height: 300 },
     ],
     portals: [
       {
@@ -330,7 +331,7 @@ export const ROOMS_DATA: Record<RoomId, RoomDef> = {
     zones: [
       { id: 'voc', team: null, label: '📞 VOC 센터', emoji: '📞', x: 60, y: 60, width: 630, height: 360 },
       { id: 'idea', team: null, label: '💡 아이디어 보드', emoji: '💡', x: 820, y: 60, width: 630, height: 360 },
-      { id: 'gathering', team: null, label: '🎉 모임방', emoji: '🎉', x: 60, y: 490, width: 420, height: 280 },
+      { id: 'gathering', team: null, label: '🏕 모임방', emoji: '🎉', x: 60, y: 490, width: 420, height: 280 },
       { id: 'reaction', team: null, label: '⚡ 반응속도', emoji: '⚡', x: 520, y: 490, width: 270, height: 280 },
       { id: 'omok', team: null, label: '⚫ 오목', emoji: '⚫', x: 810, y: 490, width: 270, height: 280 },
       { id: 'jumprope', team: null, label: '🪢 줄넘기', emoji: '🪢', x: 1100, y: 490, width: 270, height: 280 },
@@ -368,6 +369,7 @@ export const TEAM_TO_ROOM: Record<string, RoomId> = {
   '생명ITO': 'life',
   '손보ITO': 'shield',
   '한금서': 'plaza',
+  '금융ITO': 'plaza',
 };
 
 // ═══ v4 Zone 정의 (하위 호환) — ROOMS_DATA.zones 기반 동적 생성 ═══

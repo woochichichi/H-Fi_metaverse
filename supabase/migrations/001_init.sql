@@ -11,7 +11,7 @@ CREATE TABLE profiles (
   avatar_color  TEXT DEFAULT '#6C5CE7',
   avatar_emoji  TEXT DEFAULT '😊',
   avatar_url    TEXT,
-  status        TEXT DEFAULT 'offline' CHECK (status IN ('online','offline','재택')),
+  status        TEXT DEFAULT 'offline' CHECK (status IN ('online','offline','재택','퇴사')),
   mood_emoji    TEXT,
   position_x    REAL DEFAULT 430,
   position_y    REAL DEFAULT 380,

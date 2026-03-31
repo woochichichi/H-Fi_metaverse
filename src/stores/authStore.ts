@@ -47,6 +47,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
     set({ user: data.user });
     await get().fetchProfile(data.user.id);
+
+    // 퇴사자 로그인 차단
+    const profile = get().profile;
+    if (profile?.status === '퇴사') {
+      await supabase.auth.signOut();
+      set({ user: null, profile: null });
+      return { error: '퇴사 처리된 계정입니다. 관리자에게 문의하세요.' };
+    }
+
     return { error: null };
   },
 
@@ -62,6 +71,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (session?.user) {
         set({ user: session.user });
         await get().fetchProfile(session.user.id);
+        // 퇴사자는 세션 복구 시에도 로그아웃
+        if (get().profile?.status === '퇴사') {
+          await supabase.auth.signOut();
+          set({ user: null, profile: null });
+        }
       }
     } catch (err) {
       console.error('세션 초기화 실패:', err);
@@ -69,7 +83,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ isLoading: false });
     }
 
-    // 세션 변경 리스너
+    // 세션 변경 리스너 (퇴사 로그아웃 후에도 등록 필수 — 다른 계정 로그인 대비)
     supabase.auth.onAuthStateChange(async (event, session) => {
       if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
         set({ user: session.user });
