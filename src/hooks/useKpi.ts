@@ -59,18 +59,19 @@ export function useKpi() {
           .eq('team', team)
           .order('name');
 
-      const { data: profiles, error: profileErr } = await withTimeout(profileQuery, 8000, 'kpiProfiles');
+      const { data: rawProfiles, error: profileErr } = await withTimeout(profileQuery, 8000, 'kpiProfiles');
       if (profileErr) throw profileErr;
-      if (!profiles || profiles.length === 0) {
+      if (!rawProfiles || rawProfiles.length === 0) {
         setMembers([]);
         return;
       }
+      const profiles = rawProfiles as { id: string; name: string; team: string; unit: string | null; role: string }[];
 
       // 2) 분기 날짜 범위 계산
       const { start, end } = getQuarterRange(quarter ?? getCurrentQuarter());
 
       // 3) 해당 팀원들의 활동 조회
-      const userIds = profiles.map((p: { id: string }) => p.id);
+      const userIds = profiles.map((p) => p.id);
       const actQuery = () =>
         supabase
           .from('user_activities')
@@ -90,7 +91,7 @@ export function useKpi() {
         m[a.activity_type] = (m[a.activity_type] ?? 0) + 1;
       });
 
-      const result: MemberActivity[] = profiles.map((p: { id: string; name: string; unit: string | null }) => {
+      const result: MemberActivity[] = profiles.map((p) => {
         const acts = actMap.get(p.id) ?? {};
         return {
           userId: p.id,
