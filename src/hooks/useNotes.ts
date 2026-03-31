@@ -87,32 +87,43 @@ export function useNotes() {
       sender_id?: string | null;
     }) => {
       const sessionToken = input.anonymous ? crypto.randomUUID() : null;
+      const noteId = crypto.randomUUID();
 
-      const { data, error: insertError } = await supabase
+      const insertPayload = {
+        id: noteId,
+        sender_id: input.anonymous ? null : input.sender_id,
+        anonymous: input.anonymous,
+        recipient_role: input.recipient_role,
+        recipient_team: input.recipient_team ?? null,
+        category: input.category,
+        title: input.title,
+        content: input.content,
+        team: input.team,
+        session_token: sessionToken,
+      };
+
+      // INSERT만 수행 (익명 쪽지는 sender_id=null이라 SELECT RLS에 걸림)
+      const { error: insertError } = await supabase
         .from('anonymous_notes')
-        .insert({
-          sender_id: input.anonymous ? null : input.sender_id,
-          anonymous: input.anonymous,
-          recipient_role: input.recipient_role,
-          recipient_team: input.recipient_team ?? null,
-          category: input.category,
-          title: input.title,
-          content: input.content,
-          team: input.team,
-          session_token: sessionToken,
-        })
-        .select()
-        .single();
+        .insert(insertPayload);
 
       if (insertError) {
         console.error('쪽지 발송 실패:', insertError.message);
         return { data: null, error: insertError.message };
       }
 
-      // 익명 쪽지 → localStorage에 session_token 저장
-      if (input.anonymous && data && sessionToken) {
+      // 클라이언트에서 data 구성 (RLS 우회 불필요)
+      const data = {
+        ...insertPayload,
+        status: '미읽음' as const,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as AnonymousNote;
+
+      // 익명 쪽지 → sessionStorage에 session_token 저장
+      if (input.anonymous && sessionToken) {
         const tokens = JSON.parse(sessionStorage.getItem('note_tokens') || '{}');
-        tokens[data.id] = sessionToken;
+        tokens[noteId] = sessionToken;
         sessionStorage.setItem('note_tokens', JSON.stringify(tokens));
       }
 
@@ -134,7 +145,7 @@ export function useNotes() {
               team: profile.team,
               activity_type: 'note_send',
               points: ACTIVITY_POINTS.note_send,
-              ref_id: data.id,
+              ref_id: noteId,
             });
           }
         }

@@ -74,10 +74,14 @@ CREATE POLICY "notifications_update_own" ON notifications FOR UPDATE
 -- anonymous_notes
 CREATE POLICY "anon_notes_insert" ON anonymous_notes FOR INSERT
   WITH CHECK (auth.uid() IS NOT NULL);
+-- 리더/관리자: 모든 쪽지 열람 가능
 CREATE POLICY "anon_notes_select_leader" ON anonymous_notes FOR SELECT
-  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin','leader')));
+  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin','leader','director')));
+-- 일반 멤버: 자기가 보낸 실명 쪽지만 열람 가능
+CREATE POLICY "anon_notes_select_sender" ON anonymous_notes FOR SELECT
+  USING (sender_id = auth.uid());
 CREATE POLICY "anon_notes_update_leader" ON anonymous_notes FOR UPDATE
-  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin','leader')));
+  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin','leader','director')));
 
 -- message_threads
 CREATE POLICY "threads_select" ON message_threads FOR SELECT
