@@ -71,7 +71,7 @@ export default function Zone() {
             <span className="rounded bg-white/20 px-[6px] py-[1px] font-mono text-[10px] font-semibold text-white/90">
               Space
             </span>
-            {zone.emoji} {zone.label} 입장
+            {zone.label} 입장
           </div>
         );
       })()}
