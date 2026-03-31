@@ -54,7 +54,10 @@ export default function CharacterPet({ type, ownerDirection = 'right' }: Props) 
 
   if (type === 'none') return null;
 
-  const sz = PET_SIZE[type];
+  // DB에 삭제된 펫 값이 남아있을 수 있으므로 안전 처리
+  const sz = PET_SIZE[type as keyof typeof PET_SIZE];
+  if (!sz) return null;
+
   const offsetX = ownerDirection === 'right' ? -14 : 22;
   const isFlying = FLYING_PETS.has(type);
 
@@ -68,15 +71,6 @@ export default function CharacterPet({ type, ownerDirection = 'right' }: Props) 
         animation: isFlying ? 'petFloat 1.2s ease-in-out infinite' : undefined,
       }}
     >
-      {/* 날아다니는 펫용 CSS 애니메이션 */}
-      {isFlying && (
-        <style>{`
-          @keyframes petFloat {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-4px); }
-          }
-        `}</style>
-      )}
       <svg
         width={sz.w}
         height={sz.h}
