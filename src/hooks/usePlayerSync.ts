@@ -65,7 +65,7 @@ export default function usePlayerSync() {
 
     globalChannel.on('presence', { event: 'sync' }, () => {
       const state = globalChannel.presenceState();
-      const users = new Map<string, { userId: string; name: string; team: string; room: string }>();
+      const users = new Map<string, { userId: string; name: string; team: string; room: string; moodEmoji?: string }>();
       for (const [id, presences] of Object.entries(state)) {
         const p = (presences as Array<Record<string, string>>)[0];
         if (p) {
