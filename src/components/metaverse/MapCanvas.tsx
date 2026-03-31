@@ -160,71 +160,6 @@ function PixelWhiteboard({ x, y, w = 120, text = '' }: { x: number; y: number; w
   );
 }
 
-// 칠판 (게시글 도트 표시)
-const CHALK_COLORS = ['#F5F5DC', '#FFE4A0', '#FFB0B0', '#A0D8FF', '#B0FFB0', '#E0B0FF'];
-const DOT_POSITIONS = [
-  [3, 3], [7, 3], [11, 3], [15, 3],
-  [5, 6], [9, 6], [13, 6], [17, 6],
-  [3, 9], [7, 9], [11, 9], [15, 9],
-];
-
-function PixelChalkboard({ x, y, w = 120, postCount = 0 }: { x: number; y: number; w?: number; postCount?: number }) {
-  const vw = w / 4;
-  const dots = Math.min(postCount, DOT_POSITIONS.length);
-  return (
-    <div className="absolute z-[5]" style={{ left: x, top: y }}>
-      <svg width={w} height="80" viewBox={`0 0 ${vw} 20`} style={{ imageRendering: 'pixelated' }}>
-        {/* 나무 프레임 */}
-        <rect x="0" y="0" width={vw} height="18" rx="1" fill="#6B4226" />
-        <rect x="0.5" y="0.5" width={vw - 1} height="17" rx="0.5" fill="#8B5E3C" />
-        {/* 칠판 (어두운 초록) */}
-        <rect x="1.5" y="1.5" width={vw - 3} height="13" fill="#1A3A2A" />
-        <rect x="2" y="2" width={vw - 4} height="12" fill="#1E4D35" />
-        {/* 칠판 표면 질감 */}
-        <rect x="3" y="4" width={vw * 0.3} height="0.5" fill="#225538" opacity="0.5" />
-        <rect x="5" y="8" width={vw * 0.2} height="0.5" fill="#225538" opacity="0.4" />
-        {/* 게시글 도트 (분필 스타일) */}
-        {Array.from({ length: dots }).map((_, i) => {
-          const [dx, dy] = DOT_POSITIONS[i];
-          const scale = vw / 20;
-          const color = CHALK_COLORS[i % CHALK_COLORS.length];
-          return (
-            <g key={i}>
-              <rect
-                x={dx * scale}
-                y={dy * 0.9 + 1}
-                width="1.5"
-                height="1.5"
-                rx="0.3"
-                fill={color}
-                opacity="0.85"
-              />
-              {/* 분필 번짐 효과 */}
-              <rect
-                x={dx * scale + 0.3}
-                y={dy * 0.9 + 1.3}
-                width="1"
-                height="0.5"
-                fill={color}
-                opacity="0.3"
-              />
-            </g>
-          );
-        })}
-        {/* 분필 받침대 */}
-        <rect x="2" y="15.5" width={vw - 4} height="1.5" fill="#6B4226" />
-        <rect x="2.5" y="15.5" width={vw - 5} height="0.5" fill="#8B5E3C" />
-        {/* 분필 조각들 */}
-        <rect x="4" y="15.8" width="2" height="0.8" rx="0.2" fill="#F5F5DC" />
-        <rect x="7" y="15.8" width="1.5" height="0.8" rx="0.2" fill="#FFE4A0" />
-        <rect x="10" y="15.8" width="1.8" height="0.8" rx="0.2" fill="#FFB0B0" />
-        {/* 지우개 */}
-        <rect x={vw - 8} y="15.5" width="3.5" height="1.2" fill="#D4D0C8" />
-        <rect x={vw - 7.5} y="15.8" width="2.5" height="0.6" fill="#AAA" />
-      </svg>
-    </div>
-  );
-}
 
 // 파일 캐비넷 (금속 3단 서랍)
 function PixelFileCabinet({ x, y }: { x: number; y: number }) {
@@ -251,28 +186,229 @@ function PixelFileCabinet({ x, y }: { x: number; y: number }) {
   );
 }
 
-// 종이컵 커피 자판기
-function PixelVending90s({ x, y }: { x: number; y: number }) {
+// 커피 머신 (에스프레소, 개발자 필수템)
+function PixelCoffeeMachine({ x, y }: { x: number; y: number }) {
   return (
     <div className="absolute z-[5]" style={{ left: x, top: y }}>
-      <svg width="52" height="80" viewBox="0 0 13 20" style={{ imageRendering: 'pixelated' }}>
-        <ellipse cx="6.5" cy="19" rx="5.5" ry="1.5" fill="rgba(0,0,0,0.1)" />
+      <svg width="48" height="64" viewBox="0 0 12 16" style={{ imageRendering: 'pixelated' }}>
+        <ellipse cx="6" cy="15" rx="5" ry="1.5" fill="rgba(0,0,0,0.1)" />
         {/* 본체 */}
-        <rect x="0" y="0" width="13" height="18" rx="1" fill="#C0392B" />
-        <rect x="1" y="1" width="11" height="16" fill="#E74C3C" />
-        {/* 상단 로고 */}
-        <rect x="3" y="2" width="7" height="2" fill="#FFFFFF" opacity="0.3" />
+        <rect x="1" y="0" width="10" height="14" rx="1" fill="#2C2C2C" />
+        <rect x="2" y="1" width="8" height="12" fill="#3A3A3A" />
+        {/* 상단 컵 워머 */}
+        <rect x="2" y="1" width="8" height="2" fill="#555" />
+        <rect x="4" y="1" width="1" height="1" fill="#888" />
+        <rect x="7" y="1" width="1" height="1" fill="#888" />
         {/* 디스플레이 */}
-        <rect x="2" y="5" width="9" height="5" fill="#1a1a2e" />
-        <rect x="3" y="6" width="3" height="1" fill="#4CAF50" opacity="0.7" />
-        <rect x="3" y="8" width="5" height="1" fill="#FFC107" opacity="0.5" />
-        {/* 버튼 */}
-        <rect x="3" y="11" width="2" height="2" rx="0.5" fill="#FFA726" />
-        <rect x="6" y="11" width="2" height="2" rx="0.5" fill="#66BB6A" />
-        <rect x="9" y="11" width="2" height="2" rx="0.5" fill="#42A5F5" />
-        {/* 투출구 */}
-        <rect x="4" y="14" width="5" height="3" fill="#333" />
-        <rect x="5" y="15" width="3" height="1" fill="#555" />
+        <rect x="3" y="4" width="6" height="2" fill="#1a1a2e" />
+        <rect x="4" y="4.5" width="2" height="1" fill="#4CAF50" opacity="0.8" />
+        <rect x="7" y="4.5" width="1" height="1" fill="#FF5722" opacity="0.6" />
+        {/* 버튼들 */}
+        <rect x="3" y="7" width="2" height="1" rx="0.3" fill="#795548" />
+        <rect x="6" y="7" width="2" height="1" rx="0.3" fill="#5D4037" />
+        {/* 추출구 */}
+        <rect x="4" y="9" width="4" height="1" fill="#222" />
+        {/* 커피 방울 */}
+        <rect x="5.5" y="10" width="1" height="1" fill="#6D4C41" opacity="0.7" />
+        {/* 컵 */}
+        <rect x="4" y="11" width="4" height="2" rx="0.5" fill="#ECEFF1" />
+        <rect x="4.5" y="11.5" width="3" height="1" fill="#4E342E" />
+        {/* 드립 트레이 */}
+        <rect x="2" y="13" width="8" height="1" fill="#444" />
+      </svg>
+    </div>
+  );
+}
+
+// 서버 랙 (블링킹 LED)
+function PixelServerRack({ x, y }: { x: number; y: number }) {
+  return (
+    <div className="absolute z-[5]" style={{ left: x, top: y }}>
+      <svg width="48" height="76" viewBox="0 0 12 19" style={{ imageRendering: 'pixelated' }}>
+        <ellipse cx="6" cy="18" rx="5" ry="1.5" fill="rgba(0,0,0,0.1)" />
+        {/* 랙 본체 */}
+        <rect x="0" y="0" width="12" height="17" rx="1" fill="#1a1a2e" />
+        <rect x="1" y="1" width="10" height="15" fill="#222" />
+        {/* 서버 유닛 1 */}
+        <rect x="2" y="2" width="8" height="3" fill="#333" />
+        <rect x="3" y="3" width="1" height="1" fill="#4CAF50" opacity="0.9" />
+        <rect x="5" y="3" width="1" height="1" fill="#4CAF50" opacity="0.6" />
+        <rect x="7" y="3" width="2" height="1" fill="#555" />
+        {/* 서버 유닛 2 */}
+        <rect x="2" y="6" width="8" height="3" fill="#333" />
+        <rect x="3" y="7" width="1" height="1" fill="#2196F3" opacity="0.8" />
+        <rect x="5" y="7" width="1" height="1" fill="#FF9800" opacity="0.7" />
+        <rect x="7" y="7" width="2" height="1" fill="#555" />
+        {/* 서버 유닛 3 */}
+        <rect x="2" y="10" width="8" height="3" fill="#333" />
+        <rect x="3" y="11" width="1" height="1" fill="#F44336" opacity="0.5" />
+        <rect x="5" y="11" width="1" height="1" fill="#4CAF50" opacity="0.8" />
+        <rect x="7" y="11" width="2" height="1" fill="#555" />
+        {/* 케이블 포트 */}
+        <rect x="3" y="14" width="6" height="2" fill="#2C2C2C" />
+        <rect x="4" y="14.5" width="1" height="1" fill="#0D47A1" opacity="0.6" />
+        <rect x="6" y="14.5" width="1" height="1" fill="#0D47A1" opacity="0.6" />
+      </svg>
+    </div>
+  );
+}
+
+// 러버덕 (디버깅의 상징)
+function PixelRubberDuck({ x, y }: { x: number; y: number }) {
+  return (
+    <div className="absolute z-[6]" style={{ left: x, top: y }}>
+      <svg width="28" height="28" viewBox="0 0 7 7" style={{ imageRendering: 'pixelated' }}>
+        <ellipse cx="3.5" cy="6.5" rx="2.5" ry="0.8" fill="rgba(0,0,0,0.08)" />
+        {/* 몸통 */}
+        <ellipse cx="3.5" cy="4.5" rx="3" ry="2.2" fill="#FFD600" />
+        <ellipse cx="3.5" cy="4.8" rx="2.5" ry="1.5" fill="#FFEB3B" />
+        {/* 머리 */}
+        <circle cx="3.5" cy="2" r="1.8" fill="#FFD600" />
+        <circle cx="3.5" cy="2" r="1.5" fill="#FFEB3B" />
+        {/* 눈 */}
+        <circle cx="2.8" cy="1.7" r="0.4" fill="#222" />
+        <circle cx="4.2" cy="1.7" r="0.4" fill="#222" />
+        <circle cx="2.9" cy="1.5" r="0.15" fill="#FFF" />
+        <circle cx="4.3" cy="1.5" r="0.15" fill="#FFF" />
+        {/* 부리 */}
+        <ellipse cx="3.5" cy="2.5" rx="0.8" ry="0.4" fill="#FF8F00" />
+      </svg>
+    </div>
+  );
+}
+
+// 피자 박스 (야근의 동반자)
+function PixelPizzaBox({ x, y }: { x: number; y: number }) {
+  return (
+    <div className="absolute z-[5]" style={{ left: x, top: y }}>
+      <svg width="40" height="32" viewBox="0 0 10 8" style={{ imageRendering: 'pixelated' }}>
+        <ellipse cx="5" cy="7.5" rx="4" ry="1" fill="rgba(0,0,0,0.08)" />
+        {/* 박스 본체 */}
+        <rect x="0" y="2" width="10" height="5" rx="0.5" fill="#D7A86E" />
+        <rect x="0.5" y="2.5" width="9" height="4" fill="#C49A5C" />
+        {/* 뚜껑 */}
+        <rect x="0" y="1" width="10" height="2" rx="0.5" fill="#E0BB80" />
+        {/* 로고 */}
+        <rect x="3" y="1.5" width="4" height="1" fill="#D32F2F" opacity="0.6" />
+        {/* 살짝 열린 틈 — 피자 보임 */}
+        <rect x="1" y="3" width="8" height="0.5" fill="#FF8A65" />
+        <rect x="2" y="3.5" width="2" height="0.5" fill="#F44336" opacity="0.5" />
+        <rect x="5" y="3.5" width="1.5" height="0.5" fill="#4CAF50" opacity="0.5" />
+      </svg>
+    </div>
+  );
+}
+
+// 고양이 (개발자의 동반자)
+function PixelCatDev({ x, y, color = '#FF8A65' }: { x: number; y: number; color?: string }) {
+  return (
+    <div className="absolute z-[6]" style={{ left: x, top: y }}>
+      <svg width="32" height="32" viewBox="0 0 8 8" style={{ imageRendering: 'pixelated' }}>
+        {/* 꼬리 */}
+        <rect x="6" y="4" width="1" height="1" fill={color} />
+        <rect x="7" y="3" width="1" height="2" fill={color} />
+        {/* 몸통 */}
+        <ellipse cx="4" cy="5.5" rx="2.5" ry="1.8" fill={color} />
+        {/* 머리 */}
+        <circle cx="2.5" cy="3.5" r="1.8" fill={color} />
+        {/* 귀 */}
+        <polygon points="1,1.5 1.5,3 0.5,2.5" fill={color} />
+        <polygon points="4,1.5 3.5,3 4.5,2.5" fill={color} />
+        <polygon points="1.2,1.8 1.5,2.8 0.8,2.3" fill="#FF7043" opacity="0.5" />
+        <polygon points="3.8,1.8 3.5,2.8 4.2,2.3" fill="#FF7043" opacity="0.5" />
+        {/* 눈 */}
+        <circle cx="2" cy="3.3" r="0.4" fill="#222" />
+        <circle cx="3.2" cy="3.3" r="0.4" fill="#222" />
+        <circle cx="2.1" cy="3.1" r="0.12" fill="#FFF" />
+        <circle cx="3.3" cy="3.1" r="0.12" fill="#FFF" />
+        {/* 코 */}
+        <rect x="2.4" y="3.8" width="0.5" height="0.3" fill="#E91E63" />
+        {/* 발 */}
+        <ellipse cx="2" cy="7" rx="0.7" ry="0.4" fill={color} />
+        <ellipse cx="5" cy="7" rx="0.7" ry="0.4" fill={color} />
+      </svg>
+    </div>
+  );
+}
+
+// 듀얼 모니터 (개발자 셋업)
+function PixelDualMonitor({ x, y }: { x: number; y: number }) {
+  return (
+    <div className="absolute z-[5]" style={{ left: x, top: y }}>
+      <svg width="72" height="52" viewBox="0 0 18 13" style={{ imageRendering: 'pixelated' }}>
+        {/* 왼쪽 모니터 — 코드 에디터 */}
+        <rect x="0" y="0" width="8" height="7" rx="0.5" fill="#333" />
+        <rect x="0.5" y="0.5" width="7" height="5.5" fill="#1a1a2e" />
+        <rect x="1" y="1" width="2" height="0.5" fill="#C792EA" opacity="0.8" />
+        <rect x="1.5" y="2" width="4" height="0.5" fill="#82AAFF" opacity="0.7" />
+        <rect x="1.5" y="3" width="3" height="0.5" fill="#C3E88D" opacity="0.7" />
+        <rect x="1" y="4" width="5" height="0.5" fill="#FFD54F" opacity="0.6" />
+        <rect x="3" y="7" width="2" height="1.5" fill="#444" />
+        <rect x="2" y="8.5" width="4" height="0.5" fill="#555" />
+        {/* 오른쪽 모니터 — 터미널 */}
+        <rect x="10" y="0" width="8" height="7" rx="0.5" fill="#333" />
+        <rect x="10.5" y="0.5" width="7" height="5.5" fill="#1E1E1E" />
+        <rect x="11" y="1" width="1" height="0.5" fill="#4CAF50" opacity="0.9" />
+        <rect x="12.5" y="1" width="3" height="0.5" fill="#ECEFF1" opacity="0.5" />
+        <rect x="11" y="2" width="1" height="0.5" fill="#4CAF50" opacity="0.9" />
+        <rect x="12.5" y="2" width="4" height="0.5" fill="#ECEFF1" opacity="0.5" />
+        <rect x="11" y="3" width="1" height="0.5" fill="#4CAF50" opacity="0.9" />
+        <rect x="12.5" y="3" width="2" height="0.5" fill="#FF5722" opacity="0.6" />
+        <rect x="13" y="7" width="2" height="1.5" fill="#444" />
+        <rect x="12" y="8.5" width="4" height="0.5" fill="#555" />
+        {/* 키보드 */}
+        <rect x="3" y="10" width="12" height="2" rx="0.5" fill="#444" />
+        <rect x="4" y="10.5" width="10" height="1" fill="#555" />
+        <rect x="5" y="10.8" width="3" height="0.4" fill="#666" />
+        <rect x="9" y="10.8" width="3" height="0.4" fill="#666" />
+      </svg>
+    </div>
+  );
+}
+
+// 에너지 드링크 캔
+function PixelEnergyDrink({ x, y }: { x: number; y: number }) {
+  return (
+    <div className="absolute z-[6]" style={{ left: x, top: y }}>
+      <svg width="16" height="28" viewBox="0 0 4 7" style={{ imageRendering: 'pixelated' }}>
+        <ellipse cx="2" cy="6.5" rx="1.5" ry="0.5" fill="rgba(0,0,0,0.08)" />
+        {/* 캔 */}
+        <rect x="0.5" y="1" width="3" height="5" rx="0.5" fill="#1B5E20" />
+        <rect x="1" y="1.5" width="2" height="4" fill="#2E7D32" />
+        {/* 번개 로고 */}
+        <polygon points="2.5,2 1.5,3.5 2.2,3.5 1.5,5 2.8,3.2 2.1,3.2" fill="#FFEB3B" />
+        {/* 뚜껑 */}
+        <rect x="0.8" y="0.5" width="2.4" height="1" rx="0.5" fill="#C0C0C0" />
+        <rect x="1.5" y="0" width="1" height="0.7" fill="#A0A0A0" />
+      </svg>
+    </div>
+  );
+}
+
+// 기계식 키보드 (RGB 조명)
+function PixelMechKeyboard({ x, y }: { x: number; y: number }) {
+  return (
+    <div className="absolute z-[5]" style={{ left: x, top: y }}>
+      <svg width="56" height="24" viewBox="0 0 14 6" style={{ imageRendering: 'pixelated' }}>
+        <ellipse cx="7" cy="5.5" rx="6" ry="1" fill="rgba(0,0,0,0.06)" />
+        {/* 키보드 본체 */}
+        <rect x="0" y="0" width="14" height="5" rx="0.5" fill="#2C2C2C" />
+        <rect x="0.5" y="0.5" width="13" height="4" fill="#333" />
+        {/* RGB 키캡 줄 1 */}
+        <rect x="1" y="1" width="1" height="1" fill="#E91E63" opacity="0.7" />
+        <rect x="2.5" y="1" width="1" height="1" fill="#FF5722" opacity="0.7" />
+        <rect x="4" y="1" width="1" height="1" fill="#FFC107" opacity="0.7" />
+        <rect x="5.5" y="1" width="1" height="1" fill="#4CAF50" opacity="0.7" />
+        <rect x="7" y="1" width="1" height="1" fill="#2196F3" opacity="0.7" />
+        <rect x="8.5" y="1" width="1" height="1" fill="#9C27B0" opacity="0.7" />
+        <rect x="10" y="1" width="1" height="1" fill="#00BCD4" opacity="0.7" />
+        <rect x="11.5" y="1" width="1" height="1" fill="#FF9800" opacity="0.7" />
+        {/* 키캡 줄 2 */}
+        <rect x="1.5" y="2.5" width="1" height="1" fill="#4CAF50" opacity="0.5" />
+        <rect x="3" y="2.5" width="1" height="1" fill="#2196F3" opacity="0.5" />
+        <rect x="4.5" y="2.5" width="4" height="1" fill="#666" />
+        <rect x="9" y="2.5" width="1" height="1" fill="#E91E63" opacity="0.5" />
+        <rect x="10.5" y="2.5" width="1" height="1" fill="#FF5722" opacity="0.5" />
       </svg>
     </div>
   );
@@ -1059,8 +1195,6 @@ const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme, po
       <PixelSofa90s x={600} y={620} color={teamColor} />
       <PixelRoundTable x={540} y={690} size={60} />
 
-      {/* 칠판 (공지 게시글 도트) */}
-      <PixelChalkboard x={380} y={560} w={140} postCount={postCounts.notice ?? 0} />
       {/* 분위기 */}
       <PixelVending90s x={790} y={600} />
       <PixelGuitar x={780} y={710} />
@@ -1091,7 +1225,6 @@ const PlazaFurniture = memo(function PlazaFurniture({ postCounts }: { postCounts
       <PixelRoundTable x={240} y={370} size={60} />
 
       {/* 오른쪽 편의시설 */}
-      <PixelChalkboard x={100} y={80} w={140} postCount={postCounts.voc ?? 0} />
       <PixelCorkboard x={500} y={100} postCount={Math.min(postCounts.voc ?? 0, 5)} />
       <PixelVending90s x={600} y={140} />
       {/* 이전: <PixelArcade x={600} y={290} accent="#FF6B9D" /> */}
@@ -1119,7 +1252,6 @@ const PlazaFurniture = memo(function PlazaFurniture({ postCounts }: { postCounts
       <PixelChair90s x={1000} y={380} />
       <PixelChair90s x={1100} y={360} />
       {/* 아이디어 벽 — 게시판 + 화이트보드 */}
-      <PixelChalkboard x={880} y={80} w={140} postCount={postCounts.idea ?? 0} />
       <PixelCorkboard x={1350} y={120} postCount={Math.min(postCounts.idea ?? 0, 5)} />
       <PixelCorkboard x={1350} y={250} postCount={Math.min(Math.max((postCounts.idea ?? 0) - 5, 0), 5)} />
       {/* 영감 코너 */}
@@ -1136,8 +1268,6 @@ const PlazaFurniture = memo(function PlazaFurniture({ postCounts }: { postCounts
       <PixelPlant90s x={860} y={380} size="small" />
 
       {/* ═══ 모임방 Zone (60,520 ~ 520,820) — 취미/사교 공간 ═══ */}
-      {/* 칠판 (모임 게시글 도트) */}
-      <PixelChalkboard x={240} y={500} w={120} postCount={postCounts.gathering ?? 0} />
       {/* 피크닉 테이블 2개 */}
       <PixelPicnicTable x={100} y={580} />
       <PixelPicnicTable x={280} y={580} />
@@ -1158,13 +1288,14 @@ const PlazaFurniture = memo(function PlazaFurniture({ postCounts }: { postCounts
       <PixelPlant90s x={460} y={740} size="small" />
 
       {/* ═══ 반응속도 Zone (520,490 ~ 790,770) — 게임 아케이드 ═══ */}
-      <PixelArcade x={540} y={550} accent="#FF6B6B" />
-      <PixelArcade x={620} y={550} accent="#4ECDC4" />
-      <PixelScoreboard x={540} y={520} />
-      <PixelBuzzer x={700} y={600} color="#E74C3C" />
-      <PixelNeonSign x={680} y={530} text="READY?" color="#FFD93D" />
-      <PixelChair90s x={700} y={700} />
-      <PixelSofa90s x={540} y={730} color="#6C5CE7" />
+      <PixelNeonSign x={590} y={495} text="⚡ 반응속도" color="#FFD93D" />
+      <PixelScoreboard x={595} y={520} />
+      <PixelArcade x={535} y={590} accent="#FF6B6B" />
+      <PixelArcade x={710} y={590} accent="#4ECDC4" />
+      <PixelBuzzer x={635} y={630} color="#E74C3C" />
+      <PixelNeonSign x={640} y={600} text="READY?" color="#FF6B6B" />
+      <PixelSofa90s x={580} y={730} color="#6C5CE7" />
+      <PixelChair90s x={720} y={710} />
 
       {/* ═══ 오목 Zone (810,490 ~ 1080,770) ═══ */}
       <PixelOmokTable x={870} y={570} />
