@@ -76,30 +76,13 @@ export default function NotePanel({ onClose }: NotePanelProps) {
     setSelectedNote(updatedNote);
   };
 
-  // 폼 뷰
-  if (view === 'form') {
-    return <NoteForm onClose={handleBack} onCreated={handleCreated} targetName={modalContext?.targetName} targetId={modalContext?.targetId} />;
-  }
-
-  // 상세 뷰
-  if (view === 'detail' && selectedNote) {
-    return (
-      <NoteDetail
-        note={selectedNote}
-        onBack={handleBack}
-        onUpdated={handleNoteUpdated}
-        onDeleted={handleBack}
-      />
-    );
-  }
-
   // 수신/발신 분리
   const received = notes.filter((n) => n.recipient_id === user?.id);
   const sent = notes.filter((n) => n.sender_id === user?.id);
 
-  // 목록 뷰
   return (
-    <div className="flex flex-col h-full">
+    <div className="relative flex flex-col h-full overflow-hidden">
+      <div className={`flex flex-col h-full ${view !== 'list' ? 'invisible' : ''}`}>
       {/* 헤더 */}
       <div className="flex items-center justify-between border-b border-white/[.06] px-4 py-3">
         <h2 className="font-heading text-base font-bold text-text-primary">
@@ -145,30 +128,34 @@ export default function NotePanel({ onClose }: NotePanelProps) {
         </p>
       </div>
 
-      {/* 필터 바 */}
-      {showFilters && (
-        <div className="border-b border-white/[.06] px-4 py-2 space-y-2">
-          <div className="flex flex-wrap gap-1">
+      {/* 카테고리 칩 — 항상 표시 */}
+      <div className="border-b border-white/[.06] px-4 py-2">
+        <div className="flex flex-wrap gap-1">
+          <button
+            onClick={() => setFilterCategory(null)}
+            className={`rounded-full px-2.5 py-0.5 text-[10px] font-medium transition-colors ${
+              !filterCategory ? 'bg-accent text-white' : 'bg-white/[.06] text-text-muted hover:bg-white/10'
+            }`}
+          >
+            전체
+          </button>
+          {NOTE_CATEGORIES.map((cat) => (
             <button
-              onClick={() => setFilterCategory(null)}
+              key={cat}
+              onClick={() => setFilterCategory(filterCategory === cat ? null : cat)}
               className={`rounded-full px-2.5 py-0.5 text-[10px] font-medium transition-colors ${
-                !filterCategory ? 'bg-accent text-white' : 'bg-white/[.06] text-text-muted hover:bg-white/10'
+                filterCategory === cat ? 'bg-accent text-white' : 'bg-white/[.06] text-text-muted hover:bg-white/10'
               }`}
             >
-              전체
+              {cat}
             </button>
-            {NOTE_CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setFilterCategory(filterCategory === cat ? null : cat)}
-                className={`rounded-full px-2.5 py-0.5 text-[10px] font-medium transition-colors ${
-                  filterCategory === cat ? 'bg-accent text-white' : 'bg-white/[.06] text-text-muted hover:bg-white/10'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 상태 필터 — 토글 */}
+      {showFilters && (
+        <div className="border-b border-white/[.06] px-4 py-2">
           <select
             value={filterStatus ?? ''}
             onChange={(e) => setFilterStatus((e.target.value || null) as NoteStatus | null)}
@@ -224,6 +211,18 @@ export default function NotePanel({ onClose }: NotePanelProps) {
           </p>
         </div>
       </div>
+      </div>
+
+      {view === 'form' && (
+        <div className="absolute inset-0 z-10 flex flex-col bg-bg-primary animate-[slideInRight_.2s_ease-out]">
+          <NoteForm onClose={handleBack} onCreated={handleCreated} targetName={modalContext?.targetName} targetId={modalContext?.targetId} />
+        </div>
+      )}
+      {view === 'detail' && selectedNote && (
+        <div className="absolute inset-0 z-10 flex flex-col bg-bg-primary animate-[slideInRight_.2s_ease-out]">
+          <NoteDetail note={selectedNote} onBack={handleBack} onUpdated={handleNoteUpdated} onDeleted={handleBack} />
+        </div>
+      )}
     </div>
   );
 }

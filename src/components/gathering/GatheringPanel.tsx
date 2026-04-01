@@ -73,38 +73,12 @@ export default function GatheringPanel({ onClose }: GatheringPanelProps) {
     setView('detail');
   };
 
-  if (view === 'form') {
-    return <GatheringForm onClose={() => setView('list')} onCreated={handleCreated} />;
-  }
-
-  if (view === 'edit' && selected) {
-    return (
-      <GatheringForm
-        onClose={() => setView('detail')}
-        onCreated={() => { handleRefresh(); setView('detail'); }}
-        editData={selected}
-      />
-    );
-  }
-
-  if (view === 'detail' && selected) {
-    // 최신 데이터 반영
-    const latest = gatherings.find((g) => g.id === selected.id) ?? selected;
-    return (
-      <GatheringDetail
-        gathering={latest}
-        joined={joinedIds.has(latest.id)}
-        isAuthor={latest.author_id === user?.id}
-        onClose={() => { setView('list'); setSelected(null); }}
-        onRefresh={handleRefresh}
-        onEdit={() => { setSelected(latest); setView('edit'); }}
-        onDeleted={() => { setView('list'); setSelected(null); handleRefresh(); }}
-      />
-    );
-  }
+  // 상세 뷰용 최신 데이터
+  const latestSelected = selected ? (gatherings.find((g) => g.id === selected.id) ?? selected) : null;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="relative flex flex-col h-full overflow-hidden">
+      <div className={`flex flex-col h-full ${view !== 'list' ? 'invisible' : ''}`}>
       {/* 헤더 */}
       <div className="flex items-center justify-between border-b border-white/[.06] px-4 py-3">
         <h2 className="font-heading text-base font-bold text-text-primary">🎉 모임방</h2>
@@ -141,32 +115,34 @@ export default function GatheringPanel({ onClose }: GatheringPanelProps) {
         </div>
       </div>
 
-      {/* 필터 바 */}
-      {showFilters && (
-        <div className="border-b border-white/[.06] px-4 py-2 space-y-2">
-          {/* 카테고리 칩 */}
-          <div className="flex flex-wrap gap-1">
+      {/* 카테고리 칩 — 항상 표시 */}
+      <div className="border-b border-white/[.06] px-4 py-2">
+        <div className="flex flex-wrap gap-1">
+          <button
+            onClick={() => setFilterCategory(null)}
+            className={`rounded-full px-2.5 py-0.5 text-[10px] font-medium transition-colors ${
+              !filterCategory ? 'bg-accent text-white' : 'bg-white/[.06] text-text-muted hover:bg-white/10'
+            }`}
+          >
+            전체
+          </button>
+          {GATHERING_CATEGORIES.map((cat) => (
             <button
-              onClick={() => setFilterCategory(null)}
+              key={cat}
+              onClick={() => setFilterCategory(filterCategory === cat ? null : cat)}
               className={`rounded-full px-2.5 py-0.5 text-[10px] font-medium transition-colors ${
-                !filterCategory ? 'bg-accent text-white' : 'bg-white/[.06] text-text-muted hover:bg-white/10'
+                filterCategory === cat ? 'bg-accent text-white' : 'bg-white/[.06] text-text-muted hover:bg-white/10'
               }`}
             >
-              전체
+              {cat}
             </button>
-            {GATHERING_CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setFilterCategory(filterCategory === cat ? null : cat)}
-                className={`rounded-full px-2.5 py-0.5 text-[10px] font-medium transition-colors ${
-                  filterCategory === cat ? 'bg-accent text-white' : 'bg-white/[.06] text-text-muted hover:bg-white/10'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-          {/* 상태 필터 */}
+          ))}
+        </div>
+      </div>
+
+      {/* 상태 필터 — 토글 */}
+      {showFilters && (
+        <div className="border-b border-white/[.06] px-4 py-2">
           <div className="flex gap-2">
             <select
               value={filterStatus ?? ''}
@@ -234,6 +210,35 @@ export default function GatheringPanel({ onClose }: GatheringPanelProps) {
       >
         <Plus size={22} />
       </button>
+      </div>
+
+      {view === 'form' && (
+        <div className="absolute inset-0 z-10 flex flex-col bg-bg-primary animate-[slideInRight_.2s_ease-out]">
+          <GatheringForm onClose={() => setView('list')} onCreated={handleCreated} />
+        </div>
+      )}
+      {view === 'edit' && latestSelected && (
+        <div className="absolute inset-0 z-10 flex flex-col bg-bg-primary animate-[slideInRight_.2s_ease-out]">
+          <GatheringForm
+            onClose={() => setView('detail')}
+            onCreated={() => { handleRefresh(); setView('detail'); }}
+            editData={latestSelected}
+          />
+        </div>
+      )}
+      {view === 'detail' && latestSelected && (
+        <div className="absolute inset-0 z-10 flex flex-col bg-bg-primary animate-[slideInRight_.2s_ease-out]">
+          <GatheringDetail
+            gathering={latestSelected}
+            joined={joinedIds.has(latestSelected.id)}
+            isAuthor={latestSelected.author_id === user?.id}
+            onClose={() => { setView('list'); setSelected(null); }}
+            onRefresh={handleRefresh}
+            onEdit={() => { setSelected(latestSelected); setView('edit'); }}
+            onDeleted={() => { setView('list'); setSelected(null); handleRefresh(); }}
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -63,14 +63,6 @@ export default function NoticePanel({ onClose }: NoticePanelProps) {
     loadNotices();
   };
 
-  if (view === 'form') {
-    return <NoticeForm onClose={handleBack} onCreated={handleCreated} />;
-  }
-
-  if (view === 'detail' && selectedNotice) {
-    return <NoticeDetail notice={selectedNotice} onBack={handleBack} onDeleted={handleBack} />;
-  }
-
   const URGENCY_CHIPS: { value: UrgencyLevel | null; label: string }[] = [
     { value: null, label: '전체' },
     { value: '긴급', label: '🔴 긴급' },
@@ -79,7 +71,8 @@ export default function NoticePanel({ onClose }: NoticePanelProps) {
   ];
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="relative flex flex-col h-full overflow-hidden">
+      <div className={`flex flex-col h-full ${view !== 'list' ? 'invisible' : ''}`}>
       {/* 헤더 */}
       <div className="flex items-center justify-between border-b border-white/[.06] px-4 py-3">
         <h2 className="font-heading text-base font-bold text-text-primary">📋 공지사항</h2>
@@ -190,6 +183,18 @@ export default function NoticePanel({ onClose }: NoticePanelProps) {
       >
         <Plus size={22} />
       </button>
+      </div>
+
+      {view === 'form' && (
+        <div className="absolute inset-0 z-10 flex flex-col bg-bg-primary animate-[slideInRight_.2s_ease-out]">
+          <NoticeForm onClose={handleBack} onCreated={handleCreated} />
+        </div>
+      )}
+      {view === 'detail' && selectedNotice && (
+        <div className="absolute inset-0 z-10 flex flex-col bg-bg-primary animate-[slideInRight_.2s_ease-out]">
+          <NoticeDetail notice={selectedNotice} onBack={handleBack} onDeleted={handleBack} />
+        </div>
+      )}
     </div>
   );
 }

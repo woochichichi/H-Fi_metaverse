@@ -26,7 +26,6 @@ export default function KpiPanel({ onClose }: KpiPanelProps) {
   const quarters = getQuarterOptions();
   const [selectedQuarter, setSelectedQuarter] = useState(quarters[0]?.value ?? '');
   const [filterUnit, setFilterUnit] = useState<string>('');
-  const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
 
   const isAdmin = profile?.role === 'admin' || profile?.role === 'director';
@@ -57,10 +56,6 @@ export default function KpiPanel({ onClose }: KpiPanelProps) {
   const visibleUnitScores = isLeader
     ? memberUnitScores
     : memberUnitScores.filter((m) => m.userId === profile?.id);
-
-  // KPI 항목별 설명 토글
-  const toggleItem = (id: string) =>
-    setExpandedItem((prev) => (prev === id ? null : id));
 
   if (showForm) {
     return (
@@ -173,15 +168,14 @@ export default function KpiPanel({ onClose }: KpiPanelProps) {
           </div>
         ) : (
           <>
-            {/* 평가 항목 (접이식) */}
+            {/* 평가 항목 */}
             <div className="border-b border-white/[.06] px-4 py-3">
               <h3 className="text-[11px] font-semibold text-text-muted mb-2 uppercase tracking-wider">평가 항목 ({kpiItems.length})</h3>
               <div className="space-y-1">
                 {kpiItems.map((item, idx) => (
-                  <button
+                  <div
                     key={item.id}
-                    onClick={() => toggleItem(item.id)}
-                    className="w-full text-left rounded-lg bg-white/[.03] px-3 py-2 transition-colors hover:bg-white/[.06]"
+                    className="rounded-lg bg-white/[.03] px-3 py-2"
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-medium text-text-primary">
@@ -190,12 +184,12 @@ export default function KpiPanel({ onClose }: KpiPanelProps) {
                       </span>
                       <span className="text-[10px] text-text-muted font-mono">0~{item.max_score}</span>
                     </div>
-                    {expandedItem === item.id && item.description && (
-                      <p className="mt-1.5 text-[11px] leading-relaxed text-text-muted whitespace-pre-line">
+                    {item.description && (
+                      <p className="mt-1 text-[11px] leading-relaxed text-text-muted whitespace-pre-line">
                         {item.description}
                       </p>
                     )}
-                  </button>
+                  </div>
                 ))}
                 {kpiItems.length === 0 && (
                   <p className="text-xs text-text-muted py-2">등록된 평가 항목이 없습니다</p>

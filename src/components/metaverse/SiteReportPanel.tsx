@@ -27,6 +27,7 @@ export default function SiteReportPanel({ onClose }: SiteReportPanelProps) {
   const { addToast } = useUiStore();
 
   const [view, setView] = useState<'form' | 'list'>('form');
+  const [showAttach, setShowAttach] = useState(false);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [files, setFiles] = useState<File[]>([]);
@@ -194,63 +195,72 @@ export default function SiteReportPanel({ onClose }: SiteReportPanelProps) {
               <p className="text-[10px] text-text-muted mt-1 text-right">{content.length}/2000</p>
             </div>
 
-            {/* 파일 첨부 */}
+            {/* 파일 첨부 — 접이식 */}
             <div>
-              <label className="text-xs font-medium text-text-muted mb-1.5 block">
-                스크린샷 첨부 <span className="text-text-muted">(최대 {FILE_LIMITS.report.maxFiles}장)</span>
-              </label>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={files.length >= FILE_LIMITS.report.maxFiles}
-                  className="flex items-center gap-1.5 rounded-lg bg-white/[.06] px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-white/10 disabled:opacity-40"
-                >
-                  <Paperclip size={13} />
-                  파일 선택
-                </button>
-                <button
-                  onClick={() => contentRef.current?.focus()}
-                  className="flex items-center gap-1.5 rounded-lg bg-white/[.06] px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-white/10"
-                >
-                  <ClipboardPaste size={13} />
-                  Ctrl+V 붙여넣기
-                </button>
-              </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={handleFileSelect}
-              />
-              {files.length > 0 && (
-                <div className="mt-2 space-y-1">
-                  {files.map((file, i) => (
-                    <div
-                      key={`${file.name}-${i}`}
-                      className="flex items-center gap-2 rounded-lg bg-white/[.04] px-3 py-2"
-                    >
-                      <Image size={14} className="text-info shrink-0" />
-                      <span className="flex-1 truncate text-xs text-text-secondary">{file.name}</span>
-                      <span className="text-[10px] text-text-muted">{formatFileSize(file.size)}</span>
-                      <button
-                        onClick={() => removeFile(i)}
-                        className="flex h-5 w-5 items-center justify-center rounded text-text-muted transition-colors hover:bg-white/10 hover:text-danger"
-                      >
-                        <Trash2 size={12} />
-                      </button>
-                    </div>
-                  ))}
+              <button
+                type="button"
+                onClick={() => setShowAttach((v) => !v)}
+                className="flex w-full items-center gap-1.5 rounded-lg bg-white/[.06] px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-white/10"
+              >
+                <Paperclip size={13} />
+                <span>스크린샷 첨부</span>
+                {files.length > 0 && (
+                  <span className="rounded-full bg-accent/20 px-1.5 py-0.5 text-[10px] font-medium text-accent">{files.length}</span>
+                )}
+                <ChevronDown size={12} className={`ml-auto text-text-muted transition-transform ${showAttach ? 'rotate-180' : ''}`} />
+              </button>
+              {showAttach && <div className="mt-2 space-y-2">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={files.length >= FILE_LIMITS.report.maxFiles}
+                    className="flex items-center gap-1.5 rounded-lg bg-white/[.06] px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-white/10 disabled:opacity-40"
+                  >
+                    <Image size={13} />
+                    파일 선택 (최대 {FILE_LIMITS.report.maxFiles}장)
+                  </button>
+                  <button
+                    onClick={() => contentRef.current?.focus()}
+                    className="flex items-center gap-1.5 rounded-lg bg-white/[.06] px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-white/10"
+                  >
+                    <ClipboardPaste size={13} />
+                    Ctrl+V
+                  </button>
                 </div>
-              )}
-            </div>
-
-            {/* 자동 수집 안내 */}
-            <div className="rounded-lg bg-white/[.03] px-3 py-2">
-              <p className="text-[10px] text-text-muted leading-relaxed">
-                자동 첨부: 브라우저 정보, 화면 크기, 콘솔 로그 (최근 100건), 네트워크 에러
-              </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileSelect}
+                />
+                {files.length > 0 && (
+                  <div className="space-y-1">
+                    {files.map((file, i) => (
+                      <div
+                        key={`${file.name}-${i}`}
+                        className="flex items-center gap-2 rounded-lg bg-white/[.04] px-3 py-2"
+                      >
+                        <Image size={14} className="text-info shrink-0" />
+                        <span className="flex-1 truncate text-xs text-text-secondary">{file.name}</span>
+                        <span className="text-[10px] text-text-muted">{formatFileSize(file.size)}</span>
+                        <button
+                          onClick={() => removeFile(i)}
+                          className="flex h-5 w-5 items-center justify-center rounded text-text-muted transition-colors hover:bg-white/10 hover:text-danger"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="rounded-lg bg-white/[.03] px-3 py-2">
+                  <p className="text-[10px] text-text-muted leading-relaxed">
+                    자동 첨부: 브라우저 정보, 화면 크기, 콘솔 로그 (최근 100건), 네트워크 에러
+                  </p>
+                </div>
+              </div>}
             </div>
           </div>
 

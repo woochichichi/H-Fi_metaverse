@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BarChart3, ScrollText, PartyPopper, Settings } from 'lucide-react';
+import { Settings, HelpCircle } from 'lucide-react';
 import VocPanel from '../voc/VocPanel';
 import IdeaPanel from '../idea/IdeaPanel';
 import NoticePanel from '../notice/NoticePanel';
@@ -7,6 +7,10 @@ import KpiPanel from '../kpi/KpiPanel';
 import NotePanel from '../note/NotePanel';
 import LobbyPanel from '../metaverse/LobbyPanel';
 import GatheringPanel from '../gathering/GatheringPanel';
+import OmokPanel from '../game/OmokPanel';
+import ReactionPanel from '../game/ReactionPanel';
+import JumpRopePanel from '../game/JumpRopePanel';
+import FaqPanel from '../metaverse/FaqPanel';
 import AdminPanel from '../admin/AdminPanel';
 import { useNotices } from '../../hooks/useNotices';
 import { useIdeas } from '../../hooks/useIdeas';
@@ -211,41 +215,120 @@ export default function MobileHome({ activeTab }: MobileHomeProps) {
     );
   }
 
+  if (currentTab === 'more_omok') {
+    return (
+      <div className="relative flex flex-1 flex-col">
+        <OmokPanel onClose={() => setOverrideTab('more')} />
+      </div>
+    );
+  }
+
+  if (currentTab === 'more_reaction') {
+    return (
+      <div className="relative flex flex-1 flex-col">
+        <ReactionPanel onClose={() => setOverrideTab('more')} />
+      </div>
+    );
+  }
+
+  if (currentTab === 'more_jumprope') {
+    return (
+      <div className="relative flex flex-1 flex-col">
+        <JumpRopePanel onClose={() => setOverrideTab('more')} />
+      </div>
+    );
+  }
+
+  if (currentTab === 'more_faq') {
+    return (
+      <div className="relative flex flex-1 flex-col">
+        <FaqPanel onClose={() => setOverrideTab('more')} />
+      </div>
+    );
+  }
+
   return <DashboardHome onNavigate={setOverrideTab} />;
 }
 
 function MoreMenu({ onNavigate }: { onNavigate: (tab: MobileTab) => void }) {
   const { profile } = useAuthStore();
 
-  const items = [
-    { id: 'more_kpi' as MobileTab, label: 'KPI 관리', icon: BarChart3, emoji: '📊' },
-    { id: 'more_gathering' as MobileTab, label: '모임방', icon: PartyPopper, emoji: '🎉' },
-    { id: 'more_lounge' as MobileTab, label: '활동 타임라인', icon: ScrollText, emoji: '📋' },
+  const activityItems = [
+    { id: 'more_kpi' as MobileTab, label: 'KPI 관리', emoji: '📊' },
+    { id: 'more_gathering' as MobileTab, label: '모임방', emoji: '🎉' },
+    { id: 'more_lounge' as MobileTab, label: '활동 타임라인', emoji: '📋' },
+  ];
+
+  const gameItems = [
+    { id: 'more_reaction' as MobileTab, label: '반응속도', emoji: '⚡' },
+    { id: 'more_omok' as MobileTab, label: '오목', emoji: '⚫' },
+    { id: 'more_jumprope' as MobileTab, label: '줄넘기', emoji: '🏃' },
   ];
 
   return (
-    <div className="flex flex-1 flex-col gap-2 p-4">
-      <h2 className="font-heading text-lg font-bold text-text-primary mb-1">더보기</h2>
-      {items.map((item) => (
+    <div className="flex flex-1 flex-col gap-3 p-4 overflow-y-auto">
+      <h2 className="font-heading text-lg font-bold text-text-primary">더보기</h2>
+
+      {/* 활동 */}
+      <div>
+        <p className="text-[10px] font-medium text-text-muted uppercase mb-1.5 px-1">활동</p>
+        <div className="space-y-1.5">
+          {activityItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => onNavigate(item.id)}
+              className="flex w-full items-center gap-3 rounded-xl border border-white/[.06] bg-white/[.03] p-3.5 text-left transition-colors hover:bg-white/[.06]"
+            >
+              <span className="text-lg">{item.emoji}</span>
+              <span className="text-sm font-semibold text-text-primary">{item.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 미니게임 */}
+      <div>
+        <p className="text-[10px] font-medium text-text-muted uppercase mb-1.5 px-1">미니게임</p>
+        <div className="space-y-1.5">
+          {gameItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => onNavigate(item.id)}
+              className="flex w-full items-center gap-3 rounded-xl border border-white/[.06] bg-white/[.03] p-3.5 text-left transition-colors hover:bg-white/[.06]"
+            >
+              <span className="text-lg">{item.emoji}</span>
+              <span className="text-sm font-semibold text-text-primary">{item.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 도움말 */}
+      <div>
+        <p className="text-[10px] font-medium text-text-muted uppercase mb-1.5 px-1">도움말</p>
         <button
-          key={item.id}
-          onClick={() => onNavigate(item.id)}
-          className="flex items-center gap-3 rounded-xl border border-white/[.06] bg-white/[.03] p-4 text-left transition-colors hover:bg-white/[.06]"
+          onClick={() => onNavigate('more_faq')}
+          className="flex w-full items-center gap-3 rounded-xl border border-white/[.06] bg-white/[.03] p-3.5 text-left transition-colors hover:bg-white/[.06]"
         >
-          <span className="text-xl">{item.emoji}</span>
-          <span className="text-sm font-semibold text-text-primary">{item.label}</span>
+          <HelpCircle size={18} className="text-text-secondary" />
+          <span className="text-sm font-semibold text-text-primary">궁금해요</span>
         </button>
-      ))}
+      </div>
+
+      {/* 관리자 */}
       {(profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader') && (
-        <button
-          onClick={() => onNavigate('more_admin' as MobileTab)}
-          className="flex items-center gap-3 rounded-xl border border-accent/20 bg-accent/[.05] p-4 text-left transition-colors hover:bg-accent/[.1]"
-        >
-          <Settings size={20} className="text-accent" />
-          <span className="text-sm font-semibold text-accent">
-            {profile?.role === 'leader' ? '팀 관리' : '관리자 패널'}
-          </span>
-        </button>
+        <div>
+          <p className="text-[10px] font-medium text-text-muted uppercase mb-1.5 px-1">관리</p>
+          <button
+            onClick={() => onNavigate('more_admin' as MobileTab)}
+            className="flex w-full items-center gap-3 rounded-xl border border-accent/20 bg-accent/[.05] p-3.5 text-left transition-colors hover:bg-accent/[.1]"
+          >
+            <Settings size={18} className="text-accent" />
+            <span className="text-sm font-semibold text-accent">
+              {profile?.role === 'leader' ? '팀 관리' : '관리자 패널'}
+            </span>
+          </button>
+        </div>
       )}
     </div>
   );
