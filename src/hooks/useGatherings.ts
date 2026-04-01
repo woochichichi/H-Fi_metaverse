@@ -308,14 +308,18 @@ export function useGatherings() {
 
   const deleteGathering = useCallback(async (id: string) => {
     // gathering_members, gathering_comments는 FK CASCADE로 자동 삭제
-    const { error: deleteError } = await supabase
+    const { data, error: deleteError } = await supabase
       .from('gatherings')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .select('id');
 
     if (deleteError) {
       console.error('모임 삭제 실패:', deleteError.message);
       return { error: deleteError.message };
+    }
+    if (!data || data.length === 0) {
+      return { error: '삭제 권한이 없거나 이미 삭제된 모임입니다' };
     }
 
     // 관련 알림 정리 (실패해도 무시)
