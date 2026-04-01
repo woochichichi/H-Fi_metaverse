@@ -59,6 +59,15 @@ interface SignUpParams {
   inviteCodeId: string;
 }
 
+/** 비밀번호 재설정 이메일 발송 */
+export async function requestPasswordReset(email: string): Promise<{ error: string | null }> {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: 'https://h-fi-metaverse.pages.dev/reset-password',
+  });
+  if (error) return { error: error.message };
+  return { error: null };
+}
+
 /** 회원가입 (Supabase Auth + invite_codes.used_count 증가) */
 export async function signUp({ email, password, name, nickname, team, role, inviteCodeId }: SignUpParams): Promise<{ error: string | null }> {
   const { data, error: authError } = await supabase.auth.signUp({
@@ -70,7 +79,11 @@ export async function signUp({ email, password, name, nickname, team, role, invi
   });
 
   if (authError) {
-    return { error: authError.message };
+    const msg = authError.message;
+    if (msg.includes('already registered') || msg.includes('already been registered') || msg.includes('User already registered')) {
+      return { error: '이미 가입된 이메일입니다. 로그인하거나 비밀번호 찾기를 이용해주세요.' };
+    }
+    return { error: msg };
   }
 
   // autoconfirm이 꺼져있으면 세션이 없을 수 있음 → 명시적 로그인

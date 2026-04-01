@@ -320,9 +320,15 @@ export default function RegisterPage() {
 
           {/* 에러 */}
           {error && (
-            <p className="mt-3 rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
+            <div className="mt-3 rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
               {error}
-            </p>
+              {error.includes('이미 가입된') && (
+                <div className="mt-1.5 flex gap-3 text-xs">
+                  <Link to="/login" className="underline underline-offset-2 hover:text-danger/80">로그인</Link>
+                  <Link to="/reset-password" className="underline underline-offset-2 hover:text-danger/80">비밀번호 찾기</Link>
+                </div>
+              )}
+            </div>
           )}
 
           {/* 버튼 */}

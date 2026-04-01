@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { LogIn, Eye, EyeOff } from 'lucide-react';
+import { LogIn, Eye, EyeOff, KeyRound } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 
 export default function LoginPage() {
@@ -118,8 +118,17 @@ export default function LoginPage() {
             {loading ? '로그인 중...' : '로그인'}
           </button>
 
+          {/* 비밀번호 찾기 */}
+          <Link
+            to="/reset-password"
+            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg py-2 text-xs text-text-muted transition-colors hover:text-text-secondary"
+          >
+            <KeyRound size={12} />
+            비밀번호를 잊으셨나요?
+          </Link>
+
           {/* 가입 링크 */}
-          <p className="mt-4 text-center text-sm text-text-muted">
+          <p className="mt-2 text-center text-sm text-text-muted">
             계정이 없으신가요?{' '}
             <Link to="/register" className="text-accent hover:text-accent-light transition-colors">
               가입하기
