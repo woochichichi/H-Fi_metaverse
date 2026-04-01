@@ -26,6 +26,7 @@ export default function TopBar() {
   const [showMood, setShowMood] = useState(false);
   const [showNicknameEditor, setShowNicknameEditor] = useState(false);
   const [showCharacterCustom, setShowCharacterCustom] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const moodRef = useRef<HTMLDivElement>(null);
   const moodBtnRef = useRef<HTMLDivElement>(null);
 
@@ -185,7 +186,7 @@ export default function TopBar() {
                 <Pencil size={10} className="opacity-0 group-hover:opacity-100 transition-opacity" />
               </button>
               <button
-                onClick={logout}
+                onClick={() => setShowLogoutConfirm(true)}
                 className="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors duration-200 hover:bg-bg-tertiary hover:text-danger"
                 title="로그아웃"
               >
@@ -212,6 +213,35 @@ export default function TopBar() {
       {/* 캐릭터 꾸미기 모달 */}
       {showCharacterCustom && (
         <CharacterCustomModal onClose={() => setShowCharacterCustom(false)} />
+      )}
+
+      {/* 로그아웃 확인 모달 */}
+      {showLogoutConfirm && createPortal(
+        <>
+          <div className="fixed inset-0 z-[300] bg-black/50" onClick={() => setShowLogoutConfirm(false)} />
+          <div className="fixed left-1/2 top-1/2 z-[301] w-72 -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-white/10 bg-bg-secondary p-6 shadow-2xl">
+            <div className="mb-1 flex items-center gap-2 text-danger">
+              <LogOut size={18} />
+              <span className="font-semibold text-text-primary text-base">로그아웃</span>
+            </div>
+            <p className="mb-5 text-sm text-text-secondary">정말 로그아웃 하시겠어요?</p>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="rounded-lg px-4 py-2 text-sm text-text-muted transition-colors hover:bg-bg-tertiary"
+              >
+                취소
+              </button>
+              <button
+                onClick={() => { setShowLogoutConfirm(false); logout(); }}
+                className="rounded-lg bg-danger/90 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-danger"
+              >
+                로그아웃
+              </button>
+            </div>
+          </div>
+        </>,
+        document.body
       )}
 
       {/* 관리자 패널 모달 — createPortal로 body에 렌더링 (backdrop-filter stacking context 회피) */}

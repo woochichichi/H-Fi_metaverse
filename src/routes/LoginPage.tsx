@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { LogIn, Eye, EyeOff, KeyRound } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
+
+const SAVED_EMAIL_KEY = 'hf_saved_email';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -11,6 +13,15 @@ export default function LoginPage() {
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [rememberEmail, setRememberEmail] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem(SAVED_EMAIL_KEY);
+    if (saved) {
+      setEmail(saved);
+      setRememberEmail(true);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +45,12 @@ export default function LoginPage() {
         setError('이메일 또는 비밀번호가 올바르지 않습니다');
       }
       return;
+    }
+
+    if (rememberEmail) {
+      localStorage.setItem(SAVED_EMAIL_KEY, email);
+    } else {
+      localStorage.removeItem(SAVED_EMAIL_KEY);
     }
 
     navigate('/', { replace: true });
@@ -89,6 +106,20 @@ export default function LoginPage() {
               </button>
             </div>
           </div>
+
+          {/* 이메일 저장 */}
+          <label className="mb-4 flex cursor-pointer items-center gap-2 select-none">
+            <input
+              type="checkbox"
+              checked={rememberEmail}
+              onChange={(e) => {
+                setRememberEmail(e.target.checked);
+                if (!e.target.checked) localStorage.removeItem(SAVED_EMAIL_KEY);
+              }}
+              className="h-4 w-4 rounded accent-accent cursor-pointer"
+            />
+            <span className="text-xs text-text-muted">이메일 저장 (비밀번호는 저장되지 않습니다)</span>
+          </label>
 
           {/* 안내 */}
           <p className="mb-4 rounded-lg bg-warning/10 px-3 py-2 text-xs text-warning">
