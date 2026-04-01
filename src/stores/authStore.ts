@@ -85,6 +85,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     // 세션 변경 리스너 (퇴사 로그아웃 후에도 등록 필수 — 다른 계정 로그인 대비)
     supabase.auth.onAuthStateChange(async (event, session) => {
+      // PASSWORD_RECOVERY: 비밀번호 재설정 링크 클릭 시 발생
+      // SIGNED_IN과 함께 발생할 수 있으나 비밀번호 변경 전까지 세션 인정 안 함
+      if (event === 'PASSWORD_RECOVERY') return;
+
       if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
         set({ user: session.user });
         if (!get().profile || get().profile?.id !== session.user.id) {

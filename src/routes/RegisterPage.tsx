@@ -242,30 +242,35 @@ export default function RegisterPage() {
           {/* Step 4: 이름 + 별명 + 팀 */}
           {step === 3 && (
             <div className="space-y-4">
-              {/* 별명 안내 */}
-              <div className="rounded-lg bg-accent/10 border border-accent/20 px-3 py-2.5">
-                <p className="text-xs text-accent font-medium mb-1">별명 안내</p>
-                <p className="text-[11px] text-text-secondary leading-relaxed">
-                  이 공간에서는 <strong className="text-accent-light">별명</strong>으로 활동합니다.
-                  실명 대신 별명이 표시되어 자유롭게 의견을 나눌 수 있어요.
-                  별명은 나중에 변경할 수 있습니다.
-                </p>
-              </div>
-
               <div>
-                <label className="mb-1.5 block text-xs text-text-muted">이름 (실명)</label>
+                <label className="mb-1.5 block text-xs font-medium text-text-secondary">
+                  실명 <span className="text-danger">*</span>
+                </label>
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="홍길동"
+                  placeholder="예: 홍길동"
                   className="w-full rounded-lg bg-bg-primary px-3 py-2.5 text-sm text-text-primary placeholder-text-muted outline-none ring-1 ring-bg-tertiary transition-colors focus:ring-accent"
                   autoFocus
                 />
-                <p className="mt-1 text-[10px] text-text-muted">관리자에게만 표시됩니다</p>
+                <p className="mt-1 text-[10px] text-text-muted leading-relaxed">
+                  본인의 <strong className="text-text-secondary">실제 이름</strong>을 입력하세요. 관리자 확인용으로만 사용되며 다른 멤버에게는 보이지 않습니다.
+                  <br />
+                  <span className="text-warning">별명은 아래에 별도로 입력합니다. 여기에 별명을 적지 마세요.</span>
+                </p>
+              </div>
+
+              {/* 구분선 */}
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-px bg-white/[.06]" />
+                <span className="text-[10px] text-text-muted">메타버스 활동명</span>
+                <div className="flex-1 h-px bg-white/[.06]" />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs text-text-muted">별명 (1~10자)</label>
+                <label className="mb-1.5 block text-xs font-medium text-text-secondary">
+                  별명 (1~10자) <span className="text-danger">*</span>
+                </label>
                 <div className="relative">
                   <input
                     value={nickname}
@@ -294,7 +299,7 @@ export default function RegisterPage() {
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-danger">이미 사용 중</span>
                   )}
                 </div>
-                <p className="mt-1 text-[10px] text-text-muted">다른 멤버에게 이 별명으로 표시됩니다</p>
+                <p className="mt-1 text-[10px] text-text-muted">채팅·게시물 등 모든 활동에 이 별명이 표시됩니다. 나중에 변경 가능합니다.</p>
               </div>
 
               <div>
