@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, Check, Eye, EyeOff, Ticket, Mail, Lock, UserCirc
 import { TEAMS, TEAM_CONFIGS } from '../lib/constants';
 import { isAllowedEmail } from '../lib/utils';
 import { validateInviteCode, signUp, checkNicknameAvailable } from '../hooks/useAuth';
+import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../stores/authStore';
 import type { InviteCode } from '../types';
 
@@ -16,7 +17,7 @@ const STEPS = [
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const { initialize } = useAuthStore();
+  const { fetchProfile } = useAuthStore();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -140,8 +141,9 @@ export default function RegisterPage() {
       return;
     }
 
-    // authStore 세션 동기화 후 메인으로 이동
-    await initialize();
+    // authStore 프로필 동기화 (initialize 재호출 시 리스너 중복 등록 방지)
+    const { data: { user: newUser } } = await supabase.auth.getUser();
+    if (newUser) await fetchProfile(newUser.id);
     navigate('/', { replace: true });
   };
 
