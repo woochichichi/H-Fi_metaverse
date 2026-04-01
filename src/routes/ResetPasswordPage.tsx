@@ -4,11 +4,13 @@ import { KeyRound, Send, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { isAllowedEmail } from '../lib/utils';
 import { requestPasswordReset } from '../hooks/useAuth';
+import { useAuthStore } from '../stores/authStore';
 
 type Mode = 'request' | 'sent' | 'reset' | 'done';
 
 export default function ResetPasswordPage() {
   const navigate = useNavigate();
+  const { logout } = useAuthStore();
   const [mode, setMode] = useState<Mode>('request');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -151,7 +153,11 @@ export default function ResetPasswordPage() {
               <CheckCircle size={40} className="mx-auto mb-3 text-success" />
               <p className="text-sm font-medium text-text-primary mb-4">비밀번호가 변경되었습니다</p>
               <button
-                onClick={() => navigate('/login', { replace: true })}
+                onClick={async () => {
+                  // 세션 명시적 클리어 — 그렇지 않으면 PublicRoute가 user 있다고 판단해 /로 리다이렉트
+                  await logout();
+                  navigate('/login', { replace: true });
+                }}
                 className="w-full rounded-lg bg-accent py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
               >
                 로그인하기
