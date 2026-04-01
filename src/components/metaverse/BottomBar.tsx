@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Bug } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Bug, HelpCircle } from 'lucide-react';
 import { useUiStore } from '../../stores/uiStore';
 import { useMetaverseStore } from '../../stores/metaverseStore';
 import { useAuthStore } from '../../stores/authStore';
@@ -152,8 +152,15 @@ export default function BottomBar({ roomAlerts, zoneAlerts }: BottomBarProps) {
               ))}
             </div>
 
-            {/* 하단 고정: 사이트 건의 */}
-            <div className="mt-auto border-t border-white/[.06] pt-2">
+            {/* 하단 고정: 궁금해요 + 사이트 건의 */}
+            <div className="mt-auto border-t border-white/[.06] pt-2 space-y-0.5">
+              <button
+                onClick={() => openModal('faq')}
+                className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-medium text-text-muted transition-all duration-150 hover:bg-white/[.06] hover:text-text-secondary"
+              >
+                <HelpCircle size={14} className="shrink-0" />
+                <span>궁금해요</span>
+              </button>
               <button
                 onClick={() => openModal('site-report')}
                 className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-medium text-text-muted transition-all duration-150 hover:bg-white/[.06] hover:text-text-secondary"
