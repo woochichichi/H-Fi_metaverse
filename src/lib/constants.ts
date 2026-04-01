@@ -386,7 +386,7 @@ export const ROOMS_DATA: Record<RoomId, RoomDef> = {
       { id: 'gathering', team: null, label: '🏕 모임방', emoji: '🎉', x: 60, y: 490, width: 420, height: 280 },
       { id: 'reaction', team: null, label: '⚡ 반응속도', emoji: '⚡', x: 520, y: 490, width: 270, height: 280 },
       { id: 'omok', team: null, label: '⚫ 오목', emoji: '⚫', x: 810, y: 490, width: 270, height: 280 },
-      { id: 'jumprope', team: null, label: '🪢 줄넘기', emoji: '🪢', x: 1100, y: 490, width: 270, height: 280 },
+      { id: 'jumprope', team: null, label: '🏃 줄넘기', emoji: '🏃', x: 1100, y: 490, width: 270, height: 280 },
     ],
     portals: [
       {

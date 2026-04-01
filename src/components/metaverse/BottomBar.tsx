@@ -35,7 +35,7 @@ const ROOM_MENUS: Record<RoomId, { id: string; label: string; emoji: string }[]>
     { id: 'gathering', label: '모임방', emoji: '🎉' },
     { id: 'reaction', label: '반응속도', emoji: '⚡' },
     { id: 'omok', label: '오목', emoji: '⚫' },
-    { id: 'jumprope', label: '줄넘기', emoji: '🪢' },
+    { id: 'jumprope', label: '줄넘기', emoji: '🏃' },
   ],
 };
 

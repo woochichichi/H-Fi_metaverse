@@ -134,7 +134,7 @@ export default function JumpRopePanel({ onClose }: { onClose: () => void }) {
     <div className="flex h-full flex-col">
       <div className="border-b border-white/[.06]">
         <div className="flex items-center justify-between px-4 py-3">
-          <h2 className="font-heading text-base font-bold text-text-primary">🪢 단체 줄넘기</h2>
+          <h2 className="font-heading text-base font-bold text-text-primary">🏃 단체 줄넘기</h2>
           <button onClick={onClose} className="flex h-7 w-7 items-center justify-center rounded-lg text-text-muted hover:bg-white/[.08] hover:text-text-primary">
             <X size={16} />
           </button>
