@@ -1,5 +1,5 @@
 /* ═══ v4 레트로 폰트 ═══ */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
 
 /* NeoDunggeunmo (DungGeunMo 후속) */
 @font-face {
@@ -60,7 +60,7 @@
 
   /* 폰트 (v4 레트로) */
   --font-heading: 'DungGeunMo', 'Galmuri11', sans-serif;
-  --font-body: 'Galmuri11', 'Noto Sans KR', sans-serif;
+  --font-body: 'Gowun Dodum', 'Noto Sans KR', sans-serif;
   --font-mono: 'Galmuri11', monospace;
 }
 
