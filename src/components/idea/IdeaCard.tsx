@@ -112,7 +112,7 @@ export default function IdeaCard({ idea, onVote, onStatusChange, onDeleted }: Id
       </div>
 
       {/* 제목 */}
-      <h3 className="text-sm font-semibold text-text-primary line-clamp-1 tracking-wide">{idea.title}</h3>
+      <h3 className="text-sm font-semibold text-text-primary line-clamp-1 tracking-wide font-body">{idea.title}</h3>
 
       {/* 설명 */}
       <p className={`text-xs text-text-muted leading-relaxed ${expanded ? 'whitespace-pre-wrap' : 'line-clamp-2'}`}>{idea.description}</p>

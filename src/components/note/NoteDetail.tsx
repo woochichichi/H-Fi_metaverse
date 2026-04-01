@@ -140,7 +140,7 @@ export default function NoteDetail({ note, onBack, onUpdated, onDeleted }: NoteD
         </div>
 
         {/* 제목 */}
-        <h3 className="text-lg font-bold text-text-primary">{note.title}</h3>
+        <h3 className="text-lg font-bold text-text-primary font-body">{note.title}</h3>
 
         {/* 작성자 */}
         <div className="flex items-center gap-1 text-xs text-text-muted">

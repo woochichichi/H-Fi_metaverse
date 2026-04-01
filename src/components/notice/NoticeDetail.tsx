@@ -106,7 +106,7 @@ export default function NoticeDetail({ notice, onBack, onDeleted }: NoticeDetail
         </div>
 
         {/* 제목 */}
-        <h3 className="text-lg font-bold text-text-primary">{notice.title}</h3>
+        <h3 className="text-lg font-bold text-text-primary font-body">{notice.title}</h3>
 
         {/* 내용 */}
         <div className="rounded-xl bg-white/[.04] p-3">

@@ -199,7 +199,7 @@ export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDeta
         </div>
 
         {/* 제목 */}
-        <h3 className="text-lg font-bold text-text-primary">{voc.title}</h3>
+        <h3 className="text-lg font-bold text-text-primary font-body">{voc.title}</h3>
 
         {/* 작성자 */}
         <div className="flex items-center gap-1 text-xs text-text-muted">
