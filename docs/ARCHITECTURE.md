@@ -209,7 +209,7 @@ const useDeviceMode = () => {
 | voc-realtime | VOC 실시간 알림 | Postgres Changes |
 
 ## 배포
-- 프론트: Cloudflare Pages (`https://ito-metaverse.pages.dev`)
+- 프론트: Cloudflare Pages (`https://h-fi-metaverse.pages.dev`)
 - 백엔드: Supabase Cloud (`https://{ref}.supabase.co`)
 - 접근 제어: 초대 코드 + @hanwha 이메일만 가입 가능
 - SPA 라우팅: `public/_redirects` → `/* /index.html 200`

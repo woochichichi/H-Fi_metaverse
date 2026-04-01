@@ -86,6 +86,6 @@ SUPABASE_ACCESS_TOKEN=sbp_xxx...
   `PROJECT_REF`는 `VITE_SUPABASE_URL`에서 추출 (https://**{ref}**.supabase.co)
 
 ## 배포
-- 프론트: Cloudflare Pages (`https://ito-metaverse.pages.dev`)
+- 프론트: Cloudflare Pages (`https://h-fi-metaverse.pages.dev`)
 - 백엔드: Supabase Cloud
 - SPA: `public/_redirects` → `/* /index.html 200`

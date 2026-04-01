@@ -3,7 +3,7 @@
 > 본사든 사이트든, 같은 울타리 안에서.
 > 금융ITO 4개 팀(증권ITO / 생명ITO / 손보ITO / 한금서)이 하나로 모이는 온라인 공간입니다.
 
-**접속**: https://ito-metaverse.pages.dev
+**접속**: https://h-fi-metaverse.pages.dev
 
 ---
 
