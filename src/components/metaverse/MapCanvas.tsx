@@ -1390,6 +1390,13 @@ const PlazaFurniture = memo(function PlazaFurniture({ postCounts }: { postCounts
       <PixelSofa90s x={1120} y={730} color="#2ecc71" />
       <PixelSafe x={1340} y={720} />
 
+      {/* ═══ 바나프레소 Zone (1390,530 ~ 1560,730) — 운세 카페 ═══ */}
+      <PixelCoffeeMachine x={1410} y={560} />
+      <PixelNeonSign x={1410} y={540} text="CAFE" color="#F59E0B" />
+      <PixelRoundTable x={1450} y={640} size={48} />
+      <PixelChair90s x={1430} y={680} />
+      <PixelPlant90s x={1530} y={680} size="small" />
+
       {/* 광장 금융 장식 */}
       <PixelHanwhaSun x={1420} y={880} />
       <PixelGoldBar x={100} y={900} />

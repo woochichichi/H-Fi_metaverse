@@ -10,6 +10,7 @@ import GatheringPanel from '../gathering/GatheringPanel';
 import OmokPanel from '../game/OmokPanel';
 import ReactionPanel from '../game/ReactionPanel';
 import JumpRopePanel from '../game/JumpRopePanel';
+import FortunePanel from '../game/FortunePanel';
 import FaqPanel from '../metaverse/FaqPanel';
 import AdminPanel from '../admin/AdminPanel';
 import { useNotices } from '../../hooks/useNotices';
@@ -239,6 +240,14 @@ export default function MobileHome({ activeTab }: MobileHomeProps) {
     );
   }
 
+  if (currentTab === 'more_fortune') {
+    return (
+      <div className="relative flex flex-1 flex-col">
+        <FortunePanel onClose={() => setOverrideTab('more')} />
+      </div>
+    );
+  }
+
   if (currentTab === 'more_faq') {
     return (
       <div className="relative flex flex-1 flex-col">
@@ -263,6 +272,7 @@ function MoreMenu({ onNavigate }: { onNavigate: (tab: MobileTab) => void }) {
     { id: 'more_reaction' as MobileTab, label: '반응속도', emoji: '⚡' },
     { id: 'more_omok' as MobileTab, label: '오목', emoji: '⚫' },
     { id: 'more_jumprope' as MobileTab, label: '줄넘기', emoji: '🏃' },
+    { id: 'more_fortune' as MobileTab, label: '바나프레소', emoji: '☕' },
   ];
 
   return (

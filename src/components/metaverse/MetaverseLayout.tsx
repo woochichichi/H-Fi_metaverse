@@ -22,6 +22,7 @@ import GatheringPanel from '../gathering/GatheringPanel';
 import OmokPanel from '../game/OmokPanel';
 import ReactionPanel from '../game/ReactionPanel';
 import JumpRopePanel from '../game/JumpRopePanel';
+import FortunePanel from '../game/FortunePanel';
 import SiteReportPanel from './SiteReportPanel';
 import FaqPanel from './FaqPanel';
 import { useMetaverseStore } from '../../stores/metaverseStore';
@@ -49,6 +50,7 @@ function getZonePanel(zoneId: string, userTeam: string | undefined): React.FC<{ 
   if (zoneId === 'omok') return OmokPanel;
   if (zoneId === 'reaction') return ReactionPanel;
   if (zoneId === 'jumprope') return JumpRopePanel;
+  if (zoneId === 'fortune') return FortunePanel;
   if (zoneId === 'site-report') return SiteReportPanel;
   if (zoneId === 'faq') return FaqPanel;
   return null;

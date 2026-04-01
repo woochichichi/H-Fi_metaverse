@@ -378,7 +378,7 @@ export const ROOMS_DATA: Record<RoomId, RoomDef> = {
     id: 'plaza',
     label: '중앙 광장',
     theme: { main: '#F8B500', sub: '#FFF8E1', floor: '#2a2a1a', border: '#F8B500' },
-    mapSize: { w: 1520, h: 1080 },
+    mapSize: { w: 1600, h: 1080 },
     spawnPoint: { x: 760, y: 460 },
     zones: [
       { id: 'voc', team: null, label: '📞 VOC 센터', emoji: '📞', x: 60, y: 60, width: 630, height: 360 },
@@ -387,6 +387,7 @@ export const ROOMS_DATA: Record<RoomId, RoomDef> = {
       { id: 'reaction', team: null, label: '⚡ 반응속도', emoji: '⚡', x: 520, y: 490, width: 270, height: 280 },
       { id: 'omok', team: null, label: '⚫ 오목', emoji: '⚫', x: 810, y: 490, width: 270, height: 280 },
       { id: 'jumprope', team: null, label: '🏃 줄넘기', emoji: '🏃', x: 1100, y: 490, width: 270, height: 280 },
+      { id: 'fortune', team: null, label: '☕ 바나프레소', emoji: '☕', x: 1390, y: 530, width: 170, height: 200 },
     ],
     portals: [
       {
