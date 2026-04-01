@@ -34,16 +34,17 @@ export default function ChatLog() {
     if (bottom) setUnread(0);
   }, []);
 
-  // 새 메시지 도착 — ref로 읽어 항상 최신 scroll 상태 반영
+  // 새 메시지 도착 — length 대신 마지막 id로 감지 (50개 제한 후에도 정상 동작)
+  const lastMsgId = chatLog[chatLog.length - 1]?.id;
   useEffect(() => {
-    if (chatLog.length === 0) return;
+    if (!lastMsgId) return;
     if (atBottomRef.current) {
       scrollToBottom(false);
       setUnread(0);
     } else {
       setUnread((n) => n + 1);
     }
-  }, [chatLog.length, scrollToBottom]);
+  }, [lastMsgId, scrollToBottom]);
 
   if (chatLog.length === 0) return null;
 
