@@ -116,6 +116,14 @@ export default function usePlayerSync() {
       prevOnlineIdsRef.current = new Set(onlineIds);
     });
 
+    // leave 이벤트: 즉각적으로 globalOnlineUsers에서 제거
+    globalChannel.on('presence', { event: 'leave' }, ({ key }) => {
+      const store = useMetaverseStore.getState();
+      const updated = new Map(store.globalOnlineUsers);
+      updated.delete(key);
+      store.setGlobalOnlineUsers(updated);
+    });
+
     globalChannel.subscribe(async (status) => {
       if (status === 'SUBSCRIBED') {
         const p = useAuthStore.getState().profile;
@@ -131,7 +139,15 @@ export default function usePlayerSync() {
 
     globalChannelRef.current = globalChannel;
 
+    // 브라우저 닫기/새로고침 시 즉시 presence 해제
+    const handleBeforeUnload = () => {
+      globalChannel.untrack();
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
     return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      globalChannel.untrack();
       supabase.removeChannel(globalChannel);
       globalChannelRef.current = null;
       prevOnlineIdsRef.current = new Set();
@@ -230,7 +246,14 @@ export default function usePlayerSync() {
     channelRef.current = channel;
     sharedChannel = channel;
 
+    const handleBeforeUnload = () => {
+      channel.untrack();
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
     return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      channel.untrack();
       supabase.removeChannel(channel);
       channelRef.current = null;
       sharedChannel = null;
