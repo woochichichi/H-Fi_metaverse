@@ -6,6 +6,7 @@ import { useUiStore } from '../../stores/uiStore';
 import { NOTE_CATEGORIES } from '../../lib/constants';
 import type { NoteCategory } from '../../lib/constants';
 import { detectBannedWords } from '../../lib/profanityFilter';
+import { checkMessageSafety } from '../../lib/messageSafety';
 
 interface NoteFormProps {
   onClose: () => void;
@@ -24,6 +25,7 @@ export default function NoteForm({ onClose, onCreated, targetName, targetId }: N
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [checking, setChecking] = useState(false);
   const [showProfanityWarning, setShowProfanityWarning] = useState(false);
 
   const isValid = category && title.trim() && content.trim();
@@ -37,7 +39,7 @@ export default function NoteForm({ onClose, onCreated, targetName, targetId }: N
   const showConfirm = showProfanityWarning && detectedWords.length > 0;
 
   const handleSubmit = async () => {
-    if (!isValid || submitting || !profile) return;
+    if (!isValid || submitting || checking || !profile) return;
 
     // 금칙어 감지 시 경고 팝업
     if (detectedWords.length > 0 && !showProfanityWarning) {
@@ -46,6 +48,16 @@ export default function NoteForm({ onClose, onCreated, targetName, targetId }: N
     }
 
     setShowProfanityWarning(false);
+
+    // AI 안전성 검사
+    setChecking(true);
+    const safety = await checkMessageSafety(title.trim() + '\n' + content.trim());
+    setChecking(false);
+    if (!safety.safe) {
+      addToast('전송할 수 없는 내용이 포함되어 있습니다.', 'error');
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -228,10 +240,10 @@ export default function NoteForm({ onClose, onCreated, targetName, targetId }: N
         <div className="border-t border-white/[.06] px-4 py-3">
           <button
             onClick={handleSubmit}
-            disabled={!isValid || submitting}
+            disabled={!isValid || submitting || checking}
             className="w-full rounded-xl bg-accent py-2.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-accent/80 disabled:opacity-40"
           >
-            {submitting ? '전송 중...' : '💌 편지 보내기'}
+            {checking ? '검사 중...' : submitting ? '전송 중...' : '💌 편지 보내기'}
           </button>
         </div>
       )}

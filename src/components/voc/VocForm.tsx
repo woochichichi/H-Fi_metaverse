@@ -5,6 +5,7 @@ import { useVocs } from '../../hooks/useVocs';
 import { useFileUpload } from '../../hooks/useFileUpload';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
+import { checkMessageSafety } from '../../lib/messageSafety';
 import {
   VOC_CATEGORIES, VOC_TARGET_AREAS, VOC_SUB_CATEGORIES,
   VOC_SEVERITY_LABELS, FILE_LIMITS,
@@ -86,6 +87,16 @@ export default function VocForm({ onClose, onCreated }: VocFormProps) {
     setSubmitting(true);
 
     try {
+      // 익명 VOC만 AI 안전성 검사
+      if (anonymous) {
+        setSubmitStep('AI 검사 중...');
+        const safety = await checkMessageSafety(title.trim() + '\n' + content.trim());
+        if (!safety.safe) {
+          addToast('전송할 수 없는 내용이 포함되어 있습니다.', 'error');
+          return;
+        }
+      }
+
       let attachmentUrls: string[] = [];
       if (files.length > 0) {
         setSubmitStep(`파일 업로드 (0/${files.length})`);
