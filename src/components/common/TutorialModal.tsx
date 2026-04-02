@@ -55,12 +55,12 @@ const STEPS: Step[] = [
     title: '하고 싶은 말, 편하게 꺼내세요',
     body: (
       <>
-        건의사항은 <HL color={C.teal}>VOC 센터</HL>에,{'\n'}
-        번뜩이는 아이디어는 <HL color={C.teal}>아이디어 보드</HL>에 남겨주세요.{'\n'}
+        건의사항은 <HL color={C.teal}>VOC방</HL>에,{'\n'}
+        번뜩이는 아이디어는 <HL color={C.teal}>아이디어방</HL>에 남겨주세요.{'\n'}
         익명도 되니까 부담 제로! 진짜 <HL color={C.teal}>쌍방향 소통</HL>이 되는 곳.
       </>
     ),
-    locations: ['공용 맵 → VOC 센터', '공용 맵 → 아이디어 보드'],
+    locations: ['공용 맵 → VOC방', '공용 맵 → 아이디어방'],
     color: C.teal,
   },
   {

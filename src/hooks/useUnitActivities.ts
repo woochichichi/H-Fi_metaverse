@@ -13,6 +13,9 @@ export interface CommentWithAuthor extends ActivityComment {
   author_name: string | null;
 }
 
+// 세션 내 중복 조회수 방지 (새로고침 시 초기화)
+const viewedIds = new Set<string>();
+
 export function useUnitActivities() {
   const [activities, setActivities] = useState<UnitActivityWithCounts[]>([]);
   const [comments, setComments] = useState<CommentWithAuthor[]>([]);
@@ -226,6 +229,8 @@ export function useUnitActivities() {
   );
 
   const incrementViewCount = useCallback(async (id: string) => {
+    if (viewedIds.has(id)) return;
+    viewedIds.add(id);
     setActivities((prev) => prev.map((a) => a.id === id ? { ...a, view_count: (a.view_count ?? 0) + 1 } : a));
     await supabase.rpc('increment_view_count', { p_table: 'unit_activities', p_id: id });
   }, []);

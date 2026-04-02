@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ThumbsUp, MessageCircle, Send, Pencil, Trash2, Eye } from 'lucide-react';
+import { ThumbsUp, MessageCircle, Send, Pencil, Trash2, Eye, X } from 'lucide-react';
 import { formatRelativeTime } from '../../lib/utils';
 import type { TeamPostWithCounts, PostCommentWithAuthor } from '../../hooks/useTeamPosts';
 
@@ -21,11 +21,12 @@ interface TeamPostCardProps {
   onAddComment: (postId: string, content: string) => void;
   onEdit?: (post: TeamPostWithCounts) => void;
   onDelete?: (postId: string) => void;
+  onDeleteComment?: (commentId: string, postId: string) => void;
 }
 
 export default function TeamPostCard({
   post, readOnly, userId, comments, expanded,
-  onToggleLike, onExpandComments, onAddComment, onEdit, onDelete,
+  onToggleLike, onExpandComments, onAddComment, onEdit, onDelete, onDeleteComment,
 }: TeamPostCardProps) {
   const [commentText, setCommentText] = useState('');
 
@@ -111,6 +112,15 @@ export default function TeamPostCard({
                   <span className="font-medium text-text-primary shrink-0">{c.author_name ?? '알 수 없음'}</span>
                   <span className="text-text-secondary flex-1">{c.content}</span>
                   <span className="text-[10px] text-text-muted shrink-0">{formatRelativeTime(c.created_at)}</span>
+                  {!readOnly && userId && c.author_id === userId && onDeleteComment && (
+                    <button
+                      onClick={() => onDeleteComment(c.id, post.id)}
+                      className="shrink-0 flex h-4 w-4 items-center justify-center rounded text-text-muted transition-colors hover:bg-danger/20 hover:text-danger"
+                      title="댓글 삭제"
+                    >
+                      <X size={9} />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>

@@ -99,7 +99,7 @@ export default function VocPanel({ onClose }: VocPanelProps) {
       <div className={`flex flex-col h-full ${view !== 'list' ? 'invisible' : ''}`}>
       {/* 헤더 */}
       <div className="flex items-center justify-between border-b border-white/[.06] px-4 py-3">
-        <h2 className="font-heading text-base font-bold text-text-primary">📞 VOC 센터</h2>
+        <h2 className="font-heading text-base font-bold text-text-primary">📞 VOC방</h2>
         <div className="flex items-center gap-1">
           {isLeader && (
             <button

@@ -11,6 +11,9 @@ export interface NoticeFilters {
   sort?: 'newest' | 'oldest';
 }
 
+// 세션 내 중복 조회수 방지 (새로고침 시 초기화)
+const viewedIds = new Set<string>();
+
 export function useNotices() {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [loading, setLoading] = useState(false);
@@ -313,6 +316,8 @@ export function useNotices() {
   }, []);
 
   const incrementViewCount = useCallback(async (id: string) => {
+    if (viewedIds.has(id)) return;
+    viewedIds.add(id);
     setNotices((prev) => prev.map((n) => n.id === id ? { ...n, view_count: (n.view_count ?? 0) + 1 } : n));
     await supabase.rpc('increment_view_count', { p_table: 'notices', p_id: id });
   }, []);

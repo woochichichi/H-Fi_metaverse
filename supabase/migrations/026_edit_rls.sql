@@ -29,6 +29,28 @@ DO $$ BEGIN
   END IF;
 END $$;
 
+-- ── worries: 관리자(admin/director) 삭제 허용 ────────────────
+-- WorryDetail UI에서 isAdmin이면 삭제 버튼이 보이므로 RLS도 일치시킴
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='worries' AND policyname='worries_delete_admin') THEN
+    CREATE POLICY "worries_delete_admin" ON worries
+      FOR DELETE TO authenticated
+      USING (
+        EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin', 'director'))
+      );
+  END IF;
+END $$;
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='worry_comments' AND policyname='worry_comments_delete_admin') THEN
+    CREATE POLICY "worry_comments_delete_admin" ON worry_comments
+      FOR DELETE TO authenticated
+      USING (
+        EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin', 'director'))
+      );
+  END IF;
+END $$;
+
 -- ── vocs: 비익명 작성자 본인 내용 수정 ──────────────────────
 -- 기존 vocs_update_leader는 유지 (status/resolution/assignee_id)
 -- 추가: 비익명 작성자는 title/content 수정 가능 (접수 상태만)

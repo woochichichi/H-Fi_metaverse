@@ -24,7 +24,7 @@ interface TeamBoardPanelProps {
 export default function TeamBoardPanel({ team, readOnly }: TeamBoardPanelProps) {
   const { profile } = useAuthStore();
   const { addToast } = useUiStore();
-  const { posts, comments, loading, error, fetchPosts, createPost, updatePost, deletePost, toggleLike, fetchComments, addComment, incrementViewCount } = useTeamPosts();
+  const { posts, comments, loading, error, fetchPosts, createPost, updatePost, deletePost, toggleLike, fetchComments, addComment, deleteComment, incrementViewCount } = useTeamPosts();
 
   const [showForm, setShowForm] = useState(false);
   const [category, setCategory] = useState<string>('자유');
@@ -94,6 +94,11 @@ export default function TeamBoardPanel({ team, readOnly }: TeamBoardPanelProps) 
       await addComment(postId, profile.id, text);
       await fetchComments(postId);
     } catch { addToast('댓글 등록 실패', 'error'); }
+  };
+
+  const handleDeleteComment = async (commentId: string, postId: string) => {
+    const { error } = await deleteComment(commentId, postId);
+    if (error) addToast(`댓글 삭제 실패: ${error}`, 'error');
   };
 
   const filtered = filter === '전체' ? posts : posts.filter((p) => p.category === filter);
@@ -190,7 +195,8 @@ export default function TeamBoardPanel({ team, readOnly }: TeamBoardPanelProps) 
               onExpandComments={handleExpandComments}
               onAddComment={handleAddComment}
               onEdit={handleEditPost}
-              onDelete={handleDeletePost} />
+              onDelete={handleDeletePost}
+              onDeleteComment={handleDeleteComment} />
           ))}
           <LoadMore current={Math.min(displayCount, filtered.length)} total={filtered.length} onLoadMore={() => setDisplayCount((c) => c + 20)} />
         </div>

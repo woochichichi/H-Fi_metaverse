@@ -30,8 +30,9 @@ const ROOM_MENUS: Record<RoomId, { id: string; label: string; emoji: string }[]>
     { id: 'shield-notice', label: '공지', emoji: '📢' },
   ],
   plaza: [
-    { id: 'voc', label: 'VOC 센터', emoji: '📞' },
-    { id: 'idea', label: '아이디어', emoji: '💡' },
+    { id: 'voc', label: 'VOC방', emoji: '📞' },
+    { id: 'idea', label: '아이디어방', emoji: '💡' },
+    { id: 'worry', label: '고민방', emoji: '🫂' },
     { id: 'gathering', label: '모임방', emoji: '🎉' },
     { id: 'reaction', label: '반응속도', emoji: '⚡' },
     { id: 'omok', label: '오목', emoji: '⚫' },

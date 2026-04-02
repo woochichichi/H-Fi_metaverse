@@ -39,6 +39,14 @@ export default function NoticePanel({ onClose }: NoticePanelProps) {
     loadNotices();
   }, [loadNotices]);
 
+  // 수정 후 목록 갱신 시 selectedNotice도 최신 데이터로 동기화
+  useEffect(() => {
+    if (selectedNotice) {
+      const updated = notices.find((n) => n.id === selectedNotice.id);
+      if (updated) setSelectedNotice(updated);
+    }
+  }, [notices]);
+
   // 읽음 상태 로드
   useEffect(() => {
     if (user) {

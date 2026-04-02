@@ -41,3 +41,8 @@
 - 배포 전 수정/삭제 전수 체크 요청 → 아이디어방·고민방·공지방 수정 기능 신규 추가, VOC방 비익명+접수상태 내용 수정 추가, 모임방은 기존 완성. DB RLS UPDATE 정책 4개(ideas/worries/notices/vocs) Supabase 실행 완료
 - 배포 전 추가 수정 3가지: ①팀 게시판 작성자 실명→닉네임 표시 ②팀 게시판 본인 글 수정/삭제 추가 ③활동 타임라인 본인 글 수정/삭제 추가 + DB RLS(team_posts DELETE, unit_activities UPDATE/DELETE)
 - 배포 전 조회수 기능 추가: 7개 게시판(아이디어/고민/VOC/공지/팀게시판/활동/모임) view_count 컬럼 + increment_view_count RPC(SECURITY DEFINER) + 각 상세/펼침 시 증가 + 목록/상세 👁 표시
+
+## 2026-04-02
+- 배포 전 전수 검증 요청 (11가지 영역 + UX 시뮬레이션): 고민방/조회수/수정삭제 등 오늘 대규모 변경 전체 점검
+- 조회수 중복 방지: 같은 유저가 같은 글 반복 조회 시 증가 안 되게 — 7개 게시판 일괄 적용 (세션 Set 방식)
+- TeamPostCard 댓글 삭제 기능 추가: 본인 댓글 삭제 버튼 + RLS 마이그레이션 029

@@ -25,6 +25,9 @@ export interface PostCommentWithAuthor {
   author_name: string | null;
 }
 
+// 세션 내 중복 조회수 방지 (새로고침 시 초기화)
+const viewedIds = new Set<string>();
+
 export function useTeamPosts() {
   const [posts, setPosts] = useState<TeamPostWithCounts[]>([]);
   const [comments, setComments] = useState<PostCommentWithAuthor[]>([]);
@@ -215,10 +218,24 @@ export function useTeamPosts() {
     [],
   );
 
+  const deleteComment = useCallback(async (commentId: string, postId: string) => {
+    const { data, error } = await withTimeout(
+      () => supabase.from('team_post_comments').delete().eq('id', commentId).select('id'),
+      8000, 'deleteTeamComment',
+    );
+    if (error) return { error: error.message };
+    if (!data || data.length === 0) return { error: '삭제 권한이 없거나 이미 삭제된 댓글입니다' };
+    setComments((prev) => prev.filter((c) => c.id !== commentId));
+    setPosts((prev) => prev.map((p) => p.id === postId ? { ...p, comment_count: Math.max(0, p.comment_count - 1) } : p));
+    return { error: null };
+  }, []);
+
   const incrementViewCount = useCallback(async (id: string) => {
+    if (viewedIds.has(id)) return;
+    viewedIds.add(id);
     setPosts((prev) => prev.map((p) => p.id === id ? { ...p, view_count: (p.view_count ?? 0) + 1 } : p));
     await supabase.rpc('increment_view_count', { p_table: 'team_posts', p_id: id });
   }, []);
 
-  return { posts, comments, loading, error, fetchPosts, createPost, updatePost, deletePost, toggleLike, fetchComments, addComment, incrementViewCount };
+  return { posts, comments, loading, error, fetchPosts, createPost, updatePost, deletePost, toggleLike, fetchComments, addComment, deleteComment, incrementViewCount };
 }

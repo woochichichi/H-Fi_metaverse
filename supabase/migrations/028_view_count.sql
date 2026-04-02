@@ -22,6 +22,26 @@ CREATE VIEW idea_with_votes AS
     GROUP BY idea_votes.idea_id
   ) v ON i.id = v.idea_id;
 
+-- 2b. worry_with_counts 뷰 재생성 (view_count 포함)
+-- PostgreSQL SELECT * 뷰는 컬럼 목록이 생성 시점 고정 → 025 이후 추가된 view_count 반영을 위해 재생성 필요
+DROP VIEW IF EXISTS worry_with_counts;
+CREATE VIEW worry_with_counts AS
+SELECT
+  w.*,
+  COALESCE(c.comment_count, 0) AS comment_count,
+  COALESCE(r.reaction_count, 0) AS reaction_count
+FROM worries w
+LEFT JOIN (
+  SELECT worry_id, COUNT(*) AS comment_count
+  FROM worry_comments
+  GROUP BY worry_id
+) c ON c.worry_id = w.id
+LEFT JOIN (
+  SELECT worry_id, COUNT(*) AS reaction_count
+  FROM worry_reactions
+  GROUP BY worry_id
+) r ON r.worry_id = w.id;
+
 -- 3. SECURITY DEFINER RPC 함수: 인증된 사용자라면 누구나 조회수 증가 가능
 CREATE OR REPLACE FUNCTION increment_view_count(p_table text, p_id uuid)
 RETURNS void LANGUAGE plpgsql SECURITY DEFINER AS $$

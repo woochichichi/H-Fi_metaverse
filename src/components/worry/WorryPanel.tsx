@@ -44,6 +44,14 @@ export default function WorryPanel({ onClose }: WorryPanelProps) {
 
   useEffect(() => { load(); }, [load]);
 
+  // 수정 후 목록 갱신 시 selectedWorry도 최신 데이터로 동기화
+  useEffect(() => {
+    if (selectedWorry) {
+      const updated = worries.find((w) => w.id === selectedWorry.id);
+      if (updated) setSelectedWorry(updated);
+    }
+  }, [worries]);
+
   useEffect(() => {
     if (!loading) { setSkeletonTimeout(false); return; }
     const t = setTimeout(() => setSkeletonTimeout(true), 10000);

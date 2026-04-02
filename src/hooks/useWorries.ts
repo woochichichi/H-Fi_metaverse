@@ -43,6 +43,9 @@ export interface WorryCommentWithProfile extends WorryComment {
   author_avatar_color: string;
 }
 
+// 세션 내 중복 조회수 방지 (새로고침 시 초기화)
+const viewedIds = new Set<string>();
+
 export function useWorries() {
   const [worries, setWorries] = useState<Worry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -117,12 +120,13 @@ export function useWorries() {
   );
 
   const deleteWorry = useCallback(async (id: string) => {
-    const { error: deleteErr } = await withTimeout(
-      () => supabase.from('worries').delete().eq('id', id),
+    const { data, error: deleteErr } = await withTimeout(
+      () => supabase.from('worries').delete().eq('id', id).select('id'),
       8000,
       'deleteWorry',
     );
     if (deleteErr) return { error: deleteErr.message };
+    if (!data || data.length === 0) return { error: '삭제 권한이 없거나 이미 삭제된 사연입니다' };
     setWorries((prev) => prev.filter((w) => w.id !== id));
     return { error: null };
   }, []);
@@ -295,6 +299,8 @@ export function useWorries() {
   );
 
   const incrementViewCount = useCallback(async (id: string) => {
+    if (viewedIds.has(id)) return;
+    viewedIds.add(id);
     setWorries((prev) => prev.map((w) => w.id === id ? { ...w, view_count: (w.view_count ?? 0) + 1 } : w));
     await supabase.rpc('increment_view_count', { p_table: 'worries', p_id: id });
   }, []);

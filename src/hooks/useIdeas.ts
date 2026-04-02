@@ -10,6 +10,9 @@ export interface IdeaFilters {
   sort?: 'newest' | 'popular';
 }
 
+// 세션 내 중복 조회수 방지 (새로고침 시 초기화)
+const viewedIds = new Set<string>();
+
 export function useIdeas() {
   const [ideas, setIdeas] = useState<IdeaWithVotes[]>([]);
   const [loading, setLoading] = useState(false);
@@ -354,6 +357,8 @@ export function useIdeas() {
   }, []);
 
   const incrementViewCount = useCallback(async (id: string) => {
+    if (viewedIds.has(id)) return;
+    viewedIds.add(id);
     setIdeas((prev) => prev.map((i) => i.id === id ? { ...i, view_count: (i.view_count ?? 0) + 1 } : i));
     await supabase.rpc('increment_view_count', { p_table: 'ideas', p_id: id });
   }, []);

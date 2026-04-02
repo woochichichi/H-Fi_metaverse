@@ -96,7 +96,7 @@ export default function IdeaPanel({ onClose }: IdeaPanelProps) {
       <div className={`flex flex-col h-full ${view !== 'list' ? 'invisible' : ''}`}>
       {/* 헤더 */}
       <div className="flex items-center justify-between border-b border-white/[.06] px-4 py-3">
-        <h2 className="font-heading text-base font-bold text-text-primary">💡 아이디어 보드</h2>
+        <h2 className="font-heading text-base font-bold text-text-primary">💡 아이디어방</h2>
         <div className="flex items-center gap-1">
           {/* 정렬 토글 */}
           <button

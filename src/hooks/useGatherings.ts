@@ -10,6 +10,9 @@ export interface GatheringFilters {
   sort?: 'newest' | 'oldest';
 }
 
+// 세션 내 중복 조회수 방지 (새로고침 시 초기화)
+const viewedIds = new Set<string>();
+
 export function useGatherings() {
   const [gatherings, setGatherings] = useState<Gathering[]>([]);
   const [loading, setLoading] = useState(false);
@@ -330,6 +333,8 @@ export function useGatherings() {
   }, []);
 
   const incrementViewCount = useCallback(async (id: string) => {
+    if (viewedIds.has(id)) return;
+    viewedIds.add(id);
     setGatherings((prev) => prev.map((g) => g.id === id ? { ...g, view_count: (g.view_count ?? 0) + 1 } : g));
     await supabase.rpc('increment_view_count', { p_table: 'gatherings', p_id: id });
   }, []);
