@@ -1370,7 +1370,6 @@ const PlazaFurniture = memo(function PlazaFurniture({ postCounts }: { postCounts
       <PixelArcade x={710} y={590} accent="#4ECDC4" />
       <PixelBuzzer x={635} y={630} color="#E74C3C" />
       <PixelNeonSign x={640} y={600} text="READY?" color="#FF6B6B" />
-      <PixelSofa90s x={580} y={730} color="#6C5CE7" />
       <PixelGoldBar x={730} y={720} />
 
       {/* ═══ 오목 Zone (810,490 ~ 1080,770) ═══ */}

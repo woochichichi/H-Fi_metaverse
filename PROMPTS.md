@@ -48,3 +48,7 @@
 - TeamPostCard 댓글 삭제 기능 추가: 본인 댓글 삭제 버튼 + RLS 마이그레이션 029
 - 아이디어방 상세 뷰를 고민방처럼 변경 (expand 방식 제거 → 슬라이드 상세 뷰, IdeaDetail.tsx 신규), 고민방 수정 버튼 안 보임 확인(익명 글은 정상)
 - 추가 요청 3가지: ①고민방 삭제 팝업 브라우저 confirm() → 커스텀 ConfirmDialog 교체 ②모든 팝업 확인 버튼 왼쪽/취소 오른쪽 통일 ③프로젝트 전수 조사(KudosPanel confirm() 교체, 로그아웃 팝업 버튼 순서 변경)
+
+## 2026-04-03
+
+- 반응속도 게임방의 보라색 소파 제거 (MapCanvas.tsx PixelSofa90s #6C5CE7)
