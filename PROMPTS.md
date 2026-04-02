@@ -52,3 +52,4 @@
 ## 2026-04-03
 
 - 반응속도 게임방의 보라색 소파 제거 (MapCanvas.tsx PixelSofa90s #6C5CE7)
+- AI 메시지 게이트웨이(익명 콘텐츠 발송 전 악성 필터링) 구현 요청 — Gemini Edge Function + 개인정보 마스킹, 쪽지/익명VOC/양방향대화 3개 연동

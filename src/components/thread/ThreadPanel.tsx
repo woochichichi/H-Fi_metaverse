@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send } from 'lucide-react';
+import { Send, Loader } from 'lucide-react';
 import ThreadMessage from './ThreadMessage';
 import { useThreads } from '../../hooks/useThreads';
+import { useUiStore } from '../../stores/uiStore';
+import { checkMessageSafety } from '../../lib/messageSafety';
 
 interface ThreadPanelProps {
   refType: 'voc' | 'note';
@@ -19,8 +21,10 @@ export default function ThreadPanel({
   onMessageSent,
 }: ThreadPanelProps) {
   const { messages, loading, error: threadError, sendMessage } = useThreads(refType, refId);
+  const { addToast } = useUiStore();
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
+  const [checking, setChecking] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const canReply = canReplyAsAuthor || canReplyAsManager;
@@ -34,9 +38,19 @@ export default function ThreadPanel({
 
   const handleSend = async () => {
     const text = input.trim();
-    if (!text || sending) return;
+    if (!text || sending || checking) return;
 
     const role = canReplyAsManager ? 'manager' : 'author';
+
+    // AI 안전성 검사
+    setChecking(true);
+    const safety = await checkMessageSafety(text);
+    setChecking(false);
+    if (!safety.safe) {
+      addToast('전송할 수 없는 내용이 포함되어 있습니다.', 'error');
+      return; // input 유지 (setInput 호출 없음)
+    }
+
     setSending(true);
     setInput('');
 
@@ -95,15 +109,16 @@ export default function ThreadPanel({
                 handleSend();
               }
             }}
-            placeholder={canReplyAsManager ? '관리자로 답변...' : '익명으로 답변...'}
-            className="flex-1 rounded-lg bg-white/[.06] px-3 py-1.5 text-sm text-text-primary placeholder-text-muted outline-none focus:ring-1 focus:ring-accent"
+            disabled={checking || sending}
+            placeholder={checking ? '검사 중...' : canReplyAsManager ? '관리자로 답변...' : '익명으로 답변...'}
+            className="flex-1 rounded-lg bg-white/[.06] px-3 py-1.5 text-sm text-text-primary placeholder-text-muted outline-none focus:ring-1 focus:ring-accent disabled:opacity-60"
           />
           <button
             onClick={handleSend}
-            disabled={!input.trim() || sending}
+            disabled={!input.trim() || sending || checking}
             className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-white transition-colors duration-200 hover:bg-accent/80 disabled:opacity-40"
           >
-            <Send size={14} />
+            {checking ? <Loader size={14} className="animate-spin" /> : <Send size={14} />}
           </button>
         </div>
       )}
