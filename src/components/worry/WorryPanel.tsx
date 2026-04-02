@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, X, RefreshCw } from 'lucide-react';
 import { useWorries, WORRY_CATEGORIES, type Worry, type WorryCategory } from '../../hooks/useWorries';
-import { useUiStore } from '../../stores/uiStore';
+
 import WorryForm from './WorryForm';
 import WorryDetail from './WorryDetail';
 
@@ -30,7 +30,7 @@ function formatRelativeTime(dateStr: string): string {
 }
 
 export default function WorryPanel({ onClose }: WorryPanelProps) {
-  const { addToast } = useUiStore();
+
   const { worries, loading, error, fetchWorries } = useWorries();
 
   const [view, setView] = useState<ViewMode>('list');
@@ -61,7 +61,6 @@ export default function WorryPanel({ onClose }: WorryPanelProps) {
   const handleCreated = () => {
     setView('list');
     load();
-    addToast('사연이 등록되었습니다 🫂', 'success');
   };
 
   const handleDeleted = () => {
