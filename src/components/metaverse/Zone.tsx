@@ -1,10 +1,54 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { ROOMS_DATA } from '../../lib/constants';
 import { useMetaverseStore } from '../../stores/metaverseStore';
 import { useUiStore } from '../../stores/uiStore';
+import { supabase } from '../../lib/supabase';
 
 const CHAR_W = 34;
 const CHAR_H = 46;
+
+const MEDAL = ['🥇', '🥈', '🥉'];
+
+const GAME_ZONE_CONFIG: Record<string, { table: string; order: string; asc: boolean }> = {
+  reaction:  { table: 'reaction_ranking',   order: 'best_avg_ms',       asc: true  },
+  omok:      { table: 'omok_ranking',        order: 'wins',              asc: false },
+  jumprope:  { table: 'jump_rope_ranking',   order: 'best_duration_ms',  asc: false },
+};
+
+function GameZoneTop3({ zoneId }: { zoneId: string }) {
+  const [top3, setTop3] = useState<{ nickname: string | null; name: string }[]>([]);
+
+  useEffect(() => {
+    const cfg = GAME_ZONE_CONFIG[zoneId];
+    if (!cfg) return;
+    supabase
+      .from(cfg.table)
+      .select('name, nickname')
+      .order(cfg.order, { ascending: cfg.asc })
+      .limit(3)
+      .then(({ data }) => {
+        if (data) setTop3(data as { nickname: string | null; name: string }[]);
+      });
+  }, [zoneId]);
+
+  if (top3.length === 0) return null;
+
+  return (
+    <div className="absolute bottom-2 left-0 right-0 flex flex-col items-center gap-0.5 pointer-events-none">
+      {top3.map((r, i) => (
+        <div key={i} className="flex items-center gap-1">
+          <span className="text-[11px]">{MEDAL[i]}</span>
+          <span
+            className="text-[10px] font-semibold truncate max-w-[80px]"
+            style={{ color: 'rgba(255,255,255,.75)', textShadow: '0 1px 3px rgba(0,0,0,.8)' }}
+          >
+            {r.nickname || r.name}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function Zone() {
   const [hoveredZone, setHoveredZone] = useState<string | null>(null);
@@ -38,6 +82,7 @@ export default function Zone() {
           onMouseEnter={() => setHoveredZone(z.id)}
           onMouseLeave={() => setHoveredZone(null)}
         >
+          {z.id in GAME_ZONE_CONFIG && <GameZoneTop3 zoneId={z.id} />}
           {hoveredZone === z.id && (
             <div
               className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-0.5 text-[11px] font-medium text-white/90 pointer-events-none animate-[fadeIn_.15s]"

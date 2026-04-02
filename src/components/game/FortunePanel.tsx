@@ -244,15 +244,6 @@ export default function FortunePanel({ onClose }: { onClose: () => void }) {
                   transition: 'all .5s ease',
                 }}
               >
-                {/* 점수 표시선 (가운데 수평선) */}
-                <div className="absolute left-2 right-2 top-1/2 -translate-y-1/2 h-[2px] rounded-full z-30 pointer-events-none"
-                  style={{
-                    background: phase === 'done'
-                      ? `linear-gradient(90deg, transparent, ${theme.glow}60, transparent)`
-                      : 'linear-gradient(90deg, transparent, rgba(255,255,255,.1), transparent)',
-                  }}
-                />
-
                 {/* 릴 */}
                 <div className="flex gap-2">
                   {digits.map((d, i) => (
