@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, X, Filter, TrendingUp, Clock, RefreshCw } from 'lucide-react';
 import IdeaCard from './IdeaCard';
+import IdeaDetail from './IdeaDetail';
 import IdeaForm from './IdeaForm';
 import LoadMore from '../common/LoadMore';
 import { useIdeas } from '../../hooks/useIdeas';
@@ -10,7 +11,7 @@ import { IDEA_CATEGORIES, IDEA_STATUSES } from '../../lib/constants';
 import type { IdeaCategory, IdeaStatus } from '../../lib/constants';
 import type { IdeaWithVotes } from '../../types';
 
-type ViewMode = 'list' | 'form' | 'edit';
+type ViewMode = 'list' | 'form' | 'edit' | 'detail';
 
 interface IdeaPanelProps {
   onClose?: () => void;
@@ -22,6 +23,7 @@ export default function IdeaPanel({ onClose }: IdeaPanelProps) {
   const { ideas, loading, error, fetchIdeas, toggleVote, updateIdeaStatus, fetchUserVotes, fetchCommentCounts } = useIdeas();
 
   const [view, setView] = useState<ViewMode>('list');
+  const [selectedIdea, setSelectedIdea] = useState<(IdeaWithVotes & { _voted?: boolean; _commentCount?: number }) | null>(null);
   const [editTarget, setEditTarget] = useState<IdeaWithVotes | null>(null);
   const [skeletonTimeout, setSkeletonTimeout] = useState(false);
   const [sortMode, setSortMode] = useState<'newest' | 'popular'>('newest');
@@ -62,6 +64,16 @@ export default function IdeaPanel({ onClose }: IdeaPanelProps) {
     }
   }, [user, ideas.length, fetchUserVotes, fetchCommentCounts]);
 
+  // selectedIdea를 최신 ideas 데이터로 동기화
+  useEffect(() => {
+    if (selectedIdea) {
+      const updated = ideas.find((i) => i.id === selectedIdea.id);
+      if (updated) {
+        setSelectedIdea({ ...updated, _commentCount: commentCounts.get(updated.id) ?? selectedIdea._commentCount ?? 0 });
+      }
+    }
+  }, [ideas, commentCounts]);
+
   const handleVote = async (ideaId: string) => {
     if (!user) {
       addToast('로그인이 필요합니다', 'error');
@@ -80,9 +92,14 @@ export default function IdeaPanel({ onClose }: IdeaPanelProps) {
     }
   };
 
-  const handleCreated = () => {
+  const handleSelect = (idea: IdeaWithVotes) => {
+    setSelectedIdea({ ...idea, _commentCount: commentCounts.get(idea.id) ?? 0 });
+    setView('detail');
+  };
+
+  const handleDeleted = () => {
+    setSelectedIdea(null);
     setView('list');
-    setEditTarget(null);
     loadIdeas();
   };
 
@@ -90,6 +107,20 @@ export default function IdeaPanel({ onClose }: IdeaPanelProps) {
     setEditTarget(idea);
     setView('edit');
   };
+
+  const handleCreated = () => {
+    setView('list');
+    setEditTarget(null);
+    loadIdeas();
+  };
+
+  const handleEditDone = () => {
+    setEditTarget(null);
+    setView('detail');
+    loadIdeas();
+  };
+
+  const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
 
   return (
     <div className="relative flex flex-col h-full overflow-hidden">
@@ -217,9 +248,8 @@ export default function IdeaPanel({ onClose }: IdeaPanelProps) {
                 key={idea.id}
                 idea={{ ...idea, _commentCount: commentCounts.get(idea.id) ?? 0 }}
                 onVote={handleVote}
-                onStatusChange={profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader' ? handleStatusChange : undefined}
-                onDeleted={loadIdeas}
-                onEdit={handleEdit}
+                onStatusChange={isLeader ? handleStatusChange : undefined}
+                onSelect={handleSelect}
               />
             ))}
             <LoadMore current={Math.min(displayCount, ideas.length)} total={ideas.length} onLoadMore={() => setDisplayCount((c) => c + 20)} />
@@ -244,11 +274,24 @@ export default function IdeaPanel({ onClose }: IdeaPanelProps) {
         </div>
       )}
 
+      {view === 'detail' && selectedIdea && (
+        <div className="absolute inset-0 z-10 flex flex-col bg-bg-primary animate-[slideInRight_.2s_ease-out]">
+          <IdeaDetail
+            idea={selectedIdea}
+            onBack={() => setView('list')}
+            onDeleted={handleDeleted}
+            onEdit={handleEdit}
+            onVote={handleVote}
+            onStatusChange={isLeader ? handleStatusChange : undefined}
+          />
+        </div>
+      )}
+
       {view === 'edit' && editTarget && (
         <div className="absolute inset-0 z-10 flex flex-col bg-bg-primary animate-[slideInRight_.2s_ease-out]">
           <IdeaForm
-            onClose={() => { setView('list'); setEditTarget(null); }}
-            onCreated={handleCreated}
+            onClose={() => setView('detail')}
+            onCreated={handleEditDone}
             editId={editTarget.id}
             initialData={{
               title: editTarget.title,

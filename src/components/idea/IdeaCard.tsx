@@ -1,12 +1,7 @@
 import { useState } from 'react';
-import { Heart, User, Clock, MessageCircle, Trash2, Pencil, Eye } from 'lucide-react';
-import { useAuthStore } from '../../stores/authStore';
-import { useUiStore } from '../../stores/uiStore';
-import { useIdeas } from '../../hooks/useIdeas';
-import ConfirmDialog from '../common/ConfirmDialog';
+import { Heart, User, Clock, MessageCircle, Eye } from 'lucide-react';
 import { IDEA_STATUSES } from '../../lib/constants';
 import { formatRelativeTime } from '../../lib/utils';
-import IdeaComments from './IdeaComments';
 import type { IdeaWithVotes } from '../../types';
 import type { IdeaStatus } from '../../lib/constants';
 
@@ -30,23 +25,12 @@ interface IdeaCardProps {
   idea: IdeaWithVotes & { _voted?: boolean; _commentCount?: number };
   onVote: (ideaId: string) => void;
   onStatusChange?: (ideaId: string, status: IdeaStatus) => void;
-  onDeleted?: () => void;
-  onEdit?: (idea: IdeaWithVotes) => void;
+  onSelect: (idea: IdeaWithVotes) => void;
 }
 
-export default function IdeaCard({ idea, onVote, onStatusChange, onDeleted, onEdit }: IdeaCardProps) {
-  const { profile } = useAuthStore();
-  const { addToast } = useUiStore();
-  const { deleteIdea, incrementViewCount } = useIdeas();
+export default function IdeaCard({ idea, onVote, onStatusChange, onSelect }: IdeaCardProps) {
   const [animating, setAnimating] = useState(false);
-  const [expanded, setExpanded] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [deleting, setDeleting] = useState(false);
 
-  const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
-  const isAdmin = profile?.role === 'admin' || profile?.role === 'director';
-  const isAuthor = idea.author_id === profile?.id;
-  const canDelete = isAdmin || isAuthor;
   const catConfig = CATEGORY_CONFIG[idea.category ?? '기타'];
   const statusConfig = STATUS_CONFIG[idea.status];
 
@@ -59,28 +43,13 @@ export default function IdeaCard({ idea, onVote, onStatusChange, onDeleted, onEd
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     e.stopPropagation();
-    const newStatus = e.target.value as IdeaStatus;
-    onStatusChange?.(idea.id, newStatus);
-  };
-
-  const handleDelete = async () => {
-    if (deleting) return;
-    setDeleting(true);
-    const { error } = await deleteIdea(idea.id);
-    setDeleting(false);
-    setShowDeleteConfirm(false);
-    if (error) {
-      addToast(`삭제 실패: ${error}`, 'error');
-      return;
-    }
-    addToast('아이디어가 삭제되었습니다', 'success');
-    onDeleted?.();
+    onStatusChange?.(idea.id, e.target.value as IdeaStatus);
   };
 
   return (
     <div
       className="flex flex-col gap-2.5 rounded-xl border border-white/[.06] bg-white/[.03] p-3 transition-colors duration-200 hover:bg-white/[.06] cursor-pointer"
-      onClick={() => { if (!expanded) incrementViewCount(idea.id); setExpanded(!expanded); }}
+      onClick={() => onSelect(idea)}
     >
       {/* 상단: 카테고리 + 상태 */}
       <div className="flex items-center justify-between">
@@ -90,7 +59,7 @@ export default function IdeaCard({ idea, onVote, onStatusChange, onDeleted, onEd
         >
           {idea.category ?? '기타'}
         </span>
-        {isLeader && onStatusChange ? (
+        {onStatusChange ? (
           <select
             value={idea.status}
             onChange={handleStatusChange}
@@ -116,7 +85,7 @@ export default function IdeaCard({ idea, onVote, onStatusChange, onDeleted, onEd
       <h3 className="text-sm font-semibold text-text-primary line-clamp-1 tracking-wide font-body">{idea.title}</h3>
 
       {/* 설명 */}
-      <p className={`text-xs text-text-muted leading-relaxed ${expanded ? 'whitespace-pre-wrap' : 'line-clamp-2'}`}>{idea.description}</p>
+      <p className="text-xs text-text-muted leading-relaxed line-clamp-2">{idea.description}</p>
 
       {/* 하단: 투표 + 댓글 + 메타 */}
       <div className="flex items-center justify-between">
@@ -151,42 +120,6 @@ export default function IdeaCard({ idea, onVote, onStatusChange, onDeleted, onEd
           <span className="font-mono">{idea.vote_count}</span>
         </button>
       </div>
-
-      {/* 수정/삭제 (펼침 시 + 본인/관리자) */}
-      {expanded && canDelete && (
-        <div className="flex justify-end gap-1 pt-1 border-t border-white/[.06]">
-          {isAuthor && onEdit && (
-            <button
-              onClick={(e) => { e.stopPropagation(); onEdit(idea); }}
-              className="flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] text-text-muted transition-colors hover:bg-accent/20 hover:text-accent"
-            >
-              <Pencil size={12} />
-              수정
-            </button>
-          )}
-          <button
-            onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(true); }}
-            disabled={deleting}
-            className="flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] text-text-muted transition-colors hover:bg-danger/20 hover:text-danger disabled:opacity-40"
-          >
-            <Trash2 size={12} />
-            삭제
-          </button>
-        </div>
-      )}
-
-      {/* 댓글 (펼침 시) */}
-      {expanded && <IdeaComments ideaId={idea.id} />}
-
-      <ConfirmDialog
-        open={showDeleteConfirm}
-        title="아이디어 삭제"
-        message="이 아이디어를 삭제하시겠습니까? 삭제 후 복구할 수 없습니다."
-        confirmLabel="삭제"
-        danger
-        onConfirm={handleDelete}
-        onCancel={() => setShowDeleteConfirm(false)}
-      />
     </div>
   );
 }

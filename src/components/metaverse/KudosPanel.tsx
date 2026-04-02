@@ -3,6 +3,7 @@ import { Plus, Eye, RefreshCw, Send, X, ChevronDown } from 'lucide-react';
 import { useKudos, type ReactionType } from '../../hooks/useKudos';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
+import ConfirmDialog from '../common/ConfirmDialog';
 import KudosCard from './KudosCard';
 import LoadMore from '../common/LoadMore';
 
@@ -44,6 +45,7 @@ export default function KudosPanel({ team, readOnly }: KudosPanelProps) {
   const [submitting, setSubmitting] = useState(false);
   const [displayCount, setDisplayCount] = useState(20);
   const [period, setPeriod] = useState<PeriodFilter>('week');
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const since = useMemo(() => getSinceDate(period), [period]);
 
@@ -86,12 +88,18 @@ export default function KudosPanel({ team, readOnly }: KudosPanelProps) {
     catch { addToast('반응 처리 실패', 'error'); reload(); }
   };
 
-  const handleDelete = async (kudosId: string) => {
-    if (!confirm('칭찬을 삭제하시겠습니까?')) return;
+  const handleDelete = (kudosId: string) => {
+    setConfirmDeleteId(kudosId);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!confirmDeleteId) return;
     try {
-      await deleteKudos(kudosId);
+      await deleteKudos(confirmDeleteId);
       addToast('삭제했습니다', 'success');
+      reload();
     } catch { addToast('삭제 실패', 'error'); }
+    setConfirmDeleteId(null);
   };
 
   return (
@@ -187,6 +195,16 @@ export default function KudosPanel({ team, readOnly }: KudosPanelProps) {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmDeleteId !== null}
+        title="칭찬 삭제"
+        message="이 칭찬을 삭제하시겠습니까?"
+        confirmLabel="삭제"
+        danger
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, Send, Trash2, Pencil } from 'lucide-react';
+import ConfirmDialog from '../common/ConfirmDialog';
 import {
   useWorries,
   WORRY_REACTIONS,
@@ -46,6 +47,7 @@ export default function WorryDetail({ worry, onBack, onDeleted, onEdit }: WorryD
   const [commentAnon, setCommentAnon] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [loadingComments, setLoadingComments] = useState(true);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const load = useCallback(async () => {
     setLoadingComments(true);
@@ -105,10 +107,10 @@ export default function WorryDetail({ worry, onBack, onDeleted, onEdit }: WorryD
   };
 
   const handleDeleteWorry = async () => {
-    if (!confirm('이 사연을 삭제할까요?')) return;
     const { error } = await deleteWorry(worry.id);
     if (error) addToast(`삭제 실패: ${error}`, 'error');
     else { addToast('삭제되었습니다', 'success'); onDeleted(); }
+    setShowDeleteConfirm(false);
   };
 
   const isOwner = !worry.anonymous && user && worry.author_id === user.id;
@@ -136,7 +138,7 @@ export default function WorryDetail({ worry, onBack, onDeleted, onEdit }: WorryD
         )}
         {(isOwner || isAdmin) && (
           <button
-            onClick={handleDeleteWorry}
+            onClick={() => setShowDeleteConfirm(true)}
             className="flex h-7 w-7 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-red-500/20 hover:text-red-400"
             title="삭제"
           >
@@ -238,6 +240,16 @@ export default function WorryDetail({ worry, onBack, onDeleted, onEdit }: WorryD
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        title="사연 삭제"
+        message="이 사연을 삭제할까요? 삭제 후 복구할 수 없습니다."
+        confirmLabel="삭제"
+        danger
+        onConfirm={handleDeleteWorry}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
 
       {/* 댓글 입력 */}
       <div className="border-t border-white/[.06] p-3">

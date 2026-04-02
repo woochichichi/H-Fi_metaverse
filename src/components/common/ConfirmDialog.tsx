@@ -31,12 +31,6 @@ export default function ConfirmDialog({
         <p className="mb-4 text-xs leading-relaxed text-text-secondary">{message}</p>
         <div className="flex justify-end gap-2">
           <button
-            onClick={onCancel}
-            className="rounded-lg px-4 py-1.5 text-xs text-text-muted hover:bg-white/[.06]"
-          >
-            {cancelLabel}
-          </button>
-          <button
             onClick={onConfirm}
             className={`rounded-lg px-4 py-1.5 text-xs font-semibold text-white transition-colors ${
               danger
@@ -45,6 +39,12 @@ export default function ConfirmDialog({
             }`}
           >
             {confirmLabel}
+          </button>
+          <button
+            onClick={onCancel}
+            className="rounded-lg px-4 py-1.5 text-xs text-text-muted hover:bg-white/[.06]"
+          >
+            {cancelLabel}
           </button>
         </div>
       </div>

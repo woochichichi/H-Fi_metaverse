@@ -227,16 +227,16 @@ export default function TopBar() {
             <p className="mb-5 text-sm text-text-secondary">정말 로그아웃 하시겠어요?</p>
             <div className="flex gap-2 justify-end">
               <button
-                onClick={() => setShowLogoutConfirm(false)}
-                className="rounded-lg px-4 py-2 text-sm text-text-muted transition-colors hover:bg-bg-tertiary"
-              >
-                취소
-              </button>
-              <button
                 onClick={() => { setShowLogoutConfirm(false); logout(); }}
                 className="rounded-lg bg-danger/90 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-danger"
               >
                 로그아웃
+              </button>
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="rounded-lg px-4 py-2 text-sm text-text-muted transition-colors hover:bg-bg-tertiary"
+              >
+                취소
               </button>
             </div>
           </div>
