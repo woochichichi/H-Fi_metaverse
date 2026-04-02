@@ -203,6 +203,30 @@ export function useNotices() {
     return (totalCount ?? 0) - (readCount ?? 0);
   }, []);
 
+  const updateNotice = useCallback(
+    async (
+      id: string,
+      input: {
+        title?: string;
+        content?: string;
+        urgency?: UrgencyLevel;
+        category?: NoticeCategory;
+        pinned?: boolean;
+        team?: string | null;
+      },
+    ) => {
+      const { data, error: updateError } = await withTimeout(
+        () => supabase.from('notices').update(input).eq('id', id).select().single(),
+        8000,
+        'updateNotice',
+      );
+      if (updateError) return { error: updateError.message };
+      setNotices((prev) => prev.map((n) => (n.id === id ? { ...n, ...data } : n)));
+      return { error: null };
+    },
+    [],
+  );
+
   const deleteNotice = useCallback(async (id: string) => {
     // notice_reads, notice_comments는 FK CASCADE로 자동 삭제
     const { data, error: deleteError } = await supabase
@@ -296,6 +320,7 @@ export function useNotices() {
     fetchNotices,
     fetchMyReads,
     createNotice,
+    updateNotice,
     markAsRead,
     fetchReadStatus,
     fetchUnreadCount,

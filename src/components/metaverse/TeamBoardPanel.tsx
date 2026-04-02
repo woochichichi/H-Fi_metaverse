@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, Eye, RefreshCw, Send, X } from 'lucide-react';
 import { useTeamPosts } from '../../hooks/useTeamPosts';
+import type { TeamPostWithCounts } from '../../hooks/useTeamPosts';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
 import TeamPostCard from './TeamPostCard';
@@ -23,7 +24,7 @@ interface TeamBoardPanelProps {
 export default function TeamBoardPanel({ team, readOnly }: TeamBoardPanelProps) {
   const { profile } = useAuthStore();
   const { addToast } = useUiStore();
-  const { posts, comments, loading, error, fetchPosts, createPost, toggleLike, fetchComments, addComment } = useTeamPosts();
+  const { posts, comments, loading, error, fetchPosts, createPost, updatePost, deletePost, toggleLike, fetchComments, addComment } = useTeamPosts();
 
   const [showForm, setShowForm] = useState(false);
   const [category, setCategory] = useState<string>('자유');
@@ -32,6 +33,7 @@ export default function TeamBoardPanel({ team, readOnly }: TeamBoardPanelProps) 
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [displayCount, setDisplayCount] = useState(20);
+  const [editTarget, setEditTarget] = useState<TeamPostWithCounts | null>(null);
 
   const reload = useCallback(() => { fetchPosts(team, profile?.id); }, [fetchPosts, team, profile?.id]);
   useEffect(() => { reload(); }, [reload]);
@@ -40,16 +42,36 @@ export default function TeamBoardPanel({ team, readOnly }: TeamBoardPanelProps) 
     if (!profile || !content.trim()) return;
     setSubmitting(true);
     try {
-      await createPost(profile.id, team, content.trim(), category);
-      addToast('게시글이 등록되었습니다', 'success');
+      if (editTarget) {
+        const { error } = await updatePost(editTarget.id, { content: content.trim(), category });
+        if (error) { addToast(`수정 실패: ${error}`, 'error'); return; }
+        addToast('게시글이 수정되었습니다', 'success');
+        setEditTarget(null);
+      } else {
+        await createPost(profile.id, team, content.trim(), category);
+        addToast('게시글이 등록되었습니다', 'success');
+      }
       setShowForm(false);
       setContent('');
       reload();
     } catch {
-      addToast('게시글 등록 실패', 'error');
+      addToast(editTarget ? '게시글 수정 실패' : '게시글 등록 실패', 'error');
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleEditPost = (post: TeamPostWithCounts) => {
+    setEditTarget(post);
+    setContent(post.content);
+    setCategory(post.category);
+    setShowForm(true);
+  };
+
+  const handleDeletePost = async (postId: string) => {
+    const { error } = await deletePost(postId);
+    if (error) { addToast(`삭제 실패: ${error}`, 'error'); return; }
+    addToast('게시글이 삭제되었습니다', 'success');
   };
 
   const handleToggleLike = async (postId: string) => {
@@ -87,7 +109,7 @@ export default function TeamBoardPanel({ team, readOnly }: TeamBoardPanelProps) 
             </span>
           )}
           {!readOnly && (
-            <button onClick={() => setShowForm(!showForm)}
+            <button onClick={() => { setShowForm(!showForm); setEditTarget(null); setContent(''); }}
               className="flex items-center gap-1 rounded-lg bg-accent/20 px-2.5 py-1 text-[11px] font-semibold text-accent transition-colors hover:bg-accent/30">
               {showForm ? <X size={12} /> : <Plus size={12} />}
               {showForm ? '취소' : '글쓰기'}
@@ -120,7 +142,7 @@ export default function TeamBoardPanel({ team, readOnly }: TeamBoardPanelProps) 
             <button onClick={handleSubmit}
               disabled={!content.trim() || submitting}
               className="flex items-center gap-1 rounded-lg bg-accent px-3 py-1.5 text-[11px] font-bold text-white transition-all hover:bg-accent/80 disabled:opacity-30">
-              <Send size={11} /> 게시
+              <Send size={11} /> {editTarget ? '수정' : '게시'}
             </button>
           </div>
         </div>
@@ -165,7 +187,9 @@ export default function TeamBoardPanel({ team, readOnly }: TeamBoardPanelProps) 
               expanded={expandedId === p.id}
               onToggleLike={handleToggleLike}
               onExpandComments={handleExpandComments}
-              onAddComment={handleAddComment} />
+              onAddComment={handleAddComment}
+              onEdit={handleEditPost}
+              onDelete={handleDeletePost} />
           ))}
           <LoadMore current={Math.min(displayCount, filtered.length)} total={filtered.length} onLoadMore={() => setDisplayCount((c) => c + 20)} />
         </div>

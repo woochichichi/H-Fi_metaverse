@@ -9,7 +9,7 @@ import { NOTICE_CATEGORIES } from '../../lib/constants';
 import type { UrgencyLevel, NoticeCategory } from '../../lib/constants';
 import type { Notice } from '../../types';
 
-type ViewMode = 'list' | 'form' | 'detail';
+type ViewMode = 'list' | 'form' | 'detail' | 'edit';
 
 interface NoticePanelProps {
   onClose?: () => void;
@@ -60,6 +60,16 @@ export default function NoticePanel({ onClose }: NoticePanelProps) {
 
   const handleCreated = () => {
     setView('list');
+    loadNotices();
+  };
+
+  const handleEdit = (notice: Notice) => {
+    setSelectedNotice(notice);
+    setView('edit');
+  };
+
+  const handleEditDone = () => {
+    setView('detail');
     loadNotices();
   };
 
@@ -192,7 +202,29 @@ export default function NoticePanel({ onClose }: NoticePanelProps) {
       )}
       {view === 'detail' && selectedNotice && (
         <div className="absolute inset-0 z-10 flex flex-col bg-bg-primary animate-[slideInRight_.2s_ease-out]">
-          <NoticeDetail notice={selectedNotice} onBack={handleBack} onDeleted={handleBack} />
+          <NoticeDetail
+            notice={selectedNotice}
+            onBack={handleBack}
+            onDeleted={handleBack}
+            onEdit={handleEdit}
+          />
+        </div>
+      )}
+      {view === 'edit' && selectedNotice && (
+        <div className="absolute inset-0 z-10 flex flex-col bg-bg-primary animate-[slideInRight_.2s_ease-out]">
+          <NoticeForm
+            onClose={() => setView('detail')}
+            onCreated={handleEditDone}
+            editId={selectedNotice.id}
+            initialData={{
+              title: selectedNotice.title,
+              content: selectedNotice.content,
+              urgency: selectedNotice.urgency as any,
+              category: selectedNotice.category as any,
+              pinned: selectedNotice.pinned ?? false,
+              team: selectedNotice.team,
+            }}
+          />
         </div>
       )}
     </div>

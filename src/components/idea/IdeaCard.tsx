@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Heart, User, Clock, MessageCircle, Trash2 } from 'lucide-react';
+import { Heart, User, Clock, MessageCircle, Trash2, Pencil } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
 import { useIdeas } from '../../hooks/useIdeas';
@@ -31,9 +31,10 @@ interface IdeaCardProps {
   onVote: (ideaId: string) => void;
   onStatusChange?: (ideaId: string, status: IdeaStatus) => void;
   onDeleted?: () => void;
+  onEdit?: (idea: IdeaWithVotes) => void;
 }
 
-export default function IdeaCard({ idea, onVote, onStatusChange, onDeleted }: IdeaCardProps) {
+export default function IdeaCard({ idea, onVote, onStatusChange, onDeleted, onEdit }: IdeaCardProps) {
   const { profile } = useAuthStore();
   const { addToast } = useUiStore();
   const { deleteIdea } = useIdeas();
@@ -147,9 +148,18 @@ export default function IdeaCard({ idea, onVote, onStatusChange, onDeleted }: Id
         </button>
       </div>
 
-      {/* 삭제 (펼침 시 + 본인/관리자) */}
+      {/* 수정/삭제 (펼침 시 + 본인/관리자) */}
       {expanded && canDelete && (
-        <div className="flex justify-end pt-1 border-t border-white/[.06]">
+        <div className="flex justify-end gap-1 pt-1 border-t border-white/[.06]">
+          {isAuthor && onEdit && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onEdit(idea); }}
+              className="flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] text-text-muted transition-colors hover:bg-accent/20 hover:text-accent"
+            >
+              <Pencil size={12} />
+              수정
+            </button>
+          )}
           <button
             onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(true); }}
             disabled={deleting}

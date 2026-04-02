@@ -14,14 +14,22 @@ interface ActivityFormProps {
     unit: string | null;
   }) => void;
   onCancel: () => void;
+  initialData?: {
+    title: string;
+    description: string | null;
+    category: string | null;
+    status: string;
+    unit: string | null;
+  };
+  isEdit?: boolean;
 }
 
-export default function ActivityForm({ onSubmit, onCancel }: ActivityFormProps) {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState<string | null>(null);
-  const [status, setStatus] = useState('계획');
-  const [unit, setUnit] = useState<string | null>(null);
+export default function ActivityForm({ onSubmit, onCancel, initialData, isEdit }: ActivityFormProps) {
+  const [title, setTitle] = useState(initialData?.title ?? '');
+  const [description, setDescription] = useState(initialData?.description ?? '');
+  const [category, setCategory] = useState<string | null>(initialData?.category ?? null);
+  const [status, setStatus] = useState(initialData?.status ?? '계획');
+  const [unit, setUnit] = useState<string | null>(initialData?.unit ?? null);
 
   const handleSubmit = () => {
     if (!title.trim()) return;
@@ -37,7 +45,7 @@ export default function ActivityForm({ onSubmit, onCancel }: ActivityFormProps) 
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-accent/20 bg-accent/[.03] p-3">
       <div className="flex items-center justify-between">
-        <h4 className="text-xs font-bold text-accent">활동 등록</h4>
+        <h4 className="text-xs font-bold text-accent">{isEdit ? '활동 수정' : '활동 등록'}</h4>
         <button onClick={onCancel} className="text-text-muted hover:text-text-primary">
           <X size={14} />
         </button>
@@ -129,7 +137,7 @@ export default function ActivityForm({ onSubmit, onCancel }: ActivityFormProps) 
         disabled={!title.trim()}
         className="mt-1 rounded-lg bg-accent px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-accent/80 disabled:opacity-40"
       >
-        등록
+        {isEdit ? '수정 완료' : '등록'}
       </button>
     </div>
   );

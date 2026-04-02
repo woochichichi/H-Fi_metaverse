@@ -381,8 +381,9 @@ export const ROOMS_DATA: Record<RoomId, RoomDef> = {
     mapSize: { w: 1600, h: 1080 },
     spawnPoint: { x: 760, y: 460 },
     zones: [
-      { id: 'voc', team: null, label: '📞 VOC 센터', emoji: '📞', x: 60, y: 60, width: 630, height: 360 },
-      { id: 'idea', team: null, label: '💡 아이디어 보드', emoji: '💡', x: 820, y: 60, width: 630, height: 360 },
+      { id: 'voc', team: null, label: '📞 VOC방', emoji: '📞', x: 30, y: 60, width: 500, height: 360 },
+      { id: 'idea', team: null, label: '💡 아이디어방', emoji: '💡', x: 550, y: 60, width: 500, height: 360 },
+      { id: 'worry', team: null, label: '🫂 고민방', emoji: '🫂', x: 1070, y: 60, width: 500, height: 360 },
       { id: 'gathering', team: null, label: '🏕 모임방', emoji: '🎉', x: 60, y: 490, width: 420, height: 280 },
       { id: 'reaction', team: null, label: '⚡ 반응속도', emoji: '⚡', x: 520, y: 490, width: 270, height: 280 },
       { id: 'omok', team: null, label: '⚫ 오목', emoji: '⚫', x: 810, y: 490, width: 270, height: 280 },

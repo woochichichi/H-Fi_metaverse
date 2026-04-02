@@ -13,6 +13,7 @@ import TouchDpad from './TouchDpad';
 import usePlayerSync from '../../hooks/usePlayerSync';
 import VocPanel from '../voc/VocPanel';
 import IdeaPanel from '../idea/IdeaPanel';
+import WorryPanel from '../worry/WorryPanel';
 import NoticePanel from '../notice/NoticePanel';
 import KpiPanel from '../kpi/KpiPanel';
 import NotePanel from '../note/NotePanel';
@@ -36,6 +37,7 @@ import { useZoneAlerts } from '../../hooks/useZoneAlerts';
 function getZonePanel(zoneId: string, userTeam: string | undefined): React.FC<{ onClose: () => void }> | null {
   if (zoneId === 'voc') return VocPanel;
   if (zoneId === 'idea') return IdeaPanel;
+  if (zoneId === 'worry') return WorryPanel;
   if (zoneId.endsWith('-notice')) return ({ onClose }) => <NoticePanel onClose={onClose} />;
   if (zoneId.endsWith('-kpi')) return KpiPanel;
   if (zoneId.endsWith('-lobby')) {

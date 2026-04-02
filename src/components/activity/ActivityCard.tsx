@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ThumbsUp, MessageCircle, ChevronDown, Send } from 'lucide-react';
+import { ThumbsUp, MessageCircle, ChevronDown, Send, Pencil, Trash2 } from 'lucide-react';
 import type { UnitActivityWithCounts, CommentWithAuthor } from '../../hooks/useUnitActivities';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -29,6 +29,8 @@ interface ActivityCardProps {
   onStatusChange: (activityId: string, status: string) => void;
   onExpandComments: (activityId: string) => void;
   onAddComment: (activityId: string, content: string) => void;
+  onEdit?: (activity: UnitActivityWithCounts) => void;
+  onDelete?: (activityId: string) => void;
   expanded: boolean;
 }
 
@@ -42,10 +44,14 @@ export default function ActivityCard({
   onStatusChange,
   onExpandComments,
   onAddComment,
+  onEdit,
+  onDelete,
   expanded,
 }: ActivityCardProps) {
   const [showStatusMenu, setShowStatusMenu] = useState(false);
   const [commentText, setCommentText] = useState('');
+
+  const isOwner = !readOnly && userId && activity.author_id === userId;
 
   const handleSubmitComment = () => {
     const trimmed = commentText.trim();
@@ -76,6 +82,30 @@ export default function ActivityCard({
             {activity.title}
           </h4>
         </div>
+
+        {/* 본인 글: 수정/삭제 */}
+        {isOwner && (
+          <div className="flex items-center gap-1 mr-1">
+            {onEdit && (
+              <button
+                onClick={() => onEdit(activity)}
+                className="flex h-6 w-6 items-center justify-center rounded text-text-muted transition-colors hover:bg-accent/20 hover:text-accent"
+                title="수정"
+              >
+                <Pencil size={11} />
+              </button>
+            )}
+            {onDelete && (
+              <button
+                onClick={() => onDelete(activity.id)}
+                className="flex h-6 w-6 items-center justify-center rounded text-text-muted transition-colors hover:bg-danger/20 hover:text-danger"
+                title="삭제"
+              >
+                <Trash2 size={11} />
+              </button>
+            )}
+          </div>
+        )}
 
         {/* 상태 뱃지 (리더: 클릭 시 변경 드롭다운) */}
         <div className="relative">

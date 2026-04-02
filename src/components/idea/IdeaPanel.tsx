@@ -8,8 +8,9 @@ import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
 import { IDEA_CATEGORIES, IDEA_STATUSES } from '../../lib/constants';
 import type { IdeaCategory, IdeaStatus } from '../../lib/constants';
+import type { IdeaWithVotes } from '../../types';
 
-type ViewMode = 'list' | 'form';
+type ViewMode = 'list' | 'form' | 'edit';
 
 interface IdeaPanelProps {
   onClose?: () => void;
@@ -21,6 +22,7 @@ export default function IdeaPanel({ onClose }: IdeaPanelProps) {
   const { ideas, loading, error, fetchIdeas, toggleVote, updateIdeaStatus, fetchUserVotes, fetchCommentCounts } = useIdeas();
 
   const [view, setView] = useState<ViewMode>('list');
+  const [editTarget, setEditTarget] = useState<IdeaWithVotes | null>(null);
   const [skeletonTimeout, setSkeletonTimeout] = useState(false);
   const [sortMode, setSortMode] = useState<'newest' | 'popular'>('newest');
   const [filterCategory, setFilterCategory] = useState<IdeaCategory | null>(null);
@@ -80,7 +82,13 @@ export default function IdeaPanel({ onClose }: IdeaPanelProps) {
 
   const handleCreated = () => {
     setView('list');
+    setEditTarget(null);
     loadIdeas();
+  };
+
+  const handleEdit = (idea: IdeaWithVotes) => {
+    setEditTarget(idea);
+    setView('edit');
   };
 
   return (
@@ -211,6 +219,7 @@ export default function IdeaPanel({ onClose }: IdeaPanelProps) {
                 onVote={handleVote}
                 onStatusChange={profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader' ? handleStatusChange : undefined}
                 onDeleted={loadIdeas}
+                onEdit={handleEdit}
               />
             ))}
             <LoadMore current={Math.min(displayCount, ideas.length)} total={ideas.length} onLoadMore={() => setDisplayCount((c) => c + 20)} />
@@ -232,6 +241,21 @@ export default function IdeaPanel({ onClose }: IdeaPanelProps) {
       {view === 'form' && (
         <div className="absolute inset-0 z-10 flex flex-col bg-bg-primary animate-[slideInRight_.2s_ease-out]">
           <IdeaForm onClose={() => setView('list')} onCreated={handleCreated} />
+        </div>
+      )}
+
+      {view === 'edit' && editTarget && (
+        <div className="absolute inset-0 z-10 flex flex-col bg-bg-primary animate-[slideInRight_.2s_ease-out]">
+          <IdeaForm
+            onClose={() => { setView('list'); setEditTarget(null); }}
+            onCreated={handleCreated}
+            editId={editTarget.id}
+            initialData={{
+              title: editTarget.title,
+              description: editTarget.description,
+              category: editTarget.category as any,
+            }}
+          />
         </div>
       )}
     </div>

@@ -4,11 +4,14 @@
       "Read",
       "Edit",
       "Write",
-      "Bash(npm:*)",
-      "Bash(npx:*)",
-      "Bash(pnpm:*)",
-      "Bash(git:*)",
-      "Bash(supabase:*)"
+      "Bash(*)",
+      "WebFetch(*)",
+      "WebSearch(*)",
+      "Glob(*)",
+      "Grep(*)",
+      "NotebookEdit(*)",
+      "Agent(*)",
+      "mcp__*"
     ],
     "deny": [
       "Bash(rm -rf:*)",

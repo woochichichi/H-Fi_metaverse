@@ -128,6 +128,8 @@ export function useVocs() {
         status?: VocStatus;
         assignee_id?: string | null;
         resolution?: string | null;
+        title?: string;
+        content?: string;
       }
     ) => {
       const { data, error: updateError } = await supabase

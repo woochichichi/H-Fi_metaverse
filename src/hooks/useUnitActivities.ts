@@ -165,11 +165,11 @@ export function useUnitActivities() {
     let nameMap = new Map<string, string>();
     if (authorIds.length > 0) {
       const { data: profiles, error: profileErr } = await withTimeout(
-        () => supabase.from('profiles').select('id, name').in('id', authorIds),
+        () => supabase.from('profiles').select('id, name, nickname').in('id', authorIds),
         8000, 'commentAuthors',
       );
       if (profileErr) console.error('댓글 작성자 조회 실패:', profileErr.message);
-      (profiles ?? []).forEach((p) => nameMap.set(p.id, p.name));
+      (profiles ?? []).forEach((p: any) => nameMap.set(p.id, p.nickname || p.name));
     }
 
     const withAuthors: CommentWithAuthor[] = (data ?? []).map((c) => ({
@@ -178,6 +178,34 @@ export function useUnitActivities() {
     }));
 
     setComments(withAuthors);
+  }, []);
+
+  const updateActivity = useCallback(
+    async (
+      id: string,
+      input: { title?: string; description?: string | null; category?: string | null; status?: string; unit?: string | null },
+    ) => {
+      const { data, error } = await withTimeout(
+        () => supabase.from('unit_activities').update(input).eq('id', id).select().single(),
+        8000, 'updateActivity',
+      );
+      if (error) return { error: error.message };
+      setActivities((prev) => prev.map((a) => (a.id === id ? { ...a, ...data } : a)));
+      return { error: null };
+    },
+    [],
+  );
+
+  const deleteActivity = useCallback(async (id: string) => {
+    const { data, error } = await supabase
+      .from('unit_activities')
+      .delete()
+      .eq('id', id)
+      .select('id');
+    if (error) return { error: error.message };
+    if (!data || data.length === 0) return { error: '삭제 권한이 없거나 이미 삭제된 활동입니다' };
+    setActivities((prev) => prev.filter((a) => a.id !== id));
+    return { error: null };
   }, []);
 
   const addComment = useCallback(
@@ -204,7 +232,9 @@ export function useUnitActivities() {
     error,
     fetchActivities,
     createActivity,
+    updateActivity,
     updateActivityStatus,
+    deleteActivity,
     toggleReaction,
     fetchComments,
     addComment,

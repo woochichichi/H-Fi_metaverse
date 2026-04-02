@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ThumbsUp, MessageCircle, Send } from 'lucide-react';
+import { ThumbsUp, MessageCircle, Send, Pencil, Trash2 } from 'lucide-react';
 import { formatRelativeTime } from '../../lib/utils';
 import type { TeamPostWithCounts, PostCommentWithAuthor } from '../../hooks/useTeamPosts';
 
@@ -19,13 +19,17 @@ interface TeamPostCardProps {
   onToggleLike: (postId: string) => void;
   onExpandComments: (postId: string) => void;
   onAddComment: (postId: string, content: string) => void;
+  onEdit?: (post: TeamPostWithCounts) => void;
+  onDelete?: (postId: string) => void;
 }
 
 export default function TeamPostCard({
   post, readOnly, userId, comments, expanded,
-  onToggleLike, onExpandComments, onAddComment,
+  onToggleLike, onExpandComments, onAddComment, onEdit, onDelete,
 }: TeamPostCardProps) {
   const [commentText, setCommentText] = useState('');
+
+  const isOwner = !readOnly && userId && post.author_id === userId;
 
   const handleSubmitComment = () => {
     const trimmed = commentText.trim();
@@ -43,6 +47,28 @@ export default function TeamPostCard({
         </span>
         <span className="text-[11px] font-semibold text-text-primary">{post.author_name}</span>
         <span className="ml-auto text-[10px] text-text-muted">{formatRelativeTime(post.created_at)}</span>
+        {isOwner && (
+          <>
+            {onEdit && (
+              <button
+                onClick={() => onEdit(post)}
+                className="flex h-5 w-5 items-center justify-center rounded text-text-muted transition-colors hover:bg-accent/20 hover:text-accent"
+                title="수정"
+              >
+                <Pencil size={10} />
+              </button>
+            )}
+            {onDelete && (
+              <button
+                onClick={() => onDelete(post.id)}
+                className="flex h-5 w-5 items-center justify-center rounded text-text-muted transition-colors hover:bg-danger/20 hover:text-danger"
+                title="삭제"
+              >
+                <Trash2 size={10} />
+              </button>
+            )}
+          </>
+        )}
       </div>
 
       {/* 내용 */}

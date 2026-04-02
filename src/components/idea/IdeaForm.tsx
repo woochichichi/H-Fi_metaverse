@@ -9,46 +9,58 @@ import type { IdeaCategory } from '../../lib/constants';
 interface IdeaFormProps {
   onClose: () => void;
   onCreated: () => void;
+  /** 수정 모드일 때 전달 */
+  editId?: string;
+  initialData?: { title: string; description: string; category: IdeaCategory };
 }
 
-export default function IdeaForm({ onClose, onCreated }: IdeaFormProps) {
+export default function IdeaForm({ onClose, onCreated, editId, initialData }: IdeaFormProps) {
   const { user } = useAuthStore();
-  const { createIdea } = useIdeas();
+  const { createIdea, updateIdea } = useIdeas();
   const { addToast } = useUiStore();
 
-  const [category, setCategory] = useState<IdeaCategory | null>(null);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const isEdit = !!editId;
+
+  const [category, setCategory] = useState<IdeaCategory | null>(initialData?.category ?? null);
+  const [title, setTitle] = useState(initialData?.title ?? '');
+  const [description, setDescription] = useState(initialData?.description ?? '');
   const [submitting, setSubmitting] = useState(false);
 
   const isValid = category && title.trim() && description.trim();
 
   const handleSubmit = async () => {
-    console.log('[IdeaForm] submit 시작', { isValid, submitting, user: !!user });
     if (!isValid || submitting || !user) return;
     setSubmitting(true);
 
     try {
-      const { error } = await createIdea({
-        title: title.trim(),
-        description: description.trim(),
-        category: category!,
-        author_id: user.id,
-      });
-
-      console.log('[IdeaForm] createIdea 결과:', { error });
-
-      if (error) {
-        addToast(`등록 실패: ${error}`, 'error');
-        return;
+      if (isEdit && editId) {
+        const { error } = await updateIdea(editId, {
+          title: title.trim(),
+          description: description.trim(),
+          category: category!,
+        });
+        if (error) {
+          addToast(`수정 실패: ${error}`, 'error');
+          return;
+        }
+        addToast('아이디어가 수정되었습니다', 'success');
+      } else {
+        const { error } = await createIdea({
+          title: title.trim(),
+          description: description.trim(),
+          category: category!,
+          author_id: user.id,
+        });
+        if (error) {
+          addToast(`등록 실패: ${error}`, 'error');
+          return;
+        }
+        addToast('💡 아이디어가 공유되었습니다!', 'success');
       }
-
-      addToast('💡 아이디어가 공유되었습니다!', 'success');
       onCreated();
     } catch (err) {
-      console.error('[IdeaForm] 예외:', err);
       const msg = err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다';
-      addToast(`등록 실패: ${msg}`, 'error');
+      addToast(`${isEdit ? '수정' : '등록'} 실패: ${msg}`, 'error');
     } finally {
       setSubmitting(false);
     }
@@ -58,7 +70,9 @@ export default function IdeaForm({ onClose, onCreated }: IdeaFormProps) {
     <div className="flex flex-col h-full">
       {/* 헤더 */}
       <div className="flex items-center justify-between border-b border-white/[.06] px-4 py-3">
-        <h2 className="font-heading text-base font-bold text-text-primary">아이디어 등록</h2>
+        <h2 className="font-heading text-base font-bold text-text-primary">
+          {isEdit ? '아이디어 수정' : '아이디어 등록'}
+        </h2>
         <button
           onClick={onClose}
           className="flex h-7 w-7 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-white/10 hover:text-text-primary"
@@ -129,7 +143,7 @@ export default function IdeaForm({ onClose, onCreated }: IdeaFormProps) {
           disabled={!isValid || submitting}
           className="w-full rounded-xl bg-accent py-2.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-accent/80 disabled:opacity-40"
         >
-          {submitting ? '등록 중...' : '💡 아이디어 공유'}
+          {submitting ? (isEdit ? '수정 중...' : '등록 중...') : isEdit ? '✏️ 수정 완료' : '💡 아이디어 공유'}
         </button>
       </div>
     </div>

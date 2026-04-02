@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, Eye, RefreshCw } from 'lucide-react';
 import { useUnitActivities } from '../../hooks/useUnitActivities';
+import type { UnitActivityWithCounts } from '../../hooks/useUnitActivities';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
 import ActivityCard from './ActivityCard';
@@ -22,13 +23,16 @@ export default function ActivityPanel({ team, readOnly }: ActivityPanelProps) {
     error,
     fetchActivities,
     createActivity,
+    updateActivity,
     updateActivityStatus,
+    deleteActivity,
     toggleReaction,
     fetchComments,
     addComment,
   } = useUnitActivities();
 
   const [showForm, setShowForm] = useState(false);
+  const [editTarget, setEditTarget] = useState<UnitActivityWithCounts | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [displayCount, setDisplayCount] = useState(20);
 
@@ -62,6 +66,26 @@ export default function ActivityPanel({ team, readOnly }: ActivityPanelProps) {
     } catch {
       addToast('등록에 실패했습니다', 'error');
     }
+  };
+
+  const handleEditActivity = async (data: {
+    title: string;
+    description: string | null;
+    category: string | null;
+    status: string;
+    unit: string | null;
+  }) => {
+    if (!editTarget) return;
+    const { error } = await updateActivity(editTarget.id, data);
+    if (error) { addToast(`수정 실패: ${error}`, 'error'); return; }
+    addToast('활동이 수정되었습니다', 'success');
+    setEditTarget(null);
+  };
+
+  const handleDeleteActivity = async (activityId: string) => {
+    const { error } = await deleteActivity(activityId);
+    if (error) { addToast(`삭제 실패: ${error}`, 'error'); return; }
+    addToast('활동이 삭제되었습니다', 'success');
   };
 
   const handleStatusChange = async (activityId: string, status: string) => {
@@ -126,7 +150,15 @@ export default function ActivityPanel({ team, readOnly }: ActivityPanelProps) {
       </div>
 
       {/* 폼 */}
-      {showForm && <ActivityForm onSubmit={handleCreate} onCancel={() => setShowForm(false)} />}
+      {editTarget && (
+        <ActivityForm
+          onSubmit={handleEditActivity}
+          onCancel={() => setEditTarget(null)}
+          initialData={{ title: editTarget.title, description: editTarget.description, category: editTarget.category, status: editTarget.status, unit: editTarget.unit }}
+          isEdit
+        />
+      )}
+      {showForm && !editTarget && <ActivityForm onSubmit={handleCreate} onCancel={() => setShowForm(false)} />}
 
       {/* 카드 리스트 */}
       {error ? (
@@ -160,6 +192,8 @@ export default function ActivityPanel({ team, readOnly }: ActivityPanelProps) {
               onStatusChange={handleStatusChange}
               onExpandComments={handleExpandComments}
               onAddComment={handleAddComment}
+              onEdit={(act) => { setShowForm(false); setEditTarget(act); }}
+              onDelete={handleDeleteActivity}
               expanded={expandedId === a.id}
             />
           ))}

@@ -316,6 +316,20 @@ export function useIdeas() {
     return counts;
   }, []);
 
+  const updateIdea = useCallback(
+    async (id: string, input: { title?: string; description?: string; category?: IdeaCategory }) => {
+      const { data, error: updateError } = await withTimeout(
+        () => supabase.from('ideas').update(input).eq('id', id).select().single(),
+        8000,
+        'updateIdea',
+      );
+      if (updateError) return { error: updateError.message };
+      setIdeas((prev) => prev.map((i) => (i.id === id ? { ...i, ...data } : i)));
+      return { error: null };
+    },
+    [],
+  );
+
   const deleteIdea = useCallback(async (id: string) => {
     // idea_votes, idea_comments는 FK CASCADE로 자동 삭제
     const { data, error: deleteError } = await supabase
@@ -351,6 +365,7 @@ export function useIdeas() {
     fetchIdeaComments,
     addIdeaComment,
     deleteIdeaComment,
+    updateIdea,
     deleteIdea,
     fetchCommentCounts,
   };

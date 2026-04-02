@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Paperclip, Users, Trash2 } from 'lucide-react';
+import { ArrowLeft, Paperclip, Users, Trash2, Pencil } from 'lucide-react';
 import UrgencyBadge from '../common/UrgencyBadge';
 import ConfirmDialog from '../common/ConfirmDialog';
 import NoticeComments from './NoticeComments';
@@ -13,9 +13,10 @@ interface NoticeDetailProps {
   notice: Notice;
   onBack: () => void;
   onDeleted?: () => void;
+  onEdit?: (notice: Notice) => void;
 }
 
-export default function NoticeDetail({ notice, onBack, onDeleted }: NoticeDetailProps) {
+export default function NoticeDetail({ notice, onBack, onDeleted, onEdit }: NoticeDetailProps) {
   const { profile, user } = useAuthStore();
   const { markAsRead, fetchReadStatus, deleteNotice, fetchNoticeComments, addNoticeComment, deleteNoticeComment } = useNotices();
   const { addToast } = useUiStore();
@@ -74,6 +75,15 @@ export default function NoticeDetail({ notice, onBack, onDeleted }: NoticeDetail
         <h2 className="flex-1 font-heading text-base font-bold text-text-primary truncate">
           공지 상세
         </h2>
+        {isAuthor && onEdit && (
+          <button
+            onClick={() => onEdit(notice)}
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-accent/20 hover:text-accent"
+            title="수정"
+          >
+            <Pencil size={14} />
+          </button>
+        )}
         {canDelete && (
           <button
             onClick={() => setShowDeleteConfirm(true)}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, EyeOff, User, Paperclip, Trash2, ShieldOff, Shield } from 'lucide-react';
+import { ArrowLeft, EyeOff, User, Paperclip, Trash2, ShieldOff, Shield, Pencil, X as XIcon } from 'lucide-react';
 import StatusBadge from '../common/StatusBadge';
 import ConfirmDialog from '../common/ConfirmDialog';
 import ThreadPanel from '../thread/ThreadPanel';
@@ -36,6 +36,10 @@ export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDeta
   const [deleting, setDeleting] = useState(false);
   const [hiding, setHiding] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [editingContent, setEditingContent] = useState(false);
+  const [editTitle, setEditTitle] = useState(voc.title);
+  const [editContent, setEditContent] = useState(voc.content);
+  const [savingContent, setSavingContent] = useState(false);
 
   const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
   const isAdmin = profile?.role === 'admin' || profile?.role === 'director';
@@ -51,6 +55,28 @@ export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDeta
     : voc.author_id === profile?.id;
 
   const canDelete = isAdmin || canReplyAsAuthor;
+  // 비익명 작성자이고 접수 상태일 때만 내용 수정 허용
+  const canEditContent = !voc.anonymous && voc.author_id === profile?.id && voc.status === '접수';
+
+  const handleSaveContent = async () => {
+    if (!editTitle.trim() || !editContent.trim()) {
+      addToast('제목과 내용을 입력해주세요', 'error');
+      return;
+    }
+    setSavingContent(true);
+    const { data, error } = await updateVoc(voc.id, {
+      title: editTitle.trim(),
+      content: editContent.trim(),
+    });
+    setSavingContent(false);
+    if (error) {
+      addToast(`수정 실패: ${error}`, 'error');
+      return;
+    }
+    addToast('VOC 내용이 수정되었습니다', 'success');
+    setEditingContent(false);
+    if (data) onUpdated(data);
+  };
 
   const handleDelete = async () => {
     if (deleting) return;
@@ -199,7 +225,27 @@ export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDeta
         </div>
 
         {/* 제목 */}
-        <h3 className="text-lg font-bold text-text-primary font-body">{voc.title}</h3>
+        {editingContent ? (
+          <input
+            type="text"
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value.slice(0, 200))}
+            className="w-full rounded-lg bg-white/[.08] px-3 py-2 text-base font-bold text-text-primary outline-none focus:ring-1 focus:ring-accent"
+          />
+        ) : (
+          <div className="flex items-start gap-2">
+            <h3 className="flex-1 text-lg font-bold text-text-primary font-body">{voc.title}</h3>
+            {canEditContent && (
+              <button
+                onClick={() => setEditingContent(true)}
+                className="mt-1 flex h-6 w-6 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-accent/20 hover:text-accent shrink-0"
+                title="내용 수정"
+              >
+                <Pencil size={13} />
+              </button>
+            )}
+          </div>
+        )}
 
         {/* 작성자 */}
         <div className="flex items-center gap-1 text-xs text-text-muted">
@@ -215,11 +261,37 @@ export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDeta
         </div>
 
         {/* 내용 */}
-        <div className="rounded-xl bg-white/[.04] p-3">
-          <p className="text-sm text-text-secondary whitespace-pre-wrap leading-relaxed">
-            {voc.content}
-          </p>
-        </div>
+        {editingContent ? (
+          <div className="space-y-2">
+            <textarea
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value.slice(0, 2000))}
+              rows={6}
+              className="w-full resize-none rounded-xl bg-white/[.08] px-3 py-2 text-sm text-text-primary outline-none focus:ring-1 focus:ring-accent"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={handleSaveContent}
+                disabled={savingContent}
+                className="flex-1 rounded-lg bg-accent py-1.5 text-xs font-semibold text-white transition-colors hover:bg-accent/80 disabled:opacity-40"
+              >
+                {savingContent ? '저장 중...' : '저장'}
+              </button>
+              <button
+                onClick={() => { setEditingContent(false); setEditTitle(voc.title); setEditContent(voc.content); }}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted hover:bg-white/10"
+              >
+                <XIcon size={14} />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-xl bg-white/[.04] p-3">
+            <p className="text-sm text-text-secondary whitespace-pre-wrap leading-relaxed">
+              {voc.content}
+            </p>
+          </div>
+        )}
 
         {/* 첨부파일 */}
         {voc.attachment_urls && voc.attachment_urls.length > 0 && (

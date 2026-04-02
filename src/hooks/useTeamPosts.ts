@@ -46,11 +46,11 @@ export function useTeamPosts() {
       let nameMap = new Map<string, string>();
       if (authorIds.length > 0) {
         const { data: profiles, error: profileErr } = await withTimeout(
-          () => supabase.from('profiles').select('id, name').in('id', authorIds),
+          () => supabase.from('profiles').select('id, name, nickname').in('id', authorIds),
           8000, 'postAuthors',
         );
         if (profileErr) console.error('게시글 작성자 조회 실패:', profileErr.message);
-        (profiles ?? []).forEach((p: any) => nameMap.set(p.id, p.name));
+        (profiles ?? []).forEach((p: any) => nameMap.set(p.id, p.nickname || p.name));
       }
 
       // 좋아요 + 댓글 수
@@ -158,10 +158,10 @@ export function useTeamPosts() {
     let nameMap = new Map<string, string>();
     if (authorIds.length > 0) {
       const { data: profiles } = await withTimeout(
-        () => supabase.from('profiles').select('id, name').in('id', authorIds),
+        () => supabase.from('profiles').select('id, name, nickname').in('id', authorIds),
         8000, 'commentAuthors',
       );
-      (profiles ?? []).forEach((p: any) => nameMap.set(p.id, p.name));
+      (profiles ?? []).forEach((p: any) => nameMap.set(p.id, p.nickname || p.name));
     }
 
     const withAuthors: PostCommentWithAuthor[] = (data ?? []).map((c: any) => ({
@@ -170,6 +170,31 @@ export function useTeamPosts() {
     }));
 
     setComments(withAuthors);
+  }, []);
+
+  const updatePost = useCallback(
+    async (id: string, input: { content?: string; category?: string }) => {
+      const { data, error } = await withTimeout(
+        () => supabase.from('team_posts').update(input).eq('id', id).select().single(),
+        8000, 'updatePost',
+      );
+      if (error) return { error: error.message };
+      setPosts((prev) => prev.map((p) => (p.id === id ? { ...p, ...data } : p)));
+      return { error: null };
+    },
+    [],
+  );
+
+  const deletePost = useCallback(async (id: string) => {
+    const { data, error } = await supabase
+      .from('team_posts')
+      .delete()
+      .eq('id', id)
+      .select('id');
+    if (error) return { error: error.message };
+    if (!data || data.length === 0) return { error: '삭제 권한이 없거나 이미 삭제된 게시글입니다' };
+    setPosts((prev) => prev.filter((p) => p.id !== id));
+    return { error: null };
   }, []);
 
   const addComment = useCallback(
@@ -189,5 +214,5 @@ export function useTeamPosts() {
     [],
   );
 
-  return { posts, comments, loading, error, fetchPosts, createPost, toggleLike, fetchComments, addComment };
+  return { posts, comments, loading, error, fetchPosts, createPost, updatePost, deletePost, toggleLike, fetchComments, addComment };
 }

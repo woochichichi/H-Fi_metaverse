@@ -11,6 +11,15 @@ import type { UrgencyLevel, NoticeCategory } from '../../lib/constants';
 interface NoticeFormProps {
   onClose: () => void;
   onCreated: () => void;
+  editId?: string;
+  initialData?: {
+    title: string;
+    content: string;
+    urgency: UrgencyLevel;
+    category: NoticeCategory;
+    pinned: boolean;
+    team?: string | null;
+  };
 }
 
 const URGENCY_STYLE: Record<UrgencyLevel, string> = {
@@ -19,23 +28,24 @@ const URGENCY_STYLE: Record<UrgencyLevel, string> = {
   '참고': 'bg-info/20 text-info border-info/30',
 };
 
-export default function NoticeForm({ onClose, onCreated }: NoticeFormProps) {
+export default function NoticeForm({ onClose, onCreated, editId, initialData }: NoticeFormProps) {
   const { user, profile } = useAuthStore();
-  const { createNotice } = useNotices();
+  const { createNotice, updateNotice } = useNotices();
   const { addToast } = useUiStore();
   const { upload, uploading } = useFileUpload({
     bucket: 'notice-attachments',
     ...FILE_LIMITS.notice,
   });
 
+  const isEdit = !!editId;
   const isLeader = profile?.role === 'admin' || profile?.role === 'director';
 
-  const [urgency, setUrgency] = useState<UrgencyLevel>('참고');
-  const [category, setCategory] = useState<NoticeCategory>('일반');
-  const [pinned, setPinned] = useState(false);
-  const [targetTeam, setTargetTeam] = useState<string>(profile?.team ?? '');
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  const [urgency, setUrgency] = useState<UrgencyLevel>(initialData?.urgency ?? '참고');
+  const [category, setCategory] = useState<NoticeCategory>(initialData?.category ?? '일반');
+  const [pinned, setPinned] = useState(initialData?.pinned ?? false);
+  const [targetTeam, setTargetTeam] = useState<string>(initialData?.team ?? profile?.team ?? '');
+  const [title, setTitle] = useState(initialData?.title ?? '');
+  const [content, setContent] = useState(initialData?.content ?? '');
   const [files, setFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
@@ -54,34 +64,41 @@ export default function NoticeForm({ onClose, onCreated }: NoticeFormProps) {
     setSubmitting(true);
 
     try {
-      let attachmentUrls: string[] = [];
-      if (files.length > 0) {
-        const results = await upload(files);
-        attachmentUrls = results.map((r) => r.url);
+      if (isEdit && editId) {
+        const { error } = await updateNotice(editId, {
+          title: title.trim(),
+          content: content.trim(),
+          urgency,
+          category,
+          pinned,
+          team: targetTeam || null,
+        });
+        if (error) { addToast(`수정 실패: ${error}`, 'error'); return; }
+        addToast('공지가 수정되었습니다', 'success');
+      } else {
+        let attachmentUrls: string[] = [];
+        if (files.length > 0) {
+          const results = await upload(files);
+          attachmentUrls = results.map((r) => r.url);
+        }
+        const { error } = await createNotice({
+          title: title.trim(),
+          content: content.trim(),
+          urgency,
+          category,
+          pinned,
+          unit: null,
+          team: targetTeam || null,
+          attachment_urls: attachmentUrls.length > 0 ? attachmentUrls : undefined,
+          author_id: user.id,
+        });
+        if (error) { addToast(`공지 등록 실패: ${error}`, 'error'); return; }
+        addToast('📋 공지가 등록되었습니다', 'success');
       }
-
-      const { error } = await createNotice({
-        title: title.trim(),
-        content: content.trim(),
-        urgency,
-        category,
-        pinned,
-        unit: null,
-        team: targetTeam || null,
-        attachment_urls: attachmentUrls.length > 0 ? attachmentUrls : undefined,
-        author_id: user.id,
-      });
-
-      if (error) {
-        addToast(`공지 등록 실패: ${error}`, 'error');
-        return;
-      }
-
-      addToast('📋 공지가 등록되었습니다', 'success');
       onCreated();
     } catch (err) {
       const msg = err instanceof Error ? err.message : '알 수 없는 오류';
-      addToast(`공지 등록 실패: ${msg}`, 'error');
+      addToast(`${isEdit ? '수정' : '등록'} 실패: ${msg}`, 'error');
     } finally {
       setSubmitting(false);
     }
@@ -91,7 +108,7 @@ export default function NoticeForm({ onClose, onCreated }: NoticeFormProps) {
     <div className="flex flex-col h-full">
       {/* 헤더 */}
       <div className="flex items-center justify-between border-b border-white/[.06] px-4 py-3">
-        <h2 className="font-heading text-base font-bold text-text-primary">공지 작성</h2>
+        <h2 className="font-heading text-base font-bold text-text-primary">{isEdit ? '공지 수정' : '공지 작성'}</h2>
         <button
           onClick={onClose}
           className="flex h-7 w-7 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-white/10 hover:text-text-primary"
@@ -211,17 +228,19 @@ export default function NoticeForm({ onClose, onCreated }: NoticeFormProps) {
           <p className="text-[10px] text-text-muted mt-1 text-right">{content.length}/2000</p>
         </div>
 
-        {/* 첨부파일 */}
-        <div>
-          <label className="text-xs font-medium text-text-muted mb-1.5 block">첨부파일</label>
-          <FileUpload
-            maxSize={FILE_LIMITS.notice.maxSize}
-            maxFiles={FILE_LIMITS.notice.maxFiles}
-            accept={FILE_LIMITS.notice.accept}
-            files={files}
-            onChange={setFiles}
-          />
-        </div>
+        {/* 첨부파일 — 신규 작성 시만 */}
+        {!isEdit && (
+          <div>
+            <label className="text-xs font-medium text-text-muted mb-1.5 block">첨부파일</label>
+            <FileUpload
+              maxSize={FILE_LIMITS.notice.maxSize}
+              maxFiles={FILE_LIMITS.notice.maxFiles}
+              accept={FILE_LIMITS.notice.accept}
+              files={files}
+              onChange={setFiles}
+            />
+          </div>
+        )}
       </div>
 
       {/* 제출 */}
@@ -231,7 +250,7 @@ export default function NoticeForm({ onClose, onCreated }: NoticeFormProps) {
           disabled={!isValid || submitting || uploading}
           className="w-full rounded-xl bg-accent py-2.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-accent/80 disabled:opacity-40"
         >
-          {submitting || uploading ? '등록 중...' : '📋 공지 등록'}
+          {submitting || uploading ? (isEdit ? '수정 중...' : '등록 중...') : isEdit ? '✏️ 수정 완료' : '📋 공지 등록'}
         </button>
       </div>
     </div>
