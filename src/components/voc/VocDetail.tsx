@@ -25,7 +25,7 @@ interface VocDetailProps {
 
 export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDetailProps) {
   const { profile } = useAuthStore();
-  const { updateVoc, deleteVoc, hideVoc, isAnonymousAuthor, fetchAssignees } = useVocs();
+  const { updateVoc, deleteVoc, hideVoc, isAnonymousAuthor, fetchAssignees, incrementViewCount } = useVocs();
   const { addToast } = useUiStore();
 
   const [status, setStatus] = useState<VocStatus>(voc.status);
@@ -43,6 +43,10 @@ export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDeta
 
   const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
   const isAdmin = profile?.role === 'admin' || profile?.role === 'director';
+
+  useEffect(() => {
+    incrementViewCount(voc.id);
+  }, [voc.id, incrementViewCount]);
 
   useEffect(() => {
     if (isLeader) {
@@ -222,6 +226,8 @@ export default function VocDetail({ voc, onBack, onUpdated, onDeleted }: VocDeta
           <span>{voc.team}</span>
           <span>·</span>
           <span>{formatRelativeTime(voc.created_at)}</span>
+          <span>·</span>
+          <span className="flex items-center gap-0.5">👁 {voc.view_count ?? 0}</span>
         </div>
 
         {/* 제목 */}

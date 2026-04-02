@@ -353,6 +353,11 @@ export function useIdeas() {
     return { error: null };
   }, []);
 
+  const incrementViewCount = useCallback(async (id: string) => {
+    setIdeas((prev) => prev.map((i) => i.id === id ? { ...i, view_count: (i.view_count ?? 0) + 1 } : i));
+    await supabase.rpc('increment_view_count', { p_table: 'ideas', p_id: id });
+  }, []);
+
   return {
     ideas,
     loading,
@@ -368,5 +373,6 @@ export function useIdeas() {
     updateIdea,
     deleteIdea,
     fetchCommentCounts,
+    incrementViewCount,
   };
 }

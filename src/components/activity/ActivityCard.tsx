@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ThumbsUp, MessageCircle, ChevronDown, Send, Pencil, Trash2 } from 'lucide-react';
+import { ThumbsUp, MessageCircle, ChevronDown, Send, Pencil, Trash2, Eye } from 'lucide-react';
 import type { UnitActivityWithCounts, CommentWithAuthor } from '../../hooks/useUnitActivities';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -171,6 +171,9 @@ export default function ActivityCard({
           {activity.comment_count > 0 && activity.comment_count}
         </button>
 
+        <span className="flex items-center gap-1">
+          <Eye size={12} /> {activity.view_count ?? 0}
+        </span>
         <span className="ml-auto">{timeAgo(activity.created_at)}</span>
       </div>
 

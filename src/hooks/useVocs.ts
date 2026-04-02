@@ -288,6 +288,11 @@ export function useVocs() {
     return { error: null };
   }, []);
 
+  const incrementViewCount = useCallback(async (id: string) => {
+    setVocs((prev) => prev.map((v) => v.id === id ? { ...v, view_count: (v.view_count ?? 0) + 1 } : v));
+    await supabase.rpc('increment_view_count', { p_table: 'vocs', p_id: id });
+  }, []);
+
   return {
     vocs,
     loading,
@@ -302,6 +307,7 @@ export function useVocs() {
     fetchVocComments,
     addVocComment,
     deleteVocComment,
+    incrementViewCount,
   };
 }
 

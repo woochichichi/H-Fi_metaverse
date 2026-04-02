@@ -1,4 +1,4 @@
-import { Paperclip, User, EyeOff, EyeOff as Hidden, CheckCircle } from 'lucide-react';
+import { Paperclip, User, EyeOff, EyeOff as Hidden, CheckCircle, Eye } from 'lucide-react';
 import StatusBadge from '../common/StatusBadge';
 import { formatRelativeTime } from '../../lib/utils';
 import type { Voc } from '../../types';
@@ -94,6 +94,8 @@ export default function VocCard({ voc, onClick, assigneeName }: VocCardProps) {
         <span>{voc.team}</span>
         <span>·</span>
         <span>{formatRelativeTime(voc.created_at)}</span>
+        <span>·</span>
+        <span className="flex items-center gap-0.5"><Eye size={10} /> {voc.view_count ?? 0}</span>
         {assigneeName && (
           <>
             <span>·</span>

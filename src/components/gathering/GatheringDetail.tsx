@@ -28,7 +28,7 @@ function formatDate(dateStr: string): string {
 export default function GatheringDetail({ gathering, joined, isAuthor, onClose, onRefresh, onEdit, onDeleted }: GatheringDetailProps) {
   const { user, profile } = useAuthStore();
   const { addToast } = useUiStore();
-  const { joinGathering, leaveGathering, closeGathering, fetchMembers, deleteGathering } = useGatherings();
+  const { joinGathering, leaveGathering, closeGathering, fetchMembers, deleteGathering, incrementViewCount } = useGatherings();
 
   const [members, setMembers] = useState<MemberProfile[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
@@ -43,6 +43,8 @@ export default function GatheringDetail({ gathering, joined, isAuthor, onClose, 
   const isClosed = gathering.status !== 'recruiting' || isDeadlinePassed;
   const canSeeMembers = isClosed && (joined || isAuthor);
   const canSeeContact = isClosed && (joined || isAuthor);
+
+  useEffect(() => { incrementViewCount(gathering.id); }, [gathering.id, incrementViewCount]);
 
   // 마감 후 참여자 목록 로드
   useEffect(() => {
@@ -170,6 +172,9 @@ export default function GatheringDetail({ gathering, joined, isAuthor, onClose, 
           <span className="flex items-center gap-1">
             <Clock size={13} />
             {formatDate(gathering.created_at)}
+          </span>
+          <span className="flex items-center gap-1 ml-auto">
+            👁 {gathering.view_count ?? 0}
           </span>
         </div>
 

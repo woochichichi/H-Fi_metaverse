@@ -25,6 +25,7 @@ export interface Worry {
   created_at: string;
   comment_count: number;
   reaction_count: number;
+  view_count: number;
 }
 
 export interface WorryComment {
@@ -293,6 +294,11 @@ export function useWorries() {
     [],
   );
 
+  const incrementViewCount = useCallback(async (id: string) => {
+    setWorries((prev) => prev.map((w) => w.id === id ? { ...w, view_count: (w.view_count ?? 0) + 1 } : w));
+    await supabase.rpc('increment_view_count', { p_table: 'worries', p_id: id });
+  }, []);
+
   return {
     worries,
     loading,
@@ -306,5 +312,6 @@ export function useWorries() {
     deleteComment,
     fetchReactions,
     toggleReaction,
+    incrementViewCount,
   };
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Pin, Paperclip, RefreshCw } from 'lucide-react';
+import { Pin, Paperclip, RefreshCw, Eye } from 'lucide-react';
 import UrgencyBadge from '../common/UrgencyBadge';
 import LoadMore from '../common/LoadMore';
 import { formatRelativeTime } from '../../lib/utils';
@@ -142,6 +142,8 @@ export default function NoticeList({ notices, loading, error, readIds, onSelect,
             {/* 하단: 메타 */}
             <div className="flex items-center gap-2 pl-2 text-[11px] text-text-muted">
               <span>{formatRelativeTime(notice.created_at)}</span>
+              <span>·</span>
+              <span className="flex items-center gap-0.5"><Eye size={10} /> {notice.view_count ?? 0}</span>
               {notice.attachment_urls && notice.attachment_urls.length > 0 && (
                 <>
                   <span>·</span>

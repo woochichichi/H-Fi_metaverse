@@ -13,6 +13,7 @@ export interface TeamPostWithCounts {
   like_count: number;
   comment_count: number;
   my_like: boolean;
+  view_count: number;
 }
 
 export interface PostCommentWithAuthor {
@@ -214,5 +215,10 @@ export function useTeamPosts() {
     [],
   );
 
-  return { posts, comments, loading, error, fetchPosts, createPost, updatePost, deletePost, toggleLike, fetchComments, addComment };
+  const incrementViewCount = useCallback(async (id: string) => {
+    setPosts((prev) => prev.map((p) => p.id === id ? { ...p, view_count: (p.view_count ?? 0) + 1 } : p));
+    await supabase.rpc('increment_view_count', { p_table: 'team_posts', p_id: id });
+  }, []);
+
+  return { posts, comments, loading, error, fetchPosts, createPost, updatePost, deletePost, toggleLike, fetchComments, addComment, incrementViewCount };
 }

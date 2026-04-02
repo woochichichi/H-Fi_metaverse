@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Heart, User, Clock, MessageCircle, Trash2, Pencil } from 'lucide-react';
+import { Heart, User, Clock, MessageCircle, Trash2, Pencil, Eye } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
 import { useIdeas } from '../../hooks/useIdeas';
@@ -37,7 +37,7 @@ interface IdeaCardProps {
 export default function IdeaCard({ idea, onVote, onStatusChange, onDeleted, onEdit }: IdeaCardProps) {
   const { profile } = useAuthStore();
   const { addToast } = useUiStore();
-  const { deleteIdea } = useIdeas();
+  const { deleteIdea, incrementViewCount } = useIdeas();
   const [animating, setAnimating] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -80,7 +80,7 @@ export default function IdeaCard({ idea, onVote, onStatusChange, onDeleted, onEd
   return (
     <div
       className="flex flex-col gap-2.5 rounded-xl border border-white/[.06] bg-white/[.03] p-3 transition-colors duration-200 hover:bg-white/[.06] cursor-pointer"
-      onClick={() => setExpanded(!expanded)}
+      onClick={() => { if (!expanded) incrementViewCount(idea.id); setExpanded(!expanded); }}
     >
       {/* 상단: 카테고리 + 상태 */}
       <div className="flex items-center justify-between">
@@ -131,6 +131,10 @@ export default function IdeaCard({ idea, onVote, onStatusChange, onDeleted, onEd
           <span>·</span>
           <span className="flex items-center gap-1">
             <MessageCircle size={11} /> {idea._commentCount ?? 0}
+          </span>
+          <span>·</span>
+          <span className="flex items-center gap-1">
+            <Eye size={11} /> {idea.view_count ?? 0}
           </span>
         </div>
 

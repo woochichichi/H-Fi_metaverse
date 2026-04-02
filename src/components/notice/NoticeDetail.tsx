@@ -18,7 +18,7 @@ interface NoticeDetailProps {
 
 export default function NoticeDetail({ notice, onBack, onDeleted, onEdit }: NoticeDetailProps) {
   const { profile, user } = useAuthStore();
-  const { markAsRead, fetchReadStatus, deleteNotice, fetchNoticeComments, addNoticeComment, deleteNoticeComment } = useNotices();
+  const { markAsRead, fetchReadStatus, deleteNotice, fetchNoticeComments, addNoticeComment, deleteNoticeComment, incrementViewCount } = useNotices();
   const { addToast } = useUiStore();
 
   const isLeader = profile?.role === 'admin' || profile?.role === 'director' || profile?.role === 'leader';
@@ -31,7 +31,11 @@ export default function NoticeDetail({ notice, onBack, onDeleted, onEdit }: Noti
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // 열리면 자동으로 읽음 처리
+  // 열리면 자동으로 조회수 증가 + 읽음 처리
+  useEffect(() => {
+    incrementViewCount(notice.id);
+  }, [notice.id, incrementViewCount]);
+
   useEffect(() => {
     if (user) {
       markAsRead(notice.id, user.id);
@@ -107,6 +111,8 @@ export default function NoticeDetail({ notice, onBack, onDeleted, onEdit }: Noti
           {notice.pinned && <span className="text-warning">📌 고정</span>}
           <span>·</span>
           <span>{formatRelativeTime(notice.created_at)}</span>
+          <span>·</span>
+          <span className="flex items-center gap-0.5">👁 {notice.view_count ?? 0}</span>
           {notice.team && (
             <>
               <span>·</span>

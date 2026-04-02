@@ -195,6 +195,7 @@ export default function WorryPanel({ onClose }: WorryPanelProps) {
                   <div className="flex items-center gap-3 text-[10px] text-text-muted">
                     <span>🫂 {worry.reaction_count}</span>
                     <span>💬 {worry.comment_count}</span>
+                    <span>👁 {worry.view_count ?? 0}</span>
                   </div>
                 </button>
               ))}

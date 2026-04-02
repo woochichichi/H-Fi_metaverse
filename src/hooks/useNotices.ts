@@ -312,6 +312,11 @@ export function useNotices() {
     return { error: null };
   }, []);
 
+  const incrementViewCount = useCallback(async (id: string) => {
+    setNotices((prev) => prev.map((n) => n.id === id ? { ...n, view_count: (n.view_count ?? 0) + 1 } : n));
+    await supabase.rpc('increment_view_count', { p_table: 'notices', p_id: id });
+  }, []);
+
   return {
     notices,
     loading,
@@ -328,5 +333,6 @@ export function useNotices() {
     fetchNoticeComments,
     addNoticeComment,
     deleteNoticeComment,
+    incrementViewCount,
   };
 }

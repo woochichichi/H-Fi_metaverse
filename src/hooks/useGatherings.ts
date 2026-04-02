@@ -329,6 +329,11 @@ export function useGatherings() {
     return { error: null };
   }, []);
 
+  const incrementViewCount = useCallback(async (id: string) => {
+    setGatherings((prev) => prev.map((g) => g.id === id ? { ...g, view_count: (g.view_count ?? 0) + 1 } : g));
+    await supabase.rpc('increment_view_count', { p_table: 'gatherings', p_id: id });
+  }, []);
+
   return {
     gatherings,
     loading,
@@ -345,5 +350,6 @@ export function useGatherings() {
     addComment,
     deleteComment,
     deleteGathering,
+    incrementViewCount,
   };
 }

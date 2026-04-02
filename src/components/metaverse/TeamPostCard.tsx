@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ThumbsUp, MessageCircle, Send, Pencil, Trash2 } from 'lucide-react';
+import { ThumbsUp, MessageCircle, Send, Pencil, Trash2, Eye } from 'lucide-react';
 import { formatRelativeTime } from '../../lib/utils';
 import type { TeamPostWithCounts, PostCommentWithAuthor } from '../../hooks/useTeamPosts';
 
@@ -94,6 +94,9 @@ export default function TeamPostCard({
           <MessageCircle size={12} />
           {post.comment_count > 0 && post.comment_count}
         </button>
+        <span className="flex items-center gap-1 ml-auto">
+          <Eye size={12} /> {post.view_count ?? 0}
+        </span>
       </div>
 
       {/* 댓글 펼침 */}

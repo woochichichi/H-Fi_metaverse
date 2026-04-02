@@ -225,6 +225,11 @@ export function useUnitActivities() {
     [],
   );
 
+  const incrementViewCount = useCallback(async (id: string) => {
+    setActivities((prev) => prev.map((a) => a.id === id ? { ...a, view_count: (a.view_count ?? 0) + 1 } : a));
+    await supabase.rpc('increment_view_count', { p_table: 'unit_activities', p_id: id });
+  }, []);
+
   return {
     activities,
     comments,
@@ -238,5 +243,6 @@ export function useUnitActivities() {
     toggleReaction,
     fetchComments,
     addComment,
+    incrementViewCount,
   };
 }

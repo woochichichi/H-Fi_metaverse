@@ -24,7 +24,7 @@ interface TeamBoardPanelProps {
 export default function TeamBoardPanel({ team, readOnly }: TeamBoardPanelProps) {
   const { profile } = useAuthStore();
   const { addToast } = useUiStore();
-  const { posts, comments, loading, error, fetchPosts, createPost, updatePost, deletePost, toggleLike, fetchComments, addComment } = useTeamPosts();
+  const { posts, comments, loading, error, fetchPosts, createPost, updatePost, deletePost, toggleLike, fetchComments, addComment, incrementViewCount } = useTeamPosts();
 
   const [showForm, setShowForm] = useState(false);
   const [category, setCategory] = useState<string>('자유');
@@ -83,6 +83,7 @@ export default function TeamBoardPanel({ team, readOnly }: TeamBoardPanelProps) 
   const handleExpandComments = async (postId: string) => {
     if (expandedId === postId) { setExpandedId(null); return; }
     setExpandedId(postId);
+    incrementViewCount(postId);
     try { await fetchComments(postId); }
     catch { addToast('댓글 조회 실패', 'error'); }
   };

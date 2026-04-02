@@ -32,7 +32,7 @@ function formatRelativeTime(dateStr: string): string {
 export default function WorryDetail({ worry, onBack, onDeleted, onEdit }: WorryDetailProps) {
   const { user, profile } = useAuthStore();
   const { addToast } = useUiStore();
-  const { fetchComments, addComment, deleteComment, fetchReactions, toggleReaction, deleteWorry } =
+  const { fetchComments, addComment, deleteComment, fetchReactions, toggleReaction, deleteWorry, incrementViewCount } =
     useWorries();
 
   const [comments, setComments] = useState<WorryCommentWithProfile[]>([]);
@@ -59,6 +59,7 @@ export default function WorryDetail({ worry, onBack, onDeleted, onEdit }: WorryD
   }, [worry.id, user?.id, fetchComments, fetchReactions]);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => { incrementViewCount(worry.id); }, [worry.id, incrementViewCount]);
 
   const handleReaction = async (reaction: WorryReactionType) => {
     if (!user) { addToast('로그인이 필요합니다', 'error'); return; }
@@ -154,6 +155,7 @@ export default function WorryDetail({ worry, onBack, onDeleted, onEdit }: WorryD
             {worry.anonymous && (
               <span className="rounded-full bg-white/[.06] px-2 py-0.5 text-[10px] text-text-muted">익명</span>
             )}
+            <span className="text-[10px] text-text-muted">👁 {worry.view_count ?? 0}</span>
             <span className="ml-auto text-[10px] text-text-muted">{formatRelativeTime(worry.created_at)}</span>
           </div>
           <p className="text-sm leading-relaxed text-text-secondary whitespace-pre-wrap">{worry.content}</p>

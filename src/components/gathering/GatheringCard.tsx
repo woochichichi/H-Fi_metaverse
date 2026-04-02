@@ -1,4 +1,4 @@
-import { Users, Clock, Calendar } from 'lucide-react';
+import { Users, Clock, Calendar, Eye } from 'lucide-react';
 import type { Gathering } from '../../types';
 import { GATHERING_STATUS_LABELS } from '../../lib/constants';
 
@@ -94,6 +94,10 @@ export default function GatheringCard({ gathering, joined, onClick }: GatheringC
             {dl}
           </span>
         )}
+        <span className="flex items-center gap-1">
+          <Eye size={12} />
+          {gathering.view_count ?? 0}
+        </span>
         <span className="flex items-center gap-1 ml-auto">
           <Clock size={12} />
           {timeAgo(gathering.created_at)}

@@ -29,6 +29,7 @@ export default function ActivityPanel({ team, readOnly }: ActivityPanelProps) {
     toggleReaction,
     fetchComments,
     addComment,
+    incrementViewCount,
   } = useUnitActivities();
 
   const [showForm, setShowForm] = useState(false);
@@ -112,6 +113,7 @@ export default function ActivityPanel({ team, readOnly }: ActivityPanelProps) {
       setExpandedId(null);
     } else {
       setExpandedId(activityId);
+      incrementViewCount(activityId);
       fetchComments(activityId);
     }
   };

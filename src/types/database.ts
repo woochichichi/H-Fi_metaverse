@@ -219,6 +219,7 @@ export interface Voc {
   is_hidden: boolean;
   created_at: string;
   updated_at: string;
+  view_count: number;
 }
 
 export interface Idea {
@@ -229,6 +230,7 @@ export interface Idea {
   category: '이벤트' | '인적교류' | '업무개선' | '기타' | null;
   status: '제안' | '검토' | '채택' | '진행중' | '완료' | '반려';
   created_at: string;
+  view_count: number;
 }
 
 export interface IdeaVote {
@@ -253,6 +255,7 @@ export interface Notice {
   team: string | null;
   attachment_urls: string[] | null;
   created_at: string;
+  view_count: number;
 }
 
 export interface NoticeRead {
@@ -382,6 +385,7 @@ export interface Gathering {
   member_count: number;
   created_at: string;
   updated_at: string;
+  view_count: number;
 }
 
 export interface GatheringMember {
@@ -480,6 +484,7 @@ export interface UnitActivity {
   status: '계획' | '진행중' | '완료' | '보류';
   created_at: string;
   updated_at: string;
+  view_count: number;
 }
 
 export interface ActivityReaction {
