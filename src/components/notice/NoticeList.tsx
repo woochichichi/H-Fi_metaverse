@@ -133,8 +133,14 @@ export default function NoticeList({ notices, loading, error, readIds, onSelect,
             </div>
 
             {/* 제목 */}
-            <h3 className={`text-sm font-semibold line-clamp-1 pl-2 font-body ${
-              isRead ? 'text-text-secondary' : 'text-text-primary'
+            <h3 className={`text-sm font-semibold line-clamp-1 pl-2 tracking-wide font-body ${
+              notice.urgency === '긴급'
+                ? 'text-red-400'
+                : notice.urgency === '할일'
+                ? 'text-amber-400'
+                : isRead
+                ? 'text-text-secondary'
+                : 'text-text-primary'
             }`}>
               {notice.title}
             </h3>
