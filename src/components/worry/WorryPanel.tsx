@@ -94,6 +94,12 @@ export default function WorryPanel({ onClose }: WorryPanelProps) {
             >
               <RefreshCw size={14} />
             </button>
+            <button
+              onClick={() => setView('form')}
+              className="flex h-7 items-center gap-1 rounded-lg bg-rose-500/20 px-2.5 text-[11px] font-semibold text-rose-300 transition-colors hover:bg-rose-500/30"
+            >
+              <Plus size={12} /> 글쓰기
+            </button>
             {onClose && (
               <button
                 onClick={onClose}
