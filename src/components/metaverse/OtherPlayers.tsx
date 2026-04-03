@@ -66,8 +66,10 @@ function OtherPlayerSprite({ player }: { player: OtherPlayer }) {
     <div
       className="absolute z-40 pointer-events-none transition-opacity duration-300"
       style={{
-        left: player.x,
-        top: player.y,
+        left: 0,
+        top: 0,
+        transform: `translate(${player.x}px, ${player.y}px)`,
+        willChange: 'transform',
         filter: 'drop-shadow(0 2px 2px rgba(0,0,0,.2))',
         opacity: 0.85,
       }}
@@ -107,16 +109,22 @@ export default function OtherPlayers() {
   const currentRoom = useMetaverseStore((s) => s.currentRoom);
   const playersRef = useRef(otherPlayers);
   const rafRef = useRef(0);
+  const prevTsRef = useRef(0);
 
   useEffect(() => {
     playersRef.current = otherPlayers;
   }, [otherPlayers]);
 
-  // Lerp 루프
+  // Lerp 루프 (delta-time 보정: fps 변동과 무관하게 일정 속도 유지)
   useEffect(() => {
     const store = useMetaverseStore;
 
-    const loop = () => {
+    const loop = (timestamp: number) => {
+      const dt = prevTsRef.current ? Math.min(timestamp - prevTsRef.current, 50) : 16.67;
+      prevTsRef.current = timestamp;
+      // 60fps 기준 정규화 → 30fps에서도 동일한 실제 속도
+      const factor = 1 - Math.pow(1 - LERP_SPEED, dt / 16.67);
+
       const players = playersRef.current;
       let next: Map<string, OtherPlayer> | null = null;
 
@@ -125,7 +133,7 @@ export default function OtherPlayers() {
         const ddy = p.targetY - p.y;
         if (Math.abs(ddx) > 0.5 || Math.abs(ddy) > 0.5) {
           if (!next) next = new Map(players);
-          next.set(id, { ...p, x: p.x + ddx * LERP_SPEED, y: p.y + ddy * LERP_SPEED });
+          next.set(id, { ...p, x: p.x + ddx * factor, y: p.y + ddy * factor });
         }
       }
 
