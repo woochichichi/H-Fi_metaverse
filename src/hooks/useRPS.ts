@@ -271,6 +271,8 @@ export function useRPS() {
 
       if (event === 'rps_choice') {
         if (payload.to !== user.id) return;
+        // choosing 상태일 때만 처리 — result 이후 지연 도착 시 덮어씌우기 방지
+        if (cur.gameState !== 'choosing') return;
         opponentChoiceRef.current = payload.choice as RPSChoice;
         setState((prev) => ({ ...prev, opponentChoice: payload.choice as RPSChoice }));
         if (myChoiceRef.current) {
