@@ -36,6 +36,7 @@ import { ROOMS_DATA, TEAM_ZONES } from '../../lib/constants';
 import { getMapTimeTheme } from '../../lib/utils';
 import { useAuthStore } from '../../stores/authStore';
 import { useZoneAlerts } from '../../hooks/useZoneAlerts';
+import { useVersionCheck } from '../../hooks/useVersionCheck';
 
 // Zone ID → 패널 매핑 (v4: 팀별 zone ID를 기능별 패널로 매핑)
 function getZonePanel(zoneId: string, userTeam: string | undefined): React.FC<{ onClose: () => void }> | null {
@@ -86,6 +87,7 @@ export default function MetaverseLayout() {
   const mapTheme = useMemo(() => getMapTimeTheme(), []);
   const [isTouchDevice] = useState(() => 'ontouchstart' in window || navigator.maxTouchPoints > 0);
   usePlayerSync();
+  useVersionCheck();
 
   // 우클릭 컨텍스트 메뉴 상태
   const [contextMenu, setContextMenu] = useState<{

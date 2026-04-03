@@ -20,22 +20,24 @@ export default function Toast() {
   return (
     <div className="fixed left-1/2 top-14 z-[300] flex -translate-x-1/2 flex-col items-center gap-2 pointer-events-none">
       {toasts.map((toast) => (
-        <ToastItem key={toast.id} id={toast.id} message={toast.message} type={toast.type} onClose={removeToast} />
+        <ToastItem key={toast.id} id={toast.id} message={toast.message} type={toast.type} action={toast.action} onClose={removeToast} />
       ))}
     </div>
   );
 }
 
-function ToastItem({ id, message, type, onClose }: {
+function ToastItem({ id, message, type, action, onClose }: {
   id: string;
   message: string;
   type: 'success' | 'error' | 'info';
+  action?: { label: string; onClick: () => void };
   onClose: (id: string) => void;
 }) {
   useEffect(() => {
+    if (action) return; // 액션 버튼 있는 토스트는 사용자가 직접 닫음
     const timer = setTimeout(() => onClose(id), 3500);
     return () => clearTimeout(timer);
-  }, [id, onClose]);
+  }, [id, onClose, action]);
 
   const Icon = ICON_MAP[type];
 
@@ -50,6 +52,14 @@ function ToastItem({ id, message, type, onClose }: {
     >
       <Icon size={16} />
       <span>{message}</span>
+      {action && (
+        <button
+          onClick={() => { action.onClick(); onClose(id); }}
+          className="ml-1 rounded-lg bg-white/20 px-2 py-0.5 text-xs hover:bg-white/30 transition-colors"
+        >
+          {action.label}
+        </button>
+      )}
       <button
         onClick={() => onClose(id)}
         className="ml-1 flex h-5 w-5 items-center justify-center rounded-full hover:bg-white/20 transition-colors"
