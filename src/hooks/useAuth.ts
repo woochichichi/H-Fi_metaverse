@@ -9,12 +9,13 @@ interface ValidateInviteResult {
 
 /** 초대 코드 검증 */
 export async function validateInviteCode(code: string): Promise<ValidateInviteResult> {
-  const trimmed = code.trim();
+  // 모바일 키보드가 삽입하는 공백·콤마 제거, 대소문자 정규화
+  const trimmed = code.trim().replace(/[\s,]/g, '').toUpperCase();
 
   const { data, error } = await supabase
     .from('invite_codes')
     .select('*')
-    .eq('code', trimmed)
+    .ilike('code', trimmed)
     .single();
 
   if (error || !data) {

@@ -191,8 +191,13 @@ export default function RegisterPage() {
               <input
                 value={inviteCode}
                 onChange={(e) => setInviteCode(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && !loading && handleValidateCode()}
                 placeholder="초대 코드 입력"
                 inputMode="numeric"
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={false}
                 className="w-full rounded-lg bg-bg-primary px-3 py-2.5 font-mono text-sm text-text-primary placeholder-text-muted outline-none ring-1 ring-bg-tertiary tracking-wider transition-colors focus:ring-accent"
                 autoFocus
               />
