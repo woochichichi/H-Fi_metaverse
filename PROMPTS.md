@@ -56,3 +56,14 @@
 - supabase/functions/check-message/index.ts 전체 흐름·프롬프트 설명 요청
 - 긴급 버그: 쪽지 수신함에서 게시글 클릭 시 관리자 답변(thread)이 일반 팀원에게도 표시되는 문제 수정 — ThreadPanel을 isAdmin||isRecipient 조건으로 제한 + RLS 032 마이그레이션 적용
 - 다른 유저 우클릭 시 가위바위보 대결 기능 구현 — PlayerContextMenu(확장 가능한 우클릭 메뉴), useRPS(Realtime broadcast 기반 게임 상태 머신), RockPaperScissors(카운트다운+선택+결과 모달), OtherPlayers 우클릭 이벤트 바인딩
+
+## 2026-04-03
+
+- 버그 2종 수정 요청: (1) 방 재입장 시 다른 유저들이 맵에 안 보임 (2) 사이드바 유저 목록엔 보이는데 맵에 안 보임 — usePlayerSync presence join 핸들러 추가 + SUBSCRIBED 초기 위치 브로드캐스트
+- 모바일 회원가입 버그: 가입코드 넣고 확인 누르면 오류 발생 (PC는 정상) — invite code input 모바일 키보드 속성 추가, validateInviteCode 정규화 강화
+- 짜린이→허채린 실명 변경 요청 (관리자 DB 직접 수정)
+- 허채린 이름 깨짐 확인 요청 — hex dump로 CP949 인코딩 오염 확인, chr() 함수로 UTF-8 우회 수정
+- 사용자관리 상태/역할 업데이트 안 됨 + 오랜 접속 시 변경사항 미반영 문제 수정
+- 광장 이동 시 다른 플레이어 끊김 → 정정: 본인 캐릭터 이동 끊김 — delta-time 보정 + transform GPU 가속
+- VOC/마음의 편지 알림 시스템 전체 점검 (수정 없음, 정상 동작 확인 — director 제외는 설계 선택)
+- 공지사항 제목 폰트 가독성 개선 — h1~h6 규칙을 @layer base로 이동해 font-body 유틸리티 오버라이드 적용
