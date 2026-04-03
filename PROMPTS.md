@@ -74,3 +74,4 @@
 ## 2026-04-03
 
 - 모든 팀의 공지방을 3사분면으로 옮겨줘
+- 공지방 zone만 이동하고 코르크보드·가구 오브젝트는 원래 위치에 남아있는 버그 수정 — MapCanvas.tsx 공지 Zone 내 PixelCorkboard·NeonSign·RoundTable·Chair 등 x좌표 -290 오프셋 적용
