@@ -71,7 +71,8 @@ function IncomingRequestScreen({
         가위바위보 대결을 신청했습니다.<br />
         수락하시겠습니까?
       </p>
-      <div className="flex gap-3 mt-1 w-full">
+      <p className="text-white/35 text-[11px]">60초 내 미응답 시 자동 취소</p>
+      <div className="flex gap-3 w-full">
         <button
           className="flex-1 rounded-xl py-2.5 text-[14px] font-bold text-white transition-colors"
           style={{ background: 'rgba(108,92,231,.85)' }}
