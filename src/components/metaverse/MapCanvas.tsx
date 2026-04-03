@@ -1293,26 +1293,26 @@ const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme, po
       {theme === 'shield' && <PixelInsuranceBuilding x={1075} y={270} />}
       <PixelCoinStack x={1110} y={170} />
 
-      {/* ═══ 공지 Zone (350,460 ~ 850,760) — 뉴스룸 ═══ */}
-      <PixelNeonSign x={530} y={468} text="NEWS!" color="#FFD93D" />
+      {/* ═══ 공지 Zone (60,460 ~ 560,760) — 뉴스룸 ═══ */}
+      <PixelNeonSign x={240} y={468} text="NEWS!" color="#FFD93D" />
       {/* 컬러풀 게시판 갤러리 */}
-      <PixelCorkboard x={380} y={490} frameColor="#E91E63" postCount={Math.min(postCounts.notice ?? 0, 5)} />
-      <PixelCorkboard x={540} y={490} frameColor="#FF9800" postCount={Math.min(Math.max((postCounts.notice ?? 0) - 5, 0), 5)} />
-      <PixelCorkboard x={700} y={490} frameColor="#6BC5FF" postCount={Math.min(Math.max((postCounts.notice ?? 0) - 10, 0), 5)} />
+      <PixelCorkboard x={90} y={490} frameColor="#E91E63" postCount={Math.min(postCounts.notice ?? 0, 5)} />
+      <PixelCorkboard x={250} y={490} frameColor="#FF9800" postCount={Math.min(Math.max((postCounts.notice ?? 0) - 5, 0), 5)} />
+      <PixelCorkboard x={410} y={490} frameColor="#6BC5FF" postCount={Math.min(Math.max((postCounts.notice ?? 0) - 10, 0), 5)} />
       {/* 라운드 테이블 + 의자 (소파 대신) */}
-      <PixelRoundTable x={430} y={630} size={60} />
-      <PixelRoundTable x={620} y={630} size={60} />
-      <PixelChair90s x={420} y={700} />
-      <PixelChair90s x={530} y={700} />
-      <PixelChair90s x={640} y={700} />
+      <PixelRoundTable x={140} y={630} size={60} />
+      <PixelRoundTable x={330} y={630} size={60} />
+      <PixelChair90s x={130} y={700} />
+      <PixelChair90s x={240} y={700} />
+      <PixelChair90s x={350} y={700} />
       {/* 팀별 랜드마크 (오른쪽) */}
-      {theme === 'stock' && <PixelCandleChart x={800} y={580} />}
-      {theme === 'life' && <Pixel63Building x={800} y={560} />}
-      {theme === 'shield' && <PixelInsuranceBuilding x={800} y={560} />}
+      {theme === 'stock' && <PixelCandleChart x={510} y={580} />}
+      {theme === 'life' && <Pixel63Building x={510} y={560} />}
+      {theme === 'shield' && <PixelInsuranceBuilding x={510} y={560} />}
       {/* 금융 장식 */}
-      <PixelGoldBar x={370} y={730} />
-      <PixelHanwhaSun x={760} y={730} size={36} />
-      <PixelCatDev x={480} y={730} />
+      <PixelGoldBar x={80} y={730} />
+      <PixelHanwhaSun x={470} y={730} size={36} />
+      <PixelCatDev x={190} y={730} />
 
       {/* ═══ 파트 팻말 (stock 전용) — 공지방 우측 빈 공간 (860~1140, 470~720) ═══ */}
       {theme === 'stock' && (
