@@ -10,7 +10,8 @@ interface ValidateInviteResult {
 /** 초대 코드 검증 */
 export async function validateInviteCode(code: string): Promise<ValidateInviteResult> {
   // 모바일 키보드가 삽입하는 공백·콤마 제거, 대소문자 정규화
-  const trimmed = code.trim().replace(/[\s,]/g, '').toUpperCase();
+  // 모바일 키보드 공백·콤마 제거, ilike 와일드카드(%,_) 이스케이프, 대소문자 정규화
+  const trimmed = code.trim().replace(/[\s,_%]/g, '').toUpperCase();
 
   const { data, error } = await supabase
     .from('invite_codes')
