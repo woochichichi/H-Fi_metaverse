@@ -1006,6 +1006,35 @@ function PixelCandleChart({ x, y }: { x: number; y: number }) {
   );
 }
 
+// 파트 팻말 (나무 기둥 + 색상 표지판, 증권ITO 전용)
+function PixelSignboard({ x, y, label, color, accentColor }: {
+  x: number; y: number; label: string; color: string; accentColor: string;
+}) {
+  return (
+    <div className="absolute z-[6]" style={{ left: x, top: y }}>
+      <svg width="72" height="88" viewBox="0 0 18 22" style={{ imageRendering: 'pixelated' }}>
+        {/* 그림자 */}
+        <ellipse cx="9" cy="21.5" rx="5" ry="1" fill="rgba(0,0,0,0.25)" />
+        {/* 기둥 */}
+        <rect x="8" y="10" width="2" height="11" fill="#7B5E3E" />
+        <rect x="8.5" y="10" width="0.5" height="11" fill="#9A7A56" />
+        {/* 팻말 테두리 */}
+        <rect x="0" y="1" width="18" height="10" rx="1.5" fill={accentColor} />
+        {/* 팻말 본체 */}
+        <rect x="1" y="2" width="16" height="8" rx="1" fill={color} />
+        {/* 하이라이트 */}
+        <rect x="2" y="2.5" width="14" height="1.5" rx="0.5" fill="rgba(255,255,255,0.22)" />
+        {/* 나사 */}
+        <circle cx="2.8" cy="6" r="0.9" fill={accentColor} />
+        <circle cx="15.2" cy="6" r="0.9" fill={accentColor} />
+        {/* 파트 이름 */}
+        <text x="9" y="8.2" textAnchor="middle" fontSize="3.6" fill="#FFFFFF"
+          fontWeight="bold" fontFamily="monospace" style={{ letterSpacing: '0.3px' }}>{label}</text>
+      </svg>
+    </div>
+  );
+}
+
 // ═══ Zone 바닥 색상 매핑 ═══
 const ZONE_FLOOR_COLORS: Record<string, string> = {
   // 팀 룸 Zone
@@ -1284,6 +1313,19 @@ const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme, po
       <PixelGoldBar x={370} y={730} />
       <PixelHanwhaSun x={760} y={730} size={36} />
       <PixelCatDev x={480} y={730} />
+
+      {/* ═══ 파트 팻말 (stock 전용) — 공지방 우측 빈 공간 (860~1140, 470~720) ═══ */}
+      {theme === 'stock' && (
+        <>
+          {/* Row 1 */}
+          <PixelSignboard x={862} y={478} label="HTS" color="#0984E3" accentColor="#065E9E" />
+          <PixelSignboard x={958} y={478} label="MCI" color="#00D68F" accentColor="#00A06A" />
+          <PixelSignboard x={1054} y={478} label="FEP" color="#FF9A6B" accentColor="#CC6030" />
+          {/* Row 2 */}
+          <PixelSignboard x={910} y={614} label="SOL" color="#6C5CE7" accentColor="#4A3DB5" />
+          <PixelSignboard x={1006} y={614} label="WTS" color="#FF4757" accentColor="#B8001F" />
+        </>
+      )}
     </>
   );
 });
