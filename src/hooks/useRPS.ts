@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import { subscribeRPS, sendRPSEvent } from './usePlayerSync';
 import { useAuthStore } from '../stores/authStore';
 import { useUiStore } from '../stores/uiStore';
+import { useMetaverseStore } from '../stores/metaverseStore';
 
 export type RPSChoice = 'rock' | 'paper' | 'scissors';
 export type RPSGameState = 'idle' | 'requested' | 'countdown' | 'choosing' | 'result';
@@ -17,12 +18,14 @@ export interface RPSState {
   myChoice: RPSChoice | null;
   opponentChoice: RPSChoice | null;
   countdown: number;
-  iAmChallenger: boolean; // true = 내가 요청한 쪽
-  incomingRequest: RPSOpponent | null; // 수락 대기 중인 요청
+  iAmChallenger: boolean;
+  incomingRequest: RPSOpponent | null;
 }
 
 const COUNTDOWN_SEC = 5;
 const CHOICE_TIMEOUT_MS = 5000;
+const REQUEST_TIMEOUT_MS = 60_000; // 수락 대기 최대 시간
+const REQUEST_COOLDOWN_MS = 10_000; // 대결 요청 쿨다운
 
 function determineWinner(mine: RPSChoice, theirs: RPSChoice): 'win' | 'lose' | 'draw' {
   if (mine === theirs) return 'draw';
@@ -50,21 +53,24 @@ export function useRPS() {
     incomingRequest: null,
   });
 
-  // refs for use inside callbacks/timers
   const stateRef = useRef(state);
   useEffect(() => { stateRef.current = state; }, [state]);
 
   const myChoiceRef = useRef<RPSChoice | null>(null);
   const opponentChoiceRef = useRef<RPSChoice | null>(null);
+  const lastRequestTimeRef = useRef<number>(0); // 쿨다운 추적
 
   const countdownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const choiceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const requestTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null); // 60초 요청 타임아웃
 
   const clearTimers = useCallback(() => {
     if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
     if (choiceTimerRef.current) clearTimeout(choiceTimerRef.current);
+    if (requestTimerRef.current) clearTimeout(requestTimerRef.current);
     countdownTimerRef.current = null;
     choiceTimerRef.current = null;
+    requestTimerRef.current = null;
   }, []);
 
   const reset = useCallback(() => {
@@ -82,7 +88,6 @@ export function useRPS() {
     });
   }, [clearTimers]);
 
-  // 결과 계산 및 표시
   const resolveResult = useCallback((mine: RPSChoice, theirs: RPSChoice) => {
     clearTimers();
     setState((prev) => ({
@@ -93,19 +98,13 @@ export function useRPS() {
     }));
   }, [clearTimers]);
 
-  // 선택지 타임아웃 처리
+  // 선택 타임아웃: 미선택 시 랜덤 처리
   const startChoiceTimer = useCallback((opponent: RPSOpponent) => {
     choiceTimerRef.current = setTimeout(() => {
-      // 미선택 시 랜덤
       const mine = myChoiceRef.current ?? RANDOM_CHOICES[Math.floor(Math.random() * 3)];
       const theirs = opponentChoiceRef.current ?? RANDOM_CHOICES[Math.floor(Math.random() * 3)];
-
       if (!myChoiceRef.current) {
-        sendRPSEvent('rps_choice', {
-          from: user?.id,
-          to: opponent.userId,
-          choice: mine,
-        });
+        sendRPSEvent('rps_choice', { from: user?.id, to: opponent.userId, choice: mine });
       }
       resolveResult(mine, theirs);
     }, CHOICE_TIMEOUT_MS);
@@ -116,7 +115,6 @@ export function useRPS() {
     clearTimers();
     myChoiceRef.current = null;
     opponentChoiceRef.current = null;
-
     setState((prev) => ({
       ...prev,
       gameState: 'countdown',
@@ -126,7 +124,6 @@ export function useRPS() {
       myChoice: null,
       opponentChoice: null,
     }));
-
     let remaining = COUNTDOWN_SEC;
     countdownTimerRef.current = setInterval(() => {
       remaining -= 1;
@@ -143,25 +140,37 @@ export function useRPS() {
   // 대결 요청 (A → B)
   const requestDuel = useCallback((target: RPSOpponent) => {
     if (!user?.id) return;
+    // 쿨다운 체크
+    const now = Date.now();
+    if (now - lastRequestTimeRef.current < REQUEST_COOLDOWN_MS) {
+      addToast('잠시 후 다시 요청할 수 있습니다', 'info');
+      return;
+    }
+    lastRequestTimeRef.current = now;
+
     const myName = profile?.nickname || profile?.name || '???';
-    sendRPSEvent('rps_request', {
-      from: user.id,
-      fromName: myName,
-      to: target.userId,
-    });
+    sendRPSEvent('rps_request', { from: user.id, fromName: myName, to: target.userId });
     setState((prev) => ({ ...prev, gameState: 'requested', opponent: target, iAmChallenger: true }));
-  }, [user?.id, profile?.nickname, profile?.name]);
+
+    // 60초 요청 타임아웃 (요청자 측)
+    requestTimerRef.current = setTimeout(() => {
+      if (stateRef.current.gameState === 'requested') {
+        reset();
+        addToast('시간 초과로 대결 요청이 취소되었습니다', 'info');
+      }
+    }, REQUEST_TIMEOUT_MS);
+  }, [user?.id, profile?.nickname, profile?.name, addToast, reset]);
 
   // 수락
   const acceptDuel = useCallback(() => {
     const req = stateRef.current.incomingRequest;
     if (!req || !user?.id) return;
+    if (requestTimerRef.current) {
+      clearTimeout(requestTimerRef.current);
+      requestTimerRef.current = null;
+    }
     const myName = profile?.nickname || profile?.name || '???';
-    sendRPSEvent('rps_accept', {
-      from: user.id,
-      fromName: myName,
-      to: req.userId,
-    });
+    sendRPSEvent('rps_accept', { from: user.id, fromName: myName, to: req.userId });
     setState((prev) => ({ ...prev, incomingRequest: null }));
     startCountdown(req, false);
   }, [user?.id, profile?.nickname, profile?.name, startCountdown]);
@@ -170,10 +179,11 @@ export function useRPS() {
   const rejectDuel = useCallback(() => {
     const req = stateRef.current.incomingRequest;
     if (!req || !user?.id) return;
-    sendRPSEvent('rps_reject', {
-      from: user.id,
-      to: req.userId,
-    });
+    if (requestTimerRef.current) {
+      clearTimeout(requestTimerRef.current);
+      requestTimerRef.current = null;
+    }
+    sendRPSEvent('rps_reject', { from: user.id, to: req.userId });
     setState((prev) => ({ ...prev, incomingRequest: null, gameState: 'idle' }));
   }, [user?.id]);
 
@@ -183,23 +193,31 @@ export function useRPS() {
     if (cur.gameState !== 'choosing' || myChoiceRef.current || !cur.opponent || !user?.id) return;
     myChoiceRef.current = choice;
     setState((prev) => ({ ...prev, myChoice: choice }));
-    sendRPSEvent('rps_choice', {
-      from: user.id,
-      to: cur.opponent.userId,
-      choice,
-    });
-    // 상대방이 이미 선택했다면 즉시 결과
+    sendRPSEvent('rps_choice', { from: user.id, to: cur.opponent.userId, choice });
     if (opponentChoiceRef.current) {
       resolveResult(choice, opponentChoiceRef.current);
     }
   }, [user?.id, resolveResult]);
 
-  // 결과: 승/패/무 계산
   const getResult = useCallback((): 'win' | 'lose' | 'draw' | null => {
     const { myChoice, opponentChoice } = stateRef.current;
     if (!myChoice || !opponentChoice) return null;
     return determineWinner(myChoice, opponentChoice);
   }, []);
+
+  // 상대방 이탈 감지 — otherPlayers에서 사라지면 게임 중단
+  useEffect(() => {
+    return useMetaverseStore.subscribe((store) => {
+      const cur = stateRef.current;
+      if (cur.gameState === 'idle' || cur.gameState === 'result') return;
+      const opponentId = cur.opponent?.userId ?? cur.incomingRequest?.userId;
+      if (!opponentId) return;
+      if (!store.otherPlayers.has(opponentId)) {
+        reset();
+        addToast('상대방이 자리를 떠나 대결이 취소되었습니다', 'info');
+      }
+    });
+  }, [addToast, reset]);
 
   // Realtime 이벤트 수신
   useEffect(() => {
@@ -209,25 +227,34 @@ export function useRPS() {
       const cur = stateRef.current;
 
       if (event === 'rps_request') {
-        // 나에게 온 요청인지 확인
         if (payload.to !== user.id) return;
-        // 이미 게임 중이면 자동 거절
-        if (cur.gameState !== 'idle') {
+        // 이미 게임 중이거나 다른 요청 대기 중이면 자동 거절 (race condition 방지)
+        if (cur.gameState !== 'idle' || cur.incomingRequest !== null) {
           sendRPSEvent('rps_reject', { from: user.id, to: payload.from as string });
           return;
         }
-        setState((prev) => ({
-          ...prev,
-          incomingRequest: {
-            userId: payload.from as string,
-            name: payload.fromName as string,
-          },
-        }));
+        const requester: RPSOpponent = {
+          userId: payload.from as string,
+          name: payload.fromName as string,
+        };
+        setState((prev) => ({ ...prev, incomingRequest: requester }));
+
+        // 수신자 팝업도 60초 후 자동 닫힘
+        requestTimerRef.current = setTimeout(() => {
+          if (stateRef.current.incomingRequest?.userId === requester.userId) {
+            setState((prev) => ({ ...prev, incomingRequest: null }));
+          }
+        }, REQUEST_TIMEOUT_MS);
       }
 
       if (event === 'rps_accept') {
         if (payload.to !== user.id) return;
         if (!cur.iAmChallenger || cur.gameState !== 'requested') return;
+        // 수락 받으면 요청 타임아웃 취소
+        if (requestTimerRef.current) {
+          clearTimeout(requestTimerRef.current);
+          requestTimerRef.current = null;
+        }
         const opponent: RPSOpponent = {
           userId: payload.from as string,
           name: payload.fromName as string,
@@ -243,12 +270,10 @@ export function useRPS() {
       }
 
       if (event === 'rps_choice') {
-        // 나와 관련된 선택인지 확인 (to === me)
         if (payload.to !== user.id) return;
         opponentChoiceRef.current = payload.choice as RPSChoice;
         setState((prev) => ({ ...prev, opponentChoice: payload.choice as RPSChoice }));
-        // 내가 이미 선택했다면 즉시 결과
-        if (myChoiceRef.current && cur.opponent) {
+        if (myChoiceRef.current) {
           resolveResult(myChoiceRef.current, payload.choice as RPSChoice);
         }
       }
@@ -257,13 +282,5 @@ export function useRPS() {
     return unsubscribe;
   }, [user?.id, addToast, reset, startCountdown, resolveResult]);
 
-  return {
-    state,
-    requestDuel,
-    acceptDuel,
-    rejectDuel,
-    makeChoice,
-    getResult,
-    reset,
-  };
+  return { state, requestDuel, acceptDuel, rejectDuel, makeChoice, getResult, reset };
 }
