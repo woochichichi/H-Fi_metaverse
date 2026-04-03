@@ -87,13 +87,17 @@ export default function UserManager() {
     if (!confirmModal) return;
     const { userId, field, value } = confirmModal;
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('profiles')
       .update({ [field]: value })
-      .eq('id', userId);
+      .eq('id', userId)
+      .select('id');
 
     if (error) {
       addToast('변경 실패: ' + error.message, 'error');
+    } else if (!data || data.length === 0) {
+      // RLS가 UPDATE를 차단한 경우 error 없이 빈 배열 반환
+      addToast('변경 권한이 없습니다', 'error');
     } else {
       addToast('변경되었습니다', 'success');
       setUsers((prev) =>
@@ -108,13 +112,16 @@ export default function UserManager() {
     const { userId, isResigned } = resignModal;
     const newStatus = isResigned ? 'offline' : '퇴사';
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('profiles')
       .update({ status: newStatus })
-      .eq('id', userId);
+      .eq('id', userId)
+      .select('id');
 
     if (error) {
       addToast('처리 실패: ' + error.message, 'error');
+    } else if (!data || data.length === 0) {
+      addToast('변경 권한이 없습니다', 'error');
     } else {
       addToast(isResigned ? '퇴사 처리가 복원되었습니다' : '퇴사 처리되었습니다', 'success');
       setUsers((prev) =>

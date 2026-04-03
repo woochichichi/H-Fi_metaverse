@@ -2,6 +2,25 @@ import { create } from 'zustand';
 import type { Profile } from '../types';
 import { supabase } from '../lib/supabase';
 
+// 자기 프로필 변경 구독 채널 (중복 구독 방지)
+let _profileSub: ReturnType<typeof supabase.channel> | null = null;
+
+function _subscribeProfile(userId: string) {
+  if (_profileSub) supabase.removeChannel(_profileSub);
+  _profileSub = supabase
+    .channel('profile-self')
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${userId}` },
+      async () => {
+        await useAuthStore.getState().fetchProfile(userId);
+        // 퇴사 처리 즉시 강제 로그아웃
+        if (useAuthStore.getState().profile?.status === '퇴사') {
+          await supabase.auth.signOut();
+          useAuthStore.setState({ user: null, profile: null });
+        }
+      })
+    .subscribe();
+}
+
 interface AuthState {
   user: import('@supabase/supabase-js').User | null;
   profile: Profile | null;
@@ -75,6 +94,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         if (get().profile?.status === '퇴사') {
           await supabase.auth.signOut();
           set({ user: null, profile: null });
+        } else {
+          // 관리자가 역할·상태 변경 시 즉시 반영 (소프트 리프레시)
+          _subscribeProfile(session.user.id);
         }
       }
     } catch (err) {
@@ -93,9 +115,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ user: session.user });
         if (!get().profile || get().profile?.id !== session.user.id) {
           await get().fetchProfile(session.user.id);
+          if (get().profile?.status !== '퇴사') {
+            _subscribeProfile(session.user.id);
+          }
         }
       } else if (event === 'SIGNED_OUT') {
         set({ user: null, profile: null });
+        if (_profileSub) {
+          supabase.removeChannel(_profileSub);
+          _profileSub = null;
+        }
       }
     });
 
