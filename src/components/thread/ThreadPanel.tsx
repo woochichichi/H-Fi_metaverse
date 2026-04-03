@@ -45,9 +45,9 @@ export default function ThreadPanel({
     const safety = await checkMessageSafety(text, 'thread');
     setChecking(false);
     if (!safety.safe) {
-      // 사일런트 차단: 전송된 것처럼 입력창만 비움
+      // 사일런트 차단: 입력창만 비움
+      // onMessageSent 호출 안 함 — 상태 변경(답변완료) 등 사이드이펙트 방지
       setInput('');
-      onMessageSent?.();
       return;
     }
 
