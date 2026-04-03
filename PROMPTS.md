@@ -57,6 +57,7 @@
 - 긴급 버그: 쪽지 수신함에서 게시글 클릭 시 관리자 답변(thread)이 일반 팀원에게도 표시되는 문제 수정 — ThreadPanel을 isAdmin||isRecipient 조건으로 제한 + RLS 032 마이그레이션 적용
 - 다른 유저 우클릭 시 가위바위보 대결 기능 구현 — PlayerContextMenu(확장 가능한 우클릭 메뉴), useRPS(Realtime broadcast 기반 게임 상태 머신), RockPaperScissors(카운트다운+선택+결과 모달), OtherPlayers 우클릭 이벤트 바인딩
 - 가위바위보 엣지케이스 수정 — 수락 대기 60초 타임아웃, 동시 신청 race condition 방지, 상대 이탈 감지(otherPlayers 구독), 수신자 팝업 자동 닫힘, 10초 쿨다운
+- 가위바위보 결과 버그 수정 — rps_choice 수신 핸들러에 gameState 가드 누락으로 지연 도착한 상대 선택이 result 상태를 덮어씌우는 문제 (무승부→승리 전환)
 
 ## 2026-04-03
 
