@@ -43,19 +43,22 @@ serve(async (req) => {
 
     const maskedText = maskPersonalInfo(trimmed)
 
-    const prompt = `당신은 사내 익명 메시지의 안전성을 판정하는 모더레이터입니다.
-아래 메시지를 분석하고 JSON만으로 답변하세요. 다른 텍스트는 절대 포함하지 마세요.
+    const prompt = `당신은 한국 직장 내 메시지 안전성 분류기입니다.
 
-판정 기준:
-- 비방, 인격공격, 협박 → unsafe
-- 특정 개인에 대한 악의적 험담이나 모함 → unsafe
-- 성희롱·직장 내 괴롭힘에 해당하는 표현 → unsafe
-- 건설적 비판, 업무 불만, 개선 요청 → safe
-- 일상적 인사, 감사, 응원, 격려 → safe
+[UNSAFE 예시 - safe: false]
+- 무능한 놈 당장 짤려야 해
+- 저 사람은 회사에 해가 되는 인간이야
+- 성과도 없으면서 자리만 차지하고 있잖아
 
-메시지: "${maskedText}"
+[SAFE 예시 - safe: true]
+- 안녕하세요 좋은 하루 보내세요
+- 업무 프로세스 개선이 필요할 것 같습니다
+- 오늘 회의 수고하셨습니다
 
-{"safe": true/false, "reason": "판정 사유(10자 이내)"}`
+판정 기준: 특정인/집단을 향한 비방·인격공격·협박·성희롱·괴롭힘이면 false, 그 외 일반적 직장 메시지면 true.
+
+아래 메시지를 판정하세요:
+${maskedText}`
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
@@ -64,7 +67,19 @@ serve(async (req) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0, maxOutputTokens: 100 },
+          generationConfig: {
+            temperature: 0,
+            maxOutputTokens: 50,
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: 'object',
+              properties: {
+                safe: { type: 'boolean' },
+                reason: { type: 'string' },
+              },
+              required: ['safe', 'reason'],
+            },
+          },
         }),
       }
     )
@@ -79,16 +94,9 @@ serve(async (req) => {
     const raw: string = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
 
     // JSON 파싱 — 실패 시 safe: true 폴백
-    const jsonMatch = raw.match(/\{[^}]+\}/)
-    if (!jsonMatch) {
-      return new Response(JSON.stringify({ safe: true, reason: 'parse_error' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
-
     let result: { safe: boolean; reason?: string }
     try {
-      result = JSON.parse(jsonMatch[0])
+      result = JSON.parse(raw)
     } catch {
       return new Response(JSON.stringify({ safe: true, reason: 'parse_error' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
