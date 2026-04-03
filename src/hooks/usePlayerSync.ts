@@ -187,6 +187,33 @@ export default function usePlayerSync() {
       useMetaverseStore.getState().removeOtherPlayer(key);
     });
 
+    // Presence join: 새 유저 입장 시 내 위치를 즉시 재브로드캐스트 (상대방이 나를 볼 수 있도록)
+    channel.on('presence', { event: 'join' }, ({ key }) => {
+      if (key === user.id) return;
+      const store = useMetaverseStore.getState();
+      const p = useAuthStore.getState().profile;
+      channel.send({
+        type: 'broadcast',
+        event: 'position',
+        payload: {
+          userId: user.id,
+          name: p?.nickname || p?.name || '???',
+          team: p?.team || '',
+          room: currentRoom,
+          x: store.playerPosition.x,
+          y: store.playerPosition.y,
+          moodEmoji: p?.mood_emoji || undefined,
+          avatarColor: p?.avatar_color || undefined,
+          skinColor: p?.skin_color || undefined,
+          hairColor: p?.hair_color || undefined,
+          hairStyle: p?.hair_style || undefined,
+          accessory: p?.accessory || undefined,
+          pet: p?.pet || undefined,
+          direction: store.playerDirection,
+        },
+      });
+    });
+
     // Broadcast: 위치 수신
     channel.on('broadcast', { event: 'position' }, ({ payload }) => {
       if (payload.userId === user.id) return;
@@ -239,6 +266,29 @@ export default function usePlayerSync() {
           name: p?.nickname || p?.name || '???',
           team: p?.team || '',
           room: currentRoom,
+        });
+        // race condition 방지: 채널 구독 완료 후 내 위치 즉시 브로드캐스트
+        // (enterRoom 시 position effect가 channelRef=null인 시점에 실행되어 스킵되는 문제 해결)
+        const store = useMetaverseStore.getState();
+        channel.send({
+          type: 'broadcast',
+          event: 'position',
+          payload: {
+            userId: user.id,
+            name: p?.nickname || p?.name || '???',
+            team: p?.team || '',
+            room: currentRoom,
+            x: store.playerPosition.x,
+            y: store.playerPosition.y,
+            moodEmoji: p?.mood_emoji || undefined,
+            avatarColor: p?.avatar_color || undefined,
+            skinColor: p?.skin_color || undefined,
+            hairColor: p?.hair_color || undefined,
+            hairStyle: p?.hair_style || undefined,
+            accessory: p?.accessory || undefined,
+            pet: p?.pet || undefined,
+            direction: store.playerDirection,
+          },
         });
       }
     });
