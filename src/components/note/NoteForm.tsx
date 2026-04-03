@@ -51,7 +51,7 @@ export default function NoteForm({ onClose, onCreated, targetName, targetId }: N
 
     // AI 안전성 검사
     setChecking(true);
-    const safety = await checkMessageSafety(title.trim() + '\n' + content.trim());
+    const safety = await checkMessageSafety(title.trim() + '\n' + content.trim(), 'note');
     setChecking(false);
     if (!safety.safe) {
       addToast('전송할 수 없는 내용이 포함되어 있습니다.', 'error');

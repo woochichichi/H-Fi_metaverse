@@ -17,6 +17,27 @@ function maskPersonalInfo(text: string): string {
   return text
 }
 
+async function logModeration(channel: string, maskedContent: string, reason: string, safe: boolean) {
+  const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
+  const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  if (!SUPABASE_URL || !SERVICE_ROLE_KEY) return
+
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/moderation_logs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SERVICE_ROLE_KEY,
+        'Authorization': `Bearer ${SERVICE_ROLE_KEY}`,
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify({ channel, masked_content: maskedContent, reason, safe }),
+    })
+  } catch {
+    // 로그 실패해도 판정 결과에 영향 없음
+  }
+}
+
 serve(async (req) => {
   // CORS 프리플라이트
   if (req.method === 'OPTIONS') {
@@ -24,7 +45,7 @@ serve(async (req) => {
   }
 
   try {
-    const { message } = await req.json()
+    const { message, channel = 'unknown' } = await req.json()
 
     // 빈 메시지 즉시 safe 반환
     const trimmed = message?.trim?.() ?? ''
@@ -103,8 +124,16 @@ ${maskedText}`
       })
     }
 
+    const isSafe = !!result.safe
+    const reason = result.reason ?? ''
+
+    // unsafe 판정 시 moderation_logs에 기록 (비동기, 실패해도 무관)
+    if (!isSafe) {
+      logModeration(channel, maskedText, reason, isSafe)
+    }
+
     return new Response(
-      JSON.stringify({ safe: !!result.safe, reason: result.reason ?? '' }),
+      JSON.stringify({ safe: isSafe, reason }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch {

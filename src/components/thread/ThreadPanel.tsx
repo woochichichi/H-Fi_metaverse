@@ -44,7 +44,7 @@ export default function ThreadPanel({
 
     // AI 안전성 검사
     setChecking(true);
-    const safety = await checkMessageSafety(text);
+    const safety = await checkMessageSafety(text, 'thread');
     setChecking(false);
     if (!safety.safe) {
       addToast('전송할 수 없는 내용이 포함되어 있습니다.', 'error');
