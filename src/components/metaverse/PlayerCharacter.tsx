@@ -24,6 +24,7 @@ export default function PlayerCharacter() {
   const keysRef = useRef<Set<string>>(new Set());
   const rafRef = useRef<number>(0);
   const posRef = useRef(playerPosition);
+  const prevTsRef = useRef(0);
   const spawnedRef = useRef(false);
 
   // 걷기 애니메이션
@@ -137,11 +138,18 @@ export default function PlayerCharacter() {
 
   // 게임루프
   useEffect(() => {
-    const AUTO_SPEED = 5;
+    const AUTO_SPEED_PPS = 5 * 60; // 300 px/s (delta-time 보정용)
+    const SPEED_PPS = SPEED * 60;  // 240 px/s
     const ARRIVE_DIST = 6;
     let moving = false;
 
-    const loop = () => {
+    const loop = (timestamp: number) => {
+      // delta-time 보정: 프레임률과 무관하게 일정 속도 유지
+      const dt = prevTsRef.current ? Math.min(timestamp - prevTsRef.current, 50) : 16.67;
+      prevTsRef.current = timestamp;
+      const spd = SPEED_PPS * dt / 1000;
+      const autoSpd = AUTO_SPEED_PPS * dt / 1000;
+
       if (!modalOpen) {
         const room = ROOMS_DATA[currentRoom];
         const mapW = room.mapSize.w;
@@ -158,8 +166,8 @@ export default function PlayerCharacter() {
             if (target.zoneId) openModal(target.zoneId);
             moving = false;
           } else {
-            const nx = Math.max(20, Math.min(mapW - 40, posRef.current.x + (diffX / dist) * AUTO_SPEED));
-            const ny = Math.max(20, Math.min(mapH - 40, posRef.current.y + (diffY / dist) * AUTO_SPEED));
+            const nx = Math.max(20, Math.min(mapW - 40, posRef.current.x + (diffX / dist) * autoSpd));
+            const ny = Math.max(20, Math.min(mapH - 40, posRef.current.y + (diffY / dist) * autoSpd));
             posRef.current = { x: nx, y: ny };
             setPlayerPosition(posRef.current);
             checkZoneAndPortal(nx, ny);
@@ -180,10 +188,10 @@ export default function PlayerCharacter() {
         } else {
           const keys = keysRef.current;
           let dx = 0, dy = 0;
-          if (keys.has('ArrowUp') || keys.has('w') || keys.has('W')) dy = -SPEED;
-          if (keys.has('ArrowDown') || keys.has('s') || keys.has('S')) dy = SPEED;
-          if (keys.has('ArrowLeft') || keys.has('a') || keys.has('A')) dx = -SPEED;
-          if (keys.has('ArrowRight') || keys.has('d') || keys.has('D')) dx = SPEED;
+          if (keys.has('ArrowUp') || keys.has('w') || keys.has('W')) dy = -spd;
+          if (keys.has('ArrowDown') || keys.has('s') || keys.has('S')) dy = spd;
+          if (keys.has('ArrowLeft') || keys.has('a') || keys.has('A')) dx = -spd;
+          if (keys.has('ArrowRight') || keys.has('d') || keys.has('D')) dx = spd;
           if (dx || dy) {
             const nx = Math.max(20, Math.min(mapW - 40, posRef.current.x + dx));
             const ny = Math.max(20, Math.min(mapH - 40, posRef.current.y + dy));
@@ -232,8 +240,10 @@ export default function PlayerCharacter() {
     <div
       className="absolute z-50 pointer-events-none"
       style={{
-        left: playerPosition.x,
-        top: playerPosition.y,
+        left: 0,
+        top: 0,
+        transform: `translate(${playerPosition.x}px, ${playerPosition.y}px)`,
+        willChange: 'transform',
         filter: 'drop-shadow(0 3px 2px rgba(0,0,0,.25))',
       }}
     >
