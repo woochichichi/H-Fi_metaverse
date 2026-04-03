@@ -11,7 +11,12 @@ const WALK_FRAME_INTERVAL = 150;
 const IDLE_TIMEOUT = 5000;
 const IDLE_ANIMS: IdleAnim[] = ['tilt', 'sleep', 'stretch', 'dance'];
 
-function OtherPlayerSprite({ player }: { player: OtherPlayer }) {
+interface OtherPlayerSpriteProps {
+  player: OtherPlayer;
+  onRightClick?: (player: OtherPlayer, clientX: number, clientY: number) => void;
+}
+
+function OtherPlayerSprite({ player, onRightClick }: OtherPlayerSpriteProps) {
   const colors = TEAM_COLORS[player.team] || { body: '#999', hair: '#444' };
   const isTyping = useMetaverseStore((s) => s.typingUsers.has(player.userId));
 
@@ -62,9 +67,16 @@ function OtherPlayerSprite({ player }: { player: OtherPlayer }) {
   const petType = (player.pet || 'none') as PetType;
   const resolvedDir = player.direction || dirRef.current;
 
+  const handleContextMenu = (e: React.MouseEvent) => {
+    if (!onRightClick) return;
+    e.preventDefault();
+    e.stopPropagation();
+    onRightClick(player, e.clientX, e.clientY);
+  };
+
   return (
     <div
-      className="absolute z-40 pointer-events-none transition-opacity duration-300"
+      className="absolute z-40 transition-opacity duration-300"
       style={{
         left: 0,
         top: 0,
@@ -72,7 +84,13 @@ function OtherPlayerSprite({ player }: { player: OtherPlayer }) {
         willChange: 'transform',
         filter: 'drop-shadow(0 2px 2px rgba(0,0,0,.2))',
         opacity: 0.85,
+        // 우클릭 이벤트만 수신, 좌클릭은 차단하지 않음
+        pointerEvents: onRightClick ? 'auto' : 'none',
+        cursor: onRightClick ? 'context-menu' : 'default',
       }}
+      onContextMenu={handleContextMenu}
+      // 좌클릭은 맵으로 전파 (이동 동작 유지)
+      onClick={(e) => e.stopPropagation()}
     >
       {(isTyping || player.isTyping) && <TypingBubble />}
 
@@ -82,6 +100,7 @@ function OtherPlayerSprite({ player }: { player: OtherPlayer }) {
           top: -20,
           background: `${player.avatarColor || colors.body}cc`,
           boxShadow: `0 2px 6px ${player.avatarColor || colors.body}40`,
+          pointerEvents: 'none',
         }}
       >
         <span className="inline-block h-[5px] w-[5px] rounded-full" style={{ background: '#00D68F' }} />
@@ -104,7 +123,11 @@ function OtherPlayerSprite({ player }: { player: OtherPlayer }) {
   );
 }
 
-export default function OtherPlayers() {
+interface OtherPlayersProps {
+  onPlayerRightClick?: (player: OtherPlayer, clientX: number, clientY: number) => void;
+}
+
+export default function OtherPlayers({ onPlayerRightClick }: OtherPlayersProps) {
   const otherPlayers = useMetaverseStore((s) => s.otherPlayers);
   const currentRoom = useMetaverseStore((s) => s.currentRoom);
   const playersRef = useRef(otherPlayers);
@@ -152,7 +175,11 @@ export default function OtherPlayers() {
   return (
     <>
       {visible.map((p) => (
-        <OtherPlayerSprite key={p.userId} player={p} />
+        <OtherPlayerSprite
+          key={p.userId}
+          player={p}
+          onRightClick={onPlayerRightClick}
+        />
       ))}
     </>
   );

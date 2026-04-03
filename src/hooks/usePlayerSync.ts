@@ -10,6 +10,20 @@ const BROADCAST_INTERVAL = 150; // ms
 // 채널 ref를 모듈 레벨에서 공유 (ChatInput에서 접근)
 let sharedChannel: ReturnType<typeof supabase.channel> | null = null;
 
+// RPS 이벤트 리스너 (모듈 레벨 이벤트 버스)
+type RPSListener = (event: string, payload: Record<string, unknown>) => void;
+const rpsListeners = new Set<RPSListener>();
+
+export function subscribeRPS(fn: RPSListener): () => void {
+  rpsListeners.add(fn);
+  return () => rpsListeners.delete(fn);
+}
+
+export function sendRPSEvent(event: string, payload: Record<string, unknown>) {
+  if (!sharedChannel) return;
+  sharedChannel.send({ type: 'broadcast', event, payload });
+}
+
 export function sendChatMessage(message: string) {
   const { user, profile } = useAuthStore.getState();
   if (!sharedChannel || !user?.id || !message.trim()) return;
@@ -244,6 +258,13 @@ export default function usePlayerSync() {
       if (payload.userId === user.id) return;
       useMetaverseStore.getState().setTypingUser(payload.userId, payload.isTyping);
     });
+
+    // Broadcast: RPS 이벤트 (가위바위보) — 구독자에게 전달
+    for (const rpsEvent of ['rps_request', 'rps_accept', 'rps_reject', 'rps_choice']) {
+      channel.on('broadcast', { event: rpsEvent }, ({ payload }) => {
+        rpsListeners.forEach((fn) => fn(rpsEvent, payload as Record<string, unknown>));
+      });
+    }
 
     // Broadcast: 채팅 수신
     channel.on('broadcast', { event: 'chat' }, ({ payload }) => {

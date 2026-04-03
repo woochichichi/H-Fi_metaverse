@@ -2,6 +2,10 @@ import { useRef, useEffect, useCallback, useMemo, useState } from 'react';
 import MapCanvas from './MapCanvas';
 import PlayerCharacter from './PlayerCharacter';
 import OtherPlayers from './OtherPlayers';
+import PlayerContextMenu from './PlayerContextMenu';
+import RockPaperScissors from '../game/RockPaperScissors';
+import { useRPS } from '../../hooks/useRPS';
+import type { OtherPlayer } from '../../stores/metaverseStore';
 // import NPCCharacter from './NPCCharacter';
 import Zone from './Zone';
 import ChatBubble from './ChatBubble';
@@ -82,6 +86,24 @@ export default function MetaverseLayout() {
   const mapTheme = useMemo(() => getMapTimeTheme(), []);
   const [isTouchDevice] = useState(() => 'ontouchstart' in window || navigator.maxTouchPoints > 0);
   usePlayerSync();
+
+  // 우클릭 컨텍스트 메뉴 상태
+  const [contextMenu, setContextMenu] = useState<{
+    player: OtherPlayer;
+    x: number;
+    y: number;
+  } | null>(null);
+
+  // 가위바위보 훅
+  const { state: rpsState, requestDuel, acceptDuel, rejectDuel, makeChoice, getResult, reset: resetRPS } = useRPS();
+
+  const handlePlayerRightClick = useCallback((player: OtherPlayer, clientX: number, clientY: number) => {
+    setContextMenu({ player, x: clientX, y: clientY });
+  }, []);
+
+  const handleRequestDuel = useCallback((player: OtherPlayer) => {
+    requestDuel({ userId: player.userId, name: player.name });
+  }, [requestDuel]);
   const { zoneAlerts, checkAlerts, markZoneVisited, getRoomAlerts } = useZoneAlerts();
 
   // 초기 로드 + 방 이동 시 알림 체크
@@ -165,7 +187,7 @@ export default function MetaverseLayout() {
               <Zone />
               {/* <NPCCharacter /> */}
               <ChatBubble />
-              <OtherPlayers />
+              <OtherPlayers onPlayerRightClick={handlePlayerRightClick} />
               <PlayerCharacter />
               <EmojiFloat />
             </MapCanvas>
@@ -191,6 +213,32 @@ export default function MetaverseLayout() {
           )}
         </div>
       </div>
+
+      {/* 우클릭 컨텍스트 메뉴 */}
+      {contextMenu && (
+        <PlayerContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          items={[
+            {
+              label: '가위바위보 대결',
+              icon: '✊',
+              onClick: () => handleRequestDuel(contextMenu.player),
+            },
+          ]}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
+
+      {/* 가위바위보 모달 */}
+      <RockPaperScissors
+        state={rpsState}
+        getResult={getResult}
+        onAccept={acceptDuel}
+        onReject={rejectDuel}
+        onChoose={makeChoice}
+        onClose={resetRPS}
+      />
     </div>
   );
 }

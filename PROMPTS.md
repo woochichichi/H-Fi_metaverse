@@ -55,3 +55,4 @@
 - AI 메시지 게이트웨이(익명 콘텐츠 발송 전 악성 필터링) 구현 요청 — Gemini Edge Function + 개인정보 마스킹, 쪽지/익명VOC/양방향대화 3개 연동
 - supabase/functions/check-message/index.ts 전체 흐름·프롬프트 설명 요청
 - 긴급 버그: 쪽지 수신함에서 게시글 클릭 시 관리자 답변(thread)이 일반 팀원에게도 표시되는 문제 수정 — ThreadPanel을 isAdmin||isRecipient 조건으로 제한 + RLS 032 마이그레이션 적용
+- 다른 유저 우클릭 시 가위바위보 대결 기능 구현 — PlayerContextMenu(확장 가능한 우클릭 메뉴), useRPS(Realtime broadcast 기반 게임 상태 머신), RockPaperScissors(카운트다운+선택+결과 모달), OtherPlayers 우클릭 이벤트 바인딩
