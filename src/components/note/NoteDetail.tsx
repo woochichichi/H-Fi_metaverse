@@ -24,7 +24,7 @@ interface NoteDetailProps {
 
 export default function NoteDetail({ note, onBack, onUpdated, onDeleted }: NoteDetailProps) {
   const { profile } = useAuthStore();
-  const { updateNoteStatus, isAnonymousAuthor, deleteNote } = useNotes();
+  const { updateNoteStatus, deleteNote } = useNotes();
   const { addToast } = useUiStore();
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -32,9 +32,6 @@ export default function NoteDetail({ note, onBack, onUpdated, onDeleted }: NoteD
 
   const isRecipient = note.recipient_id === profile?.id;
   const isAdmin = profile?.role === 'admin' || profile?.role === 'director';
-  const canReplyAsAuthor = note.anonymous
-    ? isAnonymousAuthor(note.id, note.session_token)
-    : note.sender_id === profile?.id;
   // 익명 쪽지는 sender_id=NULL → RLS가 차단하므로 관리자만 삭제 가능
   const canDelete = isAdmin || (!note.anonymous && note.sender_id === profile?.id);
 
@@ -172,14 +169,16 @@ export default function NoteDetail({ note, onBack, onUpdated, onDeleted }: NoteD
           </button>
         )}
 
-        {/* 대화 스레드 */}
-        <ThreadPanel
-          refType="note"
-          refId={note.id}
-          canReplyAsAuthor={canReplyAsAuthor}
-          canReplyAsManager={isRecipient}
-          onMessageSent={isRecipient ? handleThreadReply : undefined}
-        />
+        {/* 대화 스레드 — 수신자(리더) 또는 관리자(admin/director)만 열람 가능 */}
+        {(isAdmin || isRecipient) && (
+          <ThreadPanel
+            refType="note"
+            refId={note.id}
+            canReplyAsAuthor={false}
+            canReplyAsManager={isRecipient}
+            onMessageSent={isRecipient ? handleThreadReply : undefined}
+          />
+        )}
       </div>
 
       <ConfirmDialog
