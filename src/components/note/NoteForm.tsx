@@ -54,7 +54,9 @@ export default function NoteForm({ onClose, onCreated, targetName, targetId }: N
     const safety = await checkMessageSafety(title.trim() + '\n' + content.trim(), 'note');
     setChecking(false);
     if (!safety.safe) {
-      addToast('전송할 수 없는 내용이 포함되어 있습니다.', 'error');
+      // 사일런트 차단: 사용자에게는 정상 전송처럼 보임
+      addToast('💌 마음의 편지가 전달되었습니다', 'success');
+      onCreated();
       return;
     }
 

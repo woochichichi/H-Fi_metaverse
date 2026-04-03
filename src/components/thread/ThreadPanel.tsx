@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import { Send, Loader } from 'lucide-react';
 import ThreadMessage from './ThreadMessage';
 import { useThreads } from '../../hooks/useThreads';
-import { useUiStore } from '../../stores/uiStore';
 import { checkMessageSafety } from '../../lib/messageSafety';
 
 interface ThreadPanelProps {
@@ -21,7 +20,6 @@ export default function ThreadPanel({
   onMessageSent,
 }: ThreadPanelProps) {
   const { messages, loading, error: threadError, sendMessage } = useThreads(refType, refId);
-  const { addToast } = useUiStore();
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [checking, setChecking] = useState(false);
@@ -47,8 +45,10 @@ export default function ThreadPanel({
     const safety = await checkMessageSafety(text, 'thread');
     setChecking(false);
     if (!safety.safe) {
-      addToast('전송할 수 없는 내용이 포함되어 있습니다.', 'error');
-      return; // input 유지 (setInput 호출 없음)
+      // 사일런트 차단: 전송된 것처럼 입력창만 비움
+      setInput('');
+      onMessageSent?.();
+      return;
     }
 
     setSending(true);

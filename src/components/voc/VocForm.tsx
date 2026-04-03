@@ -92,7 +92,9 @@ export default function VocForm({ onClose, onCreated }: VocFormProps) {
         setSubmitStep('AI 검사 중...');
         const safety = await checkMessageSafety(title.trim() + '\n' + content.trim(), 'voc');
         if (!safety.safe) {
-          addToast('전송할 수 없는 내용이 포함되어 있습니다.', 'error');
+          // 사일런트 차단: 사용자에게는 정상 접수처럼 보임
+          addToast('VOC가 접수되었습니다', 'success');
+          onCreated();
           return;
         }
       }
