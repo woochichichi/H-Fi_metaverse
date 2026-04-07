@@ -1348,41 +1348,41 @@ const PlazaFurniture = memo(function PlazaFurniture({ postCounts }: { postCounts
       <PixelSofa90s x={300} y={300} color="#6C5CE7" />
       <PixelRoundTable x={240} y={370} size={60} />
       {/* 코르크보드 + 편의시설 */}
-      <PixelCorkboard x={470} y={100} postCount={Math.min(postCounts.voc ?? 0, 5)} />
-      <PixelCoffeeMachine x={630} y={140} />
-      <PixelMailbox x={630} y={290} />
-      <PixelWaterCooler x={530} y={300} />
+      <PixelCorkboard x={380} y={100} postCount={Math.min(postCounts.voc ?? 0, 5)} />
+      <PixelCoffeeMachine x={440} y={140} />
+      <PixelMailbox x={440} y={290} />
+      <PixelWaterCooler x={350} y={300} />
       {/* 금융 장식 (나무 대신) */}
       <PixelHanwhaSun x={80} y={80} />
-      <PixelCoinStack x={660} y={380} />
-      <PixelGoldBar x={500} y={390} />
-      <PixelBasketball x={660} y={100} />
+      <PixelCoinStack x={470} y={380} />
+      <PixelGoldBar x={350} y={390} />
+      <PixelBasketball x={480} y={100} />
 
-      {/* ═══ 아이디어 Zone (860,60 ~ 1520,440) — 크리에이티브 스튜디오 ═══ */}
-      <PixelNeonSign x={1050} y={68} text="IDEA!" color="#FFD93D" />
-      <PixelNeonSign x={1300} y={68} text="WOW!" color="#4ECDC4" />
+      {/* ═══ 아이디어 Zone (550,60 ~ 1050,420) — 크리에이티브 스튜디오 ═══ */}
+      <PixelNeonSign x={750} y={68} text="IDEA!" color="#FFD93D" />
+      <PixelNeonSign x={950} y={68} text="WOW!" color="#4ECDC4" />
       {/* 브레인스토밍 테이블 */}
-      <PixelRoundTable x={920} y={160} size={80} />
-      <PixelRoundTable x={1100} y={160} size={80} />
-      <PixelRoundTable x={1020} y={310} size={80} />
-      <PixelChair90s x={900} y={240} />
-      <PixelChair90s x={1000} y={200} />
-      <PixelChair90s x={1080} y={240} />
-      <PixelChair90s x={1180} y={200} />
-      <PixelChair90s x={1000} y={380} />
-      <PixelChair90s x={1100} y={360} />
+      <PixelRoundTable x={620} y={160} size={80} />
+      <PixelRoundTable x={800} y={160} size={80} />
+      <PixelRoundTable x={720} y={310} size={80} />
+      <PixelChair90s x={600} y={240} />
+      <PixelChair90s x={700} y={200} />
+      <PixelChair90s x={780} y={240} />
+      <PixelChair90s x={880} y={200} />
+      <PixelChair90s x={700} y={380} />
+      <PixelChair90s x={800} y={360} />
       {/* 아이디어 벽 — 코르크보드 */}
-      <PixelCorkboard x={1350} y={120} postCount={Math.min(postCounts.idea ?? 0, 5)} />
-      <PixelCorkboard x={1350} y={250} postCount={Math.min(Math.max((postCounts.idea ?? 0) - 5, 0), 5)} />
+      <PixelCorkboard x={570} y={120} postCount={Math.min(postCounts.idea ?? 0, 5)} />
+      <PixelCorkboard x={570} y={250} postCount={Math.min(Math.max((postCounts.idea ?? 0) - 5, 0), 5)} />
       {/* 영감 코너 */}
-      <PixelGuitar x={1400} y={370} />
-      <PixelLightbulb x={860} y={300} />
+      <PixelGuitar x={980} y={370} />
+      <PixelLightbulb x={560} y={300} />
       {/* 편의 + 금융 장식 */}
-      <PixelSofa90s x={1200} y={340} color="#F8B500" />
-      <PixelDualMonitor x={860} y={140} />
-      <PixelHanwhaSun x={1440} y={80} />
-      <PixelSafe x={1440} y={370} />
-      <PixelGoldBar x={860} y={390} />
+      <PixelSofa90s x={880} y={340} color="#F8B500" />
+      <PixelDualMonitor x={560} y={140} />
+      <PixelHanwhaSun x={1000} y={80} />
+      <PixelSafe x={990} y={370} />
+      <PixelGoldBar x={560} y={390} />
 
       {/* ═══ 모임방 Zone (60,520 ~ 520,820) — 취미/사교 공간 ═══ */}
       {/* 코르크보드 */}
