@@ -5,6 +5,7 @@ import MainPage from './routes/MainPage';
 import LoginPage from './routes/LoginPage';
 import RegisterPage from './routes/RegisterPage';
 import ResetPasswordPage from './routes/ResetPasswordPage';
+import SurveyPage from './routes/SurveyPage';
 import Toast from './components/common/Toast';
 import ErrorBoundary from './components/common/ErrorBoundary';
 
@@ -85,6 +86,7 @@ export default function App() {
         />
         {/* recovery 토큰을 처리해야 하므로 PublicRoute 밖에 독립 배치 */}
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/survey/:slug?" element={<SurveyPage />} />
       </Routes>
     </BrowserRouter>
     </ErrorBoundary>

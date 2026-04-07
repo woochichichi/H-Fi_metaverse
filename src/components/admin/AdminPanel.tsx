@@ -1,25 +1,27 @@
 import { useState } from 'react';
-import { X, KeyRound, Users, BarChart3, ListChecks, ShieldAlert } from 'lucide-react';
+import { X, KeyRound, Users, BarChart3, ListChecks, ShieldAlert, ClipboardList } from 'lucide-react';
 import InviteManager from './InviteManager';
 import UserManager from './UserManager';
 import EvalItemManager from './EvalItemManager';
 import EvalDashboard from '../dashboard/EvalDashboard';
 import ModerationLogs from './ModerationLogs';
+import SurveyResults from './SurveyResults';
 import { useAuthStore } from '../../stores/authStore';
 
 interface AdminPanelProps {
   onClose: () => void;
 }
 
-const ALL_TABS: readonly { id: 'invite' | 'users' | 'eval-items' | 'eval' | 'mod-logs'; label: string; icon: typeof KeyRound; roles: string[] }[] = [
+type TabId = 'invite' | 'users' | 'eval-items' | 'eval' | 'mod-logs' | 'survey';
+
+const ALL_TABS: readonly { id: TabId; label: string; icon: typeof KeyRound; roles: string[] }[] = [
   { id: 'invite', label: '초대 코드', icon: KeyRound, roles: ['admin'] },
   { id: 'users', label: '사용자 관리', icon: Users, roles: ['admin', 'director', 'leader'] },
   { id: 'eval-items', label: '평가 항목', icon: ListChecks, roles: ['admin', 'director', 'leader'] },
   { id: 'eval', label: '평가 대시보드', icon: BarChart3, roles: ['admin', 'director', 'leader'] },
   { id: 'mod-logs', label: '차단 로그', icon: ShieldAlert, roles: ['admin'] },
+  { id: 'survey', label: '설문 결과', icon: ClipboardList, roles: ['admin'] },
 ];
-
-type TabId = 'invite' | 'users' | 'eval-items' | 'eval' | 'mod-logs';
 
 export default function AdminPanel({ onClose }: AdminPanelProps) {
   const { profile } = useAuthStore();
@@ -70,6 +72,7 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
         {activeTab === 'eval-items' && <EvalItemManager />}
         {activeTab === 'eval' && <EvalDashboard />}
         {activeTab === 'mod-logs' && <ModerationLogs />}
+        {activeTab === 'survey' && <SurveyResults />}
       </div>
     </div>
   );
