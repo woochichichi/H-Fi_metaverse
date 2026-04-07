@@ -116,6 +116,10 @@ export default function SurveyPage() {
   const config = SURVEY_CONFIGS[slug];
 
   useEffect(() => {
+    return () => { if (autoNextTimer.current) clearTimeout(autoNextTimer.current); };
+  }, []);
+
+  useEffect(() => {
     if (!config) {
       setNotFound(true);
       return;
