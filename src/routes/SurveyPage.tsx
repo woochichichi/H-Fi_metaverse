@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { Send, CheckCircle, XCircle, AlertTriangle, PartyPopper } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -110,6 +110,8 @@ export default function SurveyPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [notFound, setNotFound] = useState(false);
+  const [slideDir, setSlideDir] = useState<'in' | 'out' | null>(null);
+  const autoNextTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const config = SURVEY_CONFIGS[slug];
 
@@ -152,7 +154,18 @@ export default function SurveyPage() {
   const isLastStep = currentStep === questions.length - 1;
   const hasAnswer = answers[currentQ?.id]?.length > 0;
 
+  const goToStep = (next: number) => {
+    setSlideDir('out');
+    setTimeout(() => {
+      setCurrentStep(next);
+      setSlideDir('in');
+      setTimeout(() => setSlideDir(null), 350);
+    }, 250);
+  };
+
   const toggleAnswer = (questionId: string, value: string, multiple?: boolean) => {
+    if (autoNextTimer.current) clearTimeout(autoNextTimer.current);
+
     setAnswers((prev) => {
       const current = prev[questionId] || [];
       if (multiple) {
@@ -169,6 +182,11 @@ export default function SurveyPage() {
       }
       return { ...prev, [questionId]: [value] };
     });
+
+    // 단일선택이면 잠깐 보여준 뒤 자동 넘김
+    if (!multiple && currentStep < questions.length - 1) {
+      autoNextTimer.current = setTimeout(() => goToStep(currentStep + 1), 400);
+    }
   };
 
   const handleSubmit = async () => {
@@ -249,7 +267,13 @@ export default function SurveyPage() {
         </div>
 
         {/* 질문 카드 */}
-        <div className="rounded-xl bg-bg-secondary p-6">
+        <div
+          className={`rounded-xl bg-bg-secondary p-6 transition-all duration-300 ease-out ${
+            slideDir === 'out' ? 'translate-x-8 opacity-0 scale-95' :
+            slideDir === 'in' ? '-translate-x-8 opacity-0 scale-95' :
+            'translate-x-0 opacity-100 scale-100'
+          }`}
+        >
           <div className="mb-4">
             <span className="text-3xl">{currentQ.emoji}</span>
             <h2 className="mt-2 text-lg font-bold text-text-primary">{currentQ.question}</h2>
@@ -308,7 +332,7 @@ export default function SurveyPage() {
           <div className="mt-6 flex gap-3">
             {currentStep > 0 && (
               <button
-                onClick={() => setCurrentStep((s) => s - 1)}
+                onClick={() => goToStep(currentStep - 1)}
                 className="flex-1 rounded-lg bg-bg-primary py-2.5 text-sm text-text-secondary transition-colors hover:bg-bg-tertiary"
               >
                 이전
@@ -327,23 +351,21 @@ export default function SurveyPage() {
                 )}
                 {submitting ? '보내는 중...' : '제출하기'}
               </button>
-            ) : (
+            ) : currentQ.multiple ? (
               <button
-                onClick={() => setCurrentStep((s) => s + 1)}
+                onClick={() => goToStep(currentStep + 1)}
                 disabled={!hasAnswer}
                 className="flex-1 rounded-lg bg-accent py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
               >
                 다음
               </button>
-            )}
+            ) : null}
           </div>
         </div>
 
         {/* 풋터 */}
         <p className="mt-6 text-center text-xs text-text-muted">
           완전 익명입니다. 누가 뭘 골랐는지 절대 모릅니다.
-          <br />
-          <span className="text-text-muted/60">솔직하게 눌러주세요. 진짜 안 울어요. 아마도.</span>
         </p>
       </div>
     </div>
