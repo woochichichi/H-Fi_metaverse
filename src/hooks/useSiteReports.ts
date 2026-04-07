@@ -94,15 +94,31 @@ export function useSiteReports() {
       }
 
       // admin에게 알림 전송
-      await supabase.from('notifications').insert({
-        user_id: null, // broadcast — admin RLS로 필터
-        type: 'site_report',
-        urgency: '참고' as const,
-        title: '새 사이트 건의',
-        body: `${profile?.name ?? '사용자'}님이 건의를 등록했습니다: ${input.title}`,
-        link: `/site-report/${(data as SiteReport).id}`,
-        channel: 'inbox',
-      });
+      try {
+        const { data: admins } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('role', 'admin');
+
+        if (admins && admins.length > 0) {
+          const notifications = admins
+            .filter((a) => a.id !== user.id)
+            .map((a) => ({
+              user_id: a.id,
+              type: 'site_report',
+              urgency: '참고' as const,
+              title: '새 사이트 건의',
+              body: `${profile?.name ?? '사용자'}님이 건의를 등록했습니다: ${input.title}`,
+              link: `/site-report/${(data as SiteReport).id}`,
+              channel: 'in_app',
+            }));
+          if (notifications.length > 0) {
+            await supabase.from('notifications').insert(notifications);
+          }
+        }
+      } catch {
+        // 알림 실패해도 건의 등록은 정상 완료
+      }
 
       return { data: data as SiteReport, error: null };
     },
