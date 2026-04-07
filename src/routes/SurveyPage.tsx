@@ -112,11 +112,17 @@ export default function SurveyPage() {
   const [notFound, setNotFound] = useState(false);
   const [slideDir, setSlideDir] = useState<'in' | 'out' | null>(null);
   const autoNextTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const slideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const slideEndTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const config = SURVEY_CONFIGS[slug];
 
   useEffect(() => {
-    return () => { if (autoNextTimer.current) clearTimeout(autoNextTimer.current); };
+    return () => {
+      if (autoNextTimer.current) clearTimeout(autoNextTimer.current);
+      if (slideTimer.current) clearTimeout(slideTimer.current);
+      if (slideEndTimer.current) clearTimeout(slideEndTimer.current);
+    };
   }, []);
 
   useEffect(() => {
@@ -159,16 +165,21 @@ export default function SurveyPage() {
   const hasAnswer = answers[currentQ?.id]?.length > 0;
 
   const goToStep = (next: number) => {
+    // 기존 타이머 정리
+    if (autoNextTimer.current) { clearTimeout(autoNextTimer.current); autoNextTimer.current = null; }
+    if (slideTimer.current) clearTimeout(slideTimer.current);
+    if (slideEndTimer.current) clearTimeout(slideEndTimer.current);
+
     setSlideDir('out');
-    setTimeout(() => {
+    slideTimer.current = setTimeout(() => {
       setCurrentStep(next);
       setSlideDir('in');
-      setTimeout(() => setSlideDir(null), 350);
+      slideEndTimer.current = setTimeout(() => setSlideDir(null), 350);
     }, 250);
   };
 
   const toggleAnswer = (questionId: string, value: string, multiple?: boolean) => {
-    if (autoNextTimer.current) clearTimeout(autoNextTimer.current);
+    if (autoNextTimer.current) { clearTimeout(autoNextTimer.current); autoNextTimer.current = null; }
 
     setAnswers((prev) => {
       const current = prev[questionId] || [];
@@ -187,14 +198,17 @@ export default function SurveyPage() {
       return { ...prev, [questionId]: [value] };
     });
 
-    // 단일선택이면 잠깐 보여준 뒤 자동 넘김
+    // 단일선택 + 마지막이 아닌 경우만 자동 넘김
     if (!multiple && currentStep < questions.length - 1) {
       autoNextTimer.current = setTimeout(() => goToStep(currentStep + 1), 400);
     }
   };
 
   const handleSubmit = async () => {
-    if (!surveyId) return;
+    if (!surveyId) {
+      setError('설문 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
     setSubmitting(true);
     setError('');
     const { error: err } = await supabase.from('survey_responses').insert({

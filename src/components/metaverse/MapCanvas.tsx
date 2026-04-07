@@ -1403,7 +1403,7 @@ const PlazaFurniture = memo(function PlazaFurniture({ postCounts }: { postCounts
       {/* 금융 장식 (나무 대신) */}
       <PixelHanwhaSun x={440} y={540} size={36} />
       <PixelCoinStack x={480} y={760} />
-      <PixelPlant90s x={80} y={780} size="small" />
+      <PixelPlant90s x={80} y={760} size="small" />
 
       {/* ═══ 반응속도 Zone (520,490 ~ 790,770) — 게임 아케이드 ═══ */}
       <PixelNeonSign x={590} y={495} text="⚡ 반응속도" color="#FFD93D" />
