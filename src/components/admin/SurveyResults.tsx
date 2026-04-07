@@ -63,6 +63,11 @@ const QUESTION_META: { id: string; title: string; emoji: string; insight: string
 ];
 
 // 바 색상 그라데이션
+// DB title이 인코딩 깨질 수 있으므로 프론트에서 관리
+const SURVEY_TITLES: Record<string, string> = {
+  'why-not-coming': '조용히 닫았습니다.',
+};
+
 const BAR_COLORS = [
   'bg-accent',
   'bg-accent/80',
@@ -109,6 +114,7 @@ export default function SurveyResults() {
   };
 
   const selected = surveys.find((s) => s.id === selectedSurvey);
+  const getTitle = (s: SurveyRow) => SURVEY_TITLES[s.slug] || s.title;
   const surveyUrl = `${window.location.origin}/survey/${selected?.slug || ''}`;
 
   const copyUrl = () => {
@@ -183,7 +189,7 @@ export default function SurveyResults() {
             onClick={() => setShowDropdown(!showDropdown)}
             className="flex items-center gap-2 rounded-lg bg-bg-primary px-3 py-2 text-sm text-text-primary ring-1 ring-bg-tertiary transition-colors hover:bg-bg-tertiary"
           >
-            <span>{selected?.title || '설문 선택'}</span>
+            <span>{selected ? getTitle(selected) : '설문 선택'}</span>
             {selected && !selected.is_active && (
               <span className="text-[10px] text-text-muted bg-bg-tertiary px-1.5 py-0.5 rounded">종료</span>
             )}
@@ -201,7 +207,7 @@ export default function SurveyResults() {
                       s.id === selectedSurvey ? 'bg-accent/15 text-accent' : 'text-text-secondary hover:bg-bg-tertiary'
                     }`}
                   >
-                    <span>{s.title}</span>
+                    <span>{getTitle(s)}</span>
                     {!s.is_active && <span className="text-[10px] text-text-muted bg-bg-tertiary px-1.5 py-0.5 rounded">종료</span>}
                   </button>
                 ))}
