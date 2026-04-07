@@ -44,9 +44,13 @@ export default function PlayerContextMenu({ x, y, items, onClose }: PlayerContex
     };
   }, [onClose]);
 
-  // 화면 밖으로 나가지 않도록 위치 보정
-  const adjustedX = Math.min(x, window.innerWidth - 180);
-  const adjustedY = Math.min(y, window.innerHeight - (items.length * 40 + 16));
+  // 화면 밖으로 나가지 않도록 위치 보정 (메뉴 폭 200px 여유)
+  const menuWidth = 200;
+  const menuHeight = items.length * 40 + 16;
+  const adjustedX = x + menuWidth > window.innerWidth
+    ? Math.max(0, x - menuWidth)  // 오른쪽 넘치면 왼쪽에 표시
+    : x;
+  const adjustedY = Math.min(y, window.innerHeight - menuHeight);
 
   return createPortal(
     <div
