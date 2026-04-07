@@ -1333,6 +1333,105 @@ const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme, po
 // 미사용 컴포넌트 TS 참조 유지 (향후 팀룸 등에서 재사용 가능)
 void PixelDualMonitor; void PixelWaterCooler; void PixelDumbbell; void PixelBasketball; void PixelSafe;
 
+// ═══ 컴포넌트 바운딩 박스 (배치 겹침 방지용) ═══
+// 가구 배치 시 이 크기를 참고하여 x,y 간격을 확보할 것
+// 형식: [width, height] — SVG 렌더 크기 기준
+const FURNITURE_SIZES: Record<string, [number, number]> = {
+  Desk90s:       [120, 72],
+  CRT:           [48, 52],
+  Chair90s:      [36, 40],
+  Sofa90s:       [120, 56],
+  Whiteboard:    [120, 80],  // w 파라미터에 따라 가변
+  FileCabinet:   [48, 72],
+  CoffeeMachine: [48, 64],
+  RubberDuck:    [28, 28],
+  PizzaBox:      [40, 32],
+  CatDev:        [32, 32],
+  DualMonitor:   [72, 52],
+  EnergyDrink:   [16, 28],
+  MechKeyboard:  [56, 24],
+  Plant90s_sm:   [32, 44],
+  Plant90s_lg:   [56, 76],
+  Corkboard:     [140, 100],
+  WaterCooler:   [32, 68],
+  RoundTable:    [72, 72],  // size 파라미터에 따라 가변
+  Arcade:        [64, 96],
+  Mailbox:       [48, 72],
+  Lightbulb:     [40, 72],
+  Scoreboard:    [120, 56],
+  Buzzer:        [48, 40],
+  NeonSign:      [80, 20],  // 텍스트 길이에 따라 가변
+  BBQ:           [64, 64],
+  Dumbbell:      [56, 28],
+  Guitar:        [32, 72],
+  PicnicTable:   [100, 72],
+  Basketball:    [28, 28],
+  OmokTable:     [140, 140],
+  JumpRope:      [140, 120],
+  GoldBar:       [48, 36],
+  CoinStack:     [36, 48],
+  HanwhaSun:     [44, 44],  // size 파라미터에 따라 가변
+  Safe:          [48, 56],
+  Signboard:     [72, 88],
+};
+
+// 개발 모드: 가구 배치 겹침 검증
+interface FurnitureItem { name: string; x: number; y: number; w: number; h: number; zone: string }
+
+function checkFurnitureOverlaps(items: FurnitureItem[]): void {
+  if (import.meta.env.PROD) return;
+  for (let i = 0; i < items.length; i++) {
+    for (let j = i + 1; j < items.length; j++) {
+      const a = items[i], b = items[j];
+      if (a.zone !== b.zone) continue; // 다른 Zone 간은 검사 안 함
+      const overlapX = a.x < b.x + b.w && a.x + a.w > b.x;
+      const overlapY = a.y < b.y + b.h && a.y + a.h > b.y;
+      if (overlapX && overlapY) {
+        console.warn(
+          `[가구 겹침] ${a.zone}: "${a.name}"(${a.x},${a.y},${a.w}x${a.h}) ↔ "${b.name}"(${b.x},${b.y},${b.w}x${b.h})`
+        );
+      }
+    }
+  }
+}
+
+// 광장 가구 배치 검증 (개발 모드에서만 실행)
+if (import.meta.env.DEV) {
+  const S = FURNITURE_SIZES;
+  const plaza: FurnitureItem[] = [
+    // VOC Zone (30~530, 60~420)
+    { name: 'NeonSign', x: 300, y: 68, w: S.NeonSign[0], h: S.NeonSign[1], zone: 'voc' },
+    { name: 'Desk90s', x: 150, y: 140, w: S.Desk90s[0], h: S.Desk90s[1], zone: 'voc' },
+    // CRT는 Desk 위에 올려진 것이므로 의도된 겹침 — 검증 제외
+    { name: 'Chair90s', x: 190, y: 220, w: S.Chair90s[0], h: S.Chair90s[1], zone: 'voc' },
+    { name: 'Sofa90s', x: 100, y: 300, w: S.Sofa90s[0], h: S.Sofa90s[1], zone: 'voc' },
+    { name: 'RoundTable', x: 240, y: 370, w: 60, h: 60, zone: 'voc' },
+    { name: 'Corkboard', x: 380, y: 100, w: S.Corkboard[0], h: S.Corkboard[1], zone: 'voc' },
+    { name: 'Mailbox', x: 400, y: 290, w: S.Mailbox[0], h: S.Mailbox[1], zone: 'voc' },
+    { name: 'HanwhaSun', x: 80, y: 80, w: S.HanwhaSun[0], h: S.HanwhaSun[1], zone: 'voc' },
+    { name: 'GoldBar', x: 350, y: 390, w: S.GoldBar[0], h: S.GoldBar[1], zone: 'voc' },
+    // 아이디어 Zone (550~1050, 60~420)
+    { name: 'NeonSign', x: 780, y: 68, w: S.NeonSign[0], h: S.NeonSign[1], zone: 'idea' },
+    { name: 'RoundTable1', x: 720, y: 180, w: 80, h: 80, zone: 'idea' },
+    { name: 'RoundTable2', x: 720, y: 320, w: 80, h: 80, zone: 'idea' },
+    { name: 'Chair90s-1', x: 700, y: 260, w: S.Chair90s[0], h: S.Chair90s[1], zone: 'idea' },
+    { name: 'Chair90s-2', x: 820, y: 260, w: S.Chair90s[0], h: S.Chair90s[1], zone: 'idea' },
+    { name: 'Corkboard', x: 580, y: 130, w: S.Corkboard[0], h: S.Corkboard[1], zone: 'idea' },
+    { name: 'Sofa90s', x: 880, y: 340, w: S.Sofa90s[0], h: S.Sofa90s[1], zone: 'idea' },
+    { name: 'HanwhaSun', x: 1000, y: 80, w: S.HanwhaSun[0], h: S.HanwhaSun[1], zone: 'idea' },
+    { name: 'Guitar', x: 960, y: 300, w: S.Guitar[0], h: S.Guitar[1], zone: 'idea' },
+    // 고민방 Zone (1070~1570, 60~420)
+    { name: 'Corkboard', x: 1120, y: 100, w: S.Corkboard[0], h: S.Corkboard[1], zone: 'worry' },
+    { name: 'Sofa90s-1', x: 1200, y: 230, w: S.Sofa90s[0], h: S.Sofa90s[1], zone: 'worry' },
+    { name: 'Sofa90s-2', x: 1200, y: 330, w: S.Sofa90s[0], h: S.Sofa90s[1], zone: 'worry' },
+    { name: 'RoundTable', x: 1380, y: 280, w: 60, h: 60, zone: 'worry' },
+    { name: 'Plant90s', x: 1500, y: 350, w: S.Plant90s_sm[0], h: S.Plant90s_sm[1], zone: 'worry' },
+    { name: 'HanwhaSun', x: 1110, y: 80, w: S.HanwhaSun[0], h: S.HanwhaSun[1], zone: 'worry' },
+    { name: 'Lightbulb', x: 1500, y: 100, w: S.Lightbulb[0], h: S.Lightbulb[1], zone: 'worry' },
+  ];
+  checkFurnitureOverlaps(plaza);
+}
+
 // ═══ 중앙 광장 가구 (1600x1000, 로컬좌표) ═══
 const PlazaFurniture = memo(function PlazaFurniture({ postCounts }: { postCounts: BoardPostCounts }) {
   return (
@@ -1365,7 +1464,7 @@ const PlazaFurniture = memo(function PlazaFurniture({ postCounts }: { postCounts
       {/* 편의 */}
       <PixelSofa90s x={880} y={340} color="#F8B500" />
       <PixelHanwhaSun x={1000} y={80} />
-      <PixelGuitar x={960} y={370} />
+      <PixelGuitar x={960} y={300} />
 
       {/* ═══ 모임방 Zone (60,490 ~ 480,770) — 취미/사교 공간 ═══ */}
       <PixelCorkboard x={80} y={530} frameColor="#2ECC71" postCount={Math.min(postCounts.gathering ?? 0, 5)} />
@@ -1377,10 +1476,10 @@ const PlazaFurniture = memo(function PlazaFurniture({ postCounts }: { postCounts
       <PixelHanwhaSun x={440} y={540} size={36} />
 
       {/* ═══ 고민방 Zone (1070,60 ~ 1570,420) — 상담 공간 ═══ */}
-      <PixelCorkboard x={1120} y={120} postCount={0} />
-      <PixelSofa90s x={1200} y={200} color="#6C5CE7" />
-      <PixelSofa90s x={1200} y={310} color="#6C5CE7" />
-      <PixelRoundTable x={1350} y={260} size={60} />
+      <PixelCorkboard x={1120} y={100} postCount={0} />
+      <PixelSofa90s x={1200} y={230} color="#6C5CE7" />
+      <PixelSofa90s x={1200} y={330} color="#6C5CE7" />
+      <PixelRoundTable x={1380} y={280} size={60} />
       <PixelPlant90s x={1500} y={350} size="small" />
       <PixelHanwhaSun x={1110} y={80} />
       <PixelLightbulb x={1500} y={100} />
