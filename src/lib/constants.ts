@@ -316,6 +316,7 @@ export const ROOMS_DATA: Record<RoomId, RoomDef> = {
       { id: 'stock-lobby', team: '증권ITO', label: '🏠 로비', emoji: '💭', x: 60, y: 60, width: 500, height: 340 },
       { id: 'stock-kpi', team: '증권ITO', label: '📊 KPI', emoji: '📊', x: 640, y: 60, width: 500, height: 340 },
       { id: 'stock-notice', team: '증권ITO', label: '📋 공지', emoji: '📢', x: 60, y: 460, width: 500, height: 300 },
+      { id: 'stock-lab', team: '증권ITO', label: '🔬 연구실', emoji: '🔬', x: 640, y: 460, width: 500, height: 300 },
     ],
     portals: [
       {

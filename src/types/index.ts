@@ -25,4 +25,10 @@ export type {
   UnitActivity,
   ActivityReaction,
   ActivityComment,
+  LabHypothesis,
+  LabEntry,
+  LabComment,
+  LabHypothesisStatus,
+  LabHypothesisCategory,
+  LabEntryType,
 } from './database';

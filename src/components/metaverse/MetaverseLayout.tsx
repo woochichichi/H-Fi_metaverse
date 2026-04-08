@@ -28,6 +28,7 @@ import OmokPanel from '../game/OmokPanel';
 import ReactionPanel from '../game/ReactionPanel';
 import JumpRopePanel from '../game/JumpRopePanel';
 import FortunePanel from '../game/FortunePanel';
+import LabModal from '../lab/LabModal';
 import SiteReportPanel from './SiteReportPanel';
 import FaqPanel from './FaqPanel';
 import { useMetaverseStore } from '../../stores/metaverseStore';
@@ -39,6 +40,7 @@ import { useZoneAlerts } from '../../hooks/useZoneAlerts';
 
 // Zone ID → 패널 매핑 (v4: 팀별 zone ID를 기능별 패널로 매핑)
 function getZonePanel(zoneId: string, userTeam: string | undefined): React.FC<{ onClose: () => void }> | null {
+  if (zoneId === 'stock-lab') return null; // 연구실은 별도 모달로 처리
   if (zoneId === 'voc') return VocPanel;
   if (zoneId === 'idea') return IdeaPanel;
   if (zoneId === 'worry') return WorryPanel;
@@ -86,6 +88,17 @@ export default function MetaverseLayout() {
   const mapTheme = useMemo(() => getMapTimeTheme(), []);
   const [isTouchDevice] = useState(() => 'ontouchstart' in window || navigator.maxTouchPoints > 0);
   usePlayerSync();
+
+  // 연구실 모달 상태
+  const [labOpen, setLabOpen] = useState(false);
+
+  // stock-lab 존 클릭 감지 → 연구실 모달 열기
+  useEffect(() => {
+    if (modalOpen === 'stock-lab') {
+      closeModal();
+      setLabOpen(true);
+    }
+  }, [modalOpen, closeModal]);
 
   // 우클릭 컨텍스트 메뉴 상태
   const [contextMenu, setContextMenu] = useState<{
@@ -229,6 +242,9 @@ export default function MetaverseLayout() {
           onClose={() => setContextMenu(null)}
         />
       )}
+
+      {/* 연구실 모달 */}
+      {labOpen && <LabModal onClose={() => setLabOpen(false)} />}
 
       {/* 가위바위보 모달 */}
       <RockPaperScissors

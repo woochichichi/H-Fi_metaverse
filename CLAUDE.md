@@ -18,7 +18,7 @@ src/
 ├── components/      — metaverse/ mobile/ game/ voc/ idea/ notice/ note/
 │                      gathering/ thread/ inbox/ dashboard/ kpi/ admin/
 │                      layout/ common/
-├── hooks/           — Supabase 쿼리 래퍼 (컴포넌트에서 직접 호출 금지)
+├── hooks/           — Supabase 쿼리 래퍼 (select/insert/update는 훅 경유, Storage·단발성 호출은 컴포넌트 내 허용)
 ├── stores/          — authStore, metaverseStore, uiStore
 ├── lib/             — supabase.ts, constants.ts, utils.ts, renju.ts, profanityFilter.ts
 └── types/           — database.ts, metaverse.ts, index.ts
@@ -26,7 +26,7 @@ supabase/migrations/ — 001_init.sql, 002_rls.sql, 003_triggers.sql
 ```
 
 ## 불변 원칙 (MUST)
-1. DB DELETE/DROP/TRUNCATE 금지 (마이그레이션 제외)
+1. 테이블/스키마 DROP/TRUNCATE 금지 (마이그레이션 제외) — 행 DELETE는 RLS 보호 하에 허용
 2. Supabase 쿼리 후 `{ data, error }` 체크 필수
 3. `service_role_key` 프론트 사용 절대 금지 (anon key만)
 4. RLS 의존 — 보안은 RLS, 프론트 권한 체크는 UX 목적
@@ -35,7 +35,7 @@ supabase/migrations/ — 001_init.sql, 002_rls.sql, 003_triggers.sql
 7. `message_threads`: `sender_role`만 기록 (user_id 절대 저장 안 함)
 8. `user_activities`: 자동 기록 전용 (사용자 직접 수정 불가)
 9. 이메일 도메인: @hanwha 계열만 허용
-10. 컴포넌트는 간결하게 유지 (200줄 초과 시 분리 검토, 단 억지 분리 금지 — 응집도 우선)
+10. 컴포넌트 분리는 응집도 기준 — 줄 수가 아니라 역할이 다를 때 분리 (억지 분리 금지)
 
 ## 프롬프트 기록 (MUST)
 매 세션에서 사용자가 입력한 프롬프트(요청)를 `PROMPTS.md`에 날짜별로 기록한다.
@@ -49,14 +49,27 @@ supabase/migrations/ — 001_init.sql, 002_rls.sql, 003_triggers.sql
 - 사용자가 요청하지 않아도, 기록할 만한 내용이 있으면 **자동으로** 추가
 
 ## 수정 후 자체 검증 (MUST)
-모든 코드 수정 완료 후, 아래 검증을 반드시 수행한 뒤 최종 결과를 전달한다.
-1. **빌드 검증** — `npm run build` 실행하여 TypeScript 컴파일 에러·번들링 에러 0건 확인
+모든 코드 수정 완료 후, 아래 **3단계 검증**을 반드시 수행한 뒤 최종 결과를 전달한다.
+
+### Phase 1: 위험성 리뷰 (코드를 읽으며 직접 점검)
+수정한 모든 파일을 **처음부터 끝까지 다시 읽고** 아래 체크리스트를 확인한다:
+1. **이벤트 충돌** — 새로 추가한 키보드/마우스 이벤트가 기존 핸들러와 겹치지 않는지
+2. **상태 누수** — 컴포넌트 언마운트/삭제 후에도 이전 state가 남아있지 않는지
+3. **드롭다운/모달 닫기** — 바깥 클릭·ESC로 정상 닫히는지, 중첩 모달 시 올바른 순서로 닫히는지
+4. **타입 시그니처** — Props 인터페이스와 실제 전달 값의 타입이 정확히 일치하는지
+5. **프로필/참조 데이터** — 새 데이터 생성 후 관련 조회 데이터(프로필 등)가 동기화되는지
+6. **기존 피드백 위반** — `memory/` 의 피드백 메모리 (backdrop-filter, withTimeout 등)를 위반하지 않는지
+
+### Phase 2: 실효성 검증 (빌드 + 흐름 추적)
+1. **빌드 검증** — `npx tsc -b --noEmit` 실행하여 TypeScript 컴파일 에러 0건 확인
 2. **관련 파일 영향도 분석** — 수정한 함수/타입/훅을 import하는 모든 파일을 Grep으로 찾아 호환성 확인
-3. **타입 안전성** — 변경된 인터페이스·타입이 기존 사용처와 불일치 없는지 검증
-4. **RLS/보안 점검** — DB 쿼리 변경 시 RLS 정책과 충돌 없는지, anon key 범위 내인지 확인
-5. **런타임 실효성** — 수정 의도대로 동작하는지 로직 흐름을 추적하여 검증 (데드코드·unreachable 경로 없는지)
-6. **회귀 방지** — 기존 기능이 깨지지 않았는지 관련 컴포넌트·훅의 호출 흐름 점검
-7. **200줄 규칙** — 수정 후 컴포넌트가 200줄을 초과하면 즉시 분리
+3. **RLS/보안 점검** — DB 쿼리 변경 시 RLS 정책과 충돌 없는지, anon key 범위 내인지 확인
+4. **런타임 실효성** — 수정 의도대로 동작하는지 로직 흐름을 추적하여 검증 (데드코드·unreachable 경로 없는지)
+5. **회귀 방지** — 기존 기능이 깨지지 않았는지 관련 컴포넌트·훅의 호출 흐름 점검
+
+### Phase 3: 발견 즉시 수정 → 재검증 반복
+- Phase 1~2에서 문제를 발견하면 **즉시 수정**하고, 수정 후 다시 Phase 2를 실행한다
+- **0건이 될 때까지 반복** — "나중에 고치겠다"는 허용하지 않음
 
 ## 상세 문서 (필요 시 참조)
 | 문서 | 내용 |

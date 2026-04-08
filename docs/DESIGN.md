@@ -62,11 +62,10 @@ text-2xl:  24px  — 페이지 제목
 - 일관된 크기: `w-5 h-5` (기본), `w-4 h-4` (소형)
 
 ## 코딩 규칙 (SHOULD)
-- 컴포넌트 200줄 이하, 넘으면 분리
-- Supabase 쿼리는 `hooks/`에 집중 (컴포넌트에서 직접 호출 금지)
+- 컴포넌트 분리는 응집도 기준 — 역할이 다를 때 분리 (줄 수 기계적 제한 없음)
+- Supabase 쿼리(select/insert/update)는 `hooks/`에 집중, Storage·단발성 호출은 컴포넌트 내 허용
 - Zustand 스토어 도메인별 분리
-- `supabase gen types`로 자동생성된 타입 사용
-- 파일 업로드: FileUpload 공통 컴포넌트 재사용
+- 타입은 `types/database.ts`에 수동 정의 (현 프로젝트 기준)
 - 모바일 터치 타겟 44x44px 이상
 
 ## 코딩 규칙 (PRACTICE)

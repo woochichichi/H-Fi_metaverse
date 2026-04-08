@@ -7,37 +7,23 @@ interface ValidateInviteResult {
   inviteCode?: InviteCode;
 }
 
-/** 초대 코드 검증 */
+/** 초대 코드 검증 (보안 RPC — 테이블 직접 조회 차단) */
 export async function validateInviteCode(code: string): Promise<ValidateInviteResult> {
-  // 모바일 키보드가 삽입하는 공백·콤마 제거, 대소문자 정규화
-  // 모바일 키보드 공백·콤마 제거, ilike 와일드카드(%,_) 이스케이프, 대소문자 정규화
-  const trimmed = code.trim().replace(/[\s,_%]/g, '').toUpperCase();
+  const { data, error } = await supabase.rpc('validate_invite_code_secure', {
+    code_input: code,
+  });
 
-  const { data, error } = await supabase
-    .from('invite_codes')
-    .select('*')
-    .ilike('code', trimmed)
-    .single();
-
-  if (error || !data) {
-    return { valid: false, error: '유효하지 않은 초대 코드입니다' };
+  if (error) {
+    return { valid: false, error: '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.' };
   }
 
-  const invite = data as InviteCode;
+  const result = data as { valid: boolean; error?: string; invite?: Omit<InviteCode, 'code' | 'created_by' | 'created_at'> };
 
-  if (!invite.active) {
-    return { valid: false, error: '비활성화된 초대 코드입니다' };
+  if (!result.valid) {
+    return { valid: false, error: result.error ?? '유효하지 않은 초대 코드입니다' };
   }
 
-  if (invite.used_count >= invite.max_uses) {
-    return { valid: false, error: '사용 횟수가 초과된 초대 코드입니다' };
-  }
-
-  if (invite.expires_at && new Date(invite.expires_at) < new Date()) {
-    return { valid: false, error: '만료된 초대 코드입니다' };
-  }
-
-  return { valid: true, inviteCode: invite };
+  return { valid: true, inviteCode: result.invite as InviteCode };
 }
 
 /** 별명 중복 체크 */

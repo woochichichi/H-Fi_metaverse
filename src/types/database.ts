@@ -135,6 +135,24 @@ export interface Database {
         Update: Partial<Omit<SiteReport, 'id'>>;
         Relationships: [];
       };
+      lab_hypotheses: {
+        Row: LabHypothesis;
+        Insert: Omit<LabHypothesis, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<LabHypothesis, 'id'>>;
+        Relationships: [];
+      };
+      lab_entries: {
+        Row: LabEntry;
+        Insert: Omit<LabEntry, 'id' | 'created_at'>;
+        Update: Partial<Omit<LabEntry, 'id'>>;
+        Relationships: [];
+      };
+      lab_comments: {
+        Row: LabComment;
+        Insert: Omit<LabComment, 'id' | 'created_at'>;
+        Update: Record<string, never>;
+        Relationships: [];
+      };
     };
     Views: {
       idea_with_votes: {
@@ -497,6 +515,41 @@ export interface ActivityComment {
   id: string;
   activity_id: string;
   author_id: string | null;
+  content: string;
+  created_at: string;
+}
+
+export type LabHypothesisStatus = '탐색중' | '실험중' | '성공' | '실패' | '보류';
+export type LabHypothesisCategory = '구조' | '문화' | '소통' | '참여' | '성장' | '기타';
+export type LabEntryType = '시도' | '결과' | '학습' | '메모';
+
+export interface LabHypothesis {
+  id: string;
+  author_id: string;
+  title: string;
+  description: string;
+  category: LabHypothesisCategory;
+  status: LabHypothesisStatus;
+  pinned: boolean;
+  attachment_urls: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LabEntry {
+  id: string;
+  hypothesis_id: string;
+  type: LabEntryType;
+  content: string;
+  attachment_urls: string[];
+  author_id: string;
+  created_at: string;
+}
+
+export interface LabComment {
+  id: string;
+  hypothesis_id: string;
+  author_id: string;
   content: string;
   created_at: string;
 }
