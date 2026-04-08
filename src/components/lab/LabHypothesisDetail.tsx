@@ -31,6 +31,22 @@ function getFileName(url: string) {
 }
 function isImageUrl(url: string) { return /\.(png|jpe?g|gif|webp|svg)(\?|#|$)/i.test(url); }
 
+// cross-origin에서도 원본 파일명으로 다운로드
+function downloadFile(url: string) {
+  const name = getFileName(url);
+  const cleanUrl = url.split('#')[0]; // fragment 제거
+  fetch(cleanUrl)
+    .then((r) => r.blob())
+    .then((blob) => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = name;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    })
+    .catch(() => window.open(cleanUrl, '_blank'));
+}
+
 interface Props {
   hypothesis: LabHypothesis;
   entries: LabEntry[];
@@ -206,12 +222,12 @@ export default function LabHypothesisDetail({
               <div className="mt-2 rounded-lg border border-white/[.06] bg-white/[.02] p-2">
                 <div className="mb-1 text-[10px] font-semibold text-text-muted">📎 첨부파일 ({hypothesis.attachment_urls.length})</div>
                 {hypothesis.attachment_urls.map((url, i) => (
-                  <a key={i} href={url} target="_blank" rel="noopener noreferrer"
-                    className="mb-0.5 flex items-center gap-2 rounded-md px-2 py-1 text-[11px] text-text-secondary transition-colors hover:bg-white/[.04]">
+                  <button key={i} onClick={() => downloadFile(url)}
+                    className="mb-0.5 flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-[11px] text-text-secondary transition-colors hover:bg-white/[.04]">
                     {isImageUrl(url) ? <ImageIcon size={11} className="shrink-0 text-blue-400" /> : <FileText size={11} className="shrink-0 text-text-muted" />}
                     <span className="flex-1 truncate">{getFileName(url)}</span>
                     <Download size={11} className="shrink-0 text-text-muted" />
-                  </a>
+                  </button>
                 ))}
               </div>
             )}
