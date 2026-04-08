@@ -4,7 +4,7 @@ import type { RoomDef, RoomId } from '../../lib/constants';
 import { getMapTimeTheme, type MapTimeTheme } from '../../lib/utils';
 import { useMetaverseStore } from '../../stores/metaverseStore';
 import type { RoomAlertMap } from '../../hooks/useZoneAlerts';
-import { useBoardPosts, type BoardPostCounts } from '../../hooks/useBoardPosts';
+// import { useBoardPosts, type BoardPostCounts } from '../../hooks/useBoardPosts'; // 가구 간소화로 미사용
 
 // ═══════════════════════════════════════════════════════
 // 90년대 사무실 아이소메트릭 픽셀 가구 (게더타운 스타일)
@@ -1330,6 +1330,7 @@ const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme }: 
 void PixelDualMonitor; void PixelWaterCooler; void PixelDumbbell; void PixelBasketball; void PixelSafe;
 void PixelRubberDuck; void PixelPizzaBox; void PixelCatDev; void PixelEnergyDrink; void PixelMechKeyboard;
 void PixelGuitar; void PixelGoldBar; void PixelCoinStack; void PixelTeamDeco; void PixelSignboard;
+void PixelChair90s; void PixelArcade;
 
 // ═══ 컴포넌트 바운딩 박스 (배치 겹침 방지용) ═══
 // 가구 배치 시 이 크기를 참고하여 x,y 간격을 확보할 것
@@ -1426,75 +1427,50 @@ if (import.meta.env.DEV) {
 }
 
 // ═══ 중앙 광장 가구 (1600x1000, 로컬좌표) ═══
-const PlazaFurniture = memo(function PlazaFurniture({ postCounts }: { postCounts: BoardPostCounts }) {
+const PlazaFurniture = memo(function PlazaFurniture() {
   return (
     <>
-      {/* ═══ VOC Zone (30,60 ~ 530,420) — 소통 라운지 ═══ */}
-      <PixelNeonSign x={300} y={68} text="VOICE!" color="#FF6B9D" />
-      {/* 접수 데스크 */}
-      <PixelDesk90s x={150} y={140} />
-      <PixelCRT x={180} y={110} />
-      <PixelChair90s x={190} y={220} />
-      {/* 상담 라운지 */}
-      <PixelSofa90s x={100} y={300} color="#FF6B9D" />
-      <PixelRoundTable x={240} y={370} size={60} />
-      {/* 코르크보드 + 우편함 */}
-      <PixelCorkboard x={380} y={100} postCount={Math.min(postCounts.voc ?? 0, 5)} />
-      <PixelMailbox x={400} y={290} />
+      {/* ═══ VOC Zone (30,60 ~ 530,420) — 소통 ═══ */}
+      <PixelNeonSign x={180} y={68} text="VOICE!" color="#FF6B9D" />
+      <PixelMailbox x={300} y={180} />
+      <PixelSofa90s x={120} y={300} color="#FF6B9D" />
 
-      {/* ═══ 아이디어 Zone (550,60 ~ 1050,420) — 크리에이티브 스튜디오 ═══ */}
-      <PixelNeonSign x={780} y={68} text="IDEA!" color="#FFD93D" />
-      {/* 브레인스토밍 테이블 */}
-      <PixelRoundTable x={720} y={180} size={80} />
-      <PixelRoundTable x={720} y={320} size={80} />
-      <PixelChair90s x={700} y={260} />
-      <PixelChair90s x={820} y={260} />
-      {/* 아이디어 벽 — 코르크보드 */}
-      <PixelCorkboard x={580} y={130} postCount={Math.min(postCounts.idea ?? 0, 5)} />
-      <PixelLightbulb x={580} y={280} />
-      <PixelSofa90s x={880} y={340} color="#F8B500" />
+      {/* ═══ 아이디어 Zone (550,60 ~ 1050,420) — 아이디어 ═══ */}
+      <PixelLightbulb x={720} y={160} />
+      <PixelRoundTable x={720} y={280} size={72} />
+      <PixelSofa90s x={850} y={300} color="#F8B500" />
 
-      {/* ═══ 모임방 Zone (60,490 ~ 480,770) — 취미/사교 공간 ═══ */}
-      <PixelCorkboard x={80} y={530} frameColor="#2ECC71" postCount={Math.min(postCounts.gathering ?? 0, 5)} />
-      <PixelPicnicTable x={100} y={650} />
-      <PixelPicnicTable x={280} y={650} />
-      <PixelBBQ x={380} y={540} />
+      {/* ═══ 고민방 Zone (1070,60 ~ 1570,420) — 상담 ═══ */}
+      <PixelSofa90s x={1200} y={180} color="#6C5CE7" />
+      <PixelPlant90s x={1480} y={300} size="small" />
 
-      {/* ═══ 고민방 Zone (1070,60 ~ 1570,420) — 상담 공간 ═══ */}
-      <PixelCorkboard x={1120} y={100} postCount={0} />
-      <PixelSofa90s x={1200} y={230} color="#6C5CE7" />
-      <PixelSofa90s x={1200} y={330} color="#6C5CE7" />
-      <PixelRoundTable x={1380} y={280} size={60} />
-      <PixelPlant90s x={1500} y={350} size="small" />
+      {/* ═══ 모임방 Zone (60,490 ~ 480,770) — 모임 ═══ */}
+      <PixelBBQ x={300} y={540} />
+      <PixelPicnicTable x={150} y={640} />
 
-      {/* ═══ 반응속도 Zone (520,490 ~ 790,770) — 게임 아케이드 ═══ */}
-      <PixelNeonSign x={590} y={495} text="⚡ 반응속도" color="#FFD93D" />
-      <PixelScoreboard x={595} y={520} />
-      <PixelArcade x={535} y={590} accent="#FF6B6B" />
-      <PixelArcade x={710} y={590} accent="#4ECDC4" />
-      <PixelBuzzer x={635} y={630} color="#E74C3C" />
+      {/* ═══ 반응속도 Zone (520,490 ~ 790,770) ═══ */}
+      <PixelScoreboard x={595} y={510} />
+      <PixelBuzzer x={635} y={620} color="#E74C3C" />
 
       {/* ═══ 오목 Zone (810,490 ~ 1080,770) ═══ */}
       <PixelOmokTable x={870} y={570} />
-      <PixelChair90s x={850} y={550} />
-      <PixelChair90s x={990} y={550} />
-      <PixelChair90s x={850} y={710} />
-      <PixelChair90s x={990} y={710} />
 
-      {/* ═══ 줄넘기 Zone (1100,490 ~ 1370,770) — 체육관 ═══ */}
+      {/* ═══ 줄넘기 Zone (1100,490 ~ 1370,770) ═══ */}
       <PixelJumpRope x={1160} y={560} />
-      <PixelNeonSign x={1160} y={520} text="JUMP!" color="#4ECDC4" />
-      <PixelScoreboard x={1120} y={520} />
-      <PixelSofa90s x={1120} y={730} color="#2ecc71" />
 
-      {/* ═══ 바나프레소 Zone (1390,530 ~ 1560,730) — 운세 카페 ═══ */}
-      <PixelCoffeeMachine x={1410} y={560} />
-      <PixelNeonSign x={1410} y={540} text="CAFE" color="#F59E0B" />
-      <PixelRoundTable x={1450} y={640} size={48} />
-      <PixelChair90s x={1430} y={680} />
-      <PixelPlant90s x={1530} y={680} size="small" />
+      {/* ═══ 바나프레소 Zone (1390,530 ~ 1560,730) ═══ */}
+      <PixelCoffeeMachine x={1440} y={580} />
 
-      {/* 광장 하단 */}
+      {/* ══════════════════════════════════════════════
+          [숨김] 이전 광장 가구 — 필요 시 주석 해제
+          - VOC: Desk, CRT, Chair, Corkboard, RoundTable
+          - 아이디어: RoundTable x2, Chair x2, Corkboard, NeonSign
+          - 모임: Corkboard, PicnicTable x2
+          - 고민: Corkboard, Sofa x2, RoundTable
+          - 반응속도: NeonSign, Arcade x2
+          - 줄넘기: NeonSign, Scoreboard, Sofa
+          - 바나프레소: NeonSign, RoundTable, Chair, Plant
+         ═══════════════════════════════════════════════ */}
     </>
   );
 });
@@ -1511,7 +1487,7 @@ export default function MapCanvas({ children, roomAlerts }: MapCanvasProps) {
   const setMoveTarget = useMetaverseStore((s) => s.setMoveTarget);
   const room = ROOMS_DATA[currentRoom];
   const { w: mapW, h: mapH } = room.mapSize;
-  const postCounts = useBoardPosts();
+  // const postCounts = useBoardPosts(); // 가구 간소화로 미사용
 
   const themeKey = room.team
     ? (room.id === 'stock' ? 'stock' : room.id === 'life' ? 'life' : 'shield')
@@ -1589,7 +1565,7 @@ export default function MapCanvas({ children, roomAlerts }: MapCanvasProps) {
       {room.team ? (
         <TeamTownFurniture teamColor={room.theme.main} theme={themeKey} />
       ) : (
-        <PlazaFurniture postCounts={postCounts} />
+        <PlazaFurniture />
       )}
 
       {/* 포탈 아치형 문 */}
