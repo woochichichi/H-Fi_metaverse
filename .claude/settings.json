@@ -33,6 +33,19 @@
           }
         ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git commit:*)",
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"additionalContext\":\"[자체검증 리마인더] 커밋 전 CLAUDE.md Phase 1→2→3 자체검증을 완료했는지 확인하세요. 이번 대화에서 이미 실행했다면 무시해도 됩니다.\"}}'",
+            "statusMessage": "자체검증 리마인더"
+          }
+        ]
+      }
     ]
   }
 }

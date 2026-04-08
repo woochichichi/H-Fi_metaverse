@@ -28,7 +28,7 @@ export default function LabEntryForm({ onSubmit, onClose }: Props) {
   const dropRef = useRef<HTMLLabelElement>(null);
 
   const addFiles = (newFiles: File[]) => {
-    const valid = newFiles.filter((f) => f.size <= 5 * 1024 * 1024 && (f.type.startsWith('image/') || f.type === 'application/pdf'));
+    const valid = newFiles.filter((f) => f.size <= 5 * 1024 * 1024);
     setFiles((prev) => [...prev, ...valid]);
   };
 
@@ -119,8 +119,8 @@ export default function LabEntryForm({ onSubmit, onClose }: Props) {
             }`}
           >
             <Upload size={16} className="mb-1" />
-            {dragOver ? '여기에 놓으세요' : '클릭 또는 드래그하여 파일 첨부 (이미지, PDF / 5MB 이하)'}
-            <input type="file" multiple accept="image/*,.pdf" onChange={handleFileChange} className="hidden" />
+            {dragOver ? '여기에 놓으세요' : '클릭 또는 드래그하여 파일 첨부 (5MB 이하)'}
+            <input type="file" multiple accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.hwp,.hwpx,.txt,.zip" onChange={handleFileChange} className="hidden" />
           </label>
           {files.length > 0 && (
             <div className="mt-2 space-y-1">

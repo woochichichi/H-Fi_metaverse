@@ -87,7 +87,7 @@ export default function LabHypothesisDetail({
   };
 
   const handleAddFiles = async (fileList: FileList | File[]) => {
-    const arr = Array.from(fileList).filter((f) => f.size <= 5 * 1024 * 1024 && (f.type.startsWith('image/') || f.type === 'application/pdf'));
+    const arr = Array.from(fileList).filter((f) => f.size <= 5 * 1024 * 1024);
     if (arr.length === 0) return;
     setUploading(true);
     for (const file of arr) {
@@ -165,7 +165,7 @@ export default function LabHypothesisDetail({
               ))}
               <label className="mt-1 flex cursor-pointer items-center justify-center gap-1 rounded-md border border-dashed border-white/[.1] py-1.5 text-[10px] text-text-muted transition-colors hover:border-accent/40 hover:text-accent">
                 <Upload size={11} /> {uploading ? '업로드 중...' : '파일 추가'}
-                <input type="file" multiple accept="image/*,.pdf" onChange={(e) => { if (e.target.files && e.target.files.length > 0) handleAddFiles(e.target.files); e.target.value = ''; }} className="hidden" disabled={uploading} />
+                <input type="file" multiple accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.hwp,.hwpx,.txt,.zip" onChange={(e) => { if (e.target.files && e.target.files.length > 0) handleAddFiles(e.target.files); e.target.value = ''; }} className="hidden" disabled={uploading} />
               </label>
             </div>
             <div className="flex gap-1.5">
