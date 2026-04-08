@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Trash2, Pencil, Check, X, Send } from 'lucide-react';
 import ConfirmDialog from '../common/ConfirmDialog';
 import { formatRelativeTime } from '../../lib/utils';
@@ -19,6 +19,16 @@ export default function LabCommentSection({ comments, profiles, profileId, onSub
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+
+  // 가설 전환 시 편집 상태 초기화
+  const prevFirstId = useRef(comments[0]?.id);
+  useEffect(() => {
+    if (comments[0]?.id !== prevFirstId.current) {
+      setEditingId(null);
+      setDeleteTarget(null);
+      prevFirstId.current = comments[0]?.id;
+    }
+  }, [comments]);
 
   const handleSubmit = async () => {
     const trimmed = text.trim();

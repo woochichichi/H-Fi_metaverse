@@ -27,6 +27,16 @@ export default function LabEntryTimeline({ entries, isAdmin, loading, onAddClick
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const prevCount = useRef(entries.length);
 
+  // 가설 전환 시 편집 상태 초기화 (entries 배열 참조 변경 감지)
+  const prevFirstId = useRef(entries[0]?.id);
+  useEffect(() => {
+    if (entries[0]?.id !== prevFirstId.current) {
+      setEditingId(null);
+      setDeleteTarget(null);
+      prevFirstId.current = entries[0]?.id;
+    }
+  }, [entries]);
+
   // 엔트리 추가 시 하단 스크롤
   useEffect(() => {
     if (entries.length > prevCount.current) {
