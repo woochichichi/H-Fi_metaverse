@@ -6,6 +6,7 @@ import LabEntryForm from './LabEntryForm';
 import { StatusBadge } from './LabHypothesisList';
 import ConfirmDialog from '../common/ConfirmDialog';
 import { supabase } from '../../lib/supabase';
+import { useUiStore } from '../../stores/uiStore';
 import { formatDate } from '../../lib/utils';
 import type {
   LabHypothesis, LabEntry, LabComment,
@@ -86,8 +87,12 @@ export default function LabHypothesisDetail({
     setEditing(true);
   };
 
+  const { addToast } = useUiStore();
   const handleAddFiles = async (fileList: FileList | File[]) => {
-    const arr = Array.from(fileList).filter((f) => f.size <= 5 * 1024 * 1024);
+    const all = Array.from(fileList);
+    const over = all.filter((f) => f.size > 5 * 1024 * 1024);
+    if (over.length > 0) addToast(`${over.map((f) => f.name).join(', ')} — 5MB 초과로 제외됨`, 'error');
+    const arr = all.filter((f) => f.size <= 5 * 1024 * 1024);
     if (arr.length === 0) return;
     setUploading(true);
     for (const file of arr) {

@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { X, Upload } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { useUiStore } from '../../stores/uiStore';
 import type { LabHypothesisCategory } from '../../types';
 
 const CATEGORIES: LabHypothesisCategory[] = ['구조', '문화', '소통', '참여', '성장', '기타'];
@@ -27,7 +28,10 @@ export default function LabHypothesisForm({ authorId, onSubmit, onClose }: Props
   const [dragOver, setDragOver] = useState(false);
   const dropRef = useRef<HTMLLabelElement>(null);
 
+  const { addToast } = useUiStore();
   const addFiles = (newFiles: File[]) => {
+    const over = newFiles.filter((f) => f.size > 5 * 1024 * 1024);
+    if (over.length > 0) addToast(`${over.map((f) => f.name).join(', ')} — 5MB 초과로 제외됨`, 'error');
     const valid = newFiles.filter((f) => f.size <= 5 * 1024 * 1024);
     setFiles((prev) => [...prev, ...valid]);
   };
