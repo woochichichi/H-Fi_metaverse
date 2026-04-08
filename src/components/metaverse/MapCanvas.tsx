@@ -1424,16 +1424,16 @@ const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme }: 
   return (
     <>
       {/* ═══ 로비 Zone (60,60 ~ 560,400) — 팀원→소통→성장 순환 ═══ */}
-      <PixelTeamCircle x={140} y={100} color={teamColor} />
+      <PixelTeamCircle x={140} y={110} color={teamColor} />
 
       {/* ═══ KPI Zone (640,60 ~ 1140,400) — 목표 달성 바 차트 ═══ */}
-      <PixelKpiBar x={700} y={100} color={teamColor} />
+      <PixelKpiBar x={710} y={120} color={teamColor} />
       {theme === 'stock' && <PixelCandleChart x={1060} y={100} />}
       {theme === 'life' && <Pixel63Building x={1070} y={100} />}
       {theme === 'shield' && <PixelInsuranceBuilding x={1065} y={100} />}
 
       {/* ═══ 공지 Zone (60,460 ~ 560,760) — 공지 전파 ═══ */}
-      <PixelNoticeWave x={120} y={520} />
+      <PixelNoticeWave x={130} y={530} />
 
       {/* ═══ 연구실 Zone (640,460 ~ 1140,760) — stock 전용 ═══ */}
       {theme === 'stock' && <PixelLabJourney x={730} y={520} />}
@@ -1556,16 +1556,16 @@ const PlazaFurniture = memo(function PlazaFurniture() {
   return (
     <>
       {/* ═══ VOC Zone (30,60 ~ 530,420) — 불편→접수→처리→개선 ═══ */}
-      <PixelVocFlow x={80} y={140} />
+      <PixelVocFlow x={80} y={160} />
 
       {/* ═══ 아이디어 Zone (550,60 ~ 1050,420) — 씨앗→투표→채택→실현 ═══ */}
-      <PixelIdeaGrow x={620} y={140} />
+      <PixelIdeaGrow x={600} y={120} />
 
       {/* ═══ 고민방 Zone (1070,60 ~ 1570,420) — 고민→나눔→위로 ═══ */}
-      <PixelWorryHeart x={1200} y={140} />
+      <PixelWorryHeart x={1130} y={160} />
 
       {/* ═══ 모임방 Zone (60,490 ~ 480,770) — 인적교류 네트워크 ═══ */}
-      <PixelGatherNet x={120} y={540} />
+      <PixelGatherNet x={130} y={540} />
 
       {/* ═══ 반응속도 Zone (520,490 ~ 790,770) ═══ */}
       <PixelScoreboard x={595} y={510} />
