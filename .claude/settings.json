@@ -19,5 +19,20 @@
       "Bash(DELETE:*)",
       "Bash(TRUNCATE:*)"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const j=JSON.parse(d);const f=j.tool_input?.file_path||j.tool_response?.filePath||'';if(f.match(/\\.(ts|tsx)$/)){process.exit(0)}else{process.exit(1)}})\" && npx tsc -b --noEmit 2>&1 || true",
+            "timeout": 30,
+            "statusMessage": "TypeScript 타입 검증 중..."
+          }
+        ]
+      }
+    ]
   }
 }

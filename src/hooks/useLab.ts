@@ -22,6 +22,7 @@ export function useLab() {
   const [comments, setComments] = useState<LabComment[]>([]);
   const [commentProfiles, setCommentProfiles] = useState<Record<string, Profile>>({});
   const [loading, setLoading] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // ========== 가설 ==========
@@ -102,6 +103,7 @@ export function useLab() {
   // ========== 엔트리 ==========
 
   const fetchEntries = useCallback(async (hypothesisId: string) => {
+    setDetailLoading(true);
     try {
       const buildQuery = () =>
         supabase
@@ -114,6 +116,8 @@ export function useLab() {
       setEntries(data ?? []);
     } catch (err) {
       console.error('엔트리 조회 실패:', err);
+    } finally {
+      setDetailLoading(false);
     }
   }, []);
 
@@ -139,6 +143,21 @@ export function useLab() {
 
       if (insertError) return { data: null, error: insertError.message };
       if (data) setEntries((prev) => [...prev, data]);
+      return { data, error: null };
+    },
+    [],
+  );
+
+  const updateEntry = useCallback(
+    async (id: string, updates: { content?: string; type?: LabEntryType }) => {
+      const { data, error: updateError } = await supabase
+        .from('lab_entries')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      if (updateError) return { data: null, error: updateError.message };
+      if (data) setEntries((prev) => prev.map((e) => (e.id === id ? data : e)));
       return { data, error: null };
     },
     [],
@@ -213,6 +232,21 @@ export function useLab() {
     [commentProfiles],
   );
 
+  const updateComment = useCallback(
+    async (id: string, content: string) => {
+      const { data, error: updateError } = await supabase
+        .from('lab_comments')
+        .update({ content })
+        .eq('id', id)
+        .select()
+        .single();
+      if (updateError) return { data: null, error: updateError.message };
+      if (data) setComments((prev) => prev.map((c) => (c.id === id ? data : c)));
+      return { data, error: null };
+    },
+    [],
+  );
+
   const deleteComment = useCallback(async (id: string) => {
     const { error: deleteError } = await supabase.from('lab_comments').delete().eq('id', id);
     if (deleteError) return { error: deleteError.message };
@@ -232,6 +266,7 @@ export function useLab() {
     comments,
     commentProfiles,
     loading,
+    detailLoading,
     error,
     fetchHypotheses,
     createHypothesis,
@@ -239,9 +274,11 @@ export function useLab() {
     deleteHypothesis,
     fetchEntries,
     createEntry,
+    updateEntry,
     deleteEntry,
     fetchComments,
     createComment,
+    updateComment,
     deleteComment,
     clearDetail,
   };

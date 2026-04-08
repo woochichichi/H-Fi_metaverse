@@ -1289,16 +1289,14 @@ const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme, po
       <PixelChair90s x={160} y={720} />
       <PixelChair90s x={280} y={720} />
 
-      {/* ═══ 파트 팻말 (stock 전용) — 공지방 우측 빈 공간 (860~1140, 470~720) ═══ */}
+      {/* ═══ 파트 팻말 (stock 전용) — 로비 하단 (350~540, 310~380) ═══ */}
       {theme === 'stock' && (
         <>
-          {/* Row 1 */}
-          <PixelSignboard x={862} y={478} label="HTS" color="#0984E3" accentColor="#065E9E" />
-          <PixelSignboard x={958} y={478} label="MCI" color="#00D68F" accentColor="#00A06A" />
-          <PixelSignboard x={1054} y={478} label="FEP" color="#FF9A6B" accentColor="#CC6030" />
-          {/* Row 2 */}
-          <PixelSignboard x={910} y={614} label="SOL" color="#6C5CE7" accentColor="#4A3DB5" />
-          <PixelSignboard x={1006} y={614} label="WTS" color="#FF4757" accentColor="#B8001F" />
+          <PixelSignboard x={350} y={310} label="HTS" color="#0984E3" accentColor="#065E9E" />
+          <PixelSignboard x={420} y={310} label="MCI" color="#00D68F" accentColor="#00A06A" />
+          <PixelSignboard x={490} y={310} label="FEP" color="#FF9A6B" accentColor="#CC6030" />
+          <PixelSignboard x={385} y={370} label="SOL" color="#6C5CE7" accentColor="#4A3DB5" />
+          <PixelSignboard x={455} y={370} label="WTS" color="#FF4757" accentColor="#B8001F" />
         </>
       )}
     </>

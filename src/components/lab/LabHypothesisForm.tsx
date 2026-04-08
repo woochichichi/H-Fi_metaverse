@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { X, Upload } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import type { LabHypothesisCategory } from '../../types';
@@ -24,11 +24,22 @@ export default function LabHypothesisForm({ authorId, onSubmit, onClose }: Props
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  const dropRef = useRef<HTMLLabelElement>(null);
+
+  const addFiles = (newFiles: File[]) => {
+    const valid = newFiles.filter((f) => f.size <= 5 * 1024 * 1024 && (f.type.startsWith('image/') || f.type === 'application/pdf'));
+    setFiles((prev) => [...prev, ...valid]);
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = Array.from(e.target.files ?? []);
-    const valid = selected.filter((f) => f.size <= 5 * 1024 * 1024);
-    setFiles((prev) => [...prev, ...valid]);
+    addFiles(Array.from(e.target.files ?? []));
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    addFiles(Array.from(e.dataTransfer.files));
   };
 
   const uploadFiles = async (): Promise<string[]> => {
@@ -112,9 +123,17 @@ export default function LabHypothesisForm({ authorId, onSubmit, onClose }: Props
 
         <div className="mb-4">
           <label className="mb-1.5 block text-[11px] font-semibold text-text-muted">첨부파일</label>
-          <label className="flex cursor-pointer flex-col items-center rounded-lg border border-dashed border-white/[.12] py-3 text-[11px] text-text-muted transition-colors hover:border-accent/40 hover:text-text-secondary">
+          <label
+            ref={dropRef}
+            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={handleDrop}
+            className={`flex cursor-pointer flex-col items-center rounded-lg border border-dashed py-3 text-[11px] text-text-muted transition-colors ${
+              dragOver ? 'border-accent bg-accent/[.06] text-accent' : 'border-white/[.12] hover:border-accent/40 hover:text-text-secondary'
+            }`}
+          >
             <Upload size={16} className="mb-1" />
-            클릭하여 파일 첨부 (이미지, PDF / 5MB 이하)
+            {dragOver ? '여기에 놓으세요' : '클릭 또는 드래그하여 파일 첨부 (이미지, PDF / 5MB 이하)'}
             <input type="file" multiple accept="image/*,.pdf" onChange={handleFileChange} className="hidden" />
           </label>
           {files.length > 0 && (

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, FlaskConical } from 'lucide-react';
 import LabHypothesisList from './LabHypothesisList';
@@ -21,6 +21,7 @@ export default function LabModal({ onClose }: LabModalProps) {
   const [statusFilter, setStatusFilter] = useState<LabHypothesisStatus | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [showEntryForm, setShowEntryForm] = useState(false);
+  const pendingSelectRef = useRef<string | null>(null);
 
   useEffect(() => {
     lab.fetchHypotheses(statusFilter ? { status: statusFilter } : {});
@@ -38,8 +39,16 @@ export default function LabModal({ onClose }: LabModalProps) {
     }
   }, [selectedId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 첫 로드 시 첫 번째 가설 자동 선택
+  // 첫 로드 시 첫 번째 가설 자동 선택 + 새 가설 생성 후 자동 선택
   useEffect(() => {
+    if (pendingSelectRef.current) {
+      const target = lab.hypotheses.find((h) => h.id === pendingSelectRef.current);
+      if (target) {
+        setSelectedId(target.id);
+        pendingSelectRef.current = null;
+        return;
+      }
+    }
     if (!selectedId && lab.hypotheses.length > 0) {
       setSelectedId(lab.hypotheses[0].id);
     }
@@ -50,8 +59,9 @@ export default function LabModal({ onClose }: LabModalProps) {
     setShowEntryForm(false);
   }, []);
 
-  const handleCreated = useCallback(() => {
+  const handleCreated = useCallback((newId: string) => {
     setShowForm(false);
+    pendingSelectRef.current = newId;
     lab.fetchHypotheses(statusFilter ? { status: statusFilter } : {});
   }, [statusFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -76,10 +86,8 @@ export default function LabModal({ onClose }: LabModalProps) {
 
   return createPortal(
     <div className="fixed inset-0 z-[300] flex items-center justify-center">
-      {/* 배경 오버레이 */}
       <div className="absolute inset-0 bg-black/60" onClick={() => { if (!showForm && !showEntryForm) onClose(); }} />
 
-      {/* 모달 */}
       <div
         className="relative z-10 flex flex-col overflow-hidden rounded-2xl border border-white/[.08] bg-bg-primary shadow-2xl animate-[fadeIn_.2s_ease-out]"
         style={{ width: 960, maxWidth: '95vw', height: 680, maxHeight: '90vh' }}
@@ -101,7 +109,6 @@ export default function LabModal({ onClose }: LabModalProps) {
 
         {/* 바디 2-column */}
         <div className="flex flex-1 overflow-hidden">
-          {/* 좌측 목록 */}
           <LabHypothesisList
             hypotheses={lab.hypotheses}
             selectedId={selectedId}
@@ -113,7 +120,6 @@ export default function LabModal({ onClose }: LabModalProps) {
             onAddClick={() => setShowForm(true)}
           />
 
-          {/* 우측 상세 */}
           {selected ? (
             <LabHypothesisDetail
               hypothesis={selected}
@@ -122,14 +128,14 @@ export default function LabModal({ onClose }: LabModalProps) {
               commentProfiles={lab.commentProfiles}
               isAdmin={isAdmin}
               profileId={profile?.id ?? ''}
+              loading={lab.detailLoading}
               onUpdateHypothesis={lab.updateHypothesis}
-              onDeleteHypothesis={async (id) => {
-                await lab.deleteHypothesis(id);
-                handleDeleted();
-              }}
+              onDeleteHypothesis={async (id) => { await lab.deleteHypothesis(id); handleDeleted(); }}
               onCreateEntry={lab.createEntry}
+              onUpdateEntry={lab.updateEntry}
               onDeleteEntry={lab.deleteEntry}
               onCreateComment={lab.createComment}
+              onUpdateComment={lab.updateComment}
               onDeleteComment={lab.deleteComment}
               showEntryForm={showEntryForm}
               onShowEntryForm={setShowEntryForm}
@@ -139,22 +145,20 @@ export default function LabModal({ onClose }: LabModalProps) {
               <FlaskConical size={48} className="mb-3 opacity-20" />
               <p className="text-sm">
                 {lab.hypotheses.length === 0
-                  ? isAdmin
-                    ? '첫 가설을 등록해보세요'
-                    : '아직 등록된 가설이 없습니다'
+                  ? isAdmin ? '첫 가설을 등록해보세요' : '아직 등록된 가설이 없습니다'
                   : '좌측에서 가설을 선택하세요'}
               </p>
             </div>
           )}
         </div>
 
-        {/* 새 가설 폼 오버레이 */}
+        {/* 새 가설 폼 */}
         {showForm && profile && (
           <LabHypothesisForm
             authorId={profile.id}
             onSubmit={async (input) => {
               const result = await lab.createHypothesis(input);
-              if (!result.error) handleCreated();
+              if (!result.error && result.data) handleCreated(result.data.id);
               return result;
             }}
             onClose={() => setShowForm(false)}
