@@ -723,6 +723,182 @@ function PixelLabJourney({ x, y }: { x: number; y: number }) {
   );
 }
 
+// ═══ 방별 목적 다이어그램 (픽셀아트) ═══
+
+// VOC: 불편 → 접수 → 개선 흐름
+function PixelVocFlow({ x, y }: { x: number; y: number }) {
+  return (
+    <div className="absolute z-[5] pointer-events-none" style={{ left: x, top: y }}>
+      <svg width={360} height={160} viewBox="0 0 90 40" style={{ imageRendering: 'pixelated' }}>
+        {/* 흐름선 */}
+        <polyline points="10,20 30,20 50,20 70,20" fill="none" stroke="#FF6B9D" strokeWidth="0.5" strokeDasharray="1 0.5" />
+        <polygon points="72,20 69,18 69,22" fill="#FF6B9D" />
+        {/* 노드 */}
+        <circle cx="10" cy="20" r="4" fill="#1a1118" stroke="#FF6B9D" strokeWidth="0.6" />
+        <text x="10" y="21.5" textAnchor="middle" fill="#FF6B9D" fontSize="3" fontFamily="'DungGeunMo', monospace">😤</text>
+        <text x="10" y="28" textAnchor="middle" fill="#FF6B9D88" fontSize="2" fontFamily="'DungGeunMo', monospace">불편</text>
+
+        <circle cx="30" cy="20" r="4" fill="#1a1118" stroke="#f59e0b" strokeWidth="0.6" />
+        <text x="30" y="21.5" textAnchor="middle" fill="#fbbf24" fontSize="3" fontFamily="'DungGeunMo', monospace">📋</text>
+        <text x="30" y="28" textAnchor="middle" fill="#fbbf2488" fontSize="2" fontFamily="'DungGeunMo', monospace">접수</text>
+
+        <circle cx="50" cy="20" r="4" fill="#1a1118" stroke="#60a5fa" strokeWidth="0.6" />
+        <text x="50" y="21.5" textAnchor="middle" fill="#60a5fa" fontSize="3" fontFamily="'DungGeunMo', monospace">🔧</text>
+        <text x="50" y="28" textAnchor="middle" fill="#60a5fa88" fontSize="2" fontFamily="'DungGeunMo', monospace">처리</text>
+
+        <circle cx="70" cy="20" r="4" fill="#1a1118" stroke="#00D68F" strokeWidth="0.6" />
+        <text x="70" y="21.5" textAnchor="middle" fill="#00D68F" fontSize="3" fontFamily="'DungGeunMo', monospace">✅</text>
+        <text x="70" y="28" textAnchor="middle" fill="#00D68F88" fontSize="2" fontFamily="'DungGeunMo', monospace">개선</text>
+      </svg>
+    </div>
+  );
+}
+
+// 아이디어: 씨앗 → 투표 → 채택 성장
+function PixelIdeaGrow({ x, y }: { x: number; y: number }) {
+  return (
+    <div className="absolute z-[5] pointer-events-none" style={{ left: x, top: y }}>
+      <svg width={320} height={180} viewBox="0 0 80 45" style={{ imageRendering: 'pixelated' }}>
+        {/* 성장 곡선 */}
+        <path d="M10,35 Q25,34 35,28 Q45,22 55,14 Q65,8 72,6" fill="none" stroke="#F8B50066" strokeWidth="0.5" />
+        {/* 노드: 씨앗 → 새싹 → 꽃 → 열매 */}
+        <text x="10" y="33" textAnchor="middle" fill="#F8B500" fontSize="4" fontFamily="'DungGeunMo', monospace">🌱</text>
+        <text x="10" y="39" textAnchor="middle" fill="#F8B50066" fontSize="1.8" fontFamily="'DungGeunMo', monospace">아이디어</text>
+
+        <text x="35" y="26" textAnchor="middle" fill="#F8B500" fontSize="4" fontFamily="'DungGeunMo', monospace">👍</text>
+        <text x="35" y="32" textAnchor="middle" fill="#F8B50066" fontSize="1.8" fontFamily="'DungGeunMo', monospace">투표</text>
+
+        <text x="55" y="14" textAnchor="middle" fill="#F8B500" fontSize="4" fontFamily="'DungGeunMo', monospace">🌻</text>
+        <text x="55" y="20" textAnchor="middle" fill="#F8B50066" fontSize="1.8" fontFamily="'DungGeunMo', monospace">채택</text>
+
+        <text x="72" y="6" textAnchor="middle" fill="#00D68F" fontSize="4" fontFamily="'DungGeunMo', monospace">🚀</text>
+        <text x="72" y="12" textAnchor="middle" fill="#00D68F66" fontSize="1.8" fontFamily="'DungGeunMo', monospace">실현</text>
+      </svg>
+    </div>
+  );
+}
+
+// 고민방: 마음 → 나눔 → 위로
+function PixelWorryHeart({ x, y }: { x: number; y: number }) {
+  return (
+    <div className="absolute z-[5] pointer-events-none" style={{ left: x, top: y }}>
+      <svg width={280} height={160} viewBox="0 0 70 40" style={{ imageRendering: 'pixelated' }}>
+        <polyline points="12,20 35,20 58,20" fill="none" stroke="#6C5CE766" strokeWidth="0.5" strokeDasharray="1 0.5" />
+        <polygon points="60,20 57,18 57,22" fill="#6C5CE7" />
+
+        <text x="12" y="19" textAnchor="middle" fill="#6C5CE7" fontSize="5" fontFamily="'DungGeunMo', monospace">💭</text>
+        <text x="12" y="28" textAnchor="middle" fill="#6C5CE766" fontSize="2" fontFamily="'DungGeunMo', monospace">고민</text>
+
+        <text x="35" y="19" textAnchor="middle" fill="#6C5CE7" fontSize="5" fontFamily="'DungGeunMo', monospace">🤝</text>
+        <text x="35" y="28" textAnchor="middle" fill="#6C5CE766" fontSize="2" fontFamily="'DungGeunMo', monospace">나눔</text>
+
+        <text x="58" y="19" textAnchor="middle" fill="#FF6B9D" fontSize="5" fontFamily="'DungGeunMo', monospace">💝</text>
+        <text x="58" y="28" textAnchor="middle" fill="#FF6B9D66" fontSize="2" fontFamily="'DungGeunMo', monospace">위로</text>
+      </svg>
+    </div>
+  );
+}
+
+// 모임방: 사람 연결 네트워크
+function PixelGatherNet({ x, y }: { x: number; y: number }) {
+  return (
+    <div className="absolute z-[5] pointer-events-none" style={{ left: x, top: y }}>
+      <svg width={260} height={160} viewBox="0 0 65 40" style={{ imageRendering: 'pixelated' }}>
+        {/* 연결선 */}
+        <line x1="16" y1="14" x2="48" y2="14" stroke="#2ECC7144" strokeWidth="0.4" />
+        <line x1="16" y1="14" x2="32" y2="30" stroke="#2ECC7144" strokeWidth="0.4" />
+        <line x1="48" y1="14" x2="32" y2="30" stroke="#2ECC7144" strokeWidth="0.4" />
+        {/* 사람 노드 */}
+        <text x="16" y="16" textAnchor="middle" fill="#2ECC71" fontSize="5">👤</text>
+        <text x="48" y="16" textAnchor="middle" fill="#2ECC71" fontSize="5">👤</text>
+        <text x="32" y="32" textAnchor="middle" fill="#2ECC71" fontSize="5">👤</text>
+        {/* 하트 (중심) */}
+        <text x="32" y="18" textAnchor="middle" fill="#FF6B9D" fontSize="3">❤️</text>
+        <text x="32" y="38" textAnchor="middle" fill="#2ECC7166" fontSize="2" fontFamily="'DungGeunMo', monospace">인적교류</text>
+      </svg>
+    </div>
+  );
+}
+
+// 팀방 로비: 팀원 → 소통 → 성장 순환
+function PixelTeamCircle({ x, y, color }: { x: number; y: number; color: string }) {
+  return (
+    <div className="absolute z-[5] pointer-events-none" style={{ left: x, top: y }}>
+      <svg width={280} height={200} viewBox="0 0 70 50" style={{ imageRendering: 'pixelated' }}>
+        {/* 순환 화살표 (삼각형) */}
+        <polyline points="20,15 50,15" fill="none" stroke={`${color}55`} strokeWidth="0.4" />
+        <polyline points="50,15 35,38" fill="none" stroke={`${color}55`} strokeWidth="0.4" />
+        <polyline points="35,38 20,15" fill="none" stroke={`${color}55`} strokeWidth="0.4" />
+        <polygon points="50,15 47,13 47,17" fill={color} />
+        <polygon points="35,38 37,35 33,35" fill={color} />
+        <polygon points="20,15 23,17 23,13" fill={color} />
+
+        <text x="35" y="12" textAnchor="middle" fill={color} fontSize="4">👥</text>
+        <text x="35" y="8" textAnchor="middle" fill={`${color}77`} fontSize="1.8" fontFamily="'DungGeunMo', monospace">팀원</text>
+
+        <text x="53" y="22" textAnchor="middle" fill={color} fontSize="4">💬</text>
+        <text x="56" y="28" textAnchor="middle" fill={`${color}77`} fontSize="1.8" fontFamily="'DungGeunMo', monospace">소통</text>
+
+        <text x="17" y="22" textAnchor="middle" fill={color} fontSize="4">📈</text>
+        <text x="14" y="28" textAnchor="middle" fill={`${color}77`} fontSize="1.8" fontFamily="'DungGeunMo', monospace">성장</text>
+
+        <text x="35" y="44" textAnchor="middle" fill={color} fontSize="4">🎯</text>
+        <text x="35" y="49" textAnchor="middle" fill={`${color}77`} fontSize="1.8" fontFamily="'DungGeunMo', monospace">목표 달성</text>
+      </svg>
+    </div>
+  );
+}
+
+// 팀방 KPI: 목표 → 측정 → 달성 바 차트
+function PixelKpiBar({ x, y, color }: { x: number; y: number; color: string }) {
+  return (
+    <div className="absolute z-[5] pointer-events-none" style={{ left: x, top: y }}>
+      <svg width={300} height={180} viewBox="0 0 75 45" style={{ imageRendering: 'pixelated' }}>
+        {/* 바 차트 */}
+        <rect x="10" y="28" width="8" height="10" fill={`${color}44`} />
+        <rect x="10" y="32" width="8" height="6" fill={color} />
+        <rect x="22" y="22" width="8" height="16" fill={`${color}44`} />
+        <rect x="22" y="26" width="8" height="12" fill={color} />
+        <rect x="34" y="16" width="8" height="22" fill={`${color}44`} />
+        <rect x="34" y="18" width="8" height="20" fill={color} />
+        <rect x="46" y="10" width="8" height="28" fill={`${color}44`} />
+        <rect x="46" y="14" width="8" height="24" fill={color} />
+        {/* 상승 화살표 */}
+        <polyline points="14,30 26,24 38,17 50,12" fill="none" stroke="#00D68F" strokeWidth="0.5" />
+        <polygon points="52,11 49,9.5 49,12.5" fill="#00D68F" />
+        {/* 라벨 */}
+        <text x="14" y="42" textAnchor="middle" fill={`${color}66`} fontSize="1.8" fontFamily="'DungGeunMo', monospace">Q1</text>
+        <text x="26" y="42" textAnchor="middle" fill={`${color}66`} fontSize="1.8" fontFamily="'DungGeunMo', monospace">Q2</text>
+        <text x="38" y="42" textAnchor="middle" fill={`${color}66`} fontSize="1.8" fontFamily="'DungGeunMo', monospace">Q3</text>
+        <text x="50" y="42" textAnchor="middle" fill={`${color}66`} fontSize="1.8" fontFamily="'DungGeunMo', monospace">Q4</text>
+        <text x="60" y="10" fill="#00D68F66" fontSize="2" fontFamily="'DungGeunMo', monospace">📊</text>
+      </svg>
+    </div>
+  );
+}
+
+// 팀방 공지: 메가폰 → 전파 → 확인
+function PixelNoticeWave({ x, y }: { x: number; y: number }) {
+  return (
+    <div className="absolute z-[5] pointer-events-none" style={{ left: x, top: y }}>
+      <svg width={300} height={140} viewBox="0 0 75 35" style={{ imageRendering: 'pixelated' }}>
+        {/* 전파 파동 */}
+        <path d="M22,17 Q30,10 38,17" fill="none" stroke="#FFD93D44" strokeWidth="0.4" />
+        <path d="M22,17 Q34,6 46,17" fill="none" stroke="#FFD93D33" strokeWidth="0.3" />
+        <path d="M22,17 Q38,2 54,17" fill="none" stroke="#FFD93D22" strokeWidth="0.3" />
+        {/* 메가폰 */}
+        <text x="14" y="20" textAnchor="middle" fill="#FFD93D" fontSize="5">📢</text>
+        <text x="14" y="27" textAnchor="middle" fill="#FFD93D66" fontSize="1.8" fontFamily="'DungGeunMo', monospace">공지</text>
+        {/* 수신자 */}
+        <text x="42" y="20" textAnchor="middle" fill="#FFD93D" fontSize="4">👀</text>
+        <text x="42" y="27" textAnchor="middle" fill="#FFD93D66" fontSize="1.8" fontFamily="'DungGeunMo', monospace">확인</text>
+        <text x="60" y="20" textAnchor="middle" fill="#00D68F" fontSize="4">✓</text>
+        <text x="60" y="27" textAnchor="middle" fill="#00D68F66" fontSize="1.8" fontFamily="'DungGeunMo', monospace">읽음</text>
+      </svg>
+    </div>
+  );
+}
+
 // ═══ 모임방 전용 스프라이트 ═══
 
 // 바베큐 그릴
@@ -1285,33 +1461,17 @@ function PixelTeamDeco({ x, y, type }: { x: number; y: number; type: 'chart' | '
 const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme }: { teamColor: string; theme: string }) {
   return (
     <>
-      {/* ═══ 로비 Zone (60,60 ~ 560,400) — 팀 허브 ═══ */}
-      {/* 팀 로고 + 환영 문구 */}
-      <PixelHanwhaSun x={260} y={140} size={80} />
-      <PixelNeonSign x={200} y={100} text="환영합니다!" color={teamColor} />
-      {/* 소파 라운지 */}
-      <PixelSofa90s x={100} y={250} color={teamColor} />
-      <PixelSofa90s x={340} y={250} color={teamColor} />
-      <PixelCoffeeMachine x={480} y={140} />
+      {/* ═══ 로비 Zone (60,60 ~ 560,400) — 팀원→소통→성장 순환 ═══ */}
+      <PixelTeamCircle x={140} y={100} color={teamColor} />
 
-      {/* ═══ KPI Zone (640,60 ~ 1140,400) — 업무 대시보드 ═══ */}
-      {/* 화이트보드 + 팀 랜드마크 */}
-      <PixelWhiteboard x={760} y={80} w={200} />
+      {/* ═══ KPI Zone (640,60 ~ 1140,400) — 목표 달성 바 차트 ═══ */}
+      <PixelKpiBar x={700} y={100} color={teamColor} />
       {theme === 'stock' && <PixelCandleChart x={1060} y={100} />}
       {theme === 'life' && <Pixel63Building x={1070} y={100} />}
       {theme === 'shield' && <PixelInsuranceBuilding x={1065} y={100} />}
-      {/* 데스크 1줄 */}
-      <PixelDesk90s x={720} y={220} />
-      <PixelCRT x={750} y={190} />
-      <PixelDesk90s x={920} y={220} />
-      <PixelCRT x={950} y={190} />
-      <PixelFileCabinet x={1080} y={260} />
 
-      {/* ═══ 공지 Zone (60,460 ~ 560,760) — 뉴스보드 ═══ */}
-      {/* 코르크보드 2장 + 뉴스 사인 */}
-      <PixelNeonSign x={220} y={468} text="NEWS!" color="#FFD93D" />
-      <PixelCorkboard x={100} y={510} frameColor="#E91E63" postCount={0} />
-      <PixelCorkboard x={320} y={510} frameColor="#FF9800" postCount={0} />
+      {/* ═══ 공지 Zone (60,460 ~ 560,760) — 공지 전파 ═══ */}
+      <PixelNoticeWave x={120} y={520} />
 
       {/* ═══ 연구실 Zone (640,460 ~ 1140,760) — stock 전용 ═══ */}
       {theme === 'stock' && <PixelLabJourney x={730} y={520} />}
@@ -1330,7 +1490,10 @@ const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme }: 
 void PixelDualMonitor; void PixelWaterCooler; void PixelDumbbell; void PixelBasketball; void PixelSafe;
 void PixelRubberDuck; void PixelPizzaBox; void PixelCatDev; void PixelEnergyDrink; void PixelMechKeyboard;
 void PixelGuitar; void PixelGoldBar; void PixelCoinStack; void PixelTeamDeco; void PixelSignboard;
-void PixelChair90s; void PixelArcade;
+void PixelChair90s; void PixelArcade; void PixelDesk90s; void PixelCRT; void PixelSofa90s;
+void PixelWhiteboard; void PixelFileCabinet; void PixelPlant90s; void PixelCorkboard;
+void PixelRoundTable; void PixelMailbox; void PixelLightbulb; void PixelNeonSign;
+void PixelBBQ; void PixelPicnicTable; void PixelHanwhaSun;
 
 // ═══ 컴포넌트 바운딩 박스 (배치 겹침 방지용) ═══
 // 가구 배치 시 이 크기를 참고하여 x,y 간격을 확보할 것
@@ -1430,23 +1593,17 @@ if (import.meta.env.DEV) {
 const PlazaFurniture = memo(function PlazaFurniture() {
   return (
     <>
-      {/* ═══ VOC Zone (30,60 ~ 530,420) — 소통 ═══ */}
-      <PixelNeonSign x={180} y={68} text="VOICE!" color="#FF6B9D" />
-      <PixelMailbox x={300} y={180} />
-      <PixelSofa90s x={120} y={300} color="#FF6B9D" />
+      {/* ═══ VOC Zone (30,60 ~ 530,420) — 불편→접수→처리→개선 ═══ */}
+      <PixelVocFlow x={80} y={140} />
 
-      {/* ═══ 아이디어 Zone (550,60 ~ 1050,420) — 아이디어 ═══ */}
-      <PixelLightbulb x={720} y={160} />
-      <PixelRoundTable x={720} y={280} size={72} />
-      <PixelSofa90s x={850} y={300} color="#F8B500" />
+      {/* ═══ 아이디어 Zone (550,60 ~ 1050,420) — 씨앗→투표→채택→실현 ═══ */}
+      <PixelIdeaGrow x={620} y={140} />
 
-      {/* ═══ 고민방 Zone (1070,60 ~ 1570,420) — 상담 ═══ */}
-      <PixelSofa90s x={1200} y={180} color="#6C5CE7" />
-      <PixelPlant90s x={1480} y={300} size="small" />
+      {/* ═══ 고민방 Zone (1070,60 ~ 1570,420) — 고민→나눔→위로 ═══ */}
+      <PixelWorryHeart x={1200} y={140} />
 
-      {/* ═══ 모임방 Zone (60,490 ~ 480,770) — 모임 ═══ */}
-      <PixelBBQ x={300} y={540} />
-      <PixelPicnicTable x={150} y={640} />
+      {/* ═══ 모임방 Zone (60,490 ~ 480,770) — 인적교류 네트워크 ═══ */}
+      <PixelGatherNet x={120} y={540} />
 
       {/* ═══ 반응속도 Zone (520,490 ~ 790,770) ═══ */}
       <PixelScoreboard x={595} y={510} />
