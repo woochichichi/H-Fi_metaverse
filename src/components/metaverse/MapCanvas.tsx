@@ -751,7 +751,7 @@ function PixelIdeaGrow({ x, y }: { x: number; y: number }) {
     <div className="absolute z-[5] pointer-events-none" style={{ left: x, top: y }}>
       <svg width={400} height={240} viewBox="0 0 50 30" style={{ imageRendering: 'pixelated' }}>
         <path d="M8,24 Q18,22 24,16 Q30,10 36,8 Q42,5 46,4" fill="none" stroke="#F8B50055" strokeWidth="0.4" />
-        {[{x:8,y:24,e:'🌱',l:'아이디어'},{x:24,y:16,e:'👍',l:'투표'},{x:36,y:8,e:'🌻',l:'채택'},{x:46,y:4,e:'🚀',l:'실현'}].map(n=>(
+        {[{x:8,y:24,e:'🌱',l:'아이디어'},{x:24,y:16,e:'👍',l:'투표'},{x:36,y:8,e:'⭐',l:'선정'},{x:46,y:4,e:'🚀',l:'실현'}].map(n=>(
           <g key={n.l}>
             <text x={n.x} y={n.y} textAnchor="middle" fill="#F8B500" fontSize="3.5">{n.e}</text>
             <text x={n.x} y={n.y+4} textAnchor="middle" fill="#F8B500CC" fontSize="1.8" fontFamily={F}>{n.l}</text>
@@ -780,19 +780,19 @@ function PixelWorryHeart({ x, y }: { x: number; y: number }) {
   );
 }
 
-// 모임방: 사람 연결 네트워크
+// 모임방: 모집 → 만남 → 교류 → 친해짐
 function PixelGatherNet({ x, y }: { x: number; y: number }) {
   return (
     <div className="absolute z-[5] pointer-events-none" style={{ left: x, top: y }}>
-      <svg width={300} height={200} viewBox="0 0 38 25" style={{ imageRendering: 'pixelated' }}>
-        <line x1="10" y1="8" x2="28" y2="8" stroke="#2ECC7155" strokeWidth="0.3" />
-        <line x1="10" y1="8" x2="19" y2="19" stroke="#2ECC7155" strokeWidth="0.3" />
-        <line x1="28" y1="8" x2="19" y2="19" stroke="#2ECC7155" strokeWidth="0.3" />
-        <text x="10" y="10" textAnchor="middle" fill="#2ECC71" fontSize="4">👤</text>
-        <text x="28" y="10" textAnchor="middle" fill="#2ECC71" fontSize="4">👤</text>
-        <text x="19" y="21" textAnchor="middle" fill="#2ECC71" fontSize="4">👤</text>
-        <text x="19" y="12" textAnchor="middle" fill="#FF6B9D" fontSize="2.5">❤️</text>
-        <text x="19" y="25" textAnchor="middle" fill="#2ECC71CC" fontSize="2" fontFamily={F}>인적교류</text>
+      <svg width={340} height={180} viewBox="0 0 42 22" style={{ imageRendering: 'pixelated' }}>
+        <line x1="7" y1="10" x2="35" y2="10" stroke="#2ECC7144" strokeWidth="0.3" strokeDasharray="0.8 0.4" />
+        <polygon points="36,10 34,9 34,11" fill="#2ECC71" />
+        {[{cx:6,e:'📣',l:'모집',c:'#2ECC71'},{cx:16,e:'🤝',l:'만남',c:'#F8B500'},{cx:26,e:'🍻',l:'교류',c:'#FF6B9D'},{cx:36,e:'💛',l:'우리',c:'#FFD93D'}].map(n=>(
+          <g key={n.l}>
+            <text x={n.cx} y={11} textAnchor="middle" fill={n.c} fontSize="3.5">{n.e}</text>
+            <text x={n.cx} y={16} textAnchor="middle" fill={`${n.c}CC`} fontSize="1.8" fontFamily={F}>{n.l}</text>
+          </g>
+        ))}
       </svg>
     </div>
   );
