@@ -45,9 +45,8 @@ export default function LabEntryForm({ onSubmit, onClose }: Props) {
   const uploadFiles = async (): Promise<string[]> => {
     const urls: string[] = [];
     for (const file of files) {
-      const ext = file.name.split('.').pop() || 'bin';
-      const base = file.name.replace(/\.[^.]+$/, '').slice(0, 30).replace(/[^a-zA-Z0-9가-힣_-]/g, '_') || 'file';
-      const path = `lab/${crypto.randomUUID().slice(0, 8)}-${base}.${ext}`;
+      const ext = file.name.split('.').pop()?.replace(/[^a-zA-Z0-9]/g, '') || 'bin';
+      const path = `lab/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from('attachments').upload(path, file);
       if (!error) {
         const { data: urlData } = supabase.storage.from('attachments').getPublicUrl(path);
