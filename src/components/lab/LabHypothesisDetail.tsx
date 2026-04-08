@@ -71,18 +71,20 @@ export default function LabHypothesisDetail({
     setEditing(true);
   };
 
-  const handleAddFiles = async (files: FileList | File[]) => {
-    const arr = Array.from(files).filter((f) => f.size <= 5 * 1024 * 1024);
+  const handleAddFiles = async (fileList: FileList | File[]) => {
+    const arr = Array.from(fileList).filter((f) => f.size <= 5 * 1024 * 1024 && (f.type.startsWith('image/') || f.type === 'application/pdf'));
     if (arr.length === 0) return;
     setUploading(true);
     for (const file of arr) {
       const safeName = file.name.replace(/[^a-zA-Z0-9가-힣._-]/g, '_');
       const path = `lab/${crypto.randomUUID().slice(0, 8)}_${safeName}`;
       const { error } = await supabase.storage.from('attachments').upload(path, file);
-      if (!error) {
-        const { data: urlData } = supabase.storage.from('attachments').getPublicUrl(path);
-        setEditUrls((prev) => [...prev, urlData.publicUrl]);
+      if (error) {
+        console.error('파일 업로드 실패:', error.message);
+        continue;
       }
+      const { data: urlData } = supabase.storage.from('attachments').getPublicUrl(path);
+      setEditUrls((prev) => [...prev, urlData.publicUrl]);
     }
     setUploading(false);
   };
@@ -146,7 +148,7 @@ export default function LabHypothesisDetail({
               ))}
               <label className="mt-1 flex cursor-pointer items-center justify-center gap-1 rounded-md border border-dashed border-white/[.1] py-1.5 text-[10px] text-text-muted transition-colors hover:border-accent/40 hover:text-accent">
                 <Upload size={11} /> {uploading ? '업로드 중...' : '파일 추가'}
-                <input type="file" multiple accept="image/*,.pdf" onChange={(e) => handleAddFiles(e.target.files ?? [])} className="hidden" disabled={uploading} />
+                <input type="file" multiple accept="image/*,.pdf" onChange={(e) => { if (e.target.files && e.target.files.length > 0) handleAddFiles(e.target.files); e.target.value = ''; }} className="hidden" disabled={uploading} />
               </label>
             </div>
             <div className="flex gap-1.5">
