@@ -15,12 +15,12 @@ import type {
 const STATUSES: LabHypothesisStatus[] = ['탐색중', '실험중', '성공', '실패', '보류'];
 const CATEGORIES: LabHypothesisCategory[] = ['구조', '문화', '소통', '참여', '성장', '기타'];
 
-function getFileName(url: string) {
+function getFileName(url: string, idx: number) {
   try {
-    const raw = decodeURIComponent(url.split('/').pop()?.split('?')[0] ?? '파일');
-    // UUID prefix 제거 (8자_파일명 형태)
-    return raw.replace(/^[a-f0-9]{8}_/, '');
-  } catch { return '파일'; }
+    const raw = decodeURIComponent(url.split('/').pop()?.split('?')[0] ?? '');
+    const ext = raw.split('.').pop()?.toUpperCase() || '';
+    return `첨부${idx + 1}.${ext}`;
+  } catch { return `첨부${idx + 1}`; }
 }
 function isImageUrl(url: string) { return /\.(png|jpe?g|gif|webp|svg)(\?|$)/i.test(url); }
 
@@ -76,8 +76,8 @@ export default function LabHypothesisDetail({
     if (arr.length === 0) return;
     setUploading(true);
     for (const file of arr) {
-      const safeName = file.name.replace(/[^a-zA-Z0-9가-힣._-]/g, '_');
-      const path = `lab/${crypto.randomUUID().slice(0, 8)}_${safeName}`;
+      const ext = file.name.split('.').pop() || 'bin';
+      const path = `lab/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from('attachments').upload(path, file);
       if (error) {
         console.error('파일 업로드 실패:', error.message);
@@ -140,7 +140,7 @@ export default function LabHypothesisDetail({
               {editUrls.map((url, i) => (
                 <div key={i} className="mb-1 flex items-center gap-2 rounded-md bg-white/[.03] px-2 py-1">
                   {isImageUrl(url) ? <ImageIcon size={12} className="shrink-0 text-blue-400" /> : <FileText size={12} className="shrink-0 text-text-muted" />}
-                  <span className="flex-1 truncate text-[11px] text-text-secondary">{getFileName(url)}</span>
+                  <span className="flex-1 truncate text-[11px] text-text-secondary">{getFileName(url, i)}</span>
                   <button onClick={() => setEditUrls((prev) => prev.filter((_, idx) => idx !== i))} className="text-text-muted hover:text-red-400">
                     <X size={12} />
                   </button>
@@ -189,7 +189,7 @@ export default function LabHypothesisDetail({
                   <a key={i} href={url} target="_blank" rel="noopener noreferrer"
                     className="mb-0.5 flex items-center gap-2 rounded-md px-2 py-1 text-[11px] text-text-secondary transition-colors hover:bg-white/[.04]">
                     {isImageUrl(url) ? <ImageIcon size={11} className="shrink-0 text-blue-400" /> : <FileText size={11} className="shrink-0 text-text-muted" />}
-                    <span className="flex-1 truncate">{getFileName(url)}</span>
+                    <span className="flex-1 truncate">{getFileName(url, i)}</span>
                     <Download size={11} className="shrink-0 text-text-muted" />
                   </a>
                 ))}
