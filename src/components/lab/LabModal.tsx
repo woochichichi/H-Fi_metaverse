@@ -107,6 +107,15 @@ export default function LabModal({ onClose }: LabModalProps) {
           </button>
         </div>
 
+        {/* 안내 배너 */}
+        <div className="shrink-0 border-b border-white/[.04] bg-accent/[.04] px-5 py-2 text-[11px] leading-relaxed text-text-secondary">
+          <span className="font-semibold text-accent">조직 활성화 연구 공간</span>
+          {' '}— 가설을 세우고, 실험하고, 결과를 기록합니다.
+          {isAdmin
+            ? ' 관리자는 가설·기록을 작성/수정/삭제할 수 있고, 팀원은 열람 + 코멘트가 가능합니다.'
+            : ' 가설과 기록은 열람 가능하며, 하단 코멘트로 의견을 남길 수 있습니다.'}
+        </div>
+
         {/* 바디 2-column */}
         <div className="flex flex-1 overflow-hidden">
           <LabHypothesisList
