@@ -723,77 +723,58 @@ function PixelLabJourney({ x, y }: { x: number; y: number }) {
   );
 }
 
-// ═══ 방별 목적 다이어그램 (픽셀아트) ═══
+// ═══ 방별 목적 다이어그램 (픽셀아트 — 큰 글씨, 밝은 색) ═══
+const F = "'DungGeunMo', monospace";
 
-// VOC: 불편 → 접수 → 개선 흐름
+// VOC: 불편 → 접수 → 처리 → 개선
 function PixelVocFlow({ x, y }: { x: number; y: number }) {
   return (
     <div className="absolute z-[5] pointer-events-none" style={{ left: x, top: y }}>
-      <svg width={360} height={160} viewBox="0 0 90 40" style={{ imageRendering: 'pixelated' }}>
-        {/* 흐름선 */}
-        <polyline points="10,20 30,20 50,20 70,20" fill="none" stroke="#FF6B9D" strokeWidth="0.5" strokeDasharray="1 0.5" />
-        <polygon points="72,20 69,18 69,22" fill="#FF6B9D" />
-        {/* 노드 */}
-        <circle cx="10" cy="20" r="4" fill="#1a1118" stroke="#FF6B9D" strokeWidth="0.6" />
-        <text x="10" y="21.5" textAnchor="middle" fill="#FF6B9D" fontSize="3" fontFamily="'DungGeunMo', monospace">😤</text>
-        <text x="10" y="28" textAnchor="middle" fill="#FF6B9D88" fontSize="2" fontFamily="'DungGeunMo', monospace">불편</text>
-
-        <circle cx="30" cy="20" r="4" fill="#1a1118" stroke="#f59e0b" strokeWidth="0.6" />
-        <text x="30" y="21.5" textAnchor="middle" fill="#fbbf24" fontSize="3" fontFamily="'DungGeunMo', monospace">📋</text>
-        <text x="30" y="28" textAnchor="middle" fill="#fbbf2488" fontSize="2" fontFamily="'DungGeunMo', monospace">접수</text>
-
-        <circle cx="50" cy="20" r="4" fill="#1a1118" stroke="#60a5fa" strokeWidth="0.6" />
-        <text x="50" y="21.5" textAnchor="middle" fill="#60a5fa" fontSize="3" fontFamily="'DungGeunMo', monospace">🔧</text>
-        <text x="50" y="28" textAnchor="middle" fill="#60a5fa88" fontSize="2" fontFamily="'DungGeunMo', monospace">처리</text>
-
-        <circle cx="70" cy="20" r="4" fill="#1a1118" stroke="#00D68F" strokeWidth="0.6" />
-        <text x="70" y="21.5" textAnchor="middle" fill="#00D68F" fontSize="3" fontFamily="'DungGeunMo', monospace">✅</text>
-        <text x="70" y="28" textAnchor="middle" fill="#00D68F88" fontSize="2" fontFamily="'DungGeunMo', monospace">개선</text>
+      <svg width={400} height={200} viewBox="0 0 50 25" style={{ imageRendering: 'pixelated' }}>
+        <line x1="7" y1="10" x2="43" y2="10" stroke="#FF6B9D55" strokeWidth="0.4" strokeDasharray="1 0.5" />
+        <polygon points="44,10 42,9 42,11" fill="#FF6B9D" />
+        {[{cx:6,e:'😤',l:'불편',c:'#FF6B9D'},{cx:18,e:'📋',l:'접수',c:'#fbbf24'},{cx:30,e:'🔧',l:'처리',c:'#60a5fa'},{cx:42,e:'✅',l:'개선',c:'#00D68F'}].map(n=>(
+          <g key={n.l}>
+            <circle cx={n.cx} cy={10} r={3} fill="#1a1118" stroke={n.c} strokeWidth="0.5" />
+            <text x={n.cx} y={11.2} textAnchor="middle" fill={n.c} fontSize="2.5">{n.e}</text>
+            <text x={n.cx} y={16} textAnchor="middle" fill={`${n.c}CC`} fontSize="2" fontFamily={F}>{n.l}</text>
+          </g>
+        ))}
       </svg>
     </div>
   );
 }
 
-// 아이디어: 씨앗 → 투표 → 채택 성장
+// 아이디어: 씨앗 → 투표 → 채택 → 실현
 function PixelIdeaGrow({ x, y }: { x: number; y: number }) {
   return (
     <div className="absolute z-[5] pointer-events-none" style={{ left: x, top: y }}>
-      <svg width={320} height={180} viewBox="0 0 80 45" style={{ imageRendering: 'pixelated' }}>
-        {/* 성장 곡선 */}
-        <path d="M10,35 Q25,34 35,28 Q45,22 55,14 Q65,8 72,6" fill="none" stroke="#F8B50066" strokeWidth="0.5" />
-        {/* 노드: 씨앗 → 새싹 → 꽃 → 열매 */}
-        <text x="10" y="33" textAnchor="middle" fill="#F8B500" fontSize="4" fontFamily="'DungGeunMo', monospace">🌱</text>
-        <text x="10" y="39" textAnchor="middle" fill="#F8B50066" fontSize="1.8" fontFamily="'DungGeunMo', monospace">아이디어</text>
-
-        <text x="35" y="26" textAnchor="middle" fill="#F8B500" fontSize="4" fontFamily="'DungGeunMo', monospace">👍</text>
-        <text x="35" y="32" textAnchor="middle" fill="#F8B50066" fontSize="1.8" fontFamily="'DungGeunMo', monospace">투표</text>
-
-        <text x="55" y="14" textAnchor="middle" fill="#F8B500" fontSize="4" fontFamily="'DungGeunMo', monospace">🌻</text>
-        <text x="55" y="20" textAnchor="middle" fill="#F8B50066" fontSize="1.8" fontFamily="'DungGeunMo', monospace">채택</text>
-
-        <text x="72" y="6" textAnchor="middle" fill="#00D68F" fontSize="4" fontFamily="'DungGeunMo', monospace">🚀</text>
-        <text x="72" y="12" textAnchor="middle" fill="#00D68F66" fontSize="1.8" fontFamily="'DungGeunMo', monospace">실현</text>
+      <svg width={400} height={240} viewBox="0 0 50 30" style={{ imageRendering: 'pixelated' }}>
+        <path d="M8,24 Q18,22 24,16 Q30,10 36,8 Q42,5 46,4" fill="none" stroke="#F8B50055" strokeWidth="0.4" />
+        {[{x:8,y:24,e:'🌱',l:'아이디어'},{x:24,y:16,e:'👍',l:'투표'},{x:36,y:8,e:'🌻',l:'채택'},{x:46,y:4,e:'🚀',l:'실현'}].map(n=>(
+          <g key={n.l}>
+            <text x={n.x} y={n.y} textAnchor="middle" fill="#F8B500" fontSize="3.5">{n.e}</text>
+            <text x={n.x} y={n.y+4} textAnchor="middle" fill="#F8B500CC" fontSize="1.8" fontFamily={F}>{n.l}</text>
+          </g>
+        ))}
       </svg>
     </div>
   );
 }
 
-// 고민방: 마음 → 나눔 → 위로
+// 고민방: 고민 → 나눔 → 위로
 function PixelWorryHeart({ x, y }: { x: number; y: number }) {
   return (
     <div className="absolute z-[5] pointer-events-none" style={{ left: x, top: y }}>
-      <svg width={280} height={160} viewBox="0 0 70 40" style={{ imageRendering: 'pixelated' }}>
-        <polyline points="12,20 35,20 58,20" fill="none" stroke="#6C5CE766" strokeWidth="0.5" strokeDasharray="1 0.5" />
-        <polygon points="60,20 57,18 57,22" fill="#6C5CE7" />
-
-        <text x="12" y="19" textAnchor="middle" fill="#6C5CE7" fontSize="5" fontFamily="'DungGeunMo', monospace">💭</text>
-        <text x="12" y="28" textAnchor="middle" fill="#6C5CE766" fontSize="2" fontFamily="'DungGeunMo', monospace">고민</text>
-
-        <text x="35" y="19" textAnchor="middle" fill="#6C5CE7" fontSize="5" fontFamily="'DungGeunMo', monospace">🤝</text>
-        <text x="35" y="28" textAnchor="middle" fill="#6C5CE766" fontSize="2" fontFamily="'DungGeunMo', monospace">나눔</text>
-
-        <text x="58" y="19" textAnchor="middle" fill="#FF6B9D" fontSize="5" fontFamily="'DungGeunMo', monospace">💝</text>
-        <text x="58" y="28" textAnchor="middle" fill="#FF6B9D66" fontSize="2" fontFamily="'DungGeunMo', monospace">위로</text>
+      <svg width={380} height={200} viewBox="0 0 48 25" style={{ imageRendering: 'pixelated' }}>
+        <line x1="8" y1="10" x2="40" y2="10" stroke="#6C5CE755" strokeWidth="0.4" strokeDasharray="1 0.5" />
+        <polygon points="41,10 39,9 39,11" fill="#6C5CE7" />
+        {[{cx:8,e:'💭',l:'고민',c:'#6C5CE7'},{cx:24,e:'🤝',l:'나눔',c:'#6C5CE7'},{cx:40,e:'💝',l:'위로',c:'#FF6B9D'}].map(n=>(
+          <g key={n.l}>
+            <text x={n.cx} y={11} textAnchor="middle" fill={n.c} fontSize="4">{n.e}</text>
+            <text x={n.cx} y={16} textAnchor="middle" fill={`${n.c}CC`} fontSize="2" fontFamily={F}>{n.l}</text>
+          </g>
+        ))}
       </svg>
     </div>
   );
@@ -803,18 +784,15 @@ function PixelWorryHeart({ x, y }: { x: number; y: number }) {
 function PixelGatherNet({ x, y }: { x: number; y: number }) {
   return (
     <div className="absolute z-[5] pointer-events-none" style={{ left: x, top: y }}>
-      <svg width={260} height={160} viewBox="0 0 65 40" style={{ imageRendering: 'pixelated' }}>
-        {/* 연결선 */}
-        <line x1="16" y1="14" x2="48" y2="14" stroke="#2ECC7144" strokeWidth="0.4" />
-        <line x1="16" y1="14" x2="32" y2="30" stroke="#2ECC7144" strokeWidth="0.4" />
-        <line x1="48" y1="14" x2="32" y2="30" stroke="#2ECC7144" strokeWidth="0.4" />
-        {/* 사람 노드 */}
-        <text x="16" y="16" textAnchor="middle" fill="#2ECC71" fontSize="5">👤</text>
-        <text x="48" y="16" textAnchor="middle" fill="#2ECC71" fontSize="5">👤</text>
-        <text x="32" y="32" textAnchor="middle" fill="#2ECC71" fontSize="5">👤</text>
-        {/* 하트 (중심) */}
-        <text x="32" y="18" textAnchor="middle" fill="#FF6B9D" fontSize="3">❤️</text>
-        <text x="32" y="38" textAnchor="middle" fill="#2ECC7166" fontSize="2" fontFamily="'DungGeunMo', monospace">인적교류</text>
+      <svg width={300} height={200} viewBox="0 0 38 25" style={{ imageRendering: 'pixelated' }}>
+        <line x1="10" y1="8" x2="28" y2="8" stroke="#2ECC7155" strokeWidth="0.3" />
+        <line x1="10" y1="8" x2="19" y2="19" stroke="#2ECC7155" strokeWidth="0.3" />
+        <line x1="28" y1="8" x2="19" y2="19" stroke="#2ECC7155" strokeWidth="0.3" />
+        <text x="10" y="10" textAnchor="middle" fill="#2ECC71" fontSize="4">👤</text>
+        <text x="28" y="10" textAnchor="middle" fill="#2ECC71" fontSize="4">👤</text>
+        <text x="19" y="21" textAnchor="middle" fill="#2ECC71" fontSize="4">👤</text>
+        <text x="19" y="12" textAnchor="middle" fill="#FF6B9D" fontSize="2.5">❤️</text>
+        <text x="19" y="25" textAnchor="middle" fill="#2ECC71CC" fontSize="2" fontFamily={F}>인적교류</text>
       </svg>
     </div>
   );
@@ -824,54 +802,42 @@ function PixelGatherNet({ x, y }: { x: number; y: number }) {
 function PixelTeamCircle({ x, y, color }: { x: number; y: number; color: string }) {
   return (
     <div className="absolute z-[5] pointer-events-none" style={{ left: x, top: y }}>
-      <svg width={280} height={200} viewBox="0 0 70 50" style={{ imageRendering: 'pixelated' }}>
-        {/* 순환 화살표 (삼각형) */}
-        <polyline points="20,15 50,15" fill="none" stroke={`${color}55`} strokeWidth="0.4" />
-        <polyline points="50,15 35,38" fill="none" stroke={`${color}55`} strokeWidth="0.4" />
-        <polyline points="35,38 20,15" fill="none" stroke={`${color}55`} strokeWidth="0.4" />
-        <polygon points="50,15 47,13 47,17" fill={color} />
-        <polygon points="35,38 37,35 33,35" fill={color} />
-        <polygon points="20,15 23,17 23,13" fill={color} />
+      <svg width={340} height={240} viewBox="0 0 42 30" style={{ imageRendering: 'pixelated' }}>
+        <polyline points="12,8 30,8" fill="none" stroke={`${color}55`} strokeWidth="0.3" />
+        <polyline points="30,8 21,24" fill="none" stroke={`${color}55`} strokeWidth="0.3" />
+        <polyline points="21,24 12,8" fill="none" stroke={`${color}55`} strokeWidth="0.3" />
+        <polygon points="30,8 28,7 28,9" fill={color} />
+        <polygon points="21,24 22,22 20,22" fill={color} />
+        <polygon points="12,8 14,9 14,7" fill={color} />
 
-        <text x="35" y="12" textAnchor="middle" fill={color} fontSize="4">👥</text>
-        <text x="35" y="8" textAnchor="middle" fill={`${color}77`} fontSize="1.8" fontFamily="'DungGeunMo', monospace">팀원</text>
-
-        <text x="53" y="22" textAnchor="middle" fill={color} fontSize="4">💬</text>
-        <text x="56" y="28" textAnchor="middle" fill={`${color}77`} fontSize="1.8" fontFamily="'DungGeunMo', monospace">소통</text>
-
-        <text x="17" y="22" textAnchor="middle" fill={color} fontSize="4">📈</text>
-        <text x="14" y="28" textAnchor="middle" fill={`${color}77`} fontSize="1.8" fontFamily="'DungGeunMo', monospace">성장</text>
-
-        <text x="35" y="44" textAnchor="middle" fill={color} fontSize="4">🎯</text>
-        <text x="35" y="49" textAnchor="middle" fill={`${color}77`} fontSize="1.8" fontFamily="'DungGeunMo', monospace">목표 달성</text>
+        <text x="21" y="7" textAnchor="middle" fill={color} fontSize="3.5">👥</text>
+        <text x="21" y="4" textAnchor="middle" fill={`${color}CC`} fontSize="1.8" fontFamily={F}>팀원</text>
+        <text x="33" y="12" textAnchor="middle" fill={color} fontSize="3.5">💬</text>
+        <text x="36" y="16" textAnchor="middle" fill={`${color}CC`} fontSize="1.8" fontFamily={F}>소통</text>
+        <text x="9" y="12" textAnchor="middle" fill={color} fontSize="3.5">📈</text>
+        <text x="6" y="16" textAnchor="middle" fill={`${color}CC`} fontSize="1.8" fontFamily={F}>성장</text>
+        <text x="21" y="28" textAnchor="middle" fill={color} fontSize="3">🎯</text>
+        <text x="21" y="30" textAnchor="middle" fill={`${color}CC`} fontSize="1.5" fontFamily={F}>목표 달성</text>
       </svg>
     </div>
   );
 }
 
-// 팀방 KPI: 목표 → 측정 → 달성 바 차트
+// 팀방 KPI: 바 차트
 function PixelKpiBar({ x, y, color }: { x: number; y: number; color: string }) {
   return (
     <div className="absolute z-[5] pointer-events-none" style={{ left: x, top: y }}>
-      <svg width={300} height={180} viewBox="0 0 75 45" style={{ imageRendering: 'pixelated' }}>
-        {/* 바 차트 */}
-        <rect x="10" y="28" width="8" height="10" fill={`${color}44`} />
-        <rect x="10" y="32" width="8" height="6" fill={color} />
-        <rect x="22" y="22" width="8" height="16" fill={`${color}44`} />
-        <rect x="22" y="26" width="8" height="12" fill={color} />
-        <rect x="34" y="16" width="8" height="22" fill={`${color}44`} />
-        <rect x="34" y="18" width="8" height="20" fill={color} />
-        <rect x="46" y="10" width="8" height="28" fill={`${color}44`} />
-        <rect x="46" y="14" width="8" height="24" fill={color} />
-        {/* 상승 화살표 */}
-        <polyline points="14,30 26,24 38,17 50,12" fill="none" stroke="#00D68F" strokeWidth="0.5" />
-        <polygon points="52,11 49,9.5 49,12.5" fill="#00D68F" />
-        {/* 라벨 */}
-        <text x="14" y="42" textAnchor="middle" fill={`${color}66`} fontSize="1.8" fontFamily="'DungGeunMo', monospace">Q1</text>
-        <text x="26" y="42" textAnchor="middle" fill={`${color}66`} fontSize="1.8" fontFamily="'DungGeunMo', monospace">Q2</text>
-        <text x="38" y="42" textAnchor="middle" fill={`${color}66`} fontSize="1.8" fontFamily="'DungGeunMo', monospace">Q3</text>
-        <text x="50" y="42" textAnchor="middle" fill={`${color}66`} fontSize="1.8" fontFamily="'DungGeunMo', monospace">Q4</text>
-        <text x="60" y="10" fill="#00D68F66" fontSize="2" fontFamily="'DungGeunMo', monospace">📊</text>
+      <svg width={360} height={220} viewBox="0 0 45 28" style={{ imageRendering: 'pixelated' }}>
+        {[{x:5,h:5,fh:3},{x:13,h:9,fh:7},{x:21,h:14,fh:12},{x:29,h:19,fh:17}].map((b,i)=>(
+          <g key={i}>
+            <rect x={b.x} y={24-b.h} width={6} height={b.h} fill={`${color}33`} />
+            <rect x={b.x} y={24-b.fh} width={6} height={b.fh} fill={color} />
+            <text x={b.x+3} y={27} textAnchor="middle" fill={`${color}CC`} fontSize="1.5" fontFamily={F}>Q{i+1}</text>
+          </g>
+        ))}
+        <polyline points="8,21 16,17 24,12 32,7" fill="none" stroke="#00D68F" strokeWidth="0.4" />
+        <polygon points="33,6.5 31,5.5 31,7.5" fill="#00D68F" />
+        <text x="38" y="6" fill="#00D68F" fontSize="2.5">📊</text>
       </svg>
     </div>
   );
@@ -881,19 +847,15 @@ function PixelKpiBar({ x, y, color }: { x: number; y: number; color: string }) {
 function PixelNoticeWave({ x, y }: { x: number; y: number }) {
   return (
     <div className="absolute z-[5] pointer-events-none" style={{ left: x, top: y }}>
-      <svg width={300} height={140} viewBox="0 0 75 35" style={{ imageRendering: 'pixelated' }}>
-        {/* 전파 파동 */}
-        <path d="M22,17 Q30,10 38,17" fill="none" stroke="#FFD93D44" strokeWidth="0.4" />
-        <path d="M22,17 Q34,6 46,17" fill="none" stroke="#FFD93D33" strokeWidth="0.3" />
-        <path d="M22,17 Q38,2 54,17" fill="none" stroke="#FFD93D22" strokeWidth="0.3" />
-        {/* 메가폰 */}
-        <text x="14" y="20" textAnchor="middle" fill="#FFD93D" fontSize="5">📢</text>
-        <text x="14" y="27" textAnchor="middle" fill="#FFD93D66" fontSize="1.8" fontFamily="'DungGeunMo', monospace">공지</text>
-        {/* 수신자 */}
-        <text x="42" y="20" textAnchor="middle" fill="#FFD93D" fontSize="4">👀</text>
-        <text x="42" y="27" textAnchor="middle" fill="#FFD93D66" fontSize="1.8" fontFamily="'DungGeunMo', monospace">확인</text>
-        <text x="60" y="20" textAnchor="middle" fill="#00D68F" fontSize="4">✓</text>
-        <text x="60" y="27" textAnchor="middle" fill="#00D68F66" fontSize="1.8" fontFamily="'DungGeunMo', monospace">읽음</text>
+      <svg width={360} height={180} viewBox="0 0 45 22" style={{ imageRendering: 'pixelated' }}>
+        <path d="M12,10 Q18,4 24,10" fill="none" stroke="#FFD93D55" strokeWidth="0.3" />
+        <path d="M12,10 Q22,0 32,10" fill="none" stroke="#FFD93D33" strokeWidth="0.3" />
+        {[{cx:8,e:'📢',l:'공지',c:'#FFD93D'},{cx:24,e:'👀',l:'확인',c:'#FFD93D'},{cx:38,e:'✓',l:'읽음',c:'#00D68F'}].map(n=>(
+          <g key={n.l}>
+            <text x={n.cx} y={12} textAnchor="middle" fill={n.c} fontSize="4">{n.e}</text>
+            <text x={n.cx} y={17} textAnchor="middle" fill={`${n.c}CC`} fontSize="2" fontFamily={F}>{n.l}</text>
+          </g>
+        ))}
       </svg>
     </div>
   );
