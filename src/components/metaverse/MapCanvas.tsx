@@ -679,6 +679,49 @@ function PixelNeonSign({ x, y, text, color = '#FF6B6B' }: { x: number; y: number
   );
 }
 
+// ═══ 연구실 전용 — 가설·검증·학습 삼각형 ═══
+function PixelLabTriangle({ x, y }: { x: number; y: number }) {
+  // 연구실 존 한가운데 배치용 (약 200x180)
+  // 삼각형: 가설(상단) → 검증(우하) → 학습(좌하) → 가설(순환)
+  const accent = '#00D68F';
+  const dim = '#00D68F66';
+  return (
+    <div className="absolute z-[6] pointer-events-none" style={{ left: x, top: y }}>
+      <svg width={200} height={180} viewBox="0 0 200 180">
+        {/* 삼각형 연결선 (글로우) */}
+        <defs>
+          <filter id="labglow">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+          <marker id="arrowG" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L8,4 L0,8 Z" fill={accent} />
+          </marker>
+        </defs>
+        {/* 선: 가설→검증→학습→가설 */}
+        <line x1="100" y1="38" x2="165" y2="128" stroke={dim} strokeWidth="2" filter="url(#labglow)" markerEnd="url(#arrowG)" />
+        <line x1="165" y1="140" x2="38" y2="140" stroke={dim} strokeWidth="2" filter="url(#labglow)" markerEnd="url(#arrowG)" />
+        <line x1="35" y1="128" x2="95" y2="38" stroke={dim} strokeWidth="2" filter="url(#labglow)" markerEnd="url(#arrowG)" />
+
+        {/* 노드: 가설 (상단) */}
+        <circle cx="100" cy="28" r="22" fill="#0d2818" stroke={accent} strokeWidth="2" filter="url(#labglow)" />
+        <text x="100" y="24" textAnchor="middle" fill={accent} fontSize="9" fontFamily="'DungGeunMo', monospace" fontWeight="bold">🧪</text>
+        <text x="100" y="37" textAnchor="middle" fill={accent} fontSize="9" fontFamily="'DungGeunMo', monospace" fontWeight="bold">가설</text>
+
+        {/* 노드: 검증 (우하) */}
+        <circle cx="168" cy="148" r="22" fill="#0d2818" stroke="#f59e0b" strokeWidth="2" filter="url(#labglow)" />
+        <text x="168" y="144" textAnchor="middle" fill="#fbbf24" fontSize="9" fontFamily="'DungGeunMo', monospace" fontWeight="bold">📊</text>
+        <text x="168" y="157" textAnchor="middle" fill="#fbbf24" fontSize="9" fontFamily="'DungGeunMo', monospace" fontWeight="bold">검증</text>
+
+        {/* 노드: 학습 (좌하) */}
+        <circle cx="32" cy="148" r="22" fill="#0d2818" stroke="#60a5fa" strokeWidth="2" filter="url(#labglow)" />
+        <text x="32" y="144" textAnchor="middle" fill="#60a5fa" fontSize="9" fontFamily="'DungGeunMo', monospace" fontWeight="bold">💡</text>
+        <text x="32" y="157" textAnchor="middle" fill="#60a5fa" fontSize="9" fontFamily="'DungGeunMo', monospace" fontWeight="bold">학습</text>
+      </svg>
+    </div>
+  );
+}
+
 // ═══ 모임방 전용 스프라이트 ═══
 
 // 바베큐 그릴
@@ -1289,7 +1332,10 @@ const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme, po
       <PixelChair90s x={160} y={720} />
       <PixelChair90s x={280} y={720} />
 
-      {/* 파트 팻말 제거 (2026-04-08) */}
+      {/* ═══ 연구실 Zone (640,460 ~ 1140,760) — stock 전용 ═══ */}
+      {theme === 'stock' && (
+        <PixelLabTriangle x={790} y={520} />
+      )}
     </>
   );
 });
