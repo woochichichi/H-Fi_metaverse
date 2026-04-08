@@ -16,19 +16,20 @@ import type {
 const STATUSES: LabHypothesisStatus[] = ['탐색중', '실험중', '성공', '실패', '보류'];
 const CATEGORIES: LabHypothesisCategory[] = ['구조', '문화', '소통', '참여', '성장', '기타'];
 
+// URL#원본파일명 형태에서 파일명 추출
 function getFileName(url: string) {
   try {
+    // fragment에 원본 파일명이 있으면 사용
+    const hash = url.split('#')[1];
+    if (hash) return decodeURIComponent(hash);
+    // 없으면 경로에서 추출
     const raw = decodeURIComponent(url.split('/').pop()?.split('?')[0] ?? '파일');
-    const ext = raw.split('.').pop()?.toUpperCase() || '';
-    // UUID 경로: "xxxxxxxx-xxxx-....pdf" → "PDF 문서" or "이미지"
-    if (/^[a-f0-9-]{36}\./i.test(raw)) {
-      if (['PNG', 'JPG', 'JPEG', 'GIF', 'WEBP', 'SVG'].includes(ext)) return `이미지.${ext.toLowerCase()}`;
-      return `문서.${ext.toLowerCase()}`;
-    }
+    const ext = raw.split('.').pop()?.toLowerCase() || '';
+    if (/^[a-f0-9-]{36}\./i.test(raw)) return `문서.${ext}`;
     return raw;
   } catch { return '파일'; }
 }
-function isImageUrl(url: string) { return /\.(png|jpe?g|gif|webp|svg)(\?|$)/i.test(url); }
+function isImageUrl(url: string) { return /\.(png|jpe?g|gif|webp|svg)(\?|#|$)/i.test(url); }
 
 interface Props {
   hypothesis: LabHypothesis;
@@ -67,7 +68,6 @@ export default function LabHypothesisDetail({
   const [editDesc, setEditDesc] = useState('');
   const [editCategory, setEditCategory] = useState<LabHypothesisCategory>('기타');
   const [editUrls, setEditUrls] = useState<string[]>([]);
-  const [editNames, setEditNames] = useState<Record<string, string>>({}); // url → 원본 파일명
   const [uploading, setUploading] = useState(false);
 
   // 가설 전환 시 모든 임시 상태 초기화
@@ -75,7 +75,6 @@ export default function LabHypothesisDetail({
     setEditing(false);
     setShowStatusMenu(false);
     setConfirmDelete(false);
-    setEditNames({});
     setUploading(false);
   }, [hypothesis.id]);
 
@@ -104,9 +103,8 @@ export default function LabHypothesisDetail({
         continue;
       }
       const { data: urlData } = supabase.storage.from('attachments').getPublicUrl(path);
-      const publicUrl = urlData.publicUrl;
+      const publicUrl = `${urlData.publicUrl}#${encodeURIComponent(file.name)}`;
       setEditUrls((prev) => [...prev, publicUrl]);
-      setEditNames((prev) => ({ ...prev, [publicUrl]: file.name }));
     }
     setUploading(false);
   };
@@ -162,7 +160,7 @@ export default function LabHypothesisDetail({
               {editUrls.map((url, i) => (
                 <div key={i} className="mb-1 flex items-center gap-2 rounded-md bg-white/[.03] px-2 py-1">
                   {isImageUrl(url) ? <ImageIcon size={12} className="shrink-0 text-blue-400" /> : <FileText size={12} className="shrink-0 text-text-muted" />}
-                  <span className="flex-1 truncate text-[11px] text-text-secondary">{editNames[url] || getFileName(url)}</span>
+                  <span className="flex-1 truncate text-[11px] text-text-secondary">{getFileName(url)}</span>
                   <button onClick={() => setEditUrls((prev) => prev.filter((_, idx) => idx !== i))} className="text-text-muted hover:text-red-400">
                     <X size={12} />
                   </button>

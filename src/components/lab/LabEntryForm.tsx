@@ -54,7 +54,7 @@ export default function LabEntryForm({ onSubmit, onClose }: Props) {
       const { error } = await supabase.storage.from('attachments').upload(path, file);
       if (!error) {
         const { data: urlData } = supabase.storage.from('attachments').getPublicUrl(path);
-        urls.push(urlData.publicUrl);
+        urls.push(`${urlData.publicUrl}#${encodeURIComponent(file.name)}`);
       }
     }
     return urls;
