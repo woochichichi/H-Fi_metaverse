@@ -69,11 +69,13 @@ export default function LabHypothesisDetail({
   const [editNames, setEditNames] = useState<Record<string, string>>({}); // url → 원본 파일명
   const [uploading, setUploading] = useState(false);
 
-  // 가설 전환 시 편집/메뉴 상태 초기화
+  // 가설 전환 시 모든 임시 상태 초기화
   useEffect(() => {
     setEditing(false);
     setShowStatusMenu(false);
     setConfirmDelete(false);
+    setEditNames({});
+    setUploading(false);
   }, [hypothesis.id]);
 
   const startEdit = () => {
