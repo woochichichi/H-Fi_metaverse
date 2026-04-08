@@ -46,7 +46,8 @@ export default function LabHypothesisForm({ authorId, onSubmit, onClose }: Props
     const urls: string[] = [];
     for (const file of files) {
       const ext = file.name.split('.').pop() || 'bin';
-      const path = `lab/${crypto.randomUUID()}.${ext}`;
+      const base = file.name.replace(/\.[^.]+$/, '').slice(0, 30).replace(/[^a-zA-Z0-9가-힣_-]/g, '_') || 'file';
+      const path = `lab/${crypto.randomUUID().slice(0, 8)}-${base}.${ext}`;
       const { error } = await supabase.storage.from('attachments').upload(path, file);
       if (!error) {
         const { data: urlData } = supabase.storage.from('attachments').getPublicUrl(path);
