@@ -14,7 +14,9 @@ const ZONE_TABLE_MAP: Record<string, { table: string; teamCol?: string }> = {
 function getZoneTableInfo(zoneId: string): { table: string; teamCol?: string } | null {
   if (ZONE_TABLE_MAP[zoneId]) return ZONE_TABLE_MAP[zoneId];
   if (zoneId.endsWith('-notice')) return { table: 'notices', teamCol: 'team' };
-  return null; // lobby, kpi, game 등은 새글 알림 대상 아님
+  if (zoneId.endsWith('-lobby')) return { table: 'unit_activities', teamCol: 'team' };
+  if (zoneId.endsWith('-lab')) return { table: 'lab_hypotheses' };
+  return null; // kpi, game 등은 새글 알림 대상 아님
 }
 
 /** 각 존에 새 글이 있는지 체크 결과 */

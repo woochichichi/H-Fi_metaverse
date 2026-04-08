@@ -50,7 +50,11 @@ function GameZoneTop3({ zoneId }: { zoneId: string }) {
   );
 }
 
-export default function Zone() {
+interface ZoneProps {
+  zoneAlerts?: Record<string, boolean>;
+}
+
+export default function Zone({ zoneAlerts = {} }: ZoneProps) {
   const [hoveredZone, setHoveredZone] = useState<string | null>(null);
   const { nearZone, nearPortal, playerPosition, setMoveTarget, currentRoom } = useMetaverseStore();
   const { openModal } = useUiStore();
@@ -83,6 +87,15 @@ export default function Zone() {
           onMouseLeave={() => setHoveredZone(null)}
         >
           {z.id in GAME_ZONE_CONFIG && <GameZoneTop3 zoneId={z.id} />}
+          {/* 새글 알림 배지 */}
+          {zoneAlerts[z.id] && (
+            <div className="absolute right-3 top-3 pointer-events-none">
+              <span className="relative flex h-3 w-3">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
+                <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500" />
+              </span>
+            </div>
+          )}
           {hoveredZone === z.id && (
             <div
               className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-0.5 text-[11px] font-medium text-white/90 pointer-events-none animate-[fadeIn_.15s]"
