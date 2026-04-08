@@ -1297,7 +1297,7 @@ const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme, po
 // 미사용 컴포넌트 TS 참조 유지 (향후 팀룸 등에서 재사용 가능)
 void PixelDualMonitor; void PixelWaterCooler; void PixelDumbbell; void PixelBasketball; void PixelSafe;
 void PixelRubberDuck; void PixelPizzaBox; void PixelCatDev; void PixelEnergyDrink; void PixelMechKeyboard;
-void PixelGuitar; void PixelGoldBar; void PixelCoinStack; void PixelTeamDeco;
+void PixelGuitar; void PixelGoldBar; void PixelCoinStack; void PixelTeamDeco; void PixelSignboard;
 
 // ═══ 컴포넌트 바운딩 박스 (배치 겹침 방지용) ═══
 // 가구 배치 시 이 크기를 참고하여 x,y 간격을 확보할 것

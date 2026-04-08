@@ -78,7 +78,7 @@ export function useLab() {
   );
 
   const updateHypothesis = useCallback(
-    async (id: string, updates: { title?: string; description?: string; status?: LabHypothesisStatus; category?: LabHypothesisCategory; pinned?: boolean }) => {
+    async (id: string, updates: { title?: string; description?: string; status?: LabHypothesisStatus; category?: LabHypothesisCategory; pinned?: boolean; attachment_urls?: string[] }) => {
       const { data, error: updateError } = await supabase
         .from('lab_hypotheses')
         .update({ ...updates, updated_at: new Date().toISOString() })
