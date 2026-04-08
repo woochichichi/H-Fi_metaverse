@@ -254,3 +254,48 @@ const useDeviceMode = () => {
 ### backdrop-filter + fixed 스택킹 이슈
 **증상:** 오버레이 UI가 부모 기준으로 잡혀 backdrop-filter 깨짐
 **해결:** 오버레이 UI는 `createPortal(document.body)` 필수
+
+### 연구실(Lab) 기능 구축 시행착오 모음 (2026-04-08~09)
+
+#### 1. Storage 버킷 미생성 → 첨부파일 400 에러
+**증상:** 첨부파일 업로드 시 `POST .../attachments/lab/... 400 Bad Request`
+**원인:** 코드에서 `supabase.storage.from('attachments')`를 호출하지만 Supabase에 `attachments` 버킷이 존재하지 않았음
+**해결:** Management API로 `attachments` 버킷 생성 (public, 5MB 제한) + SELECT/INSERT/DELETE RLS 정책 추가
+**교훈:** 새 Storage 기능 추가 시 버킷 존재 여부를 먼저 확인. 코드만 작성하고 인프라를 빠뜨리기 쉬움
+
+#### 2. curl로 한글 INSERT → 인코딩 깨짐
+**증상:** DB에 시드 데이터 삽입 후 연구실 모달 진입 시 런타임 에러 (깨진 UTF-8)
+**원인:** Windows bash에서 curl로 Supabase Management API에 한글 SQL을 보내면 code page/locale 문제로 바이트가 손상됨
+**해결:** 깨진 데이터 삭제 → Node.js `fetch`로 Management API 호출 (UTF-8 보장)
+**교훈:** curl로 한글 SQL 직접 전달 절대 금지. 한글 데이터 INSERT는 반드시 Node.js 스크립트 사용 (memory에 기록 완료)
+
+#### 3. 한글 파일명 → Storage path 길이 초과 400
+**증상:** `ITO 상주근무 환경의 자기복원형 조직 활성화 구조 설계.pdf` 업로드 시 400
+**원인:** 한글 파일명이 URL 인코딩되면 3배 이상 길어짐 (`%EC%83%81%EC%A3%BC...`). 30자 한글 = URL 인코딩 시 ~90자. Storage path 길이 제한 초과
+**시행착오:**
+1. `UUID_파일명` → 여전히 한글이 URL에 포함되어 400
+2. `UUID8-파일명30자` → 한글 30자도 인코딩하면 길어서 400
+3. 최종: `UUID.확장자` (한글 완전 제거)
+**해결:** 파일 경로는 `lab/{UUID}.{ext}` 순수 ASCII. 원본 파일명은 URL fragment(`#파일명`)에 저장하여 표시용으로 활용
+**교훈:** Storage path에 한글을 절대 넣지 말 것. 파일명 표시가 필요하면 fragment 또는 별도 메타데이터로 분리
+
+#### 4. 첨부파일명 저장 후 "문서.pdf"로 바뀌는 문제
+**증상:** 등록 시에는 원본 파일명이 보이다가, 저장 누르면 `문서.pdf`로 변경
+**원인:** 편집 모드에서는 `editNames[url]`로 원본 파일명을 보여줬지만, 저장 후 DB에서 다시 로드하면 URL만 남아서 `getFileName(url)`이 UUID 경로를 파싱 → `문서.pdf`
+**해결:** URL에 `#encodeURIComponent(원본파일명)` fragment를 붙여서 DB에 저장. `getFileName()`이 fragment를 먼저 확인하여 원본 파일명 표시. 다운로드도 fetch→blob→download 방식으로 원본 파일명 적용
+**교훈:** 파일명과 URL은 분리되는 순간이 반드시 온다. 처음부터 파일명을 URL에 포함시키거나 별도 컬럼으로 관리할 것
+
+#### 5. 가설 전환 시 편집/상태 잔존
+**증상:** 가설 A에서 수정 모드 진입 → 좌측 목록에서 가설 B 클릭 → 수정 폼이 가설 B 위에 그대로 열려있음
+**원인:** `editing`, `showStatusMenu`, `editingId`(Timeline/Comment) 등 상태가 가설 전환 시 초기화되지 않음
+**해결:**
+- Detail: `hypothesis.id` useEffect로 `editing/showStatusMenu/confirmDelete/uploading` 리셋
+- Timeline/Comment: `entries[0].id` / `comments[0].id` 변경 감지로 `editingId/deleteTarget` 리셋
+- LabModal: `handleSelect`에서 `setShowEntryForm(false)`
+**교훈:** 부모가 props를 바꿔도 자식의 local state는 유지된다. 컨텍스트가 바뀌는 시점에 모든 임시 state를 초기화하는 useEffect가 필요
+
+#### 6. 자체검증 빠뜨림 반복
+**증상:** 버그 수정 → 즉시 커밋/배포 → 자체검증(Phase 1→2→3) 생략 → 다음 버그에서 또 상태 잔존 발견
+**원인:** "빨리 고쳐야지" 모드에서 검증 단계를 건너뜀. CLAUDE.md에 MUST로 적혀있지만 강제 트리거가 없었음
+**해결:** `.claude/settings.json`에 PreToolUse hook 추가 — `git commit` 실행 시 자체검증 리마인더 표시
+**교훈:** MUST 규칙은 문서에만 적어두면 안 되고, 자동화된 트리거(hook)로 강제해야 실효성이 있음
