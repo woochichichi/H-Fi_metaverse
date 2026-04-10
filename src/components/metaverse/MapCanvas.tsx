@@ -1221,7 +1221,7 @@ function PixelSignboard({ x, y, label, color, accentColor }: {
 const ZONE_FLOOR_COLORS: Record<string, string> = {
   // 팀 룸 Zone
   'lobby': '#4a3d28',   // 따뜻한 나무 바닥
-  'kpi': '#1a2a3a',     // 푸른 바닥
+  'kpi': '#2a2a20',     // 공사중 바닥
   'notice': '#3a2020',  // 다크레드 바닥
   // 광장 Zone
   'voc': '#382038',     // 보라/핑크 톤
@@ -1426,11 +1426,17 @@ const TeamTownFurniture = memo(function TeamTownFurniture({ teamColor, theme }: 
       {/* ═══ 로비 Zone (60,60 ~ 560,400) — 팀원→소통→성장 순환 ═══ */}
       <PixelTeamCircle x={140} y={110} color={teamColor} />
 
-      {/* ═══ KPI Zone (640,60 ~ 1140,400) — 목표 달성 바 차트 ═══ */}
-      <PixelKpiBar x={710} y={120} color={teamColor} />
-      {theme === 'stock' && <PixelCandleChart x={1060} y={100} />}
-      {theme === 'life' && <Pixel63Building x={1070} y={100} />}
-      {theme === 'shield' && <PixelInsuranceBuilding x={1065} y={100} />}
+      {/* ═══ KPI Zone (640,60 ~ 1140,400) — 공사중 ═══ */}
+      <div
+        className="absolute z-[5] flex flex-col items-center justify-center pointer-events-none"
+        style={{ left: 640, top: 60, width: 500, height: 340 }}
+      >
+        <div className="flex flex-col items-center gap-2 rounded-2xl bg-black/30 px-8 py-6">
+          <span style={{ fontSize: 48 }}>🚧</span>
+          <span className="text-sm font-bold text-yellow-300/80 tracking-wider">공사중</span>
+          <span className="text-[10px] text-text-muted">새로운 기능을 준비하고 있어요</span>
+        </div>
+      </div>
 
       {/* ═══ 공지 Zone (60,460 ~ 560,760) — 공지 전파 ═══ */}
       <PixelNoticeWave x={130} y={530} />
@@ -1453,6 +1459,7 @@ void PixelDualMonitor; void PixelWaterCooler; void PixelDumbbell; void PixelBask
 void PixelRubberDuck; void PixelPizzaBox; void PixelCatDev; void PixelEnergyDrink; void PixelMechKeyboard;
 void PixelGuitar; void PixelGoldBar; void PixelCoinStack; void PixelTeamDeco; void PixelSignboard;
 void PixelChair90s; void PixelArcade; void PixelDesk90s; void PixelCRT; void PixelSofa90s;
+void PixelKpiBar; void PixelCandleChart; void Pixel63Building; void PixelInsuranceBuilding;
 void PixelWhiteboard; void PixelFileCabinet; void PixelPlant90s; void PixelCorkboard;
 void PixelRoundTable; void PixelMailbox; void PixelLightbulb; void PixelNeonSign;
 void PixelBBQ; void PixelPicnicTable; void PixelHanwhaSun;

@@ -63,7 +63,7 @@ const STEPS: OnboardingStep[] = [
     body: (
       <>
         <span className="font-semibold" style={{ color: C.purple }}>로비</span>나{' '}
-        <span className="font-semibold" style={{ color: C.purple }}>KPI 방</span>을
+        <span className="font-semibold" style={{ color: C.purple }}>공지 방</span>을
         클릭하면 자동으로 걸어가서 입장돼요.{'\n'}
         가까이 가면 <span className="font-semibold" style={{ color: C.purple }}>Space</span>로도 입장 가능!
       </>

@@ -73,7 +73,7 @@ const STEPS: Step[] = [
         유닛장·팀장은 <HL color={C.orange}>대시보드</HL>에서 한눈에 확인!
       </>
     ),
-    locations: ['하단 바 → 팀 KPI 방'],
+    locations: ['현재 공사중 — 새 기능 준비 중'],
     color: C.orange,
   },
   {

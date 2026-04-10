@@ -19,7 +19,7 @@ import VocPanel from '../voc/VocPanel';
 import IdeaPanel from '../idea/IdeaPanel';
 import WorryPanel from '../worry/WorryPanel';
 import NoticePanel from '../notice/NoticePanel';
-import KpiPanel from '../kpi/KpiPanel';
+// import KpiPanel from '../kpi/KpiPanel';  // KPI 공사중
 import NotePanel from '../note/NotePanel';
 import InboxPanel from '../inbox/InboxPanel';
 import LobbyPanel from './LobbyPanel';
@@ -45,7 +45,7 @@ function getZonePanel(zoneId: string, userTeam: string | undefined): React.FC<{ 
   if (zoneId === 'idea') return IdeaPanel;
   if (zoneId === 'worry') return WorryPanel;
   if (zoneId.endsWith('-notice')) return ({ onClose }) => <NoticePanel onClose={onClose} />;
-  if (zoneId.endsWith('-kpi')) return KpiPanel;
+  if (zoneId.endsWith('-kpi')) return null; // KPI 공사중 — 패널 없음
   if (zoneId.endsWith('-lobby')) {
     const zone = TEAM_ZONES.find((z) => z.id === zoneId);
     const lobbyTeam = zone?.team ?? userTeam ?? '';
@@ -66,13 +66,18 @@ function getZonePanel(zoneId: string, userTeam: string | undefined): React.FC<{ 
 
 // Zone 접근 권한 체크 (v4: 타 팀 KPI/공지 잠금)
 function checkZoneAccess(zoneId: string, userTeam: string | undefined): { allowed: boolean; message?: string } {
+  // KPI 공사중
+  if (zoneId.endsWith('-kpi')) {
+    return { allowed: false, message: '🚧 이 공간은 현재 공사중입니다. 새로운 기능을 준비하고 있어요!' };
+  }
+
   const zone = TEAM_ZONES.find((z) => z.id === zoneId);
   if (!zone) return { allowed: true }; // 공용 zone (voc, idea) 또는 old zone
   if (!userTeam) return { allowed: false, message: '팀 정보가 없습니다' };
 
   if (zone.team === userTeam) return { allowed: true };
 
-  if (zoneId.endsWith('-kpi') || zoneId.endsWith('-notice')) {
+  if (zoneId.endsWith('-notice')) {
     return { allowed: false, message: `🔒 이 공간은 [${zone.team}] 팀 전용입니다` };
   }
 

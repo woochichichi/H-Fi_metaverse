@@ -48,11 +48,8 @@ function DashboardHome({ onNavigate }: { onNavigate: (tab: MobileTab) => void })
   // 인기 아이디어 TOP 1
   const topIdea = ideas[0];
 
-  // 내 활동 요약
-  const myActivity = members.find((m) => m.userId === user?.id);
-  const myTotalActivity = myActivity
-    ? myActivity.vocCount + myActivity.ideaCount + myActivity.eventJoinCount + myActivity.exchangeJoinCount
-    : 0;
+  // KPI 공사중 — 활동 요약 카드 비활성화
+  void members;
 
   return (
     <div className="flex flex-1 flex-col gap-3 p-4">
@@ -116,23 +113,7 @@ function DashboardHome({ onNavigate }: { onNavigate: (tab: MobileTab) => void })
         </p>
       </button>
 
-      {/* KPI 활동 요약 카드 */}
-      <button
-        onClick={() => onNavigate('more')}
-        className="rounded-xl border border-white/[.06] bg-white/[.04] p-3 text-left transition-colors hover:bg-white/[.06]"
-      >
-        <span className="text-xs font-semibold text-info">📊 KPI 활동 현황</span>
-        {myActivity ? (
-          <div className="mt-2 flex items-center gap-3">
-            <span className="text-lg font-bold text-text-primary">{myTotalActivity}건</span>
-            <span className="text-[11px] text-text-muted">
-              VoC {myActivity.vocCount} · 아이디어 {myActivity.ideaCount} · 이벤트 {myActivity.eventJoinCount} · 교류 {myActivity.exchangeJoinCount}
-            </span>
-          </div>
-        ) : (
-          <p className="mt-1 text-sm text-text-secondary">이번 분기 활동 기록이 없습니다</p>
-        )}
-      </button>
+      {/* KPI 활동 요약 카드 — 공사중 */}
     </div>
   );
 }
@@ -263,7 +244,7 @@ function MoreMenu({ onNavigate }: { onNavigate: (tab: MobileTab) => void }) {
   const { profile } = useAuthStore();
 
   const activityItems = [
-    { id: 'more_kpi' as MobileTab, label: 'KPI 관리', emoji: '📊' },
+    // { id: 'more_kpi' as MobileTab, label: 'KPI 관리', emoji: '📊' },  // 공사중
     { id: 'more_gathering' as MobileTab, label: '모임방', emoji: '🎉' },
     { id: 'more_lounge' as MobileTab, label: '활동 타임라인', emoji: '📋' },
   ];
