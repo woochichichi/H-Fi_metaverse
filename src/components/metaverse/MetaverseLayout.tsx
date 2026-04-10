@@ -164,11 +164,15 @@ export default function MetaverseLayout() {
     return () => window.removeEventListener('resize', centerCamera);
   }, [centerCamera]);
 
-  // ESC 키로 패널 닫기
+  // ESC 키로 패널 닫기 (게임 중에는 차단)
   useEffect(() => {
     if (!modalOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeModal();
+      if (e.key === 'Escape') {
+        const isGamePanel = modalOpen === 'omok' || modalOpen === 'reaction' || modalOpen === 'jumprope';
+        if (isGamePanel) return; // 게임은 X 버튼으로만 닫기
+        closeModal();
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -214,7 +218,15 @@ export default function MetaverseLayout() {
             <>
               <div
                 className="absolute inset-0 z-[100] bg-black/40"
-                onClick={closeModal}
+                onClick={() => {
+                  // 게임 중 실수로 배경 클릭해서 닫히는 것 방지
+                  const isGamePanel = modalOpen === 'omok' || modalOpen === 'reaction' || modalOpen === 'jumprope';
+                  if (isGamePanel) {
+                    addToast('게임 중에는 X 버튼으로 나가주세요', 'info');
+                    return;
+                  }
+                  closeModal();
+                }}
               />
               <div
                 className="absolute right-0 top-0 z-[101] flex h-full w-full max-w-md flex-col bg-bg-primary shadow-2xl animate-[slideInRight_.25s_ease-out]"

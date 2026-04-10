@@ -270,24 +270,28 @@ function EmoteBar({ onEmote, show, onToggle }: {
     <div className="relative">
       <button
         onClick={onToggle}
-        className="flex h-7 items-center gap-1 rounded-lg px-2 text-xs text-text-muted hover:bg-white/[.06] hover:text-text-secondary transition-colors"
+        className={`flex h-7 items-center gap-1 rounded-lg px-2 text-xs transition-colors ${
+          show ? 'bg-accent/20 text-accent' : 'text-text-muted hover:bg-white/[.06] hover:text-text-secondary'
+        }`}
       >
         <SmilePlus size={14} />
         이모지
       </button>
       {show && (
-        <div className="absolute bottom-full left-0 mb-1 flex flex-wrap gap-1 rounded-lg bg-surface-overlay border border-white/[.1] p-2 shadow-lg z-10" style={{ width: 220 }}>
-          {EMOTE_LIST.map((e) => (
-            <button
-              key={e.emoji}
-              onClick={() => { onEmote(e.emoji); onToggle(); }}
-              className="flex flex-col items-center gap-0.5 rounded-lg px-2 py-1.5 hover:bg-white/[.08] transition-colors"
-              title={e.label}
-            >
-              <span className="text-lg">{e.emoji}</span>
-              <span className="text-[9px] text-text-muted">{e.label}</span>
-            </button>
-          ))}
+        <div className="absolute bottom-full right-0 mb-1 rounded-lg bg-surface-overlay border border-white/[.1] p-2 shadow-lg z-10" style={{ width: 200 }}>
+          <div className="grid grid-cols-4 gap-1">
+            {EMOTE_LIST.map((e) => (
+              <button
+                key={e.emoji}
+                onClick={() => onEmote(e.emoji)}
+                className="flex flex-col items-center gap-0.5 rounded-lg py-1.5 hover:bg-white/[.08] transition-colors"
+                title={e.label}
+              >
+                <span className="text-lg">{e.emoji}</span>
+                <span className="text-[9px] text-text-muted leading-tight">{e.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>
@@ -300,15 +304,17 @@ function FloatingEmojis({ emojis }: { emojis: FloatingEmoji[] }) {
       {emojis.map((e) => (
         <div
           key={e.id}
-          className="absolute"
+          className="absolute flex flex-col items-center"
           style={{
             left: e.senderColor === 1 ? '20%' : '70%',
             bottom: '10%',
             animation: 'omok-float-up 3s ease-out forwards',
-            fontSize: 32,
           }}
         >
-          {e.emoji}
+          <span style={{ fontSize: 32 }}>{e.emoji}</span>
+          <span className="mt-0.5 rounded-full bg-black/50 px-2 py-0.5 text-[10px] font-medium text-white whitespace-nowrap">
+            {e.senderName}
+          </span>
         </div>
       ))}
     </div>

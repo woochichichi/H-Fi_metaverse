@@ -29,7 +29,7 @@ export default function InboxPanel({ onClose }: InboxPanelProps) {
 
     // link 필드로 해당 기능 이동
     if (notification.link) {
-      const match = notification.link.match(/^\/(voc|note|notice|idea)\//);
+      const match = notification.link.match(/^\/(voc|note|notice|idea|site-report)\//);
       if (match) {
         let modalId = match[1];
         // notice → 팀별 zone ID로 변환 (예: stock-notice)
@@ -37,7 +37,9 @@ export default function InboxPanel({ onClose }: InboxPanelProps) {
           const roomId = TEAM_TO_ROOM[profile.team as keyof typeof TEAM_TO_ROOM];
           if (roomId) modalId = `${roomId}-notice`;
         }
-        openModal(modalId);
+        // VOC/사이트건의 → 특정 항목 ID를 context로 전달
+        const itemId = notification.link.split('/').pop();
+        openModal(modalId, itemId ? { itemId } : undefined);
       }
     }
   };

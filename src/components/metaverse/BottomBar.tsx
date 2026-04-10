@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Bug, HelpCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Bug, HelpCircle, GraduationCap } from 'lucide-react';
 import { useUiStore } from '../../stores/uiStore';
 import { useMetaverseStore } from '../../stores/metaverseStore';
 import { useAuthStore } from '../../stores/authStore';
@@ -16,17 +16,17 @@ interface BottomBarProps {
 const ROOM_MENUS: Record<RoomId, { id: string; label: string; emoji: string }[]> = {
   stock: [
     { id: 'stock-lobby', label: '로비', emoji: '🏠' },
-    { id: 'stock-kpi', label: 'KPI', emoji: '📊' },
+    // { id: 'stock-kpi', label: 'KPI', emoji: '📊' },  // KPI 임시 숨김
     { id: 'stock-notice', label: '공지', emoji: '📢' },
   ],
   life: [
     { id: 'life-lobby', label: '로비', emoji: '🏠' },
-    { id: 'life-kpi', label: 'KPI', emoji: '📊' },
+    // { id: 'life-kpi', label: 'KPI', emoji: '📊' },  // KPI 임시 숨김
     { id: 'life-notice', label: '공지', emoji: '📢' },
   ],
   shield: [
     { id: 'shield-lobby', label: '로비', emoji: '🏠' },
-    { id: 'shield-kpi', label: 'KPI', emoji: '📊' },
+    // { id: 'shield-kpi', label: 'KPI', emoji: '📊' },  // KPI 임시 숨김
     { id: 'shield-notice', label: '공지', emoji: '📢' },
   ],
   plaza: [
@@ -155,6 +155,13 @@ export default function BottomBar({ roomAlerts, zoneAlerts }: BottomBarProps) {
 
             {/* 하단 고정: 궁금해요 + 사이트 건의 */}
             <div className="mt-auto border-t border-white/[.06] pt-2 space-y-0.5">
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent('restart-onboarding'))}
+                className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-medium text-text-muted transition-all duration-150 hover:bg-white/[.06] hover:text-text-secondary"
+              >
+                <GraduationCap size={14} className="shrink-0" />
+                <span>튜토리얼</span>
+              </button>
               <button
                 onClick={() => openModal('faq')}
                 className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-medium text-text-muted transition-all duration-150 hover:bg-white/[.06] hover:text-text-secondary"

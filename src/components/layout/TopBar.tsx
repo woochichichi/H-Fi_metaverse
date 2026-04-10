@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Bell, Inbox, Users, LogOut, Settings, Pencil, Palette } from 'lucide-react';
+import { Bell, Inbox, Users, LogOut, Settings, Pencil, Palette, Download } from 'lucide-react';
 import InboxBadge from '../inbox/InboxBadge';
 import AdminPanel from '../admin/AdminPanel';
 import MoodPicker from './MoodPicker';
@@ -13,6 +13,7 @@ import { useDeviceMode } from '../../hooks/useDeviceMode';
 import { useNotices } from '../../hooks/useNotices';
 import { useInbox } from '../../hooks/useInbox';
 import { TEAM_TO_ROOM } from '../../lib/constants';
+import { usePWAInstall } from '../../hooks/usePWAInstall';
 
 export default function TopBar() {
   const { profile, user, logout } = useAuthStore();
@@ -27,6 +28,7 @@ export default function TopBar() {
   const [showNicknameEditor, setShowNicknameEditor] = useState(false);
   const [showCharacterCustom, setShowCharacterCustom] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const { canInstall, install } = usePWAInstall();
   const moodRef = useRef<HTMLDivElement>(null);
   const moodBtnRef = useRef<HTMLDivElement>(null);
 
@@ -155,6 +157,18 @@ export default function TopBar() {
               title={profile?.role === 'leader' ? '팀 관리' : '관리자 패널'}
             >
               <Settings size={18} />
+            </button>
+          )}
+
+          {/* 바탕화면 바로가기 */}
+          {canInstall && (
+            <button
+              onClick={install}
+              className="flex h-8 items-center gap-1.5 rounded-lg bg-accent/15 px-2.5 text-[11px] font-semibold text-accent-light transition-colors duration-200 hover:bg-accent/25"
+              title="바탕화면에 바로가기 만들기"
+            >
+              <Download size={14} />
+              <span className="hidden sm:inline">바로가기</span>
             </button>
           )}
 

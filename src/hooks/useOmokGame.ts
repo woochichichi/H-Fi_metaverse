@@ -33,6 +33,7 @@ export interface FloatingEmoji {
   id: number;
   emoji: string;
   senderColor: 1 | 2;
+  senderName: string;
   ts: number;
 }
 
@@ -263,10 +264,10 @@ export function useOmokGame() {
     });
 
     channel.on('broadcast', { event: 'emote' }, ({ payload }) => {
-      const { emoji, senderColor } = payload as { emoji: string; senderColor: 1 | 2 };
+      const { emoji, senderColor, senderName } = payload as { emoji: string; senderColor: 1 | 2; senderName: string };
       setFloatingEmojis((prev) => [
         ...prev,
-        { id: emojiIdRef.current++, emoji, senderColor, ts: Date.now() },
+        { id: emojiIdRef.current++, emoji, senderColor, senderName: senderName || '???', ts: Date.now() },
       ]);
     });
 
@@ -389,18 +390,19 @@ export function useOmokGame() {
 
   const sendEmote = useCallback(
     (emoji: string) => {
-      if (!myColor) return;
+      if (!myColor || !profile) return;
+      const name = profile.nickname || profile.name;
       setFloatingEmojis((prev) => [
         ...prev,
-        { id: emojiIdRef.current++, emoji, senderColor: myColor, ts: Date.now() },
+        { id: emojiIdRef.current++, emoji, senderColor: myColor, senderName: name, ts: Date.now() },
       ]);
       channelRef.current?.send({
         type: 'broadcast',
         event: 'emote',
-        payload: { emoji, senderColor: myColor },
+        payload: { emoji, senderColor: myColor, senderName: name },
       });
     },
-    [myColor],
+    [myColor, profile],
   );
 
   return {

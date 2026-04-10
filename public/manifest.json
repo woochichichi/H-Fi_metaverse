@@ -1,0 +1,17 @@
+{
+  "name": "한울타리 — 금융ITO가 하나 되는 공간",
+  "short_name": "한울타리",
+  "description": "금융ITO 4개 팀이 하나로 모이는 메타버스 조직문화 플랫폼",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#6C5CE7",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

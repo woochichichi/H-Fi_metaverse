@@ -44,7 +44,7 @@ export default function KudosPanel({ team, readOnly }: KudosPanelProps) {
   const [members, setMembers] = useState<{ id: string; name: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [displayCount, setDisplayCount] = useState(20);
-  const [period, setPeriod] = useState<PeriodFilter>('week');
+  const [period, setPeriod] = useState<PeriodFilter>('all');
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const since = useMemo(() => getSinceDate(period), [period]);

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { X, Bug, Send, ChevronDown, ChevronUp, Paperclip, ClipboardPaste, Image, Trash2 } from 'lucide-react';
 import { useSiteReports } from '../../hooks/useSiteReports';
 import { useFileUpload } from '../../hooks/useFileUpload';
+import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
 import { FILE_LIMITS } from '../../lib/constants';
 import { formatFileSize } from '../../lib/utils';
@@ -19,25 +20,37 @@ interface SiteReportPanelProps {
 }
 
 export default function SiteReportPanel({ onClose }: SiteReportPanelProps) {
-  const { reports, loading, fetchMyReports, createReport } = useSiteReports();
+  const { reports, loading, fetchMyReports, fetchAllReports, createReport } = useSiteReports();
   const { upload, uploading, progress: uploadProgress } = useFileUpload({
     bucket: 'report-attachments',
     ...FILE_LIMITS.report,
   });
-  const { addToast } = useUiStore();
+  const { profile } = useAuthStore();
+  const { addToast, modalContext } = useUiStore();
+  const isAdmin = profile?.role === 'admin';
 
-  const [view, setView] = useState<'form' | 'list'>('form');
+  const [view, setView] = useState<'form' | 'list' | 'all'>('form');
   const [showAttach, setShowAttach] = useState(false);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     fetchMyReports();
   }, [fetchMyReports]);
+
+  // 알림에서 특정 건의로 이동 시 자동으로 전체 목록 열기
+  useEffect(() => {
+    if (modalContext?.itemId && isAdmin) {
+      setView('all');
+      setHighlightId(modalContext.itemId);
+      fetchAllReports();
+    }
+  }, [modalContext?.itemId, isAdmin, fetchAllReports]);
 
   // Ctrl+V 클립보드 이미지 붙여넣기
   const handlePaste = useCallback(
@@ -61,6 +74,34 @@ export default function SiteReportPanel({ onClose }: SiteReportPanelProps) {
     },
     [files, addToast],
   );
+
+  // Ctrl+V 버튼 클릭 시 클립보드에서 이미지 읽기
+  const handlePasteButton = useCallback(async () => {
+    try {
+      const clipboardItems = await navigator.clipboard.read();
+      const imageFiles: File[] = [];
+      for (const item of clipboardItems) {
+        const imageType = item.types.find((t) => t.startsWith('image/'));
+        if (imageType) {
+          const blob = await item.getType(imageType);
+          const ext = imageType.split('/')[1] || 'png';
+          const file = new File([blob], `clipboard-${Date.now()}.${ext}`, { type: imageType });
+          imageFiles.push(file);
+        }
+      }
+      if (imageFiles.length === 0) {
+        addToast('클립보드에 이미지가 없습니다. 화면을 캡처(Win+Shift+S)한 후 다시 시도해 주세요.', 'info');
+        return;
+      }
+      const merged = [...files, ...imageFiles].slice(0, FILE_LIMITS.report.maxFiles);
+      setFiles(merged);
+      addToast(`이미지 ${imageFiles.length}장을 붙여넣었습니다`, 'success');
+    } catch {
+      // clipboard API 권한 거부 시 fallback 안내
+      addToast('클립보드 접근이 차단되었습니다. 입력란에서 Ctrl+V를 직접 눌러주세요.', 'info');
+      contentRef.current?.focus();
+    }
+  }, [files, addToast]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files;
@@ -147,6 +188,16 @@ export default function SiteReportPanel({ onClose }: SiteReportPanelProps) {
         >
           내 건의 ({reports.length})
         </button>
+        {isAdmin && (
+          <button
+            onClick={() => { setView('all'); fetchAllReports(); }}
+            className={`flex-1 py-2 text-xs font-medium transition-colors ${
+              view === 'all' ? 'text-accent border-b-2 border-accent' : 'text-text-muted hover:text-text-secondary'
+            }`}
+          >
+            전체 건의
+          </button>
+        )}
       </div>
 
       {view === 'form' ? (
@@ -220,11 +271,11 @@ export default function SiteReportPanel({ onClose }: SiteReportPanelProps) {
                     파일 선택 (최대 {FILE_LIMITS.report.maxFiles}장)
                   </button>
                   <button
-                    onClick={() => contentRef.current?.focus()}
+                    onClick={handlePasteButton}
                     className="flex items-center gap-1.5 rounded-lg bg-white/[.06] px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-white/10"
                   >
                     <ClipboardPaste size={13} />
-                    Ctrl+V
+                    붙여넣기
                   </button>
                 </div>
                 <input
@@ -287,16 +338,18 @@ export default function SiteReportPanel({ onClose }: SiteReportPanelProps) {
           </div>
         </>
       ) : (
-        /* 이력 목록 */
+        /* 이력 목록 (내 건의 / 전체 건의 공용) */
         <div className="flex-1 overflow-y-auto p-4">
           {loading ? (
             <p className="text-center text-xs text-text-muted py-8">불러오는 중...</p>
           ) : reports.length === 0 ? (
-            <p className="text-center text-xs text-text-muted py-8">아직 건의한 내역이 없습니다</p>
+            <p className="text-center text-xs text-text-muted py-8">
+              {view === 'all' ? '건의 내역이 없습니다' : '아직 건의한 내역이 없습니다'}
+            </p>
           ) : (
             <div className="space-y-2">
               {reports.map((r) => (
-                <ReportCard key={r.id} report={r} />
+                <ReportCard key={r.id} report={r} showAuthor={view === 'all'} highlight={r.id === highlightId} />
               ))}
             </div>
           )}
@@ -306,20 +359,24 @@ export default function SiteReportPanel({ onClose }: SiteReportPanelProps) {
   );
 }
 
-function ReportCard({ report }: { report: SiteReport }) {
-  const [expanded, setExpanded] = useState(false);
+function ReportCard({ report, showAuthor, highlight }: { report: SiteReport & { profiles?: { name: string; nickname: string | null } }; showAuthor?: boolean; highlight?: boolean }) {
+  const [expanded, setExpanded] = useState(!!highlight);
   const date = new Date(report.created_at);
   const dateStr = `${date.getMonth() + 1}/${date.getDate()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+  const authorName = report.profiles?.nickname || report.profiles?.name;
 
   return (
-    <div className="rounded-xl bg-white/[.04] border border-white/[.06] overflow-hidden">
+    <div className={`rounded-xl bg-white/[.04] border overflow-hidden ${highlight ? 'border-accent/40 ring-1 ring-accent/20' : 'border-white/[.06]'}`}>
       <button
         onClick={() => setExpanded((v) => !v)}
         className="flex w-full items-center gap-2 px-3 py-2.5 text-left"
       >
         <div className="flex-1 min-w-0">
           <p className="text-xs font-medium text-text-primary truncate">{report.title}</p>
-          <p className="text-[10px] text-text-muted mt-0.5">{dateStr}</p>
+          <p className="text-[10px] text-text-muted mt-0.5">
+            {showAuthor && authorName && <span className="text-text-secondary mr-1.5">{authorName}</span>}
+            {dateStr}
+          </p>
         </div>
         <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[report.status]}`}>
           {report.status}

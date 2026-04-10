@@ -45,6 +45,48 @@ export function useSiteReports() {
     }
   }, [user?.id]);
 
+  // 관리자: 전체 건의 목록 조회
+  const fetchAllReports = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error: fetchError } = await withTimeout(
+        supabase
+          .from('site_reports')
+          .select('*, profiles:author_id(name, nickname)')
+          .order('created_at', { ascending: false })
+          .limit(100),
+        8000,
+        'site_reports_all_fetch',
+      );
+      if (fetchError) throw fetchError;
+      setReports((data as SiteReport[]) ?? []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '조회 실패');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // 단건 조회 (알림에서 특정 건의로 이동)
+  const fetchReportById = useCallback(async (id: string): Promise<SiteReport | null> => {
+    try {
+      const { data, error: fetchError } = await withTimeout(
+        supabase
+          .from('site_reports')
+          .select('*, profiles:author_id(name, nickname)')
+          .eq('id', id)
+          .single(),
+        8000,
+        'site_report_single_fetch',
+      );
+      if (fetchError) return null;
+      return data as SiteReport;
+    } catch {
+      return null;
+    }
+  }, []);
+
   // 오늘 제출 건수 확인 (스팸 방지)
   const checkDailyLimit = useCallback(async (): Promise<boolean> => {
     if (!user?.id) return false;
@@ -125,5 +167,5 @@ export function useSiteReports() {
     [user?.id, profile?.name, checkDailyLimit],
   );
 
-  return { reports, loading, error, fetchMyReports, createReport };
+  return { reports, loading, error, fetchMyReports, fetchAllReports, fetchReportById, createReport };
 }
