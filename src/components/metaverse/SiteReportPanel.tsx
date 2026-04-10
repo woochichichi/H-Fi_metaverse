@@ -349,7 +349,7 @@ export default function SiteReportPanel({ onClose }: SiteReportPanelProps) {
           ) : (
             <div className="space-y-2">
               {reports.map((r) => (
-                <ReportCard key={r.id} report={r} authorName={authorNames[r.author_id]} showAuthor={view === 'all'} highlight={r.id === highlightId} />
+                <ReportCard key={r.id} report={r} authorName={authorNames[r.author_id]} showAuthor={view === 'all'} defaultOpen={view === 'all'} highlight={r.id === highlightId} />
               ))}
             </div>
           )}
@@ -359,8 +359,8 @@ export default function SiteReportPanel({ onClose }: SiteReportPanelProps) {
   );
 }
 
-function ReportCard({ report, authorName, showAuthor, highlight }: { report: SiteReport; authorName?: string; showAuthor?: boolean; highlight?: boolean }) {
-  const [expanded, setExpanded] = useState(!!highlight);
+function ReportCard({ report, authorName, showAuthor, defaultOpen, highlight }: { report: SiteReport; authorName?: string; showAuthor?: boolean; defaultOpen?: boolean; highlight?: boolean }) {
+  const [expanded, setExpanded] = useState(!!highlight || !!defaultOpen);
   const date = new Date(report.created_at);
   const dateStr = `${date.getMonth() + 1}/${date.getDate()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
 
@@ -393,9 +393,9 @@ function ReportCard({ report, authorName, showAuthor, highlight }: { report: Sit
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block h-16 w-16 rounded-lg overflow-hidden border border-white/10"
+                  className="block rounded-lg overflow-hidden border border-white/10"
                 >
-                  <img src={url} alt="" className="h-full w-full object-cover" />
+                  <img src={url} alt="" className="max-h-40 max-w-full rounded-lg object-contain" />
                 </a>
               ))}
             </div>
