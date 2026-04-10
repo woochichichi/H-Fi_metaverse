@@ -16,6 +16,7 @@ function collectBrowserMeta() {
 
 export function useSiteReports() {
   const [reports, setReports] = useState<SiteReport[]>([]);
+  const [authorNames, setAuthorNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { user, profile } = useAuthStore();
@@ -53,37 +54,31 @@ export function useSiteReports() {
       const { data, error: fetchError } = await withTimeout(
         supabase
           .from('site_reports')
-          .select('*, profiles:author_id(name, nickname)')
+          .select('*')
           .order('created_at', { ascending: false })
           .limit(100),
         8000,
         'site_reports_all_fetch',
       );
       if (fetchError) throw fetchError;
-      setReports((data as SiteReport[]) ?? []);
+      const items = (data as SiteReport[]) ?? [];
+      setReports(items);
+
+      // 작성자 이름 별도 조회 (join 인코딩 깨짐 방지)
+      const ids = [...new Set(items.map((r) => r.author_id).filter(Boolean))];
+      if (ids.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, name, nickname')
+          .in('id', ids);
+        const map: Record<string, string> = {};
+        (profiles ?? []).forEach((p) => { map[p.id] = p.nickname || p.name; });
+        setAuthorNames(map);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : '조회 실패');
     } finally {
       setLoading(false);
-    }
-  }, []);
-
-  // 단건 조회 (알림에서 특정 건의로 이동)
-  const fetchReportById = useCallback(async (id: string): Promise<SiteReport | null> => {
-    try {
-      const { data, error: fetchError } = await withTimeout(
-        supabase
-          .from('site_reports')
-          .select('*, profiles:author_id(name, nickname)')
-          .eq('id', id)
-          .single(),
-        8000,
-        'site_report_single_fetch',
-      );
-      if (fetchError) return null;
-      return data as SiteReport;
-    } catch {
-      return null;
     }
   }, []);
 
@@ -167,5 +162,5 @@ export function useSiteReports() {
     [user?.id, profile?.name, checkDailyLimit],
   );
 
-  return { reports, loading, error, fetchMyReports, fetchAllReports, fetchReportById, createReport };
+  return { reports, loading, error, authorNames, fetchMyReports, fetchAllReports, createReport };
 }

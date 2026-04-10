@@ -20,7 +20,7 @@ interface SiteReportPanelProps {
 }
 
 export default function SiteReportPanel({ onClose }: SiteReportPanelProps) {
-  const { reports, loading, fetchMyReports, fetchAllReports, createReport } = useSiteReports();
+  const { reports, loading, authorNames, fetchMyReports, fetchAllReports, createReport } = useSiteReports();
   const { upload, uploading, progress: uploadProgress } = useFileUpload({
     bucket: 'report-attachments',
     ...FILE_LIMITS.report,
@@ -349,7 +349,7 @@ export default function SiteReportPanel({ onClose }: SiteReportPanelProps) {
           ) : (
             <div className="space-y-2">
               {reports.map((r) => (
-                <ReportCard key={r.id} report={r} showAuthor={view === 'all'} highlight={r.id === highlightId} />
+                <ReportCard key={r.id} report={r} authorName={authorNames[r.author_id]} showAuthor={view === 'all'} highlight={r.id === highlightId} />
               ))}
             </div>
           )}
@@ -359,11 +359,10 @@ export default function SiteReportPanel({ onClose }: SiteReportPanelProps) {
   );
 }
 
-function ReportCard({ report, showAuthor, highlight }: { report: SiteReport & { profiles?: { name: string; nickname: string | null } }; showAuthor?: boolean; highlight?: boolean }) {
+function ReportCard({ report, authorName, showAuthor, highlight }: { report: SiteReport; authorName?: string; showAuthor?: boolean; highlight?: boolean }) {
   const [expanded, setExpanded] = useState(!!highlight);
   const date = new Date(report.created_at);
   const dateStr = `${date.getMonth() + 1}/${date.getDate()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-  const authorName = report.profiles?.nickname || report.profiles?.name;
 
   return (
     <div className={`rounded-xl bg-white/[.04] border overflow-hidden ${highlight ? 'border-accent/40 ring-1 ring-accent/20' : 'border-white/[.06]'}`}>
