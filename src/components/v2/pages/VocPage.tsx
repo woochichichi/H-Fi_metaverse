@@ -1,9 +1,19 @@
 import { useEffect, useState } from 'react';
-import { MessageSquareHeart, Plus, Trash2 } from 'lucide-react';
+import { MessageSquareHeart, Plus, Trash2, Calendar, Eye, Building2, AlertTriangle } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
 import Modal from '../ui/Modal';
+import {
+  DetailBadges,
+  MetaRow,
+  DetailBody,
+  SectionDivider,
+  AttachmentsGrid,
+  StatusPicker,
+  ResolutionPanel,
+  type StatusTone,
+} from '../ui/DetailShell';
 import { useAuthStore } from '../../../stores/authStore';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useVocs } from '../../../hooks/useVocs';
@@ -203,6 +213,14 @@ function LoadingCard() {
   );
 }
 
+const VOC_STATUS_TONE: Record<VocStatus, StatusTone> = {
+  '접수': 'neutral',
+  '검토중': 'todo',
+  '처리중': 'accent',
+  '완료': 'success',
+  '보류': 'danger',
+};
+
 function VocDetailModal({
   voc,
   onClose,
@@ -244,76 +262,62 @@ function VocDetailModal({
       }
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+        <DetailBadges>
           <StatusBadge status={voc.status} />
           <span className="w-badge w-badge-muted">{voc.category}</span>
           {voc.sub_category && <span className="w-badge w-badge-muted">{voc.sub_category}</span>}
           {voc.anonymous && <span className="w-badge w-badge-accent">익명</span>}
-          {voc.severity && <span className="w-badge w-badge-todo">심각도 {voc.severity}</span>}
-        </div>
-        <div style={{ fontSize: 12, color: 'var(--w-text-muted)' }}>
-          {voc.team} · {formatRelativeTime(voc.created_at)} · 조회 {voc.view_count}
-        </div>
-        <div style={{ fontSize: 14, color: 'var(--w-text)', whiteSpace: 'pre-wrap', lineHeight: 1.7 }}>
-          {voc.content}
-        </div>
+          {voc.severity && (
+            <span className="w-badge w-badge-todo" style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+              <AlertTriangle size={10} /> 심각도 {voc.severity}
+            </span>
+          )}
+        </DetailBadges>
+
+        <MetaRow
+          items={[
+            { icon: <Building2 size={13} />, label: '팀', value: voc.team },
+            { icon: <Calendar size={13} />, label: '접수', value: formatRelativeTime(voc.created_at) },
+            { icon: <Eye size={13} />, label: '조회', value: voc.view_count },
+          ]}
+        />
+
+        <DetailBody>{voc.content}</DetailBody>
+
+        <AttachmentsGrid urls={voc.attachment_urls} />
+
+        {voc.resolution && !canProcess && <ResolutionPanel resolution={voc.resolution} />}
 
         {canProcess && (
-          <div
-            style={{
-              borderTop: '1px solid var(--w-border)',
-              paddingTop: 14,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 10,
-            }}
-          >
-            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--w-text-soft)' }}>리더 처리</div>
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              {VOC_STATUSES.map((s) => (
-                <button
-                  key={s}
-                  className={voc.status === s ? 'w-btn w-btn-primary' : 'w-btn w-btn-ghost'}
-                  style={{ padding: '4px 10px', fontSize: 12 }}
-                  onClick={() => onStatusChange(s)}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-            <textarea
-              rows={3}
-              placeholder="처리 결과 / 회신 메시지"
-              value={resolution}
-              onChange={(e) => setResolution(e.target.value)}
+          <>
+            <SectionDivider label="리더 처리" />
+            <StatusPicker<VocStatus>
+              label="상태 변경"
+              current={voc.status}
+              options={[...VOC_STATUSES]}
+              toneOf={(s) => VOC_STATUS_TONE[s]}
+              onChange={(s) => { void onStatusChange(s); }}
             />
-            <button
-              className="w-btn w-btn-primary"
-              style={{ alignSelf: 'flex-start' }}
-              onClick={() => onResolution(resolution)}
-              disabled={resolution === (voc.resolution ?? '')}
-            >
-              회신 저장
-            </button>
-          </div>
-        )}
-
-        {voc.resolution && !canProcess && (
-          <div
-            style={{
-              padding: 12,
-              background: 'var(--w-accent-soft)',
-              borderRadius: 'var(--w-radius-sm)',
-              fontSize: 13,
-              color: 'var(--w-text)',
-              whiteSpace: 'pre-wrap',
-            }}
-          >
-            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--w-accent-hover)', marginBottom: 4 }}>
-              리더 회신
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--w-text-muted)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                회신
+              </div>
+              <textarea
+                rows={3}
+                placeholder="처리 결과 / 회신 메시지를 작성해주세요"
+                value={resolution}
+                onChange={(e) => setResolution(e.target.value)}
+              />
+              <button
+                className="w-btn w-btn-primary"
+                style={{ alignSelf: 'flex-start' }}
+                onClick={() => onResolution(resolution)}
+                disabled={resolution === (voc.resolution ?? '')}
+              >
+                회신 저장
+              </button>
             </div>
-            {voc.resolution}
-          </div>
+          </>
         )}
       </div>
     </Modal>

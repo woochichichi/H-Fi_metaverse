@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Megaphone, Pin, Plus, Trash2 } from 'lucide-react';
+import { Megaphone, Pin, Plus, Trash2, Calendar, Eye, Building2 } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
 import Modal from '../ui/Modal';
+import { DetailBadges, MetaRow, DetailBody, AttachmentsGrid } from '../ui/DetailShell';
 import { useAuthStore } from '../../../stores/authStore';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useNotices } from '../../../hooks/useNotices';
@@ -225,20 +226,29 @@ function UrgencyBadge({ urgency }: { urgency: UrgencyLevel }) {
 }
 
 function NoticeDetailView({ notice }: { notice: Notice }) {
+  const metaItems = [
+    { icon: <Calendar size={13} />, label: '게시일', value: formatRelativeTime(notice.created_at) },
+    { icon: <Eye size={13} />, label: '조회', value: notice.view_count },
+    ...(notice.team ? [{ icon: <Building2 size={13} />, label: '대상', value: notice.team }] : []),
+  ];
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <DetailBadges>
         <UrgencyBadge urgency={notice.urgency} />
         <span className="w-badge w-badge-muted">{notice.category}</span>
-        {notice.team && <span className="w-badge w-badge-muted">{notice.team}</span>}
-        {notice.pinned && <span className="w-badge w-badge-accent">고정</span>}
-      </div>
-      <div style={{ fontSize: 12, color: 'var(--w-text-muted)' }}>
-        {formatRelativeTime(notice.created_at)} · 조회 {notice.view_count}
-      </div>
-      <div style={{ fontSize: 14, color: 'var(--w-text)', whiteSpace: 'pre-wrap', lineHeight: 1.7 }}>
-        {notice.content}
-      </div>
+        {notice.pinned && (
+          <span className="w-badge w-badge-accent" style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+            <Pin size={10} /> 고정
+          </span>
+        )}
+      </DetailBadges>
+
+      <MetaRow items={metaItems} />
+
+      <DetailBody>{notice.content}</DetailBody>
+
+      <AttachmentsGrid urls={notice.attachment_urls} />
     </div>
   );
 }

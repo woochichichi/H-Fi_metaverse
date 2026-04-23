@@ -1,9 +1,17 @@
 import { useEffect, useState } from 'react';
-import { Lightbulb, Plus, ThumbsUp } from 'lucide-react';
+import { Lightbulb, Plus, ThumbsUp, Calendar, Eye, Heart } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
 import Modal from '../ui/Modal';
+import {
+  DetailBadges,
+  MetaRow,
+  DetailBody,
+  SectionDivider,
+  StatusPicker,
+  type StatusTone,
+} from '../ui/DetailShell';
 import { useAuthStore } from '../../../stores/authStore';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useIdeas } from '../../../hooks/useIdeas';
@@ -194,6 +202,15 @@ function StatusBadge({ status }: { status: IdeaStatus }) {
   return <span className={it.cls} style={style}>{it.label}</span>;
 }
 
+const IDEA_STATUS_TONE: Record<IdeaStatus, StatusTone> = {
+  '제안': 'neutral',
+  '검토': 'todo',
+  '채택': 'accent',
+  '진행중': 'accent',
+  '완료': 'success',
+  '반려': 'danger',
+};
+
 function IdeaDetailModal({
   idea,
   onClose,
@@ -214,36 +231,32 @@ function IdeaDetailModal({
       footer={<button className="w-btn w-btn-primary" onClick={onClose}>닫기</button>}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+        <DetailBadges>
           {idea.category && <span className="w-badge w-badge-muted">{idea.category}</span>}
           <StatusBadge status={idea.status} />
-          <span className="w-badge w-badge-accent">❤ {idea.vote_count}</span>
-        </div>
-        <div style={{ fontSize: 12, color: 'var(--w-text-muted)' }}>
-          {formatRelativeTime(idea.created_at)} · 조회 {idea.view_count}
-        </div>
-        <div style={{ fontSize: 14, color: 'var(--w-text)', whiteSpace: 'pre-wrap', lineHeight: 1.7 }}>
-          {idea.description}
-        </div>
+        </DetailBadges>
+
+        <MetaRow
+          items={[
+            { icon: <Calendar size={13} />, label: '제안일', value: formatRelativeTime(idea.created_at) },
+            { icon: <Eye size={13} />, label: '조회', value: idea.view_count },
+            { icon: <Heart size={13} />, label: '공감', value: idea.vote_count },
+          ]}
+        />
+
+        <DetailBody>{idea.description}</DetailBody>
 
         {canChangeStatus && (
-          <div style={{ borderTop: '1px solid var(--w-border)', paddingTop: 14 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--w-text-soft)', marginBottom: 8 }}>
-              리더 처리 — 상태 변경
-            </div>
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              {IDEA_STATUSES.map((s) => (
-                <button
-                  key={s}
-                  className={idea.status === s ? 'w-btn w-btn-primary' : 'w-btn w-btn-ghost'}
-                  style={{ padding: '4px 10px', fontSize: 12 }}
-                  onClick={() => onStatusChange(s)}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          </div>
+          <>
+            <SectionDivider label="리더 처리" />
+            <StatusPicker<IdeaStatus>
+              label="상태 변경"
+              current={idea.status}
+              options={[...IDEA_STATUSES]}
+              toneOf={(s) => IDEA_STATUS_TONE[s]}
+              onChange={(s) => { void onStatusChange(s); }}
+            />
+          </>
         )}
       </div>
     </Modal>
