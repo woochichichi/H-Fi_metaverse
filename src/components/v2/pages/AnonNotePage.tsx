@@ -1,9 +1,19 @@
 import { useEffect, useState } from 'react';
-import { Mail, Plus, Send, Trash2 } from 'lucide-react';
+import { Mail, Plus, Send, Calendar, Building2 } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
 import Modal from '../ui/Modal';
+import {
+  DetailBadges,
+  MetaRow,
+  DetailBody,
+  SectionDivider,
+  StatusPicker,
+  DetailPanelHeader,
+  type StatusTone,
+} from '../ui/DetailShell';
+import MasterDetail, { MasterListCard, MasterListItem } from '../ui/MasterDetail';
 import { useAuthStore } from '../../../stores/authStore';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useNotes } from '../../../hooks/useNotes';
@@ -131,58 +141,72 @@ export default function AnonNotePage() {
           />
         </div>
       ) : (
-        <div className="w-card" style={{ padding: 0, overflow: 'hidden' }}>
-          {notes.map((n, i) => (
-            <button
-              key={n.id}
-              onClick={() => {
-                setDetail(n);
-                if (tab === 'inbox' && n.status === '미읽음') void updateNoteStatus(n.id, '읽음');
-              }}
-              style={{
-                display: 'flex',
-                gap: 12,
-                padding: '14px 16px',
-                width: '100%',
-                textAlign: 'left',
-                background: 'transparent',
-                borderTop: i === 0 ? 'none' : '1px solid var(--w-border)',
-                cursor: 'pointer',
-                alignItems: 'flex-start',
-              }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'var(--w-surface-2)')}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'transparent')}
-            >
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', marginBottom: 4 }}>
-                  <NoteStatusBadge status={n.status} />
-                  {n.category && <span className="w-badge w-badge-muted">{n.category}</span>}
-                  {n.anonymous && <span className="w-badge w-badge-accent">익명</span>}
-                  <span className="w-badge w-badge-muted">{n.team}</span>
-                </div>
-                <div style={{ fontSize: 14, fontWeight: n.status === '미읽음' ? 700 : 500, color: 'var(--w-text)' }}>
-                  {n.title}
-                </div>
-                <div
-                  style={{
-                    fontSize: 12,
-                    color: 'var(--w-text-soft)',
-                    marginTop: 3,
-                    display: '-webkit-box',
-                    WebkitLineClamp: 1,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                  }}
-                >
-                  {n.content}
-                </div>
-                <div style={{ fontSize: 11, color: 'var(--w-text-muted)', marginTop: 4 }}>
-                  {formatRelativeTime(n.created_at)}
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
+        <MasterDetail
+          hasSelection={!!detail}
+          onBackMobile={() => setDetail(null)}
+          emptyTitle="쪽지를 선택하세요"
+          emptyDescription="왼쪽 목록에서 쪽지를 선택하면 내용이 여기에 표시됩니다."
+          master={
+            <MasterListCard>
+              {notes.map((n) => {
+                const selected = detail?.id === n.id;
+                const unread = n.status === '미읽음';
+                return (
+                  <MasterListItem
+                    key={n.id}
+                    selected={selected}
+                    onClick={() => {
+                      setDetail(n);
+                      if (tab === 'inbox' && unread) void updateNoteStatus(n.id, '읽음');
+                    }}
+                  >
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                      <NoteStatusBadge status={n.status} />
+                      {n.category && <span className="w-badge w-badge-muted">{n.category}</span>}
+                      {n.anonymous && <span className="w-badge w-badge-accent">익명</span>}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 13.5,
+                        fontWeight: unread ? 700 : 600,
+                        color: 'var(--w-text)',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {n.title}
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--w-text-muted)' }}>
+                      {n.team} · {formatRelativeTime(n.created_at)}
+                    </div>
+                  </MasterListItem>
+                );
+              })}
+            </MasterListCard>
+          }
+          detail={
+            detail && user && (
+              <NoteDetailPanel
+                note={detail}
+                onClose={() => setDetail(null)}
+                canProcess={tab === 'inbox' && perm.canReceiveAnonNotes}
+                canDelete={perm.isAdmin || detail.sender_id === user.id}
+                onStatusChange={async (s) => {
+                  const { error } = await updateNoteStatus(detail.id, s);
+                  if (error) alert(`변경 실패: ${error}`);
+                  else setDetail({ ...detail, status: s });
+                }}
+                onDelete={async () => {
+                  if (!confirm('쪽지를 삭제하시겠어요?')) return;
+                  const { error } = await deleteNote(detail.id);
+                  if (error) alert(`삭제 실패: ${error}`);
+                  else setDetail(null);
+                }}
+              />
+            )
+          }
+        />
       )}
 
       {showCreate && user && profile && (
@@ -200,27 +224,61 @@ export default function AnonNotePage() {
           }}
         />
       )}
-
-      {detail && user && (
-        <NoteDetailModal
-          note={detail}
-          onClose={() => setDetail(null)}
-          canProcess={tab === 'inbox' && perm.canReceiveAnonNotes}
-          canDelete={perm.isAdmin || detail.sender_id === user.id}
-          onStatusChange={async (s) => {
-            const { error } = await updateNoteStatus(detail.id, s);
-            if (error) alert(`변경 실패: ${error}`);
-            else setDetail({ ...detail, status: s });
-          }}
-          onDelete={async () => {
-            if (!confirm('쪽지를 삭제하시겠어요?')) return;
-            const { error } = await deleteNote(detail.id);
-            if (error) alert(`삭제 실패: ${error}`);
-            else setDetail(null);
-          }}
-        />
-      )}
     </>
+  );
+}
+
+const NOTE_STATUS_TONE: Record<NoteStatus, StatusTone> = {
+  '미읽음': 'todo',
+  '읽음': 'neutral',
+  '답변완료': 'success',
+};
+
+function NoteDetailPanel({
+  note,
+  canProcess,
+  canDelete,
+  onStatusChange,
+  onDelete,
+}: {
+  note: AnonymousNote;
+  onClose: () => void; // 시그니처 호환용 (미사용)
+  canProcess: boolean;
+  canDelete: boolean;
+  onStatusChange: (s: NoteStatus) => Promise<void>;
+  onDelete: () => Promise<void>;
+}) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <DetailPanelHeader title={note.title} canDelete={canDelete} onDelete={onDelete} />
+
+      <DetailBadges>
+        <NoteStatusBadge status={note.status} />
+        {note.category && <span className="w-badge w-badge-muted">{note.category}</span>}
+        {note.anonymous && <span className="w-badge w-badge-accent">익명</span>}
+      </DetailBadges>
+
+      <MetaRow
+        items={[
+          { icon: <Building2 size={13} />, label: '팀', value: note.team },
+          { icon: <Calendar size={13} />, label: '접수', value: formatRelativeTime(note.created_at) },
+        ]}
+      />
+
+      <DetailBody>{note.content}</DetailBody>
+
+      {canProcess && (
+        <>
+          <SectionDivider label="상태 변경" />
+          <StatusPicker<NoteStatus>
+            current={note.status}
+            options={[...NOTE_STATUSES]}
+            toneOf={(s) => NOTE_STATUS_TONE[s]}
+            onChange={(s) => { void onStatusChange(s); }}
+          />
+        </>
+      )}
+    </div>
   );
 }
 
@@ -228,72 +286,6 @@ function NoteStatusBadge({ status }: { status: NoteStatus }) {
   if (status === '답변완료') return <span className="w-badge" style={{ background: '#E8F5EE', color: 'var(--w-success)' }}>답변완료</span>;
   if (status === '읽음') return <span className="w-badge w-badge-info">읽음</span>;
   return <span className="w-badge w-badge-todo">미읽음</span>;
-}
-
-function NoteDetailModal({
-  note,
-  onClose,
-  canProcess,
-  canDelete,
-  onStatusChange,
-  onDelete,
-}: {
-  note: AnonymousNote;
-  onClose: () => void;
-  canProcess: boolean;
-  canDelete: boolean;
-  onStatusChange: (s: NoteStatus) => Promise<void>;
-  onDelete: () => Promise<void>;
-}) {
-  return (
-    <Modal
-      open
-      onClose={onClose}
-      title={note.title}
-      width={560}
-      footer={
-        <>
-          {canDelete && (
-            <button className="w-btn w-btn-ghost" style={{ color: 'var(--w-danger)' }} onClick={onDelete}>
-              <Trash2 size={14} />
-              <span>삭제</span>
-            </button>
-          )}
-          <button className="w-btn w-btn-primary" onClick={onClose}>닫기</button>
-        </>
-      }
-    >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-          <NoteStatusBadge status={note.status} />
-          {note.category && <span className="w-badge w-badge-muted">{note.category}</span>}
-          {note.anonymous && <span className="w-badge w-badge-accent">익명</span>}
-          <span className="w-badge w-badge-muted">{note.team}</span>
-        </div>
-        <div style={{ fontSize: 12, color: 'var(--w-text-muted)' }}>{formatRelativeTime(note.created_at)}</div>
-        <div style={{ fontSize: 14, color: 'var(--w-text)', whiteSpace: 'pre-wrap', lineHeight: 1.7 }}>
-          {note.content}
-        </div>
-        {canProcess && (
-          <div style={{ borderTop: '1px solid var(--w-border)', paddingTop: 14 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--w-text-soft)', marginBottom: 8 }}>상태 변경</div>
-            <div style={{ display: 'flex', gap: 6 }}>
-              {NOTE_STATUSES.map((s) => (
-                <button
-                  key={s}
-                  className={note.status === s ? 'w-btn w-btn-primary' : 'w-btn w-btn-ghost'}
-                  style={{ padding: '4px 10px', fontSize: 12 }}
-                  onClick={() => onStatusChange(s)}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </Modal>
-  );
 }
 
 function CreateNoteModal({

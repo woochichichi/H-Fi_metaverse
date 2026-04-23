@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Paperclip, FileText, Image as ImageIcon, Download } from 'lucide-react';
+import { Paperclip, FileText, Image as ImageIcon, Download, Trash2 } from 'lucide-react';
 
 /**
  * v2 상세 모달 공통 레이아웃 프리미티브.
@@ -286,6 +286,75 @@ export function StatusPicker<T extends string>({
           );
         })}
       </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   DetailPanelHeader — 상세 패널 공통 헤더
+   제목 + 삭제 아이콘 (닫기 버튼 없음 — 다른 리스트 아이템 클릭하면 자연 전환)
+========================================================= */
+interface DetailPanelHeaderProps {
+  title: string;
+  /** 삭제 권한이 있을 때만 아이콘 노출 */
+  canDelete?: boolean;
+  onDelete?: () => void;
+  /** 추가 액션(공감, 공유 등) — 헤더 우측 삭제 앞에 배치 */
+  extraActions?: ReactNode;
+}
+
+export function DetailPanelHeader({ title, canDelete, onDelete, extraActions }: DetailPanelHeaderProps) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+      <h2
+        style={{
+          margin: 0,
+          fontSize: 18,
+          fontWeight: 700,
+          color: 'var(--w-text)',
+          flex: 1,
+          lineHeight: 1.35,
+          minWidth: 0,
+          wordBreak: 'break-word',
+        }}
+      >
+        {title}
+      </h2>
+      {extraActions}
+      {canDelete && onDelete && (
+        <button
+          onClick={onDelete}
+          title="삭제"
+          aria-label="삭제"
+          style={{
+            width: 32,
+            height: 32,
+            flexShrink: 0,
+            display: 'grid',
+            placeItems: 'center',
+            borderRadius: 'var(--w-radius-sm)',
+            background: 'transparent',
+            color: 'var(--w-text-muted)',
+            border: '1px solid var(--w-border)',
+            cursor: 'pointer',
+            transition: 'all 0.12s ease',
+          }}
+          onMouseEnter={(e) => {
+            const el = e.currentTarget as HTMLButtonElement;
+            el.style.background = 'var(--w-urgency-critical-soft)';
+            el.style.color = 'var(--w-danger)';
+            el.style.borderColor = 'transparent';
+          }}
+          onMouseLeave={(e) => {
+            const el = e.currentTarget as HTMLButtonElement;
+            el.style.background = 'transparent';
+            el.style.color = 'var(--w-text-muted)';
+            el.style.borderColor = 'var(--w-border)';
+          }}
+        >
+          <Trash2 size={14} />
+        </button>
+      )}
     </div>
   );
 }

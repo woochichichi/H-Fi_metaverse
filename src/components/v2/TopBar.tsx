@@ -39,25 +39,28 @@ export default function V2TopBar() {
         borderBottom: '1px solid var(--w-border)',
       }}
     >
-      {/* 검색 (placeholder — 기능은 차후) */}
-      <div
+      {/* 검색 (비활성 - 기능은 차후). 눈에 덜 띄게 작고 연하게 */}
+      <button
+        disabled
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 8,
-          flex: 1,
-          maxWidth: 420,
-          padding: '8px 12px',
-          background: 'var(--w-surface-2)',
-          border: '1px solid transparent',
+          gap: 6,
+          maxWidth: 260,
+          padding: '6px 10px',
+          background: 'transparent',
+          border: '1px dashed var(--w-border)',
           borderRadius: 'var(--w-radius-sm)',
           color: 'var(--w-text-muted)',
-          fontSize: 13,
+          fontSize: 12,
+          cursor: 'not-allowed',
+          opacity: 0.6,
         }}
+        title="검색 기능 준비 중"
       >
-        <Search size={14} />
-        <span>공지·VOC·아이디어·사람 검색 (준비 중)</span>
-      </div>
+        <Search size={13} />
+        <span>검색 (준비 중)</span>
+      </button>
 
       <div style={{ flex: 1 }} />
 
@@ -91,14 +94,15 @@ export default function V2TopBar() {
           <span>디자인</span>
         </button>
 
-        {/* 프로필 칩 */}
+        {/* 프로필 칩 - 역할/팀은 hover tooltip으로 이동, 아바타는 중립톤 */}
         {profile && (
           <div
+            title={`${roleKoreanLabel(perm.role)} · ${profile.team ?? '-'}`}
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: 8,
-              padding: '4px 6px 4px 4px',
+              padding: '4px 10px 4px 4px',
               marginLeft: 4,
               background: 'var(--w-surface-2)',
               borderRadius: 999,
@@ -107,26 +111,23 @@ export default function V2TopBar() {
             <div
               aria-hidden
               style={{
-                width: 28,
-                height: 28,
+                width: 26,
+                height: 26,
                 borderRadius: '50%',
-                background: profile.avatar_color || 'var(--w-accent-soft)',
+                background: 'var(--w-accent-soft)',
+                color: 'var(--w-accent-hover)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 14,
+                fontSize: 12,
+                fontWeight: 700,
               }}
             >
-              {profile.mood_emoji || profile.avatar_emoji || '🙂'}
+              {initialOf(displayName)}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
-              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--w-text)' }}>
-                {displayName}
-              </span>
-              <span style={{ fontSize: 10, color: 'var(--w-text-muted)' }}>
-                {roleKoreanLabel(perm.role)} · {profile.team ?? '-'}
-              </span>
-            </div>
+            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--w-text)' }}>
+              {displayName}
+            </span>
           </div>
         )}
 
@@ -194,6 +195,12 @@ function IconButton({
       )}
     </button>
   );
+}
+
+function initialOf(name: string): string {
+  const trimmed = name.trim();
+  if (!trimmed) return '?';
+  return trimmed[0];
 }
 
 function roleKoreanLabel(role: string | null): string {

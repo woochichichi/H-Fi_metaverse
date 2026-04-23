@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { MessageSquareHeart, Plus, Trash2, Calendar, Eye, Building2, AlertTriangle } from 'lucide-react';
+import { MessageSquareHeart, Plus, Calendar, Eye, Building2, AlertTriangle } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
@@ -12,6 +12,7 @@ import {
   AttachmentsGrid,
   StatusPicker,
   ResolutionPanel,
+  DetailPanelHeader,
   type StatusTone,
 } from '../ui/DetailShell';
 import MasterDetail, { MasterListCard, MasterListItem } from '../ui/MasterDetail';
@@ -209,7 +210,6 @@ const VOC_STATUS_TONE: Record<VocStatus, StatusTone> = {
 
 function VocDetailPanel({
   voc,
-  onClose,
   canProcess,
   canDelete,
   onStatusChange,
@@ -217,7 +217,7 @@ function VocDetailPanel({
   onDelete,
 }: {
   voc: Voc;
-  onClose: () => void;
+  onClose: () => void; // 시그니처 호환용 (미사용)
   canProcess: boolean;
   canDelete: boolean;
   onStatusChange: (s: VocStatus) => Promise<void>;
@@ -232,37 +232,7 @@ function VocDetailPanel({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-        <h2
-          style={{
-            margin: 0,
-            fontSize: 18,
-            fontWeight: 700,
-            color: 'var(--w-text)',
-            flex: 1,
-            lineHeight: 1.35,
-          }}
-        >
-          {voc.title}
-        </h2>
-        {canDelete && (
-          <button
-            className="w-btn w-btn-ghost"
-            style={{ color: 'var(--w-danger)', padding: '6px 10px', fontSize: 12 }}
-            onClick={onDelete}
-          >
-            <Trash2 size={13} />
-            <span>삭제</span>
-          </button>
-        )}
-        <button
-          className="w-btn w-btn-ghost"
-          style={{ padding: '6px 10px', fontSize: 12 }}
-          onClick={onClose}
-        >
-          닫기
-        </button>
-      </div>
+      <DetailPanelHeader title={voc.title} canDelete={canDelete} onDelete={onDelete} />
 
       <DetailBadges>
         <StatusBadge status={voc.status} />

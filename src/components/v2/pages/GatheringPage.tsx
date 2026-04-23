@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { PartyPopper, Plus, Users } from 'lucide-react';
+import { PartyPopper, Plus, Users, Calendar } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
 import Modal from '../ui/Modal';
+import { DetailBadges, MetaRow, DetailBody, DetailPanelHeader } from '../ui/DetailShell';
+import MasterDetail, { MasterListCard, MasterListItem } from '../ui/MasterDetail';
 import { useAuthStore } from '../../../stores/authStore';
 import { useGatherings } from '../../../hooks/useGatherings';
 import { GATHERING_CATEGORIES } from '../../../lib/constants';
@@ -75,30 +77,69 @@ export default function GatheringPage() {
           <EmptyState icon={PartyPopper} title="열린 모임이 없어요" description="첫 모임을 만들어 보세요." />
         </div>
       ) : (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-            gap: 12,
-          }}
-        >
-          {gatherings.map((g) => (
-            <GatheringCard
-              key={g.id}
-              gathering={g}
-              joined={myJoins.has(g.id)}
-              onClick={() => setDetail(g)}
-              onJoinToggle={async (e) => {
-                e.stopPropagation();
-                if (!user) return;
-                if (myJoins.has(g.id)) await leaveGathering(g.id, user.id);
-                else await joinGathering(g.id, user.id);
-                const next = await fetchMyJoins(user.id);
-                setMyJoins(next);
-              }}
-            />
-          ))}
-        </div>
+        <MasterDetail
+          hasSelection={!!detail}
+          onBackMobile={() => setDetail(null)}
+          emptyTitle="모임을 선택하세요"
+          emptyDescription="왼쪽 목록에서 하나를 선택하면 상세와 참여 현황이 여기에 표시됩니다."
+          master={
+            <MasterListCard>
+              {gatherings.map((g) => {
+                const selected = detail?.id === g.id;
+                const joined = myJoins.has(g.id);
+                return (
+                  <MasterListItem key={g.id} selected={selected} onClick={() => setDetail(g)}>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                      <span className="w-badge w-badge-muted">{g.category}</span>
+                      <StatusBadge status={g.status} />
+                      {joined && <span className="w-badge w-badge-accent">참여중</span>}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 13.5,
+                        fontWeight: 600,
+                        color: 'var(--w-text)',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {g.title}
+                    </div>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 11, color: 'var(--w-text-muted)' }}>
+                      <Users size={11} />
+                      <span>
+                        {g.member_count}
+                        {g.max_members ? ` / ${g.max_members}` : ''}명
+                      </span>
+                      <span>·</span>
+                      <span>{formatRelativeTime(g.created_at)}</span>
+                    </div>
+                  </MasterListItem>
+                );
+              })}
+            </MasterListCard>
+          }
+          detail={
+            detail && user && (
+              <GatheringDetailPanel
+                gathering={detail}
+                joined={myJoins.has(detail.id)}
+                isAuthor={detail.author_id === user.id}
+                onJoinToggle={async () => {
+                  if (myJoins.has(detail.id)) await leaveGathering(detail.id, user.id);
+                  else await joinGathering(detail.id, user.id);
+                  const next = await fetchMyJoins(user.id);
+                  setMyJoins(next);
+                }}
+                onCloseRecruit={async () => {
+                  await closeGathering(detail.id);
+                  setDetail(null);
+                }}
+              />
+            )
+          }
+        />
       )}
 
       {showCreate && user && (
@@ -114,103 +155,7 @@ export default function GatheringPage() {
           }}
         />
       )}
-
-      {detail && user && (
-        <GatheringDetailModal
-          gathering={detail}
-          joined={myJoins.has(detail.id)}
-          isAuthor={detail.author_id === user.id}
-          onClose={() => setDetail(null)}
-          onJoinToggle={async () => {
-            if (myJoins.has(detail.id)) await leaveGathering(detail.id, user.id);
-            else await joinGathering(detail.id, user.id);
-            const next = await fetchMyJoins(user.id);
-            setMyJoins(next);
-          }}
-          onClose_={async () => {
-            await closeGathering(detail.id);
-            setDetail(null);
-          }}
-        />
-      )}
     </>
-  );
-}
-
-function GatheringCard({
-  gathering,
-  joined,
-  onClick,
-  onJoinToggle,
-}: {
-  gathering: Gathering;
-  joined: boolean;
-  onClick: () => void;
-  onJoinToggle: (e: React.MouseEvent) => void;
-}) {
-  const isRecruiting = gathering.status === 'recruiting';
-  return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={onClick}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onClick();
-        }
-      }}
-      className="w-card"
-      style={{
-        padding: 16,
-        textAlign: 'left',
-        cursor: 'pointer',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 8,
-      }}
-    >
-      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-        <span className="w-badge w-badge-muted">{gathering.category}</span>
-        <StatusBadge status={gathering.status} />
-      </div>
-      <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--w-text)' }}>{gathering.title}</div>
-      <div
-        style={{
-          fontSize: 12,
-          color: 'var(--w-text-soft)',
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-        }}
-      >
-        {gathering.description}
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--w-text-muted)' }}>
-        <Users size={12} />
-        <span>
-          {gathering.member_count}
-          {gathering.max_members ? ` / ${gathering.max_members}` : ''}명
-        </span>
-        <span>·</span>
-        <span>{formatRelativeTime(gathering.created_at)}</span>
-      </div>
-      <button
-        onClick={onJoinToggle}
-        disabled={!isRecruiting && !joined}
-        className={joined ? 'w-btn w-btn-ghost' : 'w-btn w-btn-primary'}
-        style={{
-          alignSelf: 'flex-start',
-          padding: '5px 12px',
-          fontSize: 12,
-          marginTop: 4,
-          opacity: !isRecruiting && !joined ? 0.5 : 1,
-        }}
-      >
-        {joined ? '참여 취소' : '참여하기'}
-      </button>
-    </div>
   );
 }
 
@@ -220,59 +165,74 @@ function StatusBadge({ status }: { status: Gathering['status'] }) {
   return <span className="w-badge" style={{ background: '#E8F5EE', color: 'var(--w-success)' }}>종료</span>;
 }
 
-function GatheringDetailModal({
+function GatheringDetailPanel({
   gathering,
   joined,
   isAuthor,
-  onClose,
   onJoinToggle,
-  onClose_,
+  onCloseRecruit,
 }: {
   gathering: Gathering;
   joined: boolean;
   isAuthor: boolean;
-  onClose: () => void;
   onJoinToggle: () => Promise<void>;
-  onClose_: () => Promise<void>;
+  onCloseRecruit: () => Promise<void>;
 }) {
+  const isRecruiting = gathering.status === 'recruiting';
   return (
-    <Modal
-      open
-      onClose={onClose}
-      title={gathering.title}
-      width={560}
-      footer={
-        <>
-          {isAuthor && gathering.status === 'recruiting' && (
-            <button className="w-btn w-btn-ghost" onClick={onClose_}>모집 마감</button>
-          )}
-          {gathering.status === 'recruiting' && (
-            <button
-              className={joined ? 'w-btn w-btn-ghost' : 'w-btn w-btn-primary'}
-              onClick={onJoinToggle}
-            >
-              {joined ? '참여 취소' : '참여하기'}
-            </button>
-          )}
-          <button className="w-btn w-btn-primary" onClick={onClose}>닫기</button>
-        </>
-      }
-    >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <div style={{ display: 'flex', gap: 6 }}>
-          <span className="w-badge w-badge-muted">{gathering.category}</span>
-          <StatusBadge status={gathering.status} />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <DetailPanelHeader
+        title={gathering.title}
+        extraActions={
+          <>
+            {isAuthor && isRecruiting && (
+              <button
+                className="w-btn w-btn-ghost"
+                style={{ padding: '6px 10px', fontSize: 12 }}
+                onClick={() => { void onCloseRecruit(); }}
+              >
+                모집 마감
+              </button>
+            )}
+            {isRecruiting && (
+              <button
+                className={joined ? 'w-btn w-btn-ghost' : 'w-btn w-btn-primary'}
+                style={{ padding: '6px 12px', fontSize: 12 }}
+                onClick={() => { void onJoinToggle(); }}
+              >
+                {joined ? '참여 취소' : '참여하기'}
+              </button>
+            )}
+          </>
+        }
+      />
+
+      <DetailBadges>
+        <span className="w-badge w-badge-muted">{gathering.category}</span>
+        <StatusBadge status={gathering.status} />
+        {joined && <span className="w-badge w-badge-accent">참여중</span>}
+      </DetailBadges>
+
+      <MetaRow
+        items={[
+          {
+            icon: <Users size={13} />,
+            label: '인원',
+            value: `${gathering.member_count}${gathering.max_members ? ` / ${gathering.max_members}` : ''}명`,
+          },
+          { icon: <Calendar size={13} />, label: '등록', value: formatRelativeTime(gathering.created_at) },
+          ...(gathering.deadline ? [{ icon: <Calendar size={13} />, label: '마감', value: gathering.deadline }] : []),
+        ]}
+      />
+
+      <DetailBody>{gathering.description}</DetailBody>
+
+      {gathering.contact_info && (
+        <div style={{ fontSize: 12, color: 'var(--w-text-muted)' }}>
+          문의: <span style={{ color: 'var(--w-text)', fontWeight: 600 }}>{gathering.contact_info}</span>
         </div>
-        <div style={{ fontSize: 14, whiteSpace: 'pre-wrap', lineHeight: 1.7, color: 'var(--w-text)' }}>
-          {gathering.description}
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 12, color: 'var(--w-text-muted)' }}>
-          <span>참여 {gathering.member_count}{gathering.max_members ? ` / ${gathering.max_members}` : ''}명</span>
-          {gathering.deadline && <span>마감 {gathering.deadline}</span>}
-          {gathering.contact_info && <span>문의: {gathering.contact_info}</span>}
-        </div>
-      </div>
-    </Modal>
+      )}
+    </div>
   );
 }
 

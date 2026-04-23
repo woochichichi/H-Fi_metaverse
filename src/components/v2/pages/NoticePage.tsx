@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Megaphone, Pin, Plus, Trash2, Calendar, Eye, Building2 } from 'lucide-react';
+import { Megaphone, Pin, Plus, Calendar, Eye, Building2 } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
 import Modal from '../ui/Modal';
-import { DetailBadges, MetaRow, DetailBody, AttachmentsGrid } from '../ui/DetailShell';
+import { DetailBadges, MetaRow, DetailBody, AttachmentsGrid, DetailPanelHeader } from '../ui/DetailShell';
 import MasterDetail, { MasterListCard, MasterListItem } from '../ui/MasterDetail';
 import { useAuthStore } from '../../../stores/authStore';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -211,48 +211,15 @@ function NoticeDetailPanel({
   notice,
   canDelete,
   onDelete,
-  onClose,
 }: {
   notice: Notice;
   canDelete: boolean;
   onDelete: () => void;
-  onClose: () => void;
+  onClose: () => void; // 시그니처 호환
 }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-        <h2
-          style={{
-            margin: 0,
-            fontSize: 18,
-            fontWeight: 700,
-            color: 'var(--w-text)',
-            flex: 1,
-            lineHeight: 1.35,
-          }}
-        >
-          {notice.title}
-        </h2>
-        {canDelete && (
-          <button
-            className="w-btn w-btn-ghost"
-            style={{ color: 'var(--w-danger)', padding: '6px 10px', fontSize: 12 }}
-            onClick={onDelete}
-            title="공지 삭제"
-          >
-            <Trash2 size={13} />
-            <span>삭제</span>
-          </button>
-        )}
-        <button
-          className="w-btn w-btn-ghost"
-          style={{ padding: '6px 10px', fontSize: 12 }}
-          onClick={onClose}
-          title="선택 해제"
-        >
-          닫기
-        </button>
-      </div>
+      <DetailPanelHeader title={notice.title} canDelete={canDelete} onDelete={onDelete} />
       <NoticeDetailView notice={notice} />
     </div>
   );

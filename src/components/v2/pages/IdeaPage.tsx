@@ -10,6 +10,7 @@ import {
   DetailBody,
   SectionDivider,
   StatusPicker,
+  DetailPanelHeader,
   type StatusTone,
 } from '../ui/DetailShell';
 import MasterDetail, { MasterListCard, MasterListItem } from '../ui/MasterDetail';
@@ -205,56 +206,40 @@ function IdeaDetailPanel({
   idea,
   voted,
   onVote,
-  onClose,
   canChangeStatus,
   onStatusChange,
 }: {
   idea: IdeaWithVotes;
   voted: boolean;
   onVote: () => Promise<void>;
-  onClose: () => void;
+  onClose: () => void; // 시그니처 호환용
   canChangeStatus: boolean;
   onStatusChange: (s: IdeaStatus) => Promise<void>;
 }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-        <h2
-          style={{
-            margin: 0,
-            fontSize: 18,
-            fontWeight: 700,
-            color: 'var(--w-text)',
-            flex: 1,
-            lineHeight: 1.35,
-          }}
-        >
-          {idea.title}
-        </h2>
-        <button
-          onClick={() => { void onVote(); }}
-          className="w-btn"
-          style={{
-            padding: '6px 12px',
-            fontSize: 12,
-            background: voted ? 'var(--w-accent)' : 'var(--w-surface-2)',
-            color: voted ? '#fff' : 'var(--w-text-soft)',
-            fontWeight: 700,
-            border: voted ? '1px solid var(--w-accent)' : '1px solid var(--w-border)',
-          }}
-          title={voted ? '공감 취소' : '공감'}
-        >
-          <ThumbsUp size={13} />
-          <span>{idea.vote_count}</span>
-        </button>
-        <button
-          className="w-btn w-btn-ghost"
-          style={{ padding: '6px 10px', fontSize: 12 }}
-          onClick={onClose}
-        >
-          닫기
-        </button>
-      </div>
+      <DetailPanelHeader
+        title={idea.title}
+        extraActions={
+          <button
+            onClick={() => { void onVote(); }}
+            className="w-btn"
+            style={{
+              padding: '6px 12px',
+              fontSize: 12,
+              background: voted ? 'var(--w-accent)' : 'var(--w-surface-2)',
+              color: voted ? '#fff' : 'var(--w-text-soft)',
+              fontWeight: 700,
+              border: voted ? '1px solid var(--w-accent)' : '1px solid var(--w-border)',
+              flexShrink: 0,
+            }}
+            title={voted ? '공감 취소' : '공감'}
+          >
+            <ThumbsUp size={13} />
+            <span>{idea.vote_count}</span>
+          </button>
+        }
+      />
 
       <DetailBadges>
         {idea.category && <span className="w-badge w-badge-muted">{idea.category}</span>}

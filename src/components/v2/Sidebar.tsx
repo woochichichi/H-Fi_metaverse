@@ -19,6 +19,7 @@ import {
 import { useAuthStore } from '../../stores/authStore';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useV2Nav, type V2Page } from '../../stores/v2NavStore';
+import { useUrgentUnread } from '../../hooks/useUrgentUnread';
 
 interface MenuItem {
   id: V2Page;
@@ -27,21 +28,41 @@ interface MenuItem {
   scope?: string;
   visible: boolean;
   adminOnly?: boolean;
+  badge?: { text: string; tone: 'critical' | 'accent' };
 }
 
 export default function V2Sidebar() {
+  const user = useAuthStore((s) => s.user);
   const profile = useAuthStore((s) => s.profile);
   const perm = usePermissions();
   const { page, setPage } = useV2Nav();
+  // 긴급 미확인 공지 배지용 (초기 로드 1회만, reload는 공지 페이지에서 처리)
+  const { urgent } = useUrgentUnread(user?.id ?? null);
+  const urgentCount = urgent.length;
 
-  const mainItems = useMemo<MenuItem[]>(() => [
+  // 1) 소통 - 매일 쓰는 핵심 (공지/VOC/아이디어/KPI)
+  const coreItems = useMemo<MenuItem[]>(() => [
     { id: 'dashboard', label: '대시보드', icon: LayoutDashboard, visible: true },
-    { id: 'notice', label: '공지사항', icon: Megaphone, visible: true },
+    {
+      id: 'notice',
+      label: '공지사항',
+      icon: Megaphone,
+      visible: true,
+      badge: urgentCount > 0 ? { text: String(urgentCount), tone: 'critical' } : undefined,
+    },
     { id: 'voc', label: '우리팀 이야기(VOC)', icon: MessageSquareHeart, visible: true },
     { id: 'idea', label: '아이디어 제안', icon: Lightbulb, visible: true },
     { id: 'kpi', label: '팀 KPI', icon: Target, visible: true },
+  ], [urgentCount]);
+
+  // 2) 사내 활동 - 가끔 쓰는 (쪽지/소모임)
+  const socialItems = useMemo<MenuItem[]>(() => [
     { id: 'anon-note', label: '익명 쪽지', icon: Mail, visible: true },
     { id: 'gathering', label: '소모임', icon: PartyPopper, visible: true },
+  ], []);
+
+  // 3) 참고 (피플/조직)
+  const referenceItems = useMemo<MenuItem[]>(() => [
     { id: 'directory', label: '피플 목록', icon: Users2, visible: true },
     { id: 'unit-activities', label: '조직 활동', icon: Building2, visible: true },
   ], []);
@@ -125,7 +146,29 @@ export default function V2Sidebar() {
       {/* 메뉴 */}
       <nav style={{ flex: 1, overflowY: 'auto', padding: '0 12px 16px' }}>
         <SidebarSection label="워크스페이스">
-          {mainItems.map((item) => (
+          {coreItems.map((item) => (
+            <SidebarItem
+              key={item.id}
+              item={item}
+              active={page === item.id}
+              onClick={() => setPage(item.id)}
+            />
+          ))}
+        </SidebarSection>
+
+        <SidebarSection label="사내 소통">
+          {socialItems.map((item) => (
+            <SidebarItem
+              key={item.id}
+              item={item}
+              active={page === item.id}
+              onClick={() => setPage(item.id)}
+            />
+          ))}
+        </SidebarSection>
+
+        <SidebarSection label="참고">
+          {referenceItems.map((item) => (
             <SidebarItem
               key={item.id}
               item={item}
@@ -219,6 +262,14 @@ function SidebarItem({
     >
       <Icon size={16} />
       <span style={{ flex: 1 }}>{item.label}</span>
+      {item.badge && (
+        <span
+          className={item.badge.tone === 'critical' ? 'w-badge w-badge-critical' : 'w-badge w-badge-accent'}
+          style={{ fontSize: 10, padding: '1px 6px', minWidth: 18, textAlign: 'center' }}
+        >
+          {item.badge.text}
+        </span>
+      )}
       {item.scope && (
         <span className="w-badge w-badge-muted" style={{ fontSize: 10, padding: '1px 6px' }}>
           {item.scope}

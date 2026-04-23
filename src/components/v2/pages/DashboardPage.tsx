@@ -25,11 +25,28 @@ interface Counts {
   teamMembers: number;
 }
 
+interface RecentNotice {
+  id: string;
+  title: string;
+  urgency: '긴급' | '할일' | '참고';
+  team: string | null;
+  created_at: string;
+}
+
+interface TopIdea {
+  id: string;
+  title: string;
+  status: string;
+  vote_count: number;
+}
+
 export default function DashboardPage() {
   const { user, profile } = useAuthStore();
   const perm = usePermissions();
   const setPage = useV2Nav((s) => s.setPage);
   const [counts, setCounts] = useState<Counts | null>(null);
+  const [recentNotices, setRecentNotices] = useState<RecentNotice[]>([]);
+  const [topIdeas, setTopIdeas] = useState<TopIdea[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -116,6 +133,22 @@ export default function DashboardPage() {
           : supabase.from('profiles').select('*', { count: 'exact', head: true });
         const { count: memberCount } = await memberQ;
 
+        // 최근 공지 3건 (내 팀 우선 + 전사)
+        const { data: noticesData } = await supabase
+          .from('notices')
+          .select('id, title, urgency, team, created_at')
+          .order('pinned', { ascending: false })
+          .order('created_at', { ascending: false })
+          .limit(3);
+
+        // 인기 아이디어 Top 3 (상태=제안 + 공감 많은 순)
+        const { data: ideasData } = await supabase
+          .from('idea_with_votes')
+          .select('id, title, status, vote_count')
+          .order('vote_count', { ascending: false })
+          .order('created_at', { ascending: false })
+          .limit(3);
+
         if (cancelled) return;
         setCounts({
           noticeUnread: Math.max(0, (totalNotices ?? 0) - (readCount ?? 0)),
@@ -127,6 +160,8 @@ export default function DashboardPage() {
           anonNotesWaiting: anonWaiting,
           teamMembers: memberCount ?? 0,
         });
+        setRecentNotices((noticesData ?? []) as RecentNotice[]);
+        setTopIdeas((ideasData ?? []) as TopIdea[]);
       } catch (e) {
         console.error('대시보드 로드 실패', e);
       } finally {
@@ -233,7 +268,7 @@ export default function DashboardPage() {
             {timeLabel}이에요, {greetName}님
           </h1>
           <p style={{ margin: '6px 0 0', color: 'var(--w-text-soft)', fontSize: 14 }}>
-            오늘의 {roleScope} 상태를 한눈에 확인하세요.
+            {buildSummary(counts, roleScope)}
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -297,11 +332,218 @@ export default function DashboardPage() {
           ))}
       </div>
 
+      {/* 콘텐츠 위젯: 최근 공지 + 인기 아이디어 */}
+      {!loading && (recentNotices.length > 0 || topIdeas.length > 0) && (
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: 16,
+          }}
+        >
+          {recentNotices.length > 0 && (
+            <RecentNoticesWidget notices={recentNotices} onMore={() => setPage('notice')} onSelect={() => setPage('notice')} />
+          )}
+          {topIdeas.length > 0 && (
+            <TopIdeasWidget ideas={topIdeas} onMore={() => setPage('idea')} onSelect={() => setPage('idea')} />
+          )}
+        </div>
+      )}
+
       {/* 역할별 추가 섹션 */}
       {perm.isLeader && <AdminHints perm={perm} />}
       {!perm.isLeader && <MemberHints />}
     </div>
   );
+}
+
+/** 상단 인사말 아래 한 줄 요약: 미확인/진행 건수 중 가장 눈에 띄는 것 */
+function buildSummary(counts: Counts | null, scope: string): string {
+  if (!counts) return '오늘의 상태를 한눈에 확인하세요.';
+  const items: string[] = [];
+  if (counts.urgentUnread > 0) items.push(`미확인 긴급 공지 ${counts.urgentUnread}건`);
+  else if (counts.noticeUnread > 0) items.push(`미확인 공지 ${counts.noticeUnread}건`);
+  if (counts.vocOpen > 0 || counts.vocOpenMyTeam > 0) {
+    const n = scope === '전사' ? counts.vocOpen : counts.vocOpenMyTeam;
+    if (n > 0) items.push(`VOC 진행중 ${n}건`);
+  }
+  if (counts.anonNotesWaiting > 0) items.push(`답변 대기 쪽지 ${counts.anonNotesWaiting}건`);
+  if (items.length === 0) return `${scope} 처리 대기 항목이 없어요. 깔끔한 하루 보내세요.`;
+  return `오늘 ${scope}에 ${items.join(' · ')} 이 있어요.`;
+}
+
+function RecentNoticesWidget({
+  notices,
+  onMore,
+  onSelect,
+}: {
+  notices: RecentNotice[];
+  onMore: () => void;
+  onSelect: () => void;
+}) {
+  return (
+    <div className="w-card" style={{ padding: 0, overflow: 'hidden' }}>
+      <WidgetHeader title="최근 공지" onMore={onMore} />
+      <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+        {notices.map((n, i) => (
+          <li
+            key={n.id}
+            onClick={onSelect}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              padding: '10px 16px',
+              borderTop: i === 0 ? 'none' : '1px solid var(--w-border)',
+              cursor: 'pointer',
+            }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLLIElement).style.background = 'var(--w-surface-2)')}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLLIElement).style.background = 'transparent')}
+          >
+            <UrgencyDot urgency={n.urgency} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: 'var(--w-text)',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {n.title}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--w-text-muted)' }}>
+                {n.team ?? '전사'} · {relative(n.created_at)}
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function TopIdeasWidget({
+  ideas,
+  onMore,
+  onSelect,
+}: {
+  ideas: TopIdea[];
+  onMore: () => void;
+  onSelect: () => void;
+}) {
+  return (
+    <div className="w-card" style={{ padding: 0, overflow: 'hidden' }}>
+      <WidgetHeader title="인기 아이디어" onMore={onMore} />
+      <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+        {ideas.map((idea, i) => (
+          <li
+            key={idea.id}
+            onClick={onSelect}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              padding: '10px 16px',
+              borderTop: i === 0 ? 'none' : '1px solid var(--w-border)',
+              cursor: 'pointer',
+            }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLLIElement).style.background = 'var(--w-surface-2)')}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLLIElement).style.background = 'transparent')}
+          >
+            <div
+              style={{
+                minWidth: 28,
+                textAlign: 'center',
+                fontSize: 11,
+                fontWeight: 700,
+                color: 'var(--w-accent-hover)',
+              }}
+            >
+              #{i + 1}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: 'var(--w-text)',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {idea.title}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--w-text-muted)' }}>
+                {idea.status} · 공감 {idea.vote_count}
+              </div>
+            </div>
+            <Heart size={13} color="var(--w-accent)" />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function WidgetHeader({ title, onMore }: { title: string; onMore: () => void }) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '12px 16px',
+        borderBottom: '1px solid var(--w-border)',
+      }}
+    >
+      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--w-text)' }}>{title}</div>
+      <button
+        onClick={onMore}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 4,
+          background: 'transparent',
+          border: 'none',
+          color: 'var(--w-accent-hover)',
+          fontSize: 11,
+          fontWeight: 600,
+          cursor: 'pointer',
+          padding: 0,
+        }}
+      >
+        전체 보기 <ArrowRight size={12} />
+      </button>
+    </div>
+  );
+}
+
+function UrgencyDot({ urgency }: { urgency: '긴급' | '할일' | '참고' }) {
+  const color =
+    urgency === '긴급'
+      ? 'var(--w-urgency-critical)'
+      : urgency === '할일'
+        ? 'var(--w-urgency-todo)'
+        : 'var(--w-urgency-info)';
+  return <span style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />;
+}
+
+/** 상대 시간 포맷 - 외부 utils 대신 내부에서 간단 구현 */
+function relative(iso: string): string {
+  const d = new Date(iso);
+  const diff = Date.now() - d.getTime();
+  const min = Math.floor(diff / 60000);
+  if (min < 1) return '방금';
+  if (min < 60) return `${min}분 전`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}시간 전`;
+  const day = Math.floor(hr / 24);
+  if (day < 30) return `${day}일 전`;
+  return d.toLocaleDateString('ko-KR');
 }
 
 function KpiSkeleton() {

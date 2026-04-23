@@ -144,7 +144,7 @@ export function MasterListItem({ selected, onClick, children }: MasterListItemPr
       style={{
         width: '100%',
         textAlign: 'left',
-        padding: '12px 14px',
+        padding: '10px 12px',
         background: selected ? 'var(--w-accent-soft)' : 'transparent',
         border: 'none',
         borderLeft: `3px solid ${selected ? 'var(--w-accent)' : 'transparent'}`,
