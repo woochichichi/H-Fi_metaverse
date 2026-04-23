@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Plus, Download, RefreshCw, ChevronRight, GaugeCircle, X } from 'lucide-react';
+import { Plus, Download, RefreshCw, ChevronRight, GaugeCircle } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import EmptyState from '../ui/EmptyState';
 import Modal from '../ui/Modal';
@@ -10,7 +10,6 @@ import {
   useUserActivities,
   type TeamStat,
   type UserStat,
-  type UserDetailActivity,
 } from '../../../hooks/useUserActivities';
 import { TEAMS } from '../../../lib/constants';
 import { getDisplayName } from '../../../lib/utils';
