@@ -15,6 +15,7 @@ import KpiPage from './pages/KpiPage';
 import DirectoryPage from './pages/DirectoryPage';
 import GatheringPage from './pages/GatheringPage';
 import UnitActivitiesPage from './pages/UnitActivitiesPage';
+import CorpCardPage from './pages/CorpCardPage';
 import SiteReportPage from './pages/SiteReportPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import AdminEvalItemsPage from './pages/AdminEvalItemsPage';
@@ -130,6 +131,7 @@ function V2Router({ page }: { page: string; role: string | null }) {
     case 'gathering': return <GatheringPage />;
     case 'directory': return <DirectoryPage />;
     case 'unit-activities': return <UnitActivitiesPage />;
+    case 'corp-card': return <CorpCardPage />;
     case 'site-report': return <SiteReportPage />;
     case 'admin-users': return <AdminUsersPage />;
     case 'admin-eval-items': return <AdminEvalItemsPage />;

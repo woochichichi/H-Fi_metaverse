@@ -22,6 +22,7 @@ export type V2Page =
   | 'gathering'
   | 'directory'
   | 'unit-activities'
+  | 'corp-card'
   | 'site-report'
   | 'admin-users'
   | 'admin-eval-items'

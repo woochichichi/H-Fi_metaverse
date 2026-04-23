@@ -15,6 +15,7 @@ import {
   PartyPopper,
   Building2,
   Bug,
+  CreditCard,
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { usePermissions } from '../../hooks/usePermissions';
@@ -53,7 +54,13 @@ export default function V2Sidebar() {
     { id: 'voc', label: '우리팀 이야기(VOC)', icon: MessageSquareHeart, visible: true },
     { id: 'idea', label: '아이디어 제안', icon: Lightbulb, visible: true },
     { id: 'kpi', label: '팀 KPI', icon: Target, visible: true },
-  ], [urgentCount]);
+    {
+      id: 'corp-card',
+      label: '법인카드 현황',
+      icon: CreditCard,
+      visible: profile?.team === '증권ITO',
+    },
+  ], [urgentCount, profile?.team]);
 
   // 2) 사내 활동 - 가끔 쓰는 (쪽지/소모임)
   const socialItems = useMemo<MenuItem[]>(() => [
@@ -160,7 +167,7 @@ export default function V2Sidebar() {
       {/* 메뉴 */}
       <nav style={{ flex: 1, overflowY: 'auto', padding: '0 12px 16px' }}>
         <SidebarSection label="워크스페이스">
-          {coreItems.map((item) => (
+          {coreItems.filter((i) => i.visible).map((item) => (
             <SidebarItem
               key={item.id}
               item={item}

@@ -13,7 +13,6 @@ import { supabase } from '../../../lib/supabase';
 import { useAuthStore } from '../../../stores/authStore';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useV2Nav, type V2Page } from '../../../stores/v2NavStore';
-import CorpCardSection from '../dashboard/CorpCardSection';
 
 interface Counts {
   noticeUnread: number;
@@ -350,9 +349,6 @@ export default function DashboardPage() {
       {/* 역할별 추가 섹션 */}
       {perm.isLeader && <AdminHints perm={perm} />}
       {!perm.isLeader && <MemberHints />}
-
-      {/* 법인카드 현황 — 증권ITO 팀 소속자만 노출 */}
-      {profile?.team === '증권ITO' && <CorpCardSection team={profile.team} />}
     </div>
   );
 }
