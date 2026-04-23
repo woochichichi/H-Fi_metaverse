@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useDeviceMode } from '../hooks/useDeviceMode';
 import { useAuthStore } from '../stores/authStore';
-import { useThemeStore, UI_VERSIONS } from '../stores/themeStore';
+import { useThemeStore } from '../stores/themeStore';
 import TopBar from '../components/layout/TopBar';
 import Sidebar from '../components/layout/Sidebar';
 import MetaverseLayout from '../components/metaverse/MetaverseLayout';
@@ -54,26 +54,7 @@ export default function MainPage() {
     return <V2Workspace />;
   }
 
-  if (uiVersion !== 'classic') {
-    const meta = UI_VERSIONS.find((v) => v.id === uiVersion);
-    return (
-      <div className="flex h-screen flex-col bg-bg-primary">
-        <TopBar />
-        {meta?.preview ? (
-          <iframe
-            src={meta.preview}
-            title={meta.name}
-            className="flex-1 w-full border-0 bg-white"
-          />
-        ) : (
-          <div className="flex-1 grid place-items-center text-text-muted">
-            선택한 디자인({uiVersion})을 찾을 수 없어요.
-          </div>
-        )}
-      </div>
-    );
-  }
-
+  // classic: 메타버스 맵
   return (
     <div className="flex h-screen flex-col bg-bg-primary">
       <TopBar />

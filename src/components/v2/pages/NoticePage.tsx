@@ -50,11 +50,7 @@ export default function NoticePage() {
           { label: '한울타리' },
           {
             label: '공지사항',
-            badge: perm.isAdmin
-              ? { text: '전사', tone: 'accent' }
-              : perm.isLeaderOnly
-                ? { text: '내 팀', tone: 'info' }
-                : undefined,
+            badge: profile?.team ? { text: profile.team, tone: 'accent' } : undefined,
           },
         ]}
         title="공지사항"

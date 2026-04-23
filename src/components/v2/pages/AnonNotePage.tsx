@@ -53,11 +53,10 @@ export default function AnonNotePage() {
           { label: '한울타리' },
           {
             label: '익명 쪽지',
-            badge: perm.canReceiveAnonNotes
-              ? perm.isAdmin
-                ? { text: '전사 수신', tone: 'accent' }
-                : { text: '내 팀 수신', tone: 'info' }
-              : undefined,
+            badge:
+              perm.canReceiveAnonNotes && profile?.team
+                ? { text: `${profile.team} 수신`, tone: 'accent' }
+                : undefined,
           },
         ]}
         title="익명 쪽지"

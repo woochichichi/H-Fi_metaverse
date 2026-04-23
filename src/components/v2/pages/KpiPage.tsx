@@ -58,11 +58,7 @@ export default function KpiPage() {
           { label: '한울타리' },
           {
             label: '팀 KPI',
-            badge: perm.isAdmin
-              ? { text: '전사 열람', tone: 'accent' }
-              : perm.isLeaderOnly
-                ? { text: '내 팀', tone: 'info' }
-                : { text: '내 팀', tone: 'muted' },
+            badge: profile?.team ? { text: profile.team, tone: 'accent' } : undefined,
           },
         ]}
         title="팀 KPI"

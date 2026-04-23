@@ -54,9 +54,7 @@ export default function VocPage() {
           { label: '한울타리' },
           {
             label: 'VOC',
-            badge: perm.isAdmin
-              ? { text: '전사', tone: 'accent' }
-              : { text: `${profile?.team ?? ''}`, tone: 'info' },
+            badge: profile?.team ? { text: profile.team, tone: 'accent' } : undefined,
           },
         ]}
         title="우리팀 이야기 (VOC)"

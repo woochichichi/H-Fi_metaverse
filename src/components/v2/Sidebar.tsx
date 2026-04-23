@@ -132,8 +132,22 @@ export default function V2Sidebar() {
         overflow: 'hidden',
       }}
     >
-      {/* 브랜드 */}
-      <div style={{ padding: '20px 20px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
+      {/* 브랜드 (클릭 시 대시보드로 이동) */}
+      <button
+        onClick={() => setPage('dashboard')}
+        title="대시보드로 이동"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          padding: '20px 20px 16px',
+          width: '100%',
+          background: 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          textAlign: 'left',
+        }}
+      >
         <img src="/favicon.svg" alt="" style={{ width: 28, height: 28 }} />
         <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
           <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--w-text)' }}>한울타리</span>
@@ -141,7 +155,7 @@ export default function V2Sidebar() {
             {roleBadge.text}
           </span>
         </div>
-      </div>
+      </button>
 
       {/* 메뉴 */}
       <nav style={{ flex: 1, overflowY: 'auto', padding: '0 12px 16px' }}>

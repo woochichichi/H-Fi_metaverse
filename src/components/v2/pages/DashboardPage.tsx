@@ -13,6 +13,7 @@ import { supabase } from '../../../lib/supabase';
 import { useAuthStore } from '../../../stores/authStore';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useV2Nav, type V2Page } from '../../../stores/v2NavStore';
+import CorpCardSection from '../dashboard/CorpCardSection';
 
 interface Counts {
   noticeUnread: number;
@@ -180,7 +181,8 @@ export default function DashboardPage() {
   const timeLabel =
     hour < 6 ? '새벽' : hour < 12 ? '오전' : hour < 18 ? '오후' : '저녁';
 
-  const roleScope = perm.isAdmin ? '전사' : profile?.team ?? '';
+  // 현재 증권ITO 단일 팀 운영 단계. 추후 다팀 확장 시 admin=전사로 복원.
+  const roleScope = profile?.team ?? '';
 
   // 역할별 KPI 구성
   const kpis = useMemo(() => {
@@ -196,16 +198,16 @@ export default function DashboardPage() {
       },
       {
         icon: MessageSquareHeart,
-        label: perm.isAdmin ? '전사 VOC 진행중' : '내 팀 VOC 진행중',
-        value: perm.isAdmin ? counts.vocOpen : counts.vocOpenMyTeam,
+        label: '내 팀 VOC 진행중',
+        value: counts.vocOpenMyTeam,
         sub: '접수·검토·처리중',
         tone: 'todo',
         page: 'voc' as V2Page,
       },
       {
         icon: Lightbulb,
-        label: perm.isAdmin ? '전사 신규 아이디어' : '내 팀 신규 아이디어',
-        value: perm.isAdmin ? counts.ideaProposed : counts.ideaProposedMyTeam,
+        label: '내 팀 신규 아이디어',
+        value: counts.ideaProposedMyTeam,
         sub: '상태=제안',
         tone: 'info',
         page: 'idea' as V2Page,
@@ -215,7 +217,7 @@ export default function DashboardPage() {
     if (perm.canReceiveAnonNotes) {
       base.push({
         icon: Heart,
-        label: perm.isAdmin ? '전사 익명 쪽지' : '내 팀 익명 쪽지',
+        label: '내 팀 익명 쪽지',
         value: counts.anonNotesWaiting,
         sub: '답변 대기',
         tone: counts.anonNotesWaiting > 0 ? 'todo' : 'info',
@@ -241,14 +243,9 @@ export default function DashboardPage() {
         <span>한울타리</span>
         <span>/</span>
         <span style={{ color: 'var(--w-text)' }}>대시보드</span>
-        {perm.isAdmin && (
+        {profile?.team && (
           <span className="w-badge w-badge-accent" style={{ marginLeft: 4 }}>
-            {perm.role === 'admin' ? 'ADMIN' : 'DIRECTOR'} · 전체
-          </span>
-        )}
-        {perm.isLeaderOnly && (
-          <span className="w-badge w-badge-info" style={{ marginLeft: 4 }}>
-            리더 · 내 팀
+            {perm.isAdmin ? 'ADMIN · ' : perm.isLeaderOnly ? '리더 · ' : ''}{profile.team}
           </span>
         )}
       </div>
@@ -353,6 +350,9 @@ export default function DashboardPage() {
       {/* 역할별 추가 섹션 */}
       {perm.isLeader && <AdminHints perm={perm} />}
       {!perm.isLeader && <MemberHints />}
+
+      {/* 법인카드 현황 — 증권ITO 팀 소속자만 노출 */}
+      {profile?.team === '증권ITO' && <CorpCardSection />}
     </div>
   );
 }
@@ -363,10 +363,7 @@ function buildSummary(counts: Counts | null, scope: string): string {
   const items: string[] = [];
   if (counts.urgentUnread > 0) items.push(`미확인 긴급 공지 ${counts.urgentUnread}건`);
   else if (counts.noticeUnread > 0) items.push(`미확인 공지 ${counts.noticeUnread}건`);
-  if (counts.vocOpen > 0 || counts.vocOpenMyTeam > 0) {
-    const n = scope === '전사' ? counts.vocOpen : counts.vocOpenMyTeam;
-    if (n > 0) items.push(`VOC 진행중 ${n}건`);
-  }
+  if (counts.vocOpenMyTeam > 0) items.push(`VOC 진행중 ${counts.vocOpenMyTeam}건`);
   if (counts.anonNotesWaiting > 0) items.push(`답변 대기 쪽지 ${counts.anonNotesWaiting}건`);
   if (items.length === 0) return `${scope} 처리 대기 항목이 없어요. 깔끔한 하루 보내세요.`;
   return `오늘 ${scope}에 ${items.join(' · ')} 이 있어요.`;
@@ -415,7 +412,7 @@ function RecentNoticesWidget({
                 {n.title}
               </div>
               <div style={{ fontSize: 11, color: 'var(--w-text-muted)' }}>
-                {n.team ?? '전사'} · {relative(n.created_at)}
+                {n.team ?? '공통'} · {relative(n.created_at)}
               </div>
             </div>
           </li>
