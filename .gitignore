@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# npm lock — Windows/Linux optional dep 불일치로 커밋 금지
+# Cloudflare는 npm install로 fallback하여 플랫폼별 패키지 자동 해결
+package-lock.json
+
 # Environment variables
 .env
 .env.*
