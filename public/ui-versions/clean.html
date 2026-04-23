@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1440" />
+<title>한울타리 v2 · Clean Corporate</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
+<style>
+  :root { font-family: 'Pretendard Variable', Pretendard, system-ui, sans-serif; }
+  body { font-feature-settings: "tnum"; letter-spacing: -0.01em; }
+  .num { font-variant-numeric: tabular-nums; }
+</style>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink: { 900: '#0F172A', 700: '#334155', 500: '#64748B', 300: '#CBD5E1', 100: '#F1F5F9', 50: '#F8FAFC' },
+          brand: { DEFAULT: '#2563EB', 50:'#EFF6FF', 100:'#DBEAFE', 600:'#1D4ED8' },
+        },
+        boxShadow: { card: '0 1px 2px rgba(15,23,42,0.04), 0 1px 3px rgba(15,23,42,0.06)' }
+      }
+    }
+  }
+</script>
+</head>
+<body class="bg-ink-50 text-ink-900 min-h-screen">
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside class="w-60 shrink-0 border-r border-ink-100 bg-white flex flex-col">
+      <div class="h-16 flex items-center gap-2 px-5 border-b border-ink-100">
+        <div class="w-8 h-8 rounded-lg bg-brand text-white grid place-items-center text-sm font-bold">H</div>
+        <div>
+          <div class="text-sm font-semibold leading-tight">한울타리</div>
+          <div class="text-[11px] text-ink-500 leading-tight">Hanwha Fi-ITO</div>
+        </div>
+      </div>
+      <nav class="flex-1 px-3 py-4 space-y-0.5 text-sm">
+        <div class="px-2 py-1.5 text-[11px] font-semibold text-ink-500 uppercase tracking-wider">Workspace</div>
+        <a class="flex items-center gap-3 px-2.5 py-2 rounded-md bg-brand-50 text-brand-600 font-medium">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>
+          대시보드
+        </a>
+        <a class="flex items-center gap-3 px-2.5 py-2 rounded-md text-ink-700 hover:bg-ink-50">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          VOC 센터
+          <span class="ml-auto text-[11px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">12</span>
+        </a>
+        <a class="flex items-center gap-3 px-2.5 py-2 rounded-md text-ink-700 hover:bg-ink-50">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.4.3.8.8 1 1.3H15c.2-.5.6-1 1-1.3A7 7 0 0 0 12 2z"/></svg>
+          아이디어
+        </a>
+        <a class="flex items-center gap-3 px-2.5 py-2 rounded-md text-ink-700 hover:bg-ink-50">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6"/></svg>
+          공지사항
+        </a>
+        <a class="flex items-center gap-3 px-2.5 py-2 rounded-md text-ink-700 hover:bg-ink-50">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M7 14l4-4 4 4 5-5"/></svg>
+          KPI 관리실
+        </a>
+        <a class="flex items-center gap-3 px-2.5 py-2 rounded-md text-ink-700 hover:bg-ink-50">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v12H5.17L4 17.17z"/></svg>
+          쪽지함
+        </a>
+        <a class="flex items-center gap-3 px-2.5 py-2 rounded-md text-ink-700 hover:bg-ink-50">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          수집함
+          <span class="ml-auto text-[11px] bg-ink-100 text-ink-700 px-1.5 py-0.5 rounded-full">3</span>
+        </a>
+
+        <div class="px-2 pt-5 pb-1 text-[11px] font-semibold text-ink-500 uppercase tracking-wider">Team Space</div>
+        <a class="flex items-center gap-3 px-2.5 py-2 rounded-md text-ink-700 hover:bg-ink-50"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>증권ITO</a>
+        <a class="flex items-center gap-3 px-2.5 py-2 rounded-md text-ink-700 hover:bg-ink-50"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>생명ITO</a>
+        <a class="flex items-center gap-3 px-2.5 py-2 rounded-md text-ink-700 hover:bg-ink-50"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>손보ITO</a>
+        <a class="flex items-center gap-3 px-2.5 py-2 rounded-md text-ink-700 hover:bg-ink-50"><span class="w-1.5 h-1.5 rounded-full bg-violet-500"></span>한금서</a>
+      </nav>
+      <div class="p-3 border-t border-ink-100">
+        <div class="flex items-center gap-2 p-2 rounded-md hover:bg-ink-50">
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand to-blue-400 grid place-items-center text-white text-xs font-semibold">전우</div>
+          <div class="min-w-0 flex-1">
+            <div class="text-sm font-medium truncate">전우형</div>
+            <div class="text-[11px] text-ink-500 truncate">증권ITO · Leader</div>
+          </div>
+          <svg class="w-4 h-4 text-ink-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="flex-1 min-w-0 flex flex-col">
+      <!-- Topbar -->
+      <header class="h-16 bg-white border-b border-ink-100 flex items-center gap-4 px-8">
+        <div class="flex items-center gap-2 text-sm text-ink-500">
+          <span>Workspace</span>
+          <span>›</span>
+          <span class="text-ink-900 font-medium">대시보드</span>
+        </div>
+        <div class="ml-auto relative">
+          <input class="w-80 h-9 pl-9 pr-3 rounded-md bg-ink-50 border border-transparent focus:border-ink-300 focus:bg-white text-sm outline-none" placeholder="검색 · Ctrl+K" />
+          <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-ink-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        </div>
+        <button class="relative w-9 h-9 rounded-md hover:bg-ink-50 grid place-items-center">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4"/></svg>
+          <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+        </button>
+        <button class="h-9 px-3 rounded-md bg-brand text-white text-sm font-medium hover:bg-brand-600">+ 새 VOC</button>
+      </header>
+
+      <!-- Content -->
+      <section class="flex-1 overflow-auto p-8 space-y-6">
+        <!-- Hero -->
+        <div class="flex items-end justify-between">
+          <div>
+            <div class="text-sm text-ink-500">2026년 4월 23일 목요일</div>
+            <h1 class="text-2xl font-semibold mt-1">안녕하세요, 전우형 프로님</h1>
+            <p class="text-sm text-ink-500 mt-1">이번 주 VOC 처리율이 <span class="text-emerald-600 font-medium">+12%</span> 올랐어요.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="h-9 px-3 rounded-md border border-ink-300 text-sm bg-white hover:bg-ink-50">이번 주</button>
+            <button class="h-9 px-3 rounded-md border border-ink-300 text-sm bg-white hover:bg-ink-50 text-ink-500">이번 달</button>
+            <button class="h-9 px-3 rounded-md border border-ink-300 text-sm bg-white hover:bg-ink-50 text-ink-500">분기</button>
+          </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-4 gap-4">
+          <!-- card -->
+          <div class="bg-white rounded-lg border border-ink-100 p-5 shadow-card">
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-ink-500">VOC 처리율</span>
+              <span class="text-[11px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">+12%</span>
+            </div>
+            <div class="mt-3 flex items-baseline gap-1">
+              <span class="text-3xl font-semibold num">87</span>
+              <span class="text-ink-500">%</span>
+            </div>
+            <div class="mt-3 h-1.5 bg-ink-100 rounded-full overflow-hidden"><div class="h-full bg-brand" style="width:87%"></div></div>
+          </div>
+          <div class="bg-white rounded-lg border border-ink-100 p-5 shadow-card">
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-ink-500">아이디어 채택</span>
+              <span class="text-[11px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">+3</span>
+            </div>
+            <div class="mt-3 flex items-baseline gap-1">
+              <span class="text-3xl font-semibold num">18</span>
+              <span class="text-sm text-ink-500">/ 42</span>
+            </div>
+            <div class="mt-3 text-[11px] text-ink-500">이번 분기 누적</div>
+          </div>
+          <div class="bg-white rounded-lg border border-ink-100 p-5 shadow-card">
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-ink-500">KPI 달성률</span>
+              <span class="text-[11px] text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">-2%</span>
+            </div>
+            <div class="mt-3 flex items-baseline gap-1">
+              <span class="text-3xl font-semibold num">92.4</span>
+              <span class="text-ink-500">%</span>
+            </div>
+            <div class="mt-3 flex gap-1">
+              <div class="flex-1 h-1.5 bg-emerald-500 rounded-full"></div>
+              <div class="flex-1 h-1.5 bg-emerald-500 rounded-full"></div>
+              <div class="flex-1 h-1.5 bg-emerald-500 rounded-full"></div>
+              <div class="flex-1 h-1.5 bg-amber-400 rounded-full"></div>
+            </div>
+          </div>
+          <div class="bg-white rounded-lg border border-ink-100 p-5 shadow-card">
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-ink-500">팀 활동 점수</span>
+              <span class="text-[11px] text-ink-500">WTD</span>
+            </div>
+            <div class="mt-3 flex items-baseline gap-1">
+              <span class="text-3xl font-semibold num">1,284</span>
+            </div>
+            <svg class="mt-2 w-full h-10" viewBox="0 0 200 40" preserveAspectRatio="none">
+              <polyline points="0,30 20,28 40,22 60,25 80,18 100,20 120,14 140,16 160,10 180,12 200,8" fill="none" stroke="#2563EB" stroke-width="2"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Main grid -->
+        <div class="grid grid-cols-3 gap-6">
+          <!-- VOC status -->
+          <div class="col-span-2 bg-white rounded-lg border border-ink-100 shadow-card">
+            <div class="px-5 py-4 border-b border-ink-100 flex items-center justify-between">
+              <div>
+                <h3 class="font-semibold">VOC 처리 현황</h3>
+                <p class="text-xs text-ink-500 mt-0.5">최근 30일 · 4개 팀</p>
+              </div>
+              <a class="text-xs text-brand font-medium">전체 보기 →</a>
+            </div>
+            <div class="p-5">
+              <svg viewBox="0 0 600 220" class="w-full h-56">
+                <defs>
+                  <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#2563EB" stop-opacity="0.25"/>
+                    <stop offset="100%" stop-color="#2563EB" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <g stroke="#F1F5F9" stroke-width="1">
+                  <line x1="40" y1="40"  x2="590" y2="40"/>
+                  <line x1="40" y1="90"  x2="590" y2="90"/>
+                  <line x1="40" y1="140" x2="590" y2="140"/>
+                  <line x1="40" y1="190" x2="590" y2="190"/>
+                </g>
+                <g font-family="Pretendard" font-size="10" fill="#94A3B8">
+                  <text x="0"  y="44">40</text><text x="0" y="94">30</text><text x="0" y="144">20</text><text x="0" y="194">10</text>
+                  <text x="60"  y="210">4/1</text><text x="170" y="210">4/7</text><text x="280" y="210">4/14</text><text x="390" y="210">4/21</text><text x="500" y="210">4/28</text>
+                </g>
+                <path d="M60,150 L120,120 L180,135 L240,95 L300,110 L360,70 L420,85 L480,55 L540,65 L590,50 L590,200 L60,200 Z" fill="url(#g1)"/>
+                <polyline points="60,150 120,120 180,135 240,95 300,110 360,70 420,85 480,55 540,65 590,50" fill="none" stroke="#2563EB" stroke-width="2"/>
+                <polyline points="60,170 120,160 180,155 240,140 300,130 360,125 420,110 480,105 540,95 590,90" fill="none" stroke="#10B981" stroke-width="2" stroke-dasharray="4 3"/>
+              </svg>
+              <div class="flex items-center gap-4 mt-2 text-xs text-ink-500">
+                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-brand"></span>접수</span>
+                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>처리완료</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notice -->
+          <div class="bg-white rounded-lg border border-ink-100 shadow-card">
+            <div class="px-5 py-4 border-b border-ink-100 flex items-center justify-between">
+              <h3 class="font-semibold">공지사항</h3>
+              <a class="text-xs text-brand font-medium">+ 작성</a>
+            </div>
+            <ul class="divide-y divide-ink-100">
+              <li class="px-5 py-3.5 flex items-start gap-3 hover:bg-ink-50">
+                <span class="mt-1.5 w-2 h-2 rounded-full bg-red-500 shrink-0"></span>
+                <div class="min-w-0 flex-1">
+                  <div class="text-sm font-medium truncate">2분기 전사 워크샵 일정 안내</div>
+                  <div class="text-[11px] text-ink-500 mt-0.5">손보ITO · 2시간 전</div>
+                </div>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-red-50 text-red-600 font-medium">긴급</span>
+              </li>
+              <li class="px-5 py-3.5 flex items-start gap-3 hover:bg-ink-50">
+                <span class="mt-1.5 w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
+                <div class="min-w-0 flex-1">
+                  <div class="text-sm font-medium truncate">월간 KPI 입력 요청 (4월)</div>
+                  <div class="text-[11px] text-ink-500 mt-0.5">관리자 · 어제</div>
+                </div>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 font-medium">할일</span>
+              </li>
+              <li class="px-5 py-3.5 flex items-start gap-3 hover:bg-ink-50">
+                <span class="mt-1.5 w-2 h-2 rounded-full bg-blue-500 shrink-0"></span>
+                <div class="min-w-0 flex-1">
+                  <div class="text-sm font-medium truncate">신규 초대 코드 발급 규정 변경</div>
+                  <div class="text-[11px] text-ink-500 mt-0.5">관리자 · 3일 전</div>
+                </div>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 font-medium">참고</span>
+              </li>
+              <li class="px-5 py-3.5 flex items-start gap-3 hover:bg-ink-50">
+                <span class="mt-1.5 w-2 h-2 rounded-full bg-blue-500 shrink-0"></span>
+                <div class="min-w-0 flex-1">
+                  <div class="text-sm font-medium truncate">생명ITO 조직문화 설문 결과</div>
+                  <div class="text-[11px] text-ink-500 mt-0.5">생명ITO · 5일 전</div>
+                </div>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 font-medium">참고</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Ideas -->
+          <div class="col-span-2 bg-white rounded-lg border border-ink-100 shadow-card">
+            <div class="px-5 py-4 border-b border-ink-100 flex items-center justify-between">
+              <div>
+                <h3 class="font-semibold">인기 아이디어</h3>
+                <p class="text-xs text-ink-500 mt-0.5">이번 주 투표 상위</p>
+              </div>
+              <a class="text-xs text-brand font-medium">전체 보기 →</a>
+            </div>
+            <table class="w-full text-sm">
+              <thead class="text-xs text-ink-500">
+                <tr class="border-b border-ink-100">
+                  <th class="text-left font-medium px-5 py-2.5">#</th>
+                  <th class="text-left font-medium px-5 py-2.5">제안</th>
+                  <th class="text-left font-medium px-5 py-2.5">팀</th>
+                  <th class="text-right font-medium px-5 py-2.5">투표</th>
+                  <th class="text-left font-medium px-5 py-2.5">상태</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-ink-100">
+                <tr class="hover:bg-ink-50">
+                  <td class="px-5 py-3 text-ink-500 num">01</td>
+                  <td class="px-5 py-3">월요일 아침 팀 인사 루틴 도입</td>
+                  <td class="px-5 py-3"><span class="inline-flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>생명ITO</span></td>
+                  <td class="px-5 py-3 text-right num font-medium">47</td>
+                  <td class="px-5 py-3"><span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-medium">채택</span></td>
+                </tr>
+                <tr class="hover:bg-ink-50">
+                  <td class="px-5 py-3 text-ink-500 num">02</td>
+                  <td class="px-5 py-3">VOC 처리 SLA 가이드라인 수립</td>
+                  <td class="px-5 py-3"><span class="inline-flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>증권ITO</span></td>
+                  <td class="px-5 py-3 text-right num font-medium">38</td>
+                  <td class="px-5 py-3"><span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 font-medium">검토중</span></td>
+                </tr>
+                <tr class="hover:bg-ink-50">
+                  <td class="px-5 py-3 text-ink-500 num">03</td>
+                  <td class="px-5 py-3">원격근무 시 코어타임 유연화</td>
+                  <td class="px-5 py-3"><span class="inline-flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-violet-500"></span>한금서</span></td>
+                  <td class="px-5 py-3 text-right num font-medium">31</td>
+                  <td class="px-5 py-3"><span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-medium">논의중</span></td>
+                </tr>
+                <tr class="hover:bg-ink-50">
+                  <td class="px-5 py-3 text-ink-500 num">04</td>
+                  <td class="px-5 py-3">점심 도시락 공동구매 플랫폼</td>
+                  <td class="px-5 py-3"><span class="inline-flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>손보ITO</span></td>
+                  <td class="px-5 py-3 text-right num font-medium">22</td>
+                  <td class="px-5 py-3"><span class="text-[10px] px-2 py-0.5 rounded-full bg-ink-100 text-ink-700 font-medium">접수</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Activity -->
+          <div class="bg-white rounded-lg border border-ink-100 shadow-card">
+            <div class="px-5 py-4 border-b border-ink-100">
+              <h3 class="font-semibold">팀 활동</h3>
+              <p class="text-xs text-ink-500 mt-0.5">오늘의 타임라인</p>
+            </div>
+            <ul class="p-5 space-y-4 relative">
+              <div class="absolute left-[22px] top-7 bottom-7 w-px bg-ink-100"></div>
+              <li class="flex gap-3 relative">
+                <div class="w-4 h-4 mt-1 rounded-full bg-white border-2 border-brand z-10"></div>
+                <div class="flex-1">
+                  <div class="text-sm"><b>김민지</b> 프로가 VOC 답변 완료</div>
+                  <div class="text-[11px] text-ink-500 mt-0.5">2분 전 · 증권ITO</div>
+                </div>
+              </li>
+              <li class="flex gap-3 relative">
+                <div class="w-4 h-4 mt-1 rounded-full bg-white border-2 border-emerald-500 z-10"></div>
+                <div class="flex-1">
+                  <div class="text-sm"><b>이도윤</b> 프로가 아이디어 등록</div>
+                  <div class="text-[11px] text-ink-500 mt-0.5">15분 전 · 생명ITO</div>
+                </div>
+              </li>
+              <li class="flex gap-3 relative">
+                <div class="w-4 h-4 mt-1 rounded-full bg-white border-2 border-amber-500 z-10"></div>
+                <div class="flex-1">
+                  <div class="text-sm"><b>박서연</b> 리더가 공지 게시</div>
+                  <div class="text-[11px] text-ink-500 mt-0.5">1시간 전 · 손보ITO</div>
+                </div>
+              </li>
+              <li class="flex gap-3 relative">
+                <div class="w-4 h-4 mt-1 rounded-full bg-white border-2 border-violet-500 z-10"></div>
+                <div class="flex-1">
+                  <div class="text-sm"><b>최준호</b> 프로가 KPI 입력</div>
+                  <div class="text-[11px] text-ink-500 mt-0.5">2시간 전 · 한금서</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

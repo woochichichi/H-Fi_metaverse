@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Bell, Inbox, Users, LogOut, Settings, Pencil, Palette, Download } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Bell, Inbox, Users, LogOut, Settings, Pencil, Palette, Download, Sparkles } from 'lucide-react';
 import InboxBadge from '../inbox/InboxBadge';
 import AdminPanel from '../admin/AdminPanel';
 import MoodPicker from './MoodPicker';
@@ -16,6 +17,7 @@ import { TEAM_TO_ROOM } from '../../lib/constants';
 import { usePWAInstall } from '../../hooks/usePWAInstall';
 
 export default function TopBar() {
+  const navigate = useNavigate();
   const { profile, user, logout } = useAuthStore();
   const { sidebarOpen, toggleSidebar, openModal, closeModal, modalOpen } = useUiStore();
   const setCurrentRoom = useMetaverseStore((s) => s.setCurrentRoom);
@@ -159,6 +161,16 @@ export default function TopBar() {
               <Settings size={18} />
             </button>
           )}
+
+          {/* UI 버전 선택 (v2) */}
+          <button
+            onClick={() => navigate('/ui-version')}
+            className="flex h-8 items-center gap-1.5 rounded-lg bg-gradient-to-r from-accent/15 to-warning/15 px-2.5 text-[11px] font-semibold text-accent-light transition-colors duration-200 hover:from-accent/25 hover:to-warning/25"
+            title="디자인 테마 변경"
+          >
+            <Sparkles size={14} />
+            <span className="hidden sm:inline">디자인</span>
+          </button>
 
           {/* 바탕화면 바로가기 */}
           {canInstall && (

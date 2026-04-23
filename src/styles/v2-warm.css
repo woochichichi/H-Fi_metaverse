@@ -1,0 +1,190 @@
+/* ============================================================
+   v2 Warm Minimal — 스코프된 테마
+   index.css의 전역 "border-radius: 0 !important" / 픽셀 폰트 /
+   버튼 픽셀 그림자를 .v2-warm 스코프 안에서만 되돌린다.
+   ============================================================ */
+
+/* Pretendard (한글 최적 산세리프, 비픽셀) */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
+
+.v2-warm {
+  /* ===== 컬러 토큰 (Warm Minimal) ===== */
+  --w-bg: #FBF6EF;          /* 크림 베이스 */
+  --w-surface: #FFFFFF;
+  --w-surface-2: #F5EEE4;
+  --w-border: #E8DDCE;
+  --w-border-strong: #D9C9B2;
+
+  --w-text: #2A1F1A;
+  --w-text-soft: #5C4B42;
+  --w-text-muted: #8A776B;
+
+  --w-accent: #E8725C;      /* 기존 코랄 유지 */
+  --w-accent-soft: #FCE4DD;
+  --w-accent-hover: #D95F48;
+
+  --w-success: #3F9D6E;
+  --w-warning: #D08A2E;
+  --w-danger: #C8453E;
+  --w-info: #3D7FA8;
+
+  /* 시급성 */
+  --w-urgency-critical: #C8453E;
+  --w-urgency-critical-soft: #FCE4E1;
+  --w-urgency-todo: #D08A2E;
+  --w-urgency-todo-soft: #FAEFD9;
+  --w-urgency-info: #3D7FA8;
+  --w-urgency-info-soft: #E1EEF7;
+
+  /* 레이아웃 */
+  --w-radius-sm: 8px;
+  --w-radius: 12px;
+  --w-radius-lg: 16px;
+  --w-shadow-card: 0 1px 2px rgba(42, 31, 26, 0.04), 0 4px 12px rgba(42, 31, 26, 0.04);
+  --w-shadow-lg: 0 4px 16px rgba(42, 31, 26, 0.08), 0 12px 32px rgba(42, 31, 26, 0.06);
+
+  font-family: 'Pretendard Variable', Pretendard, 'Noto Sans KR', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  color: var(--w-text);
+  background: var(--w-bg);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+/* ===== 전역 오버라이드 무력화 =====
+   index.css의 공격적 전역 규칙을 v2 스코프에서 원복한다.
+*/
+
+/* border-radius 원복 */
+.v2-warm *,
+.v2-warm *::before,
+.v2-warm *::after {
+  border-radius: revert !important;
+}
+
+/* 픽셀 버튼 그림자/변위 제거 */
+.v2-warm button {
+  border: 0;
+  box-shadow: none;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  transform: none;
+  font-family: inherit;
+}
+.v2-warm button:hover {
+  box-shadow: none;
+  transform: none;
+}
+.v2-warm button:active {
+  box-shadow: none;
+  transform: none;
+}
+
+/* 입력 요소 기본 복구 */
+.v2-warm input,
+.v2-warm select,
+.v2-warm textarea {
+  border: 1px solid var(--w-border);
+  background: var(--w-surface);
+  color: var(--w-text);
+  font-family: inherit;
+  border-radius: var(--w-radius-sm);
+  padding: 8px 12px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.v2-warm input:focus,
+.v2-warm select:focus,
+.v2-warm textarea:focus {
+  border-color: var(--w-accent);
+  box-shadow: 0 0 0 3px var(--w-accent-soft);
+}
+
+/* 헤딩 폰트 복구 (index.css가 DungGeunMo 강제) */
+.v2-warm h1,
+.v2-warm h2,
+.v2-warm h3,
+.v2-warm h4,
+.v2-warm h5,
+.v2-warm h6 {
+  font-family: inherit;
+  color: var(--w-text);
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+/* 포커스 색상 */
+.v2-warm *:focus-visible {
+  outline: 2px solid var(--w-accent);
+  outline-offset: 2px;
+}
+
+/* ===== 공용 클래스 ===== */
+
+.v2-warm .w-card {
+  background: var(--w-surface);
+  border: 1px solid var(--w-border);
+  border-radius: var(--w-radius);
+  box-shadow: var(--w-shadow-card);
+}
+
+.v2-warm .w-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--w-radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.v2-warm .w-btn-primary {
+  background: var(--w-accent);
+  color: #fff;
+}
+.v2-warm .w-btn-primary:hover { background: var(--w-accent-hover); }
+
+.v2-warm .w-btn-ghost {
+  background: transparent;
+  color: var(--w-text-soft);
+  border: 1px solid var(--w-border);
+}
+.v2-warm .w-btn-ghost:hover {
+  background: var(--w-surface-2);
+  color: var(--w-text);
+}
+
+.v2-warm .w-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.v2-warm .w-badge-critical { background: var(--w-urgency-critical-soft); color: var(--w-urgency-critical); }
+.v2-warm .w-badge-todo     { background: var(--w-urgency-todo-soft);     color: var(--w-urgency-todo); }
+.v2-warm .w-badge-info     { background: var(--w-urgency-info-soft);     color: var(--w-urgency-info); }
+.v2-warm .w-badge-accent   { background: var(--w-accent-soft);           color: var(--w-accent-hover); }
+.v2-warm .w-badge-muted    { background: var(--w-surface-2);             color: var(--w-text-muted); }
+
+/* 스크롤바 (크림 톤) */
+.v2-warm ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.v2-warm ::-webkit-scrollbar-track { background: transparent; }
+.v2-warm ::-webkit-scrollbar-thumb {
+  background: var(--w-border);
+  border-radius: 999px;
+  border: 2px solid var(--w-bg);
+}
+.v2-warm ::-webkit-scrollbar-thumb:hover { background: var(--w-border-strong); }
+
+/* 스켈레톤 시머 */
+@keyframes v2Shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<title>한울타리 v2 · UI 목업</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
+<style>
+  :root { font-family: 'Pretendard Variable', Pretendard, system-ui, sans-serif; }
+  html, body { letter-spacing: -0.01em; }
+  .tab-active { background: #0F172A; color: white; }
+  .frame-wrap {
+    transform: scale(0.78);
+    transform-origin: top left;
+    width: 128.2%;
+    height: 128.2%;
+  }
+  iframe { border: 0; display: block; background: white; }
+</style>
+</head>
+<body class="bg-slate-100 text-slate-900">
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+    <div class="max-w-[1600px] mx-auto px-8 py-5 flex items-center gap-6">
+      <div>
+        <h1 class="text-xl font-bold">한울타리 v2 · 대시보드 UI 목업</h1>
+        <p class="text-sm text-slate-500 mt-0.5">선택: <b class="text-[#A84130]">04 · Warm Minimal</b> · 게임 요소 제거 · 역할별 대시보드 3종 + 공지 랜딩</p>
+      </div>
+      <div class="ml-auto flex items-center gap-2" id="viewToggle">
+        <button data-view="warm" class="h-9 px-3 rounded-md border border-slate-200 text-sm font-medium tab-active">Warm · 역할별 목업</button>
+        <button data-view="compare" class="h-9 px-3 rounded-md border border-slate-200 text-sm font-medium bg-white hover:bg-slate-50">초기 4가지 비교</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Warm 역할별 -->
+  <main id="warmView" class="max-w-[1600px] mx-auto p-8">
+    <div class="grid grid-cols-2 gap-6">
+      <article class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+        <div class="flex items-start justify-between p-5 border-b border-slate-100">
+          <div>
+            <div class="text-[11px] font-semibold text-[#A84130] uppercase tracking-widest">조건부 · 미확인 긴급 공지 있을 때만</div>
+            <h2 class="text-lg font-bold mt-1">공지 랜딩 페이지 <span class="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-coral-50 text-[#A84130] font-semibold align-middle">urgency=긴급 미확인</span></h2>
+            <p class="text-sm text-slate-500 mt-0.5">notice_reads 에 내 read 기록이 없는 긴급 공지가 있을 때만 노출 · 없으면 바로 대시보드</p>
+          </div>
+          <a href="./warm-01-notice-landing.html" target="_blank" class="text-xs px-3 py-1.5 rounded-md bg-slate-900 text-white font-medium">새 창 ↗</a>
+        </div>
+        <div class="relative h-[540px] overflow-hidden bg-[#FAF7F2]">
+          <iframe src="./warm-01-notice-landing.html" class="frame-wrap" title="Notice Landing"></iframe>
+        </div>
+      </article>
+
+      <article class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+        <div class="flex items-start justify-between p-5 border-b border-slate-100">
+          <div>
+            <div class="text-[11px] font-semibold text-[#A84130] uppercase tracking-widest">ROLE · MEMBER</div>
+            <h2 class="text-lg font-bold mt-1">일반 팀원 대시보드</h2>
+            <p class="text-sm text-slate-500 mt-0.5">내 활동 · 내 VOC · 수집함 · 팀 타임라인</p>
+          </div>
+          <a href="./warm-02-dashboard-member.html" target="_blank" class="text-xs px-3 py-1.5 rounded-md bg-slate-900 text-white font-medium">새 창 ↗</a>
+        </div>
+        <div class="relative h-[540px] overflow-hidden bg-[#FAF7F2]">
+          <iframe src="./warm-02-dashboard-member.html" class="frame-wrap" title="Member Dashboard"></iframe>
+        </div>
+      </article>
+
+      <article class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+        <div class="flex items-start justify-between p-5 border-b border-slate-100">
+          <div>
+            <div class="text-[11px] font-semibold text-[#A84130] uppercase tracking-widest">ROLE · LEADER</div>
+            <h2 class="text-lg font-bold mt-1">리더 대시보드 <span class="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-orange-50 text-orange-700 font-semibold align-middle">자기 팀 한정</span></h2>
+            <p class="text-sm text-slate-500 mt-0.5">팀 VOC 처리 · 팀 KPI · 팀원 히트맵 · 익명 쪽지 · 관리 메뉴(내 팀)</p>
+          </div>
+          <a href="./warm-03-dashboard-leader.html" target="_blank" class="text-xs px-3 py-1.5 rounded-md bg-slate-900 text-white font-medium">새 창 ↗</a>
+        </div>
+        <div class="relative h-[540px] overflow-hidden bg-[#FAF7F2]">
+          <iframe src="./warm-03-dashboard-leader.html" class="frame-wrap" title="Leader Dashboard"></iframe>
+        </div>
+      </article>
+
+      <article class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+        <div class="flex items-start justify-between p-5 border-b border-slate-100">
+          <div>
+            <div class="text-[11px] font-semibold text-[#A84130] uppercase tracking-widest">ROLE · ADMIN · DIRECTOR 공용</div>
+            <h2 class="text-lg font-bold mt-1">관리자 대시보드 <span class="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-slate-900 text-white font-semibold align-middle">전사</span></h2>
+            <p class="text-sm text-slate-500 mt-0.5">기존 메타버스와 동일하게 admin/director 완전 동일 · 차이: 초대 코드·차단 로그는 admin만</p>
+          </div>
+          <a href="./warm-04-dashboard-admin.html" target="_blank" class="text-xs px-3 py-1.5 rounded-md bg-slate-900 text-white font-medium">새 창 ↗</a>
+        </div>
+        <div class="relative h-[540px] overflow-hidden bg-[#FAF7F2]">
+          <iframe src="./warm-04-dashboard-admin.html" class="frame-wrap" title="Admin/Director Dashboard"></iframe>
+        </div>
+      </article>
+    </div>
+
+    <!-- 주요 결정사항 요약 -->
+    <section class="mt-10 bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+      <div class="px-6 py-5 border-b border-slate-100 flex items-start justify-between">
+        <div>
+          <h2 class="text-lg font-bold">설계 결정사항 요약</h2>
+          <p class="text-sm text-slate-500 mt-0.5">상세는 <code class="px-1.5 py-0.5 rounded bg-slate-100">docs/V2_DESIGN.md</code></p>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 divide-x divide-slate-100">
+        <div class="p-6">
+          <h3 class="font-semibold text-slate-900 mb-3">✅ 유지 (21개)</h3>
+          <div class="flex flex-wrap gap-1.5">
+            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">VOC</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">아이디어</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">공지사항</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">KPI 관리실</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">익명 쪽지</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">수집함</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">평가 대시보드</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">팀 게시판</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">칭찬</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">고민방</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">모임방</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">사이트 건의</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">연구실</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">라운지 타임라인</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">초대코드</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">사용자 관리</span>
+          </div>
+        </div>
+        <div class="p-6">
+          <h3 class="font-semibold text-slate-900 mb-3">❌ 제거 (6개)</h3>
+          <div class="flex flex-wrap gap-1.5">
+            <span class="px-2 py-0.5 rounded-full bg-red-50 text-red-700 text-xs line-through">오목</span>
+            <span class="px-2 py-0.5 rounded-full bg-red-50 text-red-700 text-xs line-through">줄넘기</span>
+            <span class="px-2 py-0.5 rounded-full bg-red-50 text-red-700 text-xs line-through">반응속도</span>
+            <span class="px-2 py-0.5 rounded-full bg-red-50 text-red-700 text-xs line-through">바나프레소 운세</span>
+            <span class="px-2 py-0.5 rounded-full bg-red-50 text-red-700 text-xs line-through">캐릭터 커스텀</span>
+            <span class="px-2 py-0.5 rounded-full bg-red-50 text-red-700 text-xs line-through">기분 이모지</span>
+          </div>
+          <h3 class="font-semibold text-slate-900 mt-5 mb-3">🔒 권한 원칙 (기존 메타버스와 동일)</h3>
+          <ul class="text-xs text-slate-700 space-y-1 list-disc pl-4">
+            <li><b>DB/RLS 그대로</b> — 스키마 변경 없음 (migration 34개 재사용)</li>
+            <li><b>admin ≡ director</b> — 동일 <code>isAdmin</code> 플래그로 완전 동일 취급</li>
+            <li>차이: <b>초대 코드 / 차단 로그</b>만 admin 전용 (AdminPanel 기준)</li>
+            <li>leader는 관리 메뉴 노출, <b>자기 팀만</b> 필터 (UI + RLS 이중 방어)</li>
+            <li>익명 VOC/쪽지/고민은 admin도 작성자 조회 불가</li>
+            <li>실명 표시는 admin/director만 (<code>getDisplayName(p, isAdmin)</code>)</li>
+            <li>공지 랜딩은 <b>미확인 긴급 공지 있을 때만</b> 노출</li>
+            <li>v1↔v2 <b>언제든 전환</b> · 모바일은 기존 MobileLayout 유지</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <footer class="mt-8 text-center text-xs text-slate-500">
+      한울타리 v2 · Warm Minimal Selected · 2026.04.23
+    </footer>
+  </main>
+
+  <!-- 초기 4가지 비교 -->
+  <main id="compareView" class="hidden max-w-[1600px] mx-auto p-8">
+    <div class="grid grid-cols-2 gap-6">
+      <article class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+        <div class="p-5 border-b border-slate-100 flex justify-between">
+          <div><div class="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">01 · Light</div><h2 class="text-lg font-bold mt-1">Clean Corporate</h2></div>
+          <a href="./01-clean-corporate.html" target="_blank" class="text-xs px-3 py-1.5 rounded-md bg-slate-900 text-white font-medium">열기 ↗</a>
+        </div>
+        <div class="relative h-[440px] overflow-hidden bg-slate-50"><iframe src="./01-clean-corporate.html" class="frame-wrap"></iframe></div>
+      </article>
+      <article class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+        <div class="p-5 border-b border-slate-100 flex justify-between">
+          <div><div class="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">02 · Dark</div><h2 class="text-lg font-bold mt-1">Modern Dark</h2></div>
+          <a href="./02-modern-dark.html" target="_blank" class="text-xs px-3 py-1.5 rounded-md bg-slate-900 text-white font-medium">열기 ↗</a>
+        </div>
+        <div class="relative h-[440px] overflow-hidden bg-slate-900"><iframe src="./02-modern-dark.html" class="frame-wrap"></iframe></div>
+      </article>
+      <article class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+        <div class="p-5 border-b border-slate-100 flex justify-between">
+          <div><div class="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">03 · Brand</div><h2 class="text-lg font-bold mt-1">Hanwha Enterprise</h2></div>
+          <a href="./03-hanwha-enterprise.html" target="_blank" class="text-xs px-3 py-1.5 rounded-md bg-slate-900 text-white font-medium">열기 ↗</a>
+        </div>
+        <div class="relative h-[440px] overflow-hidden bg-slate-50"><iframe src="./03-hanwha-enterprise.html" class="frame-wrap"></iframe></div>
+      </article>
+      <article class="bg-white rounded-xl border border-[#E8725C] overflow-hidden shadow-sm ring-2 ring-[#E8725C]/40">
+        <div class="p-5 border-b border-slate-100 flex justify-between">
+          <div><div class="text-[11px] font-semibold text-[#A84130] uppercase tracking-widest">04 · Warm · ✓ 선택됨</div><h2 class="text-lg font-bold mt-1">Warm Minimal</h2></div>
+          <a href="./04-warm-minimal.html" target="_blank" class="text-xs px-3 py-1.5 rounded-md bg-[#A84130] text-white font-medium">열기 ↗</a>
+        </div>
+        <div class="relative h-[440px] overflow-hidden bg-amber-50"><iframe src="./04-warm-minimal.html" class="frame-wrap"></iframe></div>
+      </article>
+    </div>
+  </main>
+
+  <script>
+    const warm = document.getElementById('warmView');
+    const compare = document.getElementById('compareView');
+    document.querySelectorAll('#viewToggle button').forEach(b => {
+      b.addEventListener('click', () => {
+        document.querySelectorAll('#viewToggle button').forEach(x => x.classList.remove('tab-active'));
+        b.classList.add('tab-active');
+        const mode = b.dataset.view;
+        if (mode === 'warm') { warm.classList.remove('hidden'); compare.classList.add('hidden'); }
+        else { warm.classList.add('hidden'); compare.classList.remove('hidden'); }
+      });
+    });
+  </script>
+</body>
+</html>
