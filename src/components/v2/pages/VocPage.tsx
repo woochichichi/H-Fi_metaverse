@@ -14,6 +14,7 @@ import {
   ResolutionPanel,
   type StatusTone,
 } from '../ui/DetailShell';
+import MasterDetail, { MasterListCard, MasterListItem } from '../ui/MasterDetail';
 import { useAuthStore } from '../../../stores/authStore';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useVocs } from '../../../hooks/useVocs';
@@ -96,17 +97,69 @@ export default function VocPage() {
           />
         </div>
       ) : (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-            gap: 12,
-          }}
-        >
-          {vocs.map((v) => (
-            <VocCard key={v.id} voc={v} onClick={() => setDetail(v)} />
-          ))}
-        </div>
+        <MasterDetail
+          hasSelection={!!detail}
+          onBackMobile={() => setDetail(null)}
+          emptyTitle="VOC를 선택하세요"
+          emptyDescription="왼쪽 목록에서 하나를 선택하면 내용과 처리 영역이 여기에 표시됩니다."
+          master={
+            <MasterListCard>
+              {vocs.map((v) => {
+                const selected = detail?.id === v.id;
+                return (
+                  <MasterListItem key={v.id} selected={selected} onClick={() => setDetail(v)}>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                      <StatusBadge status={v.status} />
+                      <span className="w-badge w-badge-muted">{v.category}</span>
+                      {v.anonymous && <span className="w-badge w-badge-accent">익명</span>}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 13.5,
+                        fontWeight: 600,
+                        color: 'var(--w-text)',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {v.title}
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--w-text-muted)' }}>
+                      {v.team} · {formatRelativeTime(v.created_at)}
+                    </div>
+                  </MasterListItem>
+                );
+              })}
+            </MasterListCard>
+          }
+          detail={
+            detail && user && (
+              <VocDetailPanel
+                voc={detail}
+                onClose={() => setDetail(null)}
+                canProcess={perm.canProcessVoc}
+                canDelete={perm.isAdmin || detail.author_id === user.id}
+                onStatusChange={async (s) => {
+                  const { error } = await updateVoc(detail.id, { status: s });
+                  if (error) alert(`변경 실패: ${error}`);
+                  else setDetail({ ...detail, status: s });
+                }}
+                onResolution={async (r) => {
+                  const { error } = await updateVoc(detail.id, { resolution: r });
+                  if (error) alert(`저장 실패: ${error}`);
+                  else setDetail({ ...detail, resolution: r });
+                }}
+                onDelete={async () => {
+                  if (!confirm('정말 삭제하시겠어요?')) return;
+                  const { error } = await deleteVoc(detail.id);
+                  if (error) alert(`삭제 실패: ${error}`);
+                  else setDetail(null);
+                }}
+              />
+            )
+          }
+        />
       )}
 
       {showCreate && profile && user && (
@@ -126,74 +179,7 @@ export default function VocPage() {
           }}
         />
       )}
-
-      {detail && user && (
-        <VocDetailModal
-          voc={detail}
-          onClose={() => setDetail(null)}
-          canProcess={perm.canProcessVoc}
-          canDelete={perm.isAdmin || detail.author_id === user.id}
-          onStatusChange={async (s) => {
-            const { error } = await updateVoc(detail.id, { status: s });
-            if (error) alert(`변경 실패: ${error}`);
-            else setDetail({ ...detail, status: s });
-          }}
-          onResolution={async (r) => {
-            const { error } = await updateVoc(detail.id, { resolution: r });
-            if (error) alert(`저장 실패: ${error}`);
-            else setDetail({ ...detail, resolution: r });
-          }}
-          onDelete={async () => {
-            if (!confirm('정말 삭제하시겠어요?')) return;
-            const { error } = await deleteVoc(detail.id);
-            if (error) alert(`삭제 실패: ${error}`);
-            else setDetail(null);
-          }}
-        />
-      )}
     </>
-  );
-}
-
-function VocCard({ voc, onClick }: { voc: Voc; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className="w-card"
-      style={{
-        padding: 16,
-        textAlign: 'left',
-        cursor: 'pointer',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 8,
-      }}
-      onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--w-border-strong)')}
-      onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--w-border)')}
-    >
-      <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-        <StatusBadge status={voc.status} />
-        <span className="w-badge w-badge-muted">{voc.category}</span>
-        {voc.anonymous && <span className="w-badge w-badge-accent">익명</span>}
-        {voc.severity && <span className="w-badge w-badge-todo">심각도 {voc.severity}</span>}
-      </div>
-      <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--w-text)' }}>{voc.title}</div>
-      <div
-        style={{
-          fontSize: 12,
-          color: 'var(--w-text-soft)',
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-        }}
-      >
-        {voc.content}
-      </div>
-      <div style={{ fontSize: 11, color: 'var(--w-text-muted)' }}>
-        {voc.team} · {formatRelativeTime(voc.created_at)}
-      </div>
-    </button>
   );
 }
 
@@ -221,7 +207,7 @@ const VOC_STATUS_TONE: Record<VocStatus, StatusTone> = {
   '보류': 'danger',
 };
 
-function VocDetailModal({
+function VocDetailPanel({
   voc,
   onClose,
   canProcess,
@@ -239,88 +225,103 @@ function VocDetailModal({
   onDelete: () => Promise<void>;
 }) {
   const [resolution, setResolution] = useState(voc.resolution ?? '');
+  // 선택 VOC가 바뀌면 로컬 회신 입력도 해당 VOC의 것으로 동기화
+  useEffect(() => {
+    setResolution(voc.resolution ?? '');
+  }, [voc.id, voc.resolution]);
+
   return (
-    <Modal
-      open
-      onClose={onClose}
-      title={voc.title}
-      width={640}
-      footer={
-        <>
-          {canDelete && (
-            <button
-              className="w-btn w-btn-ghost"
-              style={{ color: 'var(--w-danger)' }}
-              onClick={onDelete}
-            >
-              <Trash2 size={14} />
-              <span>삭제</span>
-            </button>
-          )}
-          <button className="w-btn w-btn-primary" onClick={onClose}>닫기</button>
-        </>
-      }
-    >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <DetailBadges>
-          <StatusBadge status={voc.status} />
-          <span className="w-badge w-badge-muted">{voc.category}</span>
-          {voc.sub_category && <span className="w-badge w-badge-muted">{voc.sub_category}</span>}
-          {voc.anonymous && <span className="w-badge w-badge-accent">익명</span>}
-          {voc.severity && (
-            <span className="w-badge w-badge-todo" style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-              <AlertTriangle size={10} /> 심각도 {voc.severity}
-            </span>
-          )}
-        </DetailBadges>
-
-        <MetaRow
-          items={[
-            { icon: <Building2 size={13} />, label: '팀', value: voc.team },
-            { icon: <Calendar size={13} />, label: '접수', value: formatRelativeTime(voc.created_at) },
-            { icon: <Eye size={13} />, label: '조회', value: voc.view_count },
-          ]}
-        />
-
-        <DetailBody>{voc.content}</DetailBody>
-
-        <AttachmentsGrid urls={voc.attachment_urls} />
-
-        {voc.resolution && !canProcess && <ResolutionPanel resolution={voc.resolution} />}
-
-        {canProcess && (
-          <>
-            <SectionDivider label="리더 처리" />
-            <StatusPicker<VocStatus>
-              label="상태 변경"
-              current={voc.status}
-              options={[...VOC_STATUSES]}
-              toneOf={(s) => VOC_STATUS_TONE[s]}
-              onChange={(s) => { void onStatusChange(s); }}
-            />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--w-text-muted)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-                회신
-              </div>
-              <textarea
-                rows={3}
-                placeholder="처리 결과 / 회신 메시지를 작성해주세요"
-                value={resolution}
-                onChange={(e) => setResolution(e.target.value)}
-              />
-              <button
-                className="w-btn w-btn-primary"
-                style={{ alignSelf: 'flex-start' }}
-                onClick={() => onResolution(resolution)}
-                disabled={resolution === (voc.resolution ?? '')}
-              >
-                회신 저장
-              </button>
-            </div>
-          </>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+        <h2
+          style={{
+            margin: 0,
+            fontSize: 18,
+            fontWeight: 700,
+            color: 'var(--w-text)',
+            flex: 1,
+            lineHeight: 1.35,
+          }}
+        >
+          {voc.title}
+        </h2>
+        {canDelete && (
+          <button
+            className="w-btn w-btn-ghost"
+            style={{ color: 'var(--w-danger)', padding: '6px 10px', fontSize: 12 }}
+            onClick={onDelete}
+          >
+            <Trash2 size={13} />
+            <span>삭제</span>
+          </button>
         )}
+        <button
+          className="w-btn w-btn-ghost"
+          style={{ padding: '6px 10px', fontSize: 12 }}
+          onClick={onClose}
+        >
+          닫기
+        </button>
       </div>
-    </Modal>
+
+      <DetailBadges>
+        <StatusBadge status={voc.status} />
+        <span className="w-badge w-badge-muted">{voc.category}</span>
+        {voc.sub_category && <span className="w-badge w-badge-muted">{voc.sub_category}</span>}
+        {voc.anonymous && <span className="w-badge w-badge-accent">익명</span>}
+        {voc.severity && (
+          <span className="w-badge w-badge-todo" style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+            <AlertTriangle size={10} /> 심각도 {voc.severity}
+          </span>
+        )}
+      </DetailBadges>
+
+      <MetaRow
+        items={[
+          { icon: <Building2 size={13} />, label: '팀', value: voc.team },
+          { icon: <Calendar size={13} />, label: '접수', value: formatRelativeTime(voc.created_at) },
+          { icon: <Eye size={13} />, label: '조회', value: voc.view_count },
+        ]}
+      />
+
+      <DetailBody>{voc.content}</DetailBody>
+
+      <AttachmentsGrid urls={voc.attachment_urls} />
+
+      {voc.resolution && !canProcess && <ResolutionPanel resolution={voc.resolution} />}
+
+      {canProcess && (
+        <>
+          <SectionDivider label="리더 처리" />
+          <StatusPicker<VocStatus>
+            label="상태 변경"
+            current={voc.status}
+            options={[...VOC_STATUSES]}
+            toneOf={(s) => VOC_STATUS_TONE[s]}
+            onChange={(s) => { void onStatusChange(s); }}
+          />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--w-text-muted)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+              회신
+            </div>
+            <textarea
+              rows={3}
+              placeholder="처리 결과 / 회신 메시지를 작성해주세요"
+              value={resolution}
+              onChange={(e) => setResolution(e.target.value)}
+            />
+            <button
+              className="w-btn w-btn-primary"
+              style={{ alignSelf: 'flex-start' }}
+              onClick={() => onResolution(resolution)}
+              disabled={resolution === (voc.resolution ?? '')}
+            >
+              회신 저장
+            </button>
+          </div>
+        </>
+      )}
+    </div>
   );
 }
 

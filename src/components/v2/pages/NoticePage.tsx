@@ -5,6 +5,7 @@ import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
 import Modal from '../ui/Modal';
 import { DetailBadges, MetaRow, DetailBody, AttachmentsGrid } from '../ui/DetailShell';
+import MasterDetail, { MasterListCard, MasterListItem } from '../ui/MasterDetail';
 import { useAuthStore } from '../../../stores/authStore';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useNotices } from '../../../hooks/useNotices';
@@ -102,65 +103,85 @@ export default function NoticePage() {
           />
         </div>
       ) : (
-        <div className="w-card" style={{ padding: 0, overflow: 'hidden' }}>
-          {notices.map((n, i) => {
-            const isRead = readIds.has(n.id);
-            return (
-              <button
-                key={n.id}
-                onClick={() => {
-                  setDetail(n);
-                  if (user && !isRead) void markAsRead(n.id, user.id);
-                }}
-                style={{
-                  display: 'flex',
-                  gap: 12,
-                  padding: '14px 16px',
-                  width: '100%',
-                  textAlign: 'left',
-                  background: 'transparent',
-                  borderTop: i === 0 ? 'none' : '1px solid var(--w-border)',
-                  cursor: 'pointer',
-                  alignItems: 'center',
-                }}
-                onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'var(--w-surface-2)')}
-                onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'transparent')}
-              >
-                <div style={{ display: 'flex', gap: 6, flexShrink: 0, alignItems: 'center' }}>
-                  {n.pinned && <Pin size={14} color="var(--w-accent-hover)" />}
-                  <UrgencyBadge urgency={n.urgency} />
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div
-                    style={{
-                      fontSize: 14,
-                      fontWeight: isRead ? 500 : 700,
-                      color: isRead ? 'var(--w-text-soft)' : 'var(--w-text)',
-                      marginBottom: 2,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
+        <MasterDetail
+          hasSelection={!!detail}
+          onBackMobile={() => setDetail(null)}
+          emptyTitle="공지를 선택하세요"
+          emptyDescription="왼쪽 목록에서 공지를 선택하면 내용이 여기에 표시됩니다."
+          master={
+            <MasterListCard>
+              {notices.map((n) => {
+                const isRead = readIds.has(n.id);
+                const selected = detail?.id === n.id;
+                return (
+                  <MasterListItem
+                    key={n.id}
+                    selected={selected}
+                    onClick={() => {
+                      setDetail(n);
+                      if (user && !isRead) void markAsRead(n.id, user.id);
                     }}
                   >
-                    {n.title}
-                  </div>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 11, color: 'var(--w-text-muted)' }}>
-                    <span>{n.category}</span>
-                    {n.team && (
-                      <>
-                        <span>·</span>
-                        <span>{n.team}</span>
-                      </>
-                    )}
-                    <span>·</span>
-                    <span>{formatRelativeTime(n.created_at)}</span>
-                    {!isRead && <span className="w-badge w-badge-accent" style={{ marginLeft: 4 }}>미확인</span>}
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                      {n.pinned && <Pin size={13} color="var(--w-accent-hover)" />}
+                      <UrgencyBadge urgency={n.urgency} />
+                      {!isRead && (
+                        <span
+                          aria-label="미확인"
+                          style={{
+                            width: 6,
+                            height: 6,
+                            borderRadius: '50%',
+                            background: 'var(--w-accent)',
+                            marginLeft: 'auto',
+                          }}
+                        />
+                      )}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 13.5,
+                        fontWeight: isRead ? 500 : 700,
+                        color: isRead ? 'var(--w-text-soft)' : 'var(--w-text)',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {n.title}
+                    </div>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 11, color: 'var(--w-text-muted)' }}>
+                      <span>{n.category}</span>
+                      {n.team && (
+                        <>
+                          <span>·</span>
+                          <span>{n.team}</span>
+                        </>
+                      )}
+                      <span>·</span>
+                      <span>{formatRelativeTime(n.created_at)}</span>
+                    </div>
+                  </MasterListItem>
+                );
+              })}
+            </MasterListCard>
+          }
+          detail={
+            detail && (
+              <NoticeDetailPanel
+                notice={detail}
+                canDelete={perm.isAdmin || detail.author_id === user?.id}
+                onClose={() => setDetail(null)}
+                onDelete={async () => {
+                  if (!confirm('공지를 삭제하시겠어요?')) return;
+                  const { error } = await deleteNotice(detail.id);
+                  if (error) alert(`삭제 실패: ${error}`);
+                  else setDetail(null);
+                }}
+              />
+            )
+          }
+        />
       )}
 
       {showCreate && canWrite && profile && (
@@ -182,40 +203,58 @@ export default function NoticePage() {
           }}
         />
       )}
-
-      {detail && (
-        <Modal
-          open
-          onClose={() => setDetail(null)}
-          title={detail.title}
-          width={640}
-          footer={
-            <>
-              {(perm.isAdmin || detail.author_id === user?.id) && (
-                <button
-                  className="w-btn w-btn-ghost"
-                  style={{ color: 'var(--w-danger)' }}
-                  onClick={async () => {
-                    if (!confirm('공지를 삭제하시겠어요?')) return;
-                    const { error } = await deleteNotice(detail.id);
-                    if (error) alert(`삭제 실패: ${error}`);
-                    else setDetail(null);
-                  }}
-                >
-                  <Trash2 size={14} />
-                  <span>삭제</span>
-                </button>
-              )}
-              <button className="w-btn w-btn-primary" onClick={() => setDetail(null)}>
-                닫기
-              </button>
-            </>
-          }
-        >
-          <NoticeDetailView notice={detail} />
-        </Modal>
-      )}
     </>
+  );
+}
+
+function NoticeDetailPanel({
+  notice,
+  canDelete,
+  onDelete,
+  onClose,
+}: {
+  notice: Notice;
+  canDelete: boolean;
+  onDelete: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+        <h2
+          style={{
+            margin: 0,
+            fontSize: 18,
+            fontWeight: 700,
+            color: 'var(--w-text)',
+            flex: 1,
+            lineHeight: 1.35,
+          }}
+        >
+          {notice.title}
+        </h2>
+        {canDelete && (
+          <button
+            className="w-btn w-btn-ghost"
+            style={{ color: 'var(--w-danger)', padding: '6px 10px', fontSize: 12 }}
+            onClick={onDelete}
+            title="공지 삭제"
+          >
+            <Trash2 size={13} />
+            <span>삭제</span>
+          </button>
+        )}
+        <button
+          className="w-btn w-btn-ghost"
+          style={{ padding: '6px 10px', fontSize: 12 }}
+          onClick={onClose}
+          title="선택 해제"
+        >
+          닫기
+        </button>
+      </div>
+      <NoticeDetailView notice={notice} />
+    </div>
   );
 }
 

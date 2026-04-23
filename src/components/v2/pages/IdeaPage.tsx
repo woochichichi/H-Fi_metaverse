@@ -12,6 +12,7 @@ import {
   StatusPicker,
   type StatusTone,
 } from '../ui/DetailShell';
+import MasterDetail, { MasterListCard, MasterListItem } from '../ui/MasterDetail';
 import { useAuthStore } from '../../../stores/authStore';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useIdeas } from '../../../hooks/useIdeas';
@@ -83,25 +84,80 @@ export default function IdeaPage() {
           <EmptyState icon={Lightbulb} title="아직 아이디어가 없어요" description="첫 아이디어를 제안해보세요!" />
         </div>
       ) : (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-            gap: 12,
-          }}
-        >
-          {ideas.map((idea) => (
-            <IdeaCard
-              key={idea.id}
-              idea={idea}
-              onClick={() => setDetail(idea)}
-              onVote={async (e) => {
-                e.stopPropagation();
-                if (user) await toggleVote(idea.id, user.id);
-              }}
-            />
-          ))}
-        </div>
+        <MasterDetail
+          hasSelection={!!detail}
+          onBackMobile={() => setDetail(null)}
+          emptyTitle="아이디어를 선택하세요"
+          emptyDescription="왼쪽 목록에서 하나를 선택하면 상세와 공감 현황이 여기에 표시됩니다."
+          master={
+            <MasterListCard>
+              {ideas.map((idea) => {
+                const voted = !!(idea as IdeaWithVotes & { _voted?: boolean })._voted;
+                const selected = detail?.id === idea.id;
+                return (
+                  <MasterListItem key={idea.id} selected={selected} onClick={() => setDetail(idea)}>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                      {idea.category && <span className="w-badge w-badge-muted">{idea.category}</span>}
+                      <StatusBadge status={idea.status} />
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          if (user) await toggleVote(idea.id, user.id);
+                        }}
+                        className="w-btn"
+                        style={{
+                          marginLeft: 'auto',
+                          padding: '3px 8px',
+                          fontSize: 11,
+                          background: voted ? 'var(--w-accent-soft)' : 'var(--w-surface-2)',
+                          color: voted ? 'var(--w-accent-hover)' : 'var(--w-text-soft)',
+                          fontWeight: 600,
+                        }}
+                        title={voted ? '공감 취소' : '공감'}
+                      >
+                        <ThumbsUp size={11} />
+                        <span>{idea.vote_count}</span>
+                      </button>
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 13.5,
+                        fontWeight: 600,
+                        color: 'var(--w-text)',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {idea.title}
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--w-text-muted)' }}>
+                      {formatRelativeTime(idea.created_at)}
+                    </div>
+                  </MasterListItem>
+                );
+              })}
+            </MasterListCard>
+          }
+          detail={
+            detail && (
+              <IdeaDetailPanel
+                idea={detail}
+                voted={!!(detail as IdeaWithVotes & { _voted?: boolean })._voted}
+                canChangeStatus={perm.canChangeIdeaStatus}
+                onClose={() => setDetail(null)}
+                onVote={async () => {
+                  if (user) await toggleVote(detail.id, user.id);
+                }}
+                onStatusChange={async (s) => {
+                  const { error } = await updateIdeaStatus(detail.id, s);
+                  if (error) alert(`변경 실패: ${error}`);
+                  else setDetail({ ...detail, status: s });
+                }}
+              />
+            )
+          }
+        />
       )}
 
       {showCreate && user && (
@@ -118,73 +174,7 @@ export default function IdeaPage() {
           }}
         />
       )}
-
-      {detail && (
-        <IdeaDetailModal
-          idea={detail}
-          onClose={() => setDetail(null)}
-          canChangeStatus={perm.canChangeIdeaStatus}
-          onStatusChange={async (s) => {
-            const { error } = await updateIdeaStatus(detail.id, s);
-            if (error) alert(`변경 실패: ${error}`);
-            else setDetail({ ...detail, status: s });
-          }}
-        />
-      )}
     </>
-  );
-}
-
-function IdeaCard({
-  idea,
-  onClick,
-  onVote,
-}: {
-  idea: IdeaWithVotes & { _voted?: boolean };
-  onClick: () => void;
-  onVote: (e: React.MouseEvent) => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="w-card"
-      style={{ padding: 16, textAlign: 'left', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 8 }}
-    >
-      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-        {idea.category && <span className="w-badge w-badge-muted">{idea.category}</span>}
-        <StatusBadge status={idea.status} />
-      </div>
-      <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--w-text)' }}>{idea.title}</div>
-      <div
-        style={{
-          fontSize: 12,
-          color: 'var(--w-text-soft)',
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-        }}
-      >
-        {idea.description}
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
-        <button
-          onClick={onVote}
-          className="w-btn"
-          style={{
-            padding: '5px 10px',
-            fontSize: 12,
-            background: idea._voted ? 'var(--w-accent-soft)' : 'var(--w-surface-2)',
-            color: idea._voted ? 'var(--w-accent-hover)' : 'var(--w-text-soft)',
-            fontWeight: 600,
-          }}
-        >
-          <ThumbsUp size={12} />
-          <span>{idea.vote_count}</span>
-        </button>
-        <span style={{ fontSize: 11, color: 'var(--w-text-muted)' }}>{formatRelativeTime(idea.created_at)}</span>
-      </div>
-    </button>
   );
 }
 
@@ -211,55 +201,89 @@ const IDEA_STATUS_TONE: Record<IdeaStatus, StatusTone> = {
   '반려': 'danger',
 };
 
-function IdeaDetailModal({
+function IdeaDetailPanel({
   idea,
+  voted,
+  onVote,
   onClose,
   canChangeStatus,
   onStatusChange,
 }: {
   idea: IdeaWithVotes;
+  voted: boolean;
+  onVote: () => Promise<void>;
   onClose: () => void;
   canChangeStatus: boolean;
   onStatusChange: (s: IdeaStatus) => Promise<void>;
 }) {
   return (
-    <Modal
-      open
-      onClose={onClose}
-      title={idea.title}
-      width={640}
-      footer={<button className="w-btn w-btn-primary" onClick={onClose}>닫기</button>}
-    >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <DetailBadges>
-          {idea.category && <span className="w-badge w-badge-muted">{idea.category}</span>}
-          <StatusBadge status={idea.status} />
-        </DetailBadges>
-
-        <MetaRow
-          items={[
-            { icon: <Calendar size={13} />, label: '제안일', value: formatRelativeTime(idea.created_at) },
-            { icon: <Eye size={13} />, label: '조회', value: idea.view_count },
-            { icon: <Heart size={13} />, label: '공감', value: idea.vote_count },
-          ]}
-        />
-
-        <DetailBody>{idea.description}</DetailBody>
-
-        {canChangeStatus && (
-          <>
-            <SectionDivider label="리더 처리" />
-            <StatusPicker<IdeaStatus>
-              label="상태 변경"
-              current={idea.status}
-              options={[...IDEA_STATUSES]}
-              toneOf={(s) => IDEA_STATUS_TONE[s]}
-              onChange={(s) => { void onStatusChange(s); }}
-            />
-          </>
-        )}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+        <h2
+          style={{
+            margin: 0,
+            fontSize: 18,
+            fontWeight: 700,
+            color: 'var(--w-text)',
+            flex: 1,
+            lineHeight: 1.35,
+          }}
+        >
+          {idea.title}
+        </h2>
+        <button
+          onClick={() => { void onVote(); }}
+          className="w-btn"
+          style={{
+            padding: '6px 12px',
+            fontSize: 12,
+            background: voted ? 'var(--w-accent)' : 'var(--w-surface-2)',
+            color: voted ? '#fff' : 'var(--w-text-soft)',
+            fontWeight: 700,
+            border: voted ? '1px solid var(--w-accent)' : '1px solid var(--w-border)',
+          }}
+          title={voted ? '공감 취소' : '공감'}
+        >
+          <ThumbsUp size={13} />
+          <span>{idea.vote_count}</span>
+        </button>
+        <button
+          className="w-btn w-btn-ghost"
+          style={{ padding: '6px 10px', fontSize: 12 }}
+          onClick={onClose}
+        >
+          닫기
+        </button>
       </div>
-    </Modal>
+
+      <DetailBadges>
+        {idea.category && <span className="w-badge w-badge-muted">{idea.category}</span>}
+        <StatusBadge status={idea.status} />
+      </DetailBadges>
+
+      <MetaRow
+        items={[
+          { icon: <Calendar size={13} />, label: '제안일', value: formatRelativeTime(idea.created_at) },
+          { icon: <Eye size={13} />, label: '조회', value: idea.view_count },
+          { icon: <Heart size={13} />, label: '공감', value: idea.vote_count },
+        ]}
+      />
+
+      <DetailBody>{idea.description}</DetailBody>
+
+      {canChangeStatus && (
+        <>
+          <SectionDivider label="리더 처리" />
+          <StatusPicker<IdeaStatus>
+            label="상태 변경"
+            current={idea.status}
+            options={[...IDEA_STATUSES]}
+            toneOf={(s) => IDEA_STATUS_TONE[s]}
+            onChange={(s) => { void onStatusChange(s); }}
+          />
+        </>
+      )}
+    </div>
   );
 }
 
