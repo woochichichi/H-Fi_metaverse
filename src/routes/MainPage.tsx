@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useDeviceMode } from '../hooks/useDeviceMode';
 import { useAuthStore } from '../stores/authStore';
-import { useThemeStore, UI_VERSIONS } from '../stores/themeStore';
+import { useThemeStore } from '../stores/themeStore';
 import TopBar from '../components/layout/TopBar';
 import Sidebar from '../components/layout/Sidebar';
 import MetaverseLayout from '../components/metaverse/MetaverseLayout';
@@ -49,31 +49,12 @@ export default function MainPage() {
     );
   }
 
-  // v2: Warm Minimal은 실제 React 구현, 나머지 버전은 정적 HTML 미리보기 유지
-  if (uiVersion === 'warm') {
+  // Modern Dark: V2Workspace (실제 React 13페이지 구현)
+  if (uiVersion === 'dark') {
     return <V2Workspace />;
   }
 
-  if (uiVersion !== 'classic') {
-    const meta = UI_VERSIONS.find((v) => v.id === uiVersion);
-    return (
-      <div className="flex h-screen flex-col bg-bg-primary">
-        <TopBar />
-        {meta?.preview ? (
-          <iframe
-            src={meta.preview}
-            title={meta.name}
-            className="flex-1 w-full border-0 bg-white"
-          />
-        ) : (
-          <div className="flex-1 grid place-items-center text-text-muted">
-            선택한 디자인({uiVersion})을 찾을 수 없어요.
-          </div>
-        )}
-      </div>
-    );
-  }
-
+  // classic: 기존 메타버스 맵
   return (
     <div className="flex h-screen flex-col bg-bg-primary">
       <TopBar />

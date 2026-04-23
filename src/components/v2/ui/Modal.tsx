@@ -28,12 +28,12 @@ export default function Modal({ open, onClose, title, children, width = 520, foo
   if (!open) return null;
 
   return createPortal(
-    <div className="v2-warm" style={{ position: 'fixed', inset: 0, zIndex: 400 }}>
+    <div className="v2-dark" style={{ position: 'fixed', inset: 0, zIndex: 400 }}>
       <div
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'rgba(42, 31, 26, 0.45)',
+          background: 'rgba(0, 0, 0, 0.6)',
           backdropFilter: 'blur(2px)',
         }}
         onClick={onClose}

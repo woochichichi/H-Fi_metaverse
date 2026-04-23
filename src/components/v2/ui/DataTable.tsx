@@ -18,8 +18,8 @@ interface Props<T> {
 }
 
 /**
- * warm 스타일 데이터 테이블.
- * 크림 surface + 옅은 border, hover 시 surface-2로 강조.
+ * v2 대시보드용 데이터 테이블.
+ * surface + 옅은 border, hover 시 surface-2로 강조.
  */
 export default function DataTable<T>({ columns, rows, rowKey, empty, loading, rowClassName }: Props<T>) {
   if (loading) {
