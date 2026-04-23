@@ -352,7 +352,7 @@ export default function DashboardPage() {
       {!perm.isLeader && <MemberHints />}
 
       {/* 법인카드 현황 — 증권ITO 팀 소속자만 노출 */}
-      {profile?.team === '증권ITO' && <CorpCardSection />}
+      {profile?.team === '증권ITO' && <CorpCardSection team={profile.team} />}
     </div>
   );
 }
