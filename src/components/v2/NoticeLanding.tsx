@@ -55,7 +55,7 @@ export default function NoticeLanding({ urgent, onContinue, onAllRead }: Props) 
 
   return (
     <div
-      className="v2-dark"
+      className="v2-warm"
       style={{
         minHeight: '100vh',
         background: 'var(--w-bg)',

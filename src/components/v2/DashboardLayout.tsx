@@ -6,13 +6,13 @@ interface Props {
 }
 
 /**
- * v2 Modern Dark 레이아웃 셸.
- * 전체를 .v2-dark 스코프로 감싸서 index.css의 전역 레트로 규칙을 격리한다.
+ * v2 Warm Minimal 레이아웃 셸.
+ * 전체를 .v2-warm 스코프로 감싸서 index.css의 전역 레트로 규칙을 격리한다.
  */
 export default function DashboardLayout({ children }: Props) {
   return (
     <div
-      className="v2-dark"
+      className="v2-warm"
       style={{
         display: 'flex',
         height: '100vh',

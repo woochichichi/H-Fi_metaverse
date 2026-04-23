@@ -120,7 +120,7 @@ export default function StyleSelectorPage() {
                 {/* 미리보기 */}
                 <div
                   className={`relative h-[360px] overflow-hidden border-t border-slate-100 ${
-                    v.mode === 'dark' ? 'bg-slate-950' : 'bg-slate-50'
+                    v.mode === 'dark' ? 'bg-slate-950' : v.mode === 'warm' ? 'bg-amber-50' : 'bg-slate-50'
                   }`}
                 >
                   {v.preview ? (

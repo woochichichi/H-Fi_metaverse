@@ -82,7 +82,7 @@ export default function V2Workspace() {
   if (loading) {
     return (
       <div
-        className="v2-dark"
+        className="v2-warm"
         style={{
           minHeight: '100vh',
           display: 'flex',
