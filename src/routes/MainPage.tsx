@@ -49,8 +49,8 @@ export default function MainPage() {
     );
   }
 
-  // v2: Warm Minimal은 실제 React 구현, 나머지 버전은 정적 HTML 미리보기 유지
-  if (uiVersion === 'warm') {
+  // v2: Warm Minimal / Modern Dark 모두 V2Workspace로 렌더 (테마는 .v2-warm/.v2-dark 스코프)
+  if (uiVersion === 'warm' || uiVersion === 'dark') {
     return <V2Workspace />;
   }
 

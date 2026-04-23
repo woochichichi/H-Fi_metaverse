@@ -3,6 +3,7 @@ import { useAuthStore } from '../../stores/authStore';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useUrgentUnread } from '../../hooks/useUrgentUnread';
 import { useV2Nav } from '../../stores/v2NavStore';
+import { useThemeStore } from '../../stores/themeStore';
 import DashboardLayout from './DashboardLayout';
 import NoticeLanding from './NoticeLanding';
 import DashboardPage from './pages/DashboardPage';
@@ -42,6 +43,7 @@ export default function V2Workspace() {
   const perm = usePermissions();
   const { page } = useV2Nav();
   const { urgent, loading, reload } = useUrgentUnread(user?.id ?? null);
+  const themeClass = useThemeStore((s) => (s.version === 'dark' ? 'v2-dark' : 'v2-warm'));
 
   // 세션 내에서 "나중에 읽기"를 눌렀는지 여부 (사용자별 키)
   const [dismissed, setDismissed] = useState<boolean>(() => {
@@ -82,7 +84,7 @@ export default function V2Workspace() {
   if (loading) {
     return (
       <div
-        className="v2-warm"
+        className={themeClass}
         style={{
           minHeight: '100vh',
           display: 'flex',
@@ -100,11 +102,18 @@ export default function V2Workspace() {
 
   // gate: 미확인 긴급 공지가 있고, 아직 skip하지 않았으면 랜딩
   if (!dismissed && urgent.length > 0) {
-    return <NoticeLanding urgent={urgent} onContinue={handleDismiss} onAllRead={handleAllRead} />;
+    return (
+      <NoticeLanding
+        urgent={urgent}
+        onContinue={handleDismiss}
+        onAllRead={handleAllRead}
+        themeClass={themeClass}
+      />
+    );
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout themeClass={themeClass}>
       <V2Router page={page} role={perm.role} />
     </DashboardLayout>
   );

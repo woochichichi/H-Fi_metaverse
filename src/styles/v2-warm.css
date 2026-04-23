@@ -188,3 +188,167 @@
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+/* ============================================================
+   v2 Modern Dark — 같은 변수명(--w-*)을 다크 팔레트로 재정의.
+   컴포넌트는 클래스만 .v2-warm → .v2-dark 로 바꾸면 다크로 전환.
+   ============================================================ */
+
+.v2-dark {
+  /* 컬러 토큰 */
+  --w-bg: #09090B;
+  --w-surface: #0F0F12;
+  --w-surface-2: #17171B;
+  --w-border: #26262C;
+  --w-border-strong: #2A2A30;
+
+  --w-text: #F4F4F5;
+  --w-text-soft: #D4D4D8;
+  --w-text-muted: #A1A1AA;
+
+  --w-accent: #2DD4BF;      /* teal */
+  --w-accent-soft: rgba(45, 212, 191, 0.12);
+  --w-accent-hover: #14B8A6;
+
+  --w-success: #34D399;
+  --w-warning: #FBBF24;
+  --w-danger: #F87171;
+  --w-info: #818CF8;
+
+  --w-urgency-critical: #F87171;
+  --w-urgency-critical-soft: rgba(248, 113, 113, 0.15);
+  --w-urgency-todo: #FBBF24;
+  --w-urgency-todo-soft: rgba(251, 191, 36, 0.15);
+  --w-urgency-info: #818CF8;
+  --w-urgency-info-soft: rgba(129, 140, 248, 0.15);
+
+  --w-radius-sm: 8px;
+  --w-radius: 12px;
+  --w-radius-lg: 16px;
+  --w-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.25);
+  --w-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.5), 0 12px 32px rgba(0, 0, 0, 0.4);
+
+  font-family: 'Pretendard Variable', Pretendard, 'Noto Sans KR', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  color: var(--w-text);
+  background: var(--w-bg);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+/* border-radius 원복 */
+.v2-dark *,
+.v2-dark *::before,
+.v2-dark *::after {
+  border-radius: revert !important;
+}
+
+/* 픽셀 버튼 그림자/변위 제거 */
+.v2-dark button {
+  border: 0;
+  box-shadow: none;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  transform: none;
+  font-family: inherit;
+}
+.v2-dark button:hover { box-shadow: none; transform: none; }
+.v2-dark button:active { box-shadow: none; transform: none; }
+
+/* 입력 요소 (다크 surface-2 배경) */
+.v2-dark input,
+.v2-dark select,
+.v2-dark textarea {
+  border: 1px solid var(--w-border);
+  background: var(--w-surface-2);
+  color: var(--w-text);
+  font-family: inherit;
+  border-radius: var(--w-radius-sm);
+  padding: 8px 12px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.v2-dark input::placeholder,
+.v2-dark textarea::placeholder { color: var(--w-text-muted); }
+.v2-dark input:focus,
+.v2-dark select:focus,
+.v2-dark textarea:focus {
+  border-color: var(--w-accent);
+  box-shadow: 0 0 0 3px var(--w-accent-soft);
+}
+
+/* 헤딩 */
+.v2-dark h1,
+.v2-dark h2,
+.v2-dark h3,
+.v2-dark h4,
+.v2-dark h5,
+.v2-dark h6 {
+  font-family: inherit;
+  color: var(--w-text);
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+/* 포커스 */
+.v2-dark *:focus-visible {
+  outline: 2px solid var(--w-accent);
+  outline-offset: 2px;
+}
+
+/* 공용 클래스 */
+.v2-dark .w-card {
+  background: var(--w-surface);
+  border: 1px solid var(--w-border);
+  border-radius: var(--w-radius);
+  box-shadow: var(--w-shadow-card);
+}
+
+.v2-dark .w-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--w-radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.v2-dark .w-btn-primary { background: var(--w-accent); color: #09090B; }
+.v2-dark .w-btn-primary:hover { background: var(--w-accent-hover); }
+
+.v2-dark .w-btn-ghost {
+  background: transparent;
+  color: var(--w-text-soft);
+  border: 1px solid var(--w-border);
+}
+.v2-dark .w-btn-ghost:hover {
+  background: var(--w-surface-2);
+  color: var(--w-text);
+}
+
+.v2-dark .w-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.v2-dark .w-badge-critical { background: var(--w-urgency-critical-soft); color: var(--w-urgency-critical); }
+.v2-dark .w-badge-todo     { background: var(--w-urgency-todo-soft);     color: var(--w-urgency-todo); }
+.v2-dark .w-badge-info     { background: var(--w-urgency-info-soft);     color: var(--w-urgency-info); }
+.v2-dark .w-badge-accent   { background: var(--w-accent-soft);           color: var(--w-accent); }
+.v2-dark .w-badge-muted    { background: var(--w-surface-2);             color: var(--w-text-muted); }
+
+/* 스크롤바 */
+.v2-dark ::-webkit-scrollbar { width: 10px; height: 10px; }
+.v2-dark ::-webkit-scrollbar-track { background: transparent; }
+.v2-dark ::-webkit-scrollbar-thumb {
+  background: var(--w-border);
+  border-radius: 999px;
+  border: 2px solid var(--w-bg);
+}
+.v2-dark ::-webkit-scrollbar-thumb:hover { background: var(--w-border-strong); }

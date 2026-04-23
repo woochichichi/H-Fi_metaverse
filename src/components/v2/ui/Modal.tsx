@@ -1,6 +1,7 @@
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { useEffect } from 'react';
+import { useThemeStore } from '../../../stores/themeStore';
 
 interface Props {
   open: boolean;
@@ -16,6 +17,9 @@ interface Props {
  * createPortal로 body에 렌더되므로 스코프 클래스를 루트에 다시 붙여야 한다.
  */
 export default function Modal({ open, onClose, title, children, width = 520, footer }: Props) {
+  const themeClass = useThemeStore((s) => (s.version === 'dark' ? 'v2-dark' : 'v2-warm'));
+  const isDark = themeClass === 'v2-dark';
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -28,12 +32,12 @@ export default function Modal({ open, onClose, title, children, width = 520, foo
   if (!open) return null;
 
   return createPortal(
-    <div className="v2-warm" style={{ position: 'fixed', inset: 0, zIndex: 400 }}>
+    <div className={themeClass} style={{ position: 'fixed', inset: 0, zIndex: 400 }}>
       <div
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'rgba(42, 31, 26, 0.45)',
+          background: isDark ? 'rgba(0, 0, 0, 0.6)' : 'rgba(42, 31, 26, 0.45)',
           backdropFilter: 'blur(2px)',
         }}
         onClick={onClose}

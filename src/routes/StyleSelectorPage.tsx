@@ -163,8 +163,8 @@ export default function StyleSelectorPage() {
 
         {/* 안내 */}
         <div className="rounded-xl bg-amber-50 border border-amber-200 p-4 text-sm text-amber-900">
-          <b>참고</b> · 지금은 미리보기 단계예요. &lsquo;기본&rsquo; 외의 버전을 선택하면 앱이 해당
-          디자인의 데모 화면을 보여주고, 실제 데이터 연결은 단계적으로 반영됩니다.
+          <b>참고</b> · <b>기본(메타버스)</b>과 <b>Warm Minimal</b>, <b>Modern Dark</b>는 실제 작동합니다.
+          나머지 테마(Clean Corporate / Hanwha Enterprise)는 정적 미리보기 단계이며, 선택 시 데모 화면이 표시됩니다.
         </div>
       </main>
 

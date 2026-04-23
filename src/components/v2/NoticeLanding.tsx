@@ -9,6 +9,7 @@ interface Props {
   onContinue: () => void;
   /** 읽음 처리가 끝나서 더 이상 긴급이 없을 때 부모가 호출되어 랜딩을 닫는다 */
   onAllRead: () => void;
+  themeClass?: string;
 }
 
 /**
@@ -16,7 +17,7 @@ interface Props {
  * 사용자는 개별 공지를 확인하거나, "나중에 읽기"로 대시보드로 바로 진입 가능(선택).
  * "모두 확인" 버튼으로 일괄 읽음 처리도 가능.
  */
-export default function NoticeLanding({ urgent, onContinue, onAllRead }: Props) {
+export default function NoticeLanding({ urgent, onContinue, onAllRead, themeClass = 'v2-warm' }: Props) {
   const user = useAuthStore((s) => s.user);
   const { markAsRead } = useNotices();
   const [processing, setProcessing] = useState<string | null>(null);
@@ -55,7 +56,7 @@ export default function NoticeLanding({ urgent, onContinue, onAllRead }: Props) 
 
   return (
     <div
-      className="v2-warm"
+      className={themeClass}
       style={{
         minHeight: '100vh',
         background: 'var(--w-bg)',

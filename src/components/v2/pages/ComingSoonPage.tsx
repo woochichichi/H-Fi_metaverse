@@ -48,7 +48,7 @@ export default function ComingSoonPage({ title, description }: Props) {
         <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>{title}</h2>
         <p style={{ margin: 0, fontSize: 14, color: 'var(--w-text-soft)', lineHeight: 1.6 }}>
           {description ??
-            '이 기능은 기존 버전(classic)에서 정상 동작합니다. 곧 Warm Minimal 스타일로 이전됩니다. 급하게 쓰셔야 하면 상단 [디자인] 버튼에서 classic으로 전환해 주세요.'}
+            '이 기능은 기존 버전(classic)에서 정상 동작합니다. 곧 새 대시보드 스타일로 이전됩니다. 급하게 쓰셔야 하면 상단 [디자인] 버튼에서 classic으로 전환해 주세요.'}
         </p>
         <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
           <button className="w-btn w-btn-ghost" onClick={() => setPage('dashboard')}>
