@@ -50,7 +50,7 @@ interface SignUpParams {
 /** 비밀번호 재설정 이메일 발송 */
 export async function requestPasswordReset(email: string): Promise<{ error: string | null }> {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: 'https://h-fi-metaverse.pages.dev/reset-password',
+    redirectTo: 'https://hwiki.site/reset-password',
   });
   if (error) return { error: error.message };
   return { error: null };

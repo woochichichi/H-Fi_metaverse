@@ -92,7 +92,7 @@ Phase 3 — 금융ITO 전체
 | 개발도구 | Claude Code (Anthropic CLI) | 터미널에서 직접 개발, CLAUDE.md 자동 참조 |
 
 ### 배포
-- **프론트**: `https://h-fi-metaverse.pages.dev` (또는 커스텀 도메인)
+- **프론트**: `https://hwiki.site` (Cloudflare Pages 커스텀 도메인)
 - **백엔드**: `https://{ref}.supabase.co`
 - **접근 제어**: 초대 코드 + @hanwha 이메일만 가입 가능
 
