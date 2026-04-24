@@ -5,7 +5,13 @@ import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
 import Modal from '../ui/Modal';
 import { StatusPicker, type StatusTone } from '../ui/DetailShell';
-import { ThreadShell, ThreadHeader, ThreadEntry, ThreadComposer } from '../ui/ConversationThread';
+import {
+  PostHeaderCard,
+  WorkflowStepper,
+  DescriptionCard,
+  ReplyCard,
+  ComposerCard,
+} from '../ui/PostDetail';
 import MasterDetail, { MasterListCard, MasterListItem } from '../ui/MasterDetail';
 import { useAuthStore } from '../../../stores/authStore';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -218,10 +224,21 @@ function VocDetailPanel({
   // useState 초기값이 새 voc의 resolution으로 자동 동기화.
   const [resolution, setResolution] = useState(voc.resolution ?? '');
 
+  // 보류 상태는 별도 분기로 표시 (4단계 stepper 대신 경고)
+  const isOnHold = voc.status === '보류';
+  const flowSteps: { key: VocStatus; label: string }[] = [
+    { key: '접수', label: '접수' },
+    { key: '검토중', label: '검토중' },
+    { key: '처리중', label: '처리중' },
+    { key: '완료', label: '완료' },
+  ];
+
   return (
-    <ThreadShell>
-      <ThreadHeader
-        title={voc.title}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <PostHeaderCard
+        icon={<MessageSquareHeart size={22} />}
+        iconTone={voc.status === '완료' ? 'success' : voc.status === '보류' ? 'crit' : 'accent'}
+        badgeId={`VOC-${voc.id.slice(0, 6)}`}
         badges={
           <>
             <StatusBadge status={voc.status} />
@@ -238,43 +255,83 @@ function VocDetailPanel({
             )}
           </>
         }
+        title={voc.title}
+        metaLine={
+          <>
+            <span>{voc.anonymous ? '익명 작성자' : '작성자'}</span>
+            <span>·</span>
+            <span>{voc.team}</span>
+            <span>·</span>
+            <span>{formatRelativeTime(voc.created_at)}</span>
+            <span>·</span>
+            <span>조회 {voc.view_count}</span>
+          </>
+        }
         canDelete={canDelete}
         onDelete={onDelete}
       />
 
-      <ThreadEntry
-        avatarTone={voc.anonymous ? 'anon' : 'author'}
-        avatarLabel={voc.anonymous ? '?' : 'V'}
-        authorName={voc.anonymous ? '익명 작성자' : '작성자'}
+      {!isOnHold && (
+        <WorkflowStepper<VocStatus>
+          title="처리 진행"
+          steps={flowSteps}
+          currentKey={voc.status === '보류' ? '접수' : voc.status}
+          quickActions={
+            canProcess && (
+              <>
+                <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--w-text-muted)' }}>
+                  빠른 진행 →
+                </span>
+                {VOC_STATUSES.filter((s) => s !== voc.status).map((s) => (
+                  <button
+                    key={s}
+                    className="w-btn"
+                    style={{
+                      padding: '4px 10px',
+                      fontSize: 11,
+                      background: s === '완료' ? 'var(--w-accent)' : 'var(--w-surface-2)',
+                      color: s === '완료' ? '#fff' : 'var(--w-text-soft)',
+                      border:
+                        s === '완료' ? '1px solid var(--w-accent)' : '1px solid var(--w-border)',
+                      fontWeight: 600,
+                    }}
+                    onClick={() => {
+                      void onStatusChange(s);
+                    }}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </>
+            )
+          }
+        />
+      )}
+
+      <DescriptionCard
+        label="VOC 내용"
         timestamp={formatRelativeTime(voc.created_at)}
-        extraMeta={
-          <>
-            <span>{voc.team}</span>
-            <span className="w-thread-meta-sep">·</span>
-            <span>조회 {voc.view_count}</span>
-          </>
-        }
         attachments={voc.attachment_urls}
       >
         {voc.content}
-      </ThreadEntry>
+      </DescriptionCard>
 
       {voc.resolution && (
-        <ThreadEntry
+        <ReplyCard
           variant="leader"
-          avatarTone="leader"
           avatarLabel="리"
           authorName="리더 회신"
           authorBadge={<span className="w-badge w-badge-accent">{voc.team} 리더</span>}
           timestamp="처리됨"
+          tag="LEADER REPLY"
         >
           {voc.resolution}
-        </ThreadEntry>
+        </ReplyCard>
       )}
 
       {canProcess && (
-        <ThreadComposer
-          label="리더 회신 / 상태 변경"
+        <ComposerCard
+          label="리더 처리"
           topActions={
             <div style={{ marginLeft: 'auto' }}>
               <StatusPicker<VocStatus>
@@ -300,7 +357,7 @@ function VocDetailPanel({
           }}
         />
       )}
-    </ThreadShell>
+    </div>
   );
 }
 

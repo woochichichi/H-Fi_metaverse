@@ -4,7 +4,12 @@ import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
 import Modal from '../ui/Modal';
-import { ThreadShell, ThreadHeader, ThreadEntry, ThreadEvent } from '../ui/ConversationThread';
+import {
+  PostHeaderCard,
+  WorkflowStepper,
+  DescriptionCard,
+  ReplyCard,
+} from '../ui/PostDetail';
 import MasterDetail, { MasterListCard, MasterListItem } from '../ui/MasterDetail';
 import { useAuthStore } from '../../../stores/authStore';
 import { useGatherings } from '../../../hooks/useGatherings';
@@ -179,15 +184,49 @@ function GatheringDetailPanel({
   onCloseRecruit: () => Promise<void>;
 }) {
   const isRecruiting = gathering.status === 'recruiting';
+  const flowSteps: { key: Gathering['status']; label: string }[] = [
+    { key: 'recruiting', label: '모집중' },
+    { key: 'closed', label: '마감' },
+    { key: 'completed', label: '종료' },
+  ];
+
   return (
-    <ThreadShell>
-      <ThreadHeader
-        title={gathering.title}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <PostHeaderCard
+        icon={<PartyPopper size={22} />}
+        iconTone={
+          gathering.status === 'completed'
+            ? 'success'
+            : gathering.status === 'closed'
+              ? 'muted'
+              : 'accent'
+        }
+        badgeId={`MEET-${gathering.id.slice(0, 6)}`}
         badges={
           <>
             <span className="w-badge w-badge-muted">{gathering.category}</span>
             <StatusBadge status={gathering.status} />
             {joined && <span className="w-badge w-badge-accent">참여중</span>}
+          </>
+        }
+        title={gathering.title}
+        metaLine={
+          <>
+            <span>{isAuthor ? '내 모임' : '모임장'}</span>
+            <span>·</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              <Users size={11} />
+              {gathering.member_count}
+              {gathering.max_members ? ` / ${gathering.max_members}` : ''}명
+            </span>
+            <span>·</span>
+            <span>{formatRelativeTime(gathering.created_at)}</span>
+            {gathering.deadline && (
+              <>
+                <span>·</span>
+                <span>마감 {gathering.deadline}</span>
+              </>
+            )}
           </>
         }
         extraActions={
@@ -218,39 +257,28 @@ function GatheringDetailPanel({
         }
       />
 
-      <ThreadEntry
-        variant="leader"
-        avatarTone="leader"
-        avatarLabel="모"
-        authorName={isAuthor ? '내 모임' : '모임장'}
-        authorBadge={<span className="w-badge w-badge-muted">호스트</span>}
-        timestamp={formatRelativeTime(gathering.created_at)}
-        extraMeta={
-          <>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-              <Users size={11} />
-              {gathering.member_count}
-              {gathering.max_members ? ` / ${gathering.max_members}` : ''}명
-            </span>
-            {gathering.deadline && (
-              <>
-                <span className="w-thread-meta-sep">·</span>
-                <span>마감 {gathering.deadline}</span>
-              </>
-            )}
-          </>
-        }
-      >
+      <WorkflowStepper<Gathering['status']>
+        title="모임 진행"
+        steps={flowSteps}
+        currentKey={gathering.status}
+      />
+
+      <DescriptionCard label="모임 소개" timestamp={formatRelativeTime(gathering.created_at)}>
         {gathering.description}
-      </ThreadEntry>
+      </DescriptionCard>
 
       {gathering.contact_info && (
-        <ThreadEvent icon="✉">
-          문의:&nbsp;
-          <b style={{ color: 'var(--w-text)' }}>{gathering.contact_info}</b>
-        </ThreadEvent>
+        <ReplyCard
+          variant="system"
+          avatarLabel=""
+          authorName="문의처"
+          timestamp={gathering.contact_info}
+          tag="CONTACT"
+        >
+          {gathering.contact_info}
+        </ReplyCard>
       )}
-    </ThreadShell>
+    </div>
   );
 }
 

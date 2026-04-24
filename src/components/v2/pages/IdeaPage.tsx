@@ -5,7 +5,12 @@ import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
 import Modal from '../ui/Modal';
 import { StatusPicker, type StatusTone } from '../ui/DetailShell';
-import { ThreadShell, ThreadHeader, ThreadEntry, ThreadComposer } from '../ui/ConversationThread';
+import {
+  PostHeaderCard,
+  WorkflowStepper,
+  DescriptionCard,
+  ComposerCard,
+} from '../ui/PostDetail';
 import MasterDetail, { MasterListCard, MasterListItem } from '../ui/MasterDetail';
 import { useAuthStore } from '../../../stores/authStore';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -209,14 +214,46 @@ function IdeaDetailPanel({
   canChangeStatus: boolean;
   onStatusChange: (s: IdeaStatus) => Promise<void>;
 }) {
+  // 반려는 별도 분기 (5단계 stepper 대신 표시 안 함)
+  const isRejected = idea.status === '반려';
+  const flowSteps: { key: IdeaStatus; label: string }[] = [
+    { key: '제안', label: '제안' },
+    { key: '검토', label: '검토' },
+    { key: '채택', label: '채택' },
+    { key: '진행중', label: '진행중' },
+    { key: '완료', label: '완료' },
+  ];
+
   return (
-    <ThreadShell>
-      <ThreadHeader
-        title={idea.title}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <PostHeaderCard
+        icon={<Lightbulb size={22} />}
+        iconTone={
+          idea.status === '완료'
+            ? 'success'
+            : idea.status === '반려'
+              ? 'crit'
+              : idea.status === '채택' || idea.status === '진행중'
+                ? 'accent'
+                : 'todo'
+        }
+        badgeId={`IDEA-${idea.id.slice(0, 6)}`}
         badges={
           <>
             {idea.category && <span className="w-badge w-badge-muted">{idea.category}</span>}
             <StatusBadge status={idea.status} />
+          </>
+        }
+        title={idea.title}
+        metaLine={
+          <>
+            <span>제안자</span>
+            <span>·</span>
+            <span>{formatRelativeTime(idea.created_at)}</span>
+            <span>·</span>
+            <span>조회 {idea.view_count}</span>
+            <span>·</span>
+            <span>공감 {idea.vote_count}</span>
           </>
         }
         extraActions={
@@ -245,24 +282,49 @@ function IdeaDetailPanel({
         }
       />
 
-      <ThreadEntry
-        avatarTone="author"
-        avatarLabel="아"
-        authorName="제안자"
-        timestamp={formatRelativeTime(idea.created_at)}
-        extraMeta={
-          <>
-            <span>조회 {idea.view_count}</span>
-            <span className="w-thread-meta-sep">·</span>
-            <span>공감 {idea.vote_count}</span>
-          </>
-        }
-      >
+      {!isRejected && (
+        <WorkflowStepper<IdeaStatus>
+          title="제안 진행"
+          steps={flowSteps}
+          currentKey={idea.status === '반려' ? '제안' : idea.status}
+          quickActions={
+            canChangeStatus && (
+              <>
+                <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--w-text-muted)' }}>
+                  빠른 진행 →
+                </span>
+                {IDEA_STATUSES.filter((s) => s !== idea.status).map((s) => (
+                  <button
+                    key={s}
+                    className="w-btn"
+                    style={{
+                      padding: '4px 10px',
+                      fontSize: 11,
+                      background: s === '완료' ? 'var(--w-accent)' : 'var(--w-surface-2)',
+                      color: s === '완료' ? '#fff' : 'var(--w-text-soft)',
+                      border:
+                        s === '완료' ? '1px solid var(--w-accent)' : '1px solid var(--w-border)',
+                      fontWeight: 600,
+                    }}
+                    onClick={() => {
+                      void onStatusChange(s);
+                    }}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </>
+            )
+          }
+        />
+      )}
+
+      <DescriptionCard label="아이디어 내용" timestamp={formatRelativeTime(idea.created_at)}>
         {idea.description}
-      </ThreadEntry>
+      </DescriptionCard>
 
       {canChangeStatus && (
-        <ThreadComposer
+        <ComposerCard
           label="리더 처리 — 상태 변경"
           topActions={
             <div style={{ marginLeft: 'auto' }}>
@@ -278,7 +340,7 @@ function IdeaDetailPanel({
           }
         />
       )}
-    </ThreadShell>
+    </div>
   );
 }
 

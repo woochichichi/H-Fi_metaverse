@@ -123,3 +123,6 @@
 - A안을 게시글 보이는 모든 화면(VOC/공지/아이디어/익명쪽지/소모임)에 적용, Warm·Dark 두 테마 모두 자동 대응 (CSS 토큰 사용)
 - 수정사항 재검증 요청, 게더타운 스타일 잔재 점검 → 안정성 우선으로 ESLint 1건(VocPage useEffect setState) 함께 정리 후 push
 - git 푸시 진행
+- 게시글 상세 패널이 게더타운 느낌 남아있어 대시보드 톤으로 4안 mockup 요청 → C안(Workflow Tracker) 선택 → Warm/Dark 둘 다 적용
+- 법인카드 화면도 cash/project 목업대로 안 했음 지적 → 모든 화면 게더타운 → C안 톤 일괄 변경 요청, 병렬 진행 + Agent 활용 가능
+- 1차 적용: PostDetail 컴포넌트 셋(PostHeaderCard/WorkflowStepper/DescriptionCard/ReplyCard/ComposerCard/MiniStat/ActivityLogCard) 신설 + 게시글 5개 페이지 교체 + ConversationThread 정리

@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<title>한울타리 · 게시글 상세 패널 리디자인 V2 · 4안 비교</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
+<style>
+  :root { font-family: 'Pretendard Variable', Pretendard, system-ui, sans-serif; letter-spacing: -.01em; }
+</style>
+</head>
+<body class="bg-stone-50 text-stone-900 min-h-screen">
+<div class="max-w-[1320px] mx-auto p-10">
+
+  <header class="mb-8">
+    <div class="text-xs text-stone-500">한울타리 · Detail Panel V2</div>
+    <h1 class="text-2xl font-bold mt-1">게시글 상세 — <span class="text-[#D95F48]">대시보드 톤</span> 4안 비교</h1>
+    <p class="text-sm text-stone-600 mt-2 leading-relaxed max-w-3xl">
+      대시보드와 시각 언어가 일치하는 4가지 패러다임. 모두 같은 Warm 테마, 같은 데이터(VOC 한 건),
+      사이드바·탑바·VOC 리스트 동일. <b>차이는 우측 디테일 영역의 정보 표현 방식</b>.
+    </p>
+    <div class="mt-3 inline-flex items-center gap-2 text-[11px] px-3 py-1.5 rounded-lg" style="background:#FEF3EC; color:#A84130;">
+      직관성 + UX 흐름 + 대시보드 톤 일치 모두 고려. 한 안 선택 시 5개 게시글 페이지에 적용 + Dark 테마 동시 매핑.
+    </div>
+  </header>
+
+  <div class="grid grid-cols-2 gap-6">
+
+    <!-- A -->
+    <a href="./a-stat-strip.html" target="_blank" class="block rounded-2xl border-2 border-stone-200 hover:border-[#E8725C] bg-white shadow-sm hover:shadow-lg transition overflow-hidden">
+      <div class="h-72 relative overflow-hidden p-3" style="background:#FBF6EF">
+        <!-- header bar -->
+        <div class="rounded-lg bg-white border border-[#E8DDCE] p-2 mb-2">
+          <div class="h-1.5 w-12 rounded mono mb-1" style="background:#F5EEE4"></div>
+          <div class="h-2.5 w-3/4 rounded bg-stone-400/60"></div>
+        </div>
+        <!-- KPI 5 -->
+        <div class="grid grid-cols-5 gap-1 mb-2">
+          <div class="rounded bg-white border border-[#E8DDCE] p-1.5 space-y-1">
+            <div class="w-3 h-3 rounded" style="background:#FAEFD9"></div>
+            <div class="h-1.5 w-full rounded" style="background:#D08A2E"></div>
+          </div>
+          <div class="rounded bg-white border border-[#E8DDCE] p-1.5 space-y-1">
+            <div class="w-3 h-3 rounded" style="background:#FCE4DD"></div>
+            <div class="h-1.5 w-3/4 rounded bg-stone-300"></div>
+          </div>
+          <div class="rounded bg-white border border-[#E8DDCE] p-1.5 space-y-1">
+            <div class="w-3 h-3 rounded" style="background:#FAEFD9"></div>
+            <div class="flex gap-0.5"><div class="h-1.5 w-1 rounded" style="background:#D08A2E"></div><div class="h-1.5 w-1 rounded" style="background:#D08A2E"></div><div class="h-1.5 w-1 rounded" style="background:#D08A2E"></div></div>
+          </div>
+          <div class="rounded bg-white border border-[#E8DDCE] p-1.5 space-y-1">
+            <div class="w-3 h-3 rounded" style="background:#E1EEF7"></div>
+            <div class="h-1.5 w-1/2 rounded bg-stone-300"></div>
+          </div>
+          <div class="rounded bg-white border border-[#E8DDCE] p-1.5 space-y-1">
+            <div class="w-3 h-3 rounded" style="background:#FCE4DD"></div>
+            <div class="h-1.5 w-2/3 rounded bg-stone-300"></div>
+          </div>
+        </div>
+        <!-- article -->
+        <div class="rounded-lg bg-white border border-[#E8DDCE] p-2 mb-2 space-y-1">
+          <div class="h-1 w-12 rounded bg-stone-300/70"></div>
+          <div class="space-y-0.5">
+            <div class="h-1 w-full rounded bg-stone-200"></div>
+            <div class="h-1 w-full rounded bg-stone-200"></div>
+            <div class="h-1 w-3/4 rounded bg-stone-200"></div>
+          </div>
+        </div>
+        <!-- reply -->
+        <div class="rounded-lg p-2 border space-y-1" style="background:#FCE4DD; border-color:#E8725C">
+          <div class="h-1 w-1/2 rounded" style="background:#D95F48"></div>
+          <div class="h-1 w-3/4 rounded bg-stone-300"></div>
+        </div>
+        <!-- composer -->
+        <div class="rounded-lg bg-white border border-[#E8DDCE] p-2 mt-2">
+          <div class="flex gap-1 mb-1"><div class="h-1.5 w-6 rounded bg-stone-300/70"></div><div class="ml-auto h-1.5 w-12 rounded" style="background:#F5EEE4"></div></div>
+          <div class="h-3 rounded" style="background:#F5EEE4"></div>
+        </div>
+      </div>
+      <div class="p-5 border-t border-stone-200">
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-bold text-white px-2 py-0.5 rounded" style="background:#E8725C">A</span>
+          <span class="text-sm font-bold">Stat Strip + Article</span>
+        </div>
+        <p class="text-xs text-stone-600 mt-2 leading-relaxed">
+          <b>대시보드 KPI 카드와 동일 톤</b>의 5개 메타 stat이 상단에 깔리고, 그 아래 깔끔한 article 카드.
+          가장 대시보드와 시각 언어가 일치. 메타데이터를 한눈에 스캔 가능.
+        </p>
+        <ul class="text-[11px] text-stone-500 mt-3 space-y-0.5">
+          <li>· UX 강점: <b>스캐닝</b> · 메타가 KPI처럼 즉시 파악</li>
+          <li>· 약점: 아이콘이 많아 시각 노이즈 ↑</li>
+          <li>· 어울리는 페이지: <b>VOC / 아이디어</b> (메타가 풍부한 글)</li>
+        </ul>
+        <div class="mt-3 text-[11px] font-semibold text-[#D95F48]">A안 열기 →</div>
+      </div>
+    </a>
+
+    <!-- B -->
+    <a href="./b-properties-rail.html" target="_blank" class="block rounded-2xl border-2 border-stone-200 hover:border-[#E8725C] bg-white shadow-sm hover:shadow-lg transition overflow-hidden">
+      <div class="h-72 relative overflow-hidden p-3" style="background:#FBF6EF">
+        <div class="rounded-lg bg-white border border-[#E8DDCE] overflow-hidden h-full flex flex-col">
+          <!-- sticky header -->
+          <div class="flex items-center gap-1 p-2 border-b border-[#E8DDCE]">
+            <div class="h-1.5 w-8 rounded" style="background:#F5EEE4"></div>
+            <div class="h-1.5 w-24 rounded bg-stone-400/60 flex-1"></div>
+            <div class="h-3 w-20 rounded flex" style="background:#F5EEE4"><div class="flex-1"></div><div class="w-7" style="background:#E8725C"></div><div class="flex-1"></div></div>
+          </div>
+          <div class="flex flex-1 overflow-hidden">
+            <!-- left article -->
+            <div class="flex-1 p-2 space-y-1 border-r border-[#E8DDCE]">
+              <!-- author row -->
+              <div class="flex items-center gap-1 pb-1.5 border-b border-[#E8DDCE]">
+                <div class="w-4 h-4 rounded-full" style="background:#5C4B42"></div>
+                <div class="h-1.5 w-12 rounded bg-stone-400/60"></div>
+                <div class="ml-auto text-right space-y-0.5">
+                  <div class="h-1 w-6 rounded bg-stone-300"></div>
+                  <div class="h-2 w-4 rounded bg-stone-400 ml-auto"></div>
+                </div>
+              </div>
+              <div class="space-y-0.5 mt-1">
+                <div class="h-1 w-1/3 rounded bg-stone-300/70"></div>
+                <div class="h-1 w-full rounded bg-stone-200"></div>
+                <div class="h-1 w-full rounded bg-stone-200"></div>
+                <div class="h-1 w-3/4 rounded bg-stone-200"></div>
+              </div>
+              <!-- reply -->
+              <div class="rounded p-1 mt-2" style="background:#FCE4DD; border:1px solid #E8725C">
+                <div class="h-1 w-1/2 rounded bg-stone-400/60 mb-0.5"></div>
+                <div class="h-1 w-3/4 rounded bg-stone-300"></div>
+              </div>
+              <!-- composer -->
+              <div class="rounded p-1 mt-1" style="background:#F5EEE4">
+                <div class="h-2 w-full rounded bg-white"></div>
+              </div>
+            </div>
+            <!-- right rail -->
+            <div class="w-[88px] shrink-0 p-1.5 space-y-1" style="background:#F5EEE4">
+              <div class="h-1 w-6 rounded bg-stone-300/70"></div>
+              <div class="space-y-0.5 border-b border-dashed border-[#E8DDCE] pb-1">
+                <div class="flex gap-1"><div class="h-1 w-4 rounded bg-stone-300/70"></div><div class="h-1.5 flex-1 rounded" style="background:#FAEFD9"></div></div>
+              </div>
+              <div class="space-y-0.5 border-b border-dashed border-[#E8DDCE] pb-1">
+                <div class="flex gap-1"><div class="h-1 w-4 rounded bg-stone-300/70"></div><div class="h-1 flex-1 rounded bg-stone-300"></div></div>
+              </div>
+              <div class="space-y-0.5 border-b border-dashed border-[#E8DDCE] pb-1">
+                <div class="flex gap-1"><div class="h-1 w-4 rounded bg-stone-300/70"></div>
+                  <div class="flex gap-[1px] flex-1"><div class="h-2 w-1 rounded-sm" style="background:#D08A2E"></div><div class="h-2 w-1 rounded-sm" style="background:#D08A2E"></div><div class="h-2 w-1 rounded-sm" style="background:#D08A2E"></div></div>
+                </div>
+              </div>
+              <!-- progress -->
+              <div class="space-y-1 mt-2">
+                <div class="flex items-center gap-1">
+                  <div class="w-2 h-2 rounded-full" style="background:#E8725C"></div>
+                  <div class="h-1 flex-1 rounded bg-stone-300"></div>
+                </div>
+                <div class="flex items-center gap-1">
+                  <div class="w-2 h-2 rounded-full" style="background:#D08A2E"></div>
+                  <div class="h-1 flex-1 rounded bg-stone-300"></div>
+                </div>
+                <div class="flex items-center gap-1">
+                  <div class="w-2 h-2 rounded-full bg-white border border-[#E8DDCE]"></div>
+                  <div class="h-1 flex-1 rounded bg-stone-200"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="p-5 border-t border-stone-200">
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-bold text-white px-2 py-0.5 rounded" style="background:#E8725C">B</span>
+          <span class="text-sm font-bold">Article + Properties Rail</span>
+        </div>
+        <p class="text-xs text-stone-600 mt-2 leading-relaxed">
+          좌측은 본문/회신, 우측은 <b>Properties 사이드 (속성 + 진행률 stepper + 액션)</b>.
+          Notion/Linear 스타일. 메타가 항상 시야에 있고 빠르게 처리 가능.
+        </p>
+        <ul class="text-[11px] text-stone-500 mt-3 space-y-0.5">
+          <li>· UX 강점: <b>처리 효율</b> · 본문 보면서 메타·진행 상태 동시 인지</li>
+          <li>· 약점: 좁은 화면에서 사이드바 압박</li>
+          <li>· 어울리는 페이지: <b>VOC</b> (처리 워크플로 강조)</li>
+        </ul>
+        <div class="mt-3 text-[11px] font-semibold text-[#D95F48]">B안 열기 →</div>
+      </div>
+    </a>
+
+    <!-- C -->
+    <a href="./c-status-tracker.html" target="_blank" class="block rounded-2xl border-2 border-stone-200 hover:border-[#E8725C] bg-white shadow-sm hover:shadow-lg transition overflow-hidden">
+      <div class="h-72 relative overflow-hidden p-3" style="background:#FBF6EF">
+        <!-- header -->
+        <div class="rounded-lg bg-white border border-[#E8DDCE] p-2 mb-2 flex items-center gap-1.5">
+          <div class="w-7 h-7 rounded-lg" style="background:#FCE4DD"></div>
+          <div class="flex-1 space-y-0.5">
+            <div class="h-1 w-1/3 rounded bg-stone-300"></div>
+            <div class="h-1.5 w-3/4 rounded bg-stone-400/60"></div>
+          </div>
+        </div>
+        <!-- stepper -->
+        <div class="rounded-lg bg-white border border-[#E8DDCE] p-3 mb-2">
+          <div class="flex items-center gap-1">
+            <div class="flex flex-col items-center flex-1 gap-1 relative">
+              <div class="w-5 h-5 rounded-full text-[8px] grid place-items-center text-white font-bold" style="background:#E8725C; box-shadow:0 0 0 3px #FCE4DD">✓</div>
+              <div class="h-1 w-6 rounded bg-stone-300"></div>
+              <div class="absolute top-2.5 left-[60%] right-[-40%] h-0.5" style="background:#E8725C"></div>
+            </div>
+            <div class="flex flex-col items-center flex-1 gap-1 relative">
+              <div class="w-5 h-5 rounded-full text-[8px] grid place-items-center" style="background:white; border:2px solid #E8725C; color:#E8725C; box-shadow:0 0 0 3px #FCE4DD">●</div>
+              <div class="h-1 w-6 rounded bg-stone-400/60"></div>
+              <div class="absolute top-2.5 left-[60%] right-[-40%] h-0.5 bg-stone-200"></div>
+            </div>
+            <div class="flex flex-col items-center flex-1 gap-1 relative">
+              <div class="w-5 h-5 rounded-full text-[8px] grid place-items-center bg-white" style="border:2px dashed #D9C9B2; color:#8A776B">3</div>
+              <div class="h-1 w-6 rounded bg-stone-200"></div>
+              <div class="absolute top-2.5 left-[60%] right-[-40%] h-0.5 bg-stone-200"></div>
+            </div>
+            <div class="flex flex-col items-center flex-1 gap-1">
+              <div class="w-5 h-5 rounded-full text-[8px] grid place-items-center bg-white" style="border:2px dashed #D9C9B2; color:#8A776B">4</div>
+              <div class="h-1 w-6 rounded bg-stone-200"></div>
+            </div>
+          </div>
+        </div>
+        <!-- body grid -->
+        <div class="grid gap-1.5 mb-2" style="grid-template-columns: 1fr 80px;">
+          <div class="rounded-lg bg-white border border-[#E8DDCE] p-2 space-y-0.5">
+            <div class="h-1 w-1/3 rounded bg-stone-300"></div>
+            <div class="h-1 w-full rounded bg-stone-200"></div>
+            <div class="h-1 w-full rounded bg-stone-200"></div>
+            <div class="h-1 w-3/4 rounded bg-stone-200"></div>
+          </div>
+          <div class="space-y-1">
+            <div class="rounded-lg bg-white border border-[#E8DDCE] p-1.5">
+              <div class="h-1 w-2/3 rounded bg-stone-300/60 mb-0.5"></div>
+              <div class="h-2 w-1/2 rounded bg-stone-400/60"></div>
+            </div>
+            <div class="rounded-lg bg-white border border-[#E8DDCE] p-1.5">
+              <div class="h-1 w-2/3 rounded bg-stone-300/60 mb-0.5"></div>
+              <div class="h-2 w-1/3 rounded bg-stone-400/60"></div>
+            </div>
+          </div>
+        </div>
+        <!-- reply -->
+        <div class="rounded-lg p-1.5 mb-2" style="background:#FCE4DD; border:1px solid #E8725C">
+          <div class="h-1 w-1/3 rounded mb-0.5" style="background:#D95F48"></div>
+          <div class="h-1 w-3/4 rounded bg-stone-300/70"></div>
+        </div>
+        <!-- composer (snippet) -->
+        <div class="rounded-lg bg-white border border-[#E8DDCE] p-1.5 h-6"></div>
+      </div>
+      <div class="p-5 border-t border-stone-200">
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-bold text-white px-2 py-0.5 rounded" style="background:#E8725C">C</span>
+          <span class="text-sm font-bold">Workflow Tracker (Stepper)</span>
+        </div>
+        <p class="text-xs text-stone-600 mt-2 leading-relaxed">
+          상단에 <b>워크플로우 stepper (접수→검토→처리→완료)</b>가 시각적으로 강조.
+          빠른 진행 버튼·우측 미니 위젯(처리시간/유사VOC/담당)으로 처리 흐름이 한눈에.
+        </p>
+        <ul class="text-[11px] text-stone-500 mt-3 space-y-0.5">
+          <li>· UX 강점: <b>진행 상태 직관성</b> · "내가 어디 단계?" 즉시 인지</li>
+          <li>· 약점: 단순 게시글(공지/아이디어)엔 stepper 과함</li>
+          <li>· 어울리는 페이지: <b>VOC / 익명쪽지</b> (워크플로 있는 글)</li>
+        </ul>
+        <div class="mt-3 text-[11px] font-semibold text-[#D95F48]">C안 열기 →</div>
+      </div>
+    </a>
+
+    <!-- D -->
+    <a href="./d-color-stack.html" target="_blank" class="block rounded-2xl border-2 border-stone-200 hover:border-[#E8725C] bg-white shadow-sm hover:shadow-lg transition overflow-hidden">
+      <div class="h-72 relative overflow-hidden p-3" style="background:#FBF6EF">
+        <!-- hero -->
+        <div class="rounded-lg bg-white border border-[#E8DDCE] p-2 mb-2 relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-12 h-12 rounded-full opacity-50" style="background:radial-gradient(circle, #FCE4DD, transparent 70%); transform:translate(40%, -50%)"></div>
+          <div class="space-y-0.5 relative">
+            <div class="flex gap-1"><div class="h-1.5 w-4 rounded" style="background:#FAEFD9"></div><div class="h-1.5 w-4 rounded bg-stone-200"></div><div class="h-1.5 w-4 rounded" style="background:#FCE4DD"></div></div>
+            <div class="h-2.5 w-3/4 rounded bg-stone-400/60"></div>
+            <div class="h-1 w-1/2 rounded bg-stone-300/60"></div>
+          </div>
+        </div>
+        <!-- ① meta (info bar) -->
+        <div class="flex gap-1 mb-1.5">
+          <div class="w-1 rounded-r" style="background:#3D7FA8"></div>
+          <div class="flex-1 rounded bg-white border border-[#E8DDCE] p-1.5">
+            <div class="h-1 w-12 rounded bg-stone-300/70 mb-1"></div>
+            <div class="grid grid-cols-4 gap-1">
+              <div class="h-3 rounded" style="background:#F5EEE4"></div>
+              <div class="h-3 rounded" style="background:#F5EEE4"></div>
+              <div class="h-3 rounded" style="background:#F5EEE4"></div>
+              <div class="h-3 rounded" style="background:#F5EEE4"></div>
+            </div>
+          </div>
+        </div>
+        <!-- ② body (todo bar) -->
+        <div class="flex gap-1 mb-1.5">
+          <div class="w-1 rounded-r" style="background:#D08A2E"></div>
+          <div class="flex-1 rounded bg-white border border-[#E8DDCE] p-1.5 space-y-0.5">
+            <div class="h-1 w-12 rounded bg-stone-300/70"></div>
+            <div class="h-1 w-full rounded bg-stone-200"></div>
+            <div class="h-1 w-full rounded bg-stone-200"></div>
+            <div class="h-1 w-3/4 rounded bg-stone-200"></div>
+          </div>
+        </div>
+        <!-- ③ reply (accent bar) -->
+        <div class="flex gap-1 mb-1.5">
+          <div class="w-1 rounded-r" style="background:#E8725C"></div>
+          <div class="flex-1 rounded p-1.5 space-y-0.5" style="background:#FCE4DD; border:1px solid #E8725C">
+            <div class="h-1 w-12 rounded" style="background:#D95F48"></div>
+            <div class="h-1 w-3/4 rounded bg-stone-300"></div>
+          </div>
+        </div>
+        <!-- ④ activity (soft bar) -->
+        <div class="flex gap-1 mb-1.5">
+          <div class="w-1 rounded-r bg-stone-300"></div>
+          <div class="flex-1 rounded bg-white border border-[#E8DDCE] p-1.5 space-y-0.5">
+            <div class="h-1 w-10 rounded bg-stone-300/70"></div>
+            <div class="h-1 w-3/4 rounded bg-stone-200"></div>
+            <div class="h-1 w-2/3 rounded bg-stone-200"></div>
+          </div>
+        </div>
+        <!-- ⑤ composer (accent bar) -->
+        <div class="flex gap-1">
+          <div class="w-1 rounded-r" style="background:#E8725C"></div>
+          <div class="flex-1 rounded bg-white border border-[#E8DDCE] p-1.5">
+            <div class="h-2 rounded" style="background:#F5EEE4"></div>
+          </div>
+        </div>
+      </div>
+      <div class="p-5 border-t border-stone-200">
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-bold text-white px-2 py-0.5 rounded" style="background:#E8725C">D</span>
+          <span class="text-sm font-bold">Color-Coded Card Stack</span>
+        </div>
+        <p class="text-xs text-stone-600 mt-2 leading-relaxed">
+          Hero 카드 + 의미별 색띠 카드 스택. <b>각 카드의 좌측 컬러 띠 색</b>으로 의미가 즉시 구분
+          (메타=파랑, 본문=노랑, 회신=코랄, 활동=회색).
+          가장 시각적으로 화려하고 카테고리화 명확.
+        </p>
+        <ul class="text-[11px] text-stone-500 mt-3 space-y-0.5">
+          <li>· UX 강점: <b>의미 구분</b> · 색만으로 영역 인지</li>
+          <li>· 약점: 색이 많아 단조로운 글엔 과함</li>
+          <li>· 어울리는 페이지: <b>모든 게시글</b> 유연 적용</li>
+        </ul>
+        <div class="mt-3 text-[11px] font-semibold text-[#D95F48]">D안 열기 →</div>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- 비교 표 -->
+  <section class="mt-10 rounded-xl border border-stone-200 bg-white overflow-hidden">
+    <div class="px-5 py-3 border-b border-stone-200 text-sm font-bold">UX 관점 비교</div>
+    <table class="w-full text-sm">
+      <thead class="bg-stone-50 text-xs text-stone-500">
+        <tr>
+          <th class="text-left px-5 py-2.5 w-40 font-semibold">관점</th>
+          <th class="text-left px-5 py-2.5 font-semibold">A · Stat Strip</th>
+          <th class="text-left px-5 py-2.5 font-semibold">B · Properties Rail</th>
+          <th class="text-left px-5 py-2.5 font-semibold">C · Workflow Tracker</th>
+          <th class="text-left px-5 py-2.5 font-semibold">D · Color Stack</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-stone-100">
+        <tr><td class="px-5 py-3 font-semibold">대시보드 일치도</td><td class="px-5 py-3">★★★★★</td><td class="px-5 py-3">★★★</td><td class="px-5 py-3">★★★★</td><td class="px-5 py-3">★★★</td></tr>
+        <tr><td class="px-5 py-3 font-semibold">메타 스캔성</td><td class="px-5 py-3">★★★★★</td><td class="px-5 py-3">★★★★</td><td class="px-5 py-3">★★★</td><td class="px-5 py-3">★★★</td></tr>
+        <tr><td class="px-5 py-3 font-semibold">처리 효율</td><td class="px-5 py-3">★★★</td><td class="px-5 py-3">★★★★★</td><td class="px-5 py-3">★★★★</td><td class="px-5 py-3">★★★</td></tr>
+        <tr><td class="px-5 py-3 font-semibold">진행 상태 직관성</td><td class="px-5 py-3">★★</td><td class="px-5 py-3">★★★★</td><td class="px-5 py-3">★★★★★</td><td class="px-5 py-3">★★★</td></tr>
+        <tr><td class="px-5 py-3 font-semibold">영역 구분 명확성</td><td class="px-5 py-3">★★★</td><td class="px-5 py-3">★★★★</td><td class="px-5 py-3">★★★★</td><td class="px-5 py-3">★★★★★</td></tr>
+        <tr><td class="px-5 py-3 font-semibold">단순 게시글 적합도</td><td class="px-5 py-3">★★★★</td><td class="px-5 py-3">★★★</td><td class="px-5 py-3">★★</td><td class="px-5 py-3">★★★★</td></tr>
+        <tr><td class="px-5 py-3 font-semibold">정보 밀도</td><td class="px-5 py-3">중상</td><td class="px-5 py-3">상</td><td class="px-5 py-3">중상</td><td class="px-5 py-3">중</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="mt-6 text-xs text-stone-500 leading-relaxed space-y-2">
+    <p><b>추천</b>: 대시보드와의 시각 일관성 + 메타 스캔성이 가장 중요하면 <b>A안</b>, 처리 효율을 우선하면 <b>B안</b>, 워크플로우 강조면 <b>C안</b>, 의미 카테고리화 명확성이면 <b>D안</b>.</p>
+    <p>한 안 선택 시 5개 게시글 페이지(VOC/공지/아이디어/익명쪽지/소모임)에 동일 적용 + Warm/Dark 두 테마 모두 매핑합니다.</p>
+  </section>
+
+</div>
+</body></html>

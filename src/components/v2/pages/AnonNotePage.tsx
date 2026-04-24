@@ -5,7 +5,12 @@ import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
 import Modal from '../ui/Modal';
 import { StatusPicker, type StatusTone } from '../ui/DetailShell';
-import { ThreadShell, ThreadHeader, ThreadEntry, ThreadComposer } from '../ui/ConversationThread';
+import {
+  PostHeaderCard,
+  WorkflowStepper,
+  DescriptionCard,
+  ComposerCard,
+} from '../ui/PostDetail';
 import MasterDetail, { MasterListCard, MasterListItem } from '../ui/MasterDetail';
 import { useAuthStore } from '../../../stores/authStore';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -240,10 +245,20 @@ function NoteDetailPanel({
   onStatusChange: (s: NoteStatus) => Promise<void>;
   onDelete: () => Promise<void>;
 }) {
+  const flowSteps: { key: NoteStatus; label: string }[] = [
+    { key: '미읽음', label: '미읽음' },
+    { key: '읽음', label: '읽음' },
+    { key: '답변완료', label: '답변완료' },
+  ];
+
   return (
-    <ThreadShell>
-      <ThreadHeader
-        title={note.title}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <PostHeaderCard
+        icon={<Mail size={22} />}
+        iconTone={
+          note.status === '답변완료' ? 'success' : note.status === '미읽음' ? 'todo' : 'info'
+        }
+        badgeId={`NOTE-${note.id.slice(0, 6)}`}
         badges={
           <>
             <NoteStatusBadge status={note.status} />
@@ -251,22 +266,61 @@ function NoteDetailPanel({
             {note.anonymous && <span className="w-badge w-badge-accent">익명</span>}
           </>
         }
+        title={note.title}
+        metaLine={
+          <>
+            <span>{note.anonymous ? '익명 발신자' : '발신자'}</span>
+            <span>·</span>
+            <span>{note.team}</span>
+            <span>·</span>
+            <span>{formatRelativeTime(note.created_at)}</span>
+          </>
+        }
         canDelete={canDelete}
         onDelete={onDelete}
       />
 
-      <ThreadEntry
-        avatarTone={note.anonymous ? 'anon' : 'author'}
-        avatarLabel={note.anonymous ? '?' : '쪽'}
-        authorName={note.anonymous ? '익명 발신자' : '발신자'}
-        timestamp={formatRelativeTime(note.created_at)}
-        extraMeta={<span>{note.team}</span>}
-      >
+      {canProcess && (
+        <WorkflowStepper<NoteStatus>
+          title="처리 진행"
+          steps={flowSteps}
+          currentKey={note.status}
+          quickActions={
+            <>
+              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--w-text-muted)' }}>
+                빠른 진행 →
+              </span>
+              {NOTE_STATUSES.filter((s) => s !== note.status).map((s) => (
+                <button
+                  key={s}
+                  className="w-btn"
+                  style={{
+                    padding: '4px 10px',
+                    fontSize: 11,
+                    background: s === '답변완료' ? 'var(--w-accent)' : 'var(--w-surface-2)',
+                    color: s === '답변완료' ? '#fff' : 'var(--w-text-soft)',
+                    border:
+                      s === '답변완료' ? '1px solid var(--w-accent)' : '1px solid var(--w-border)',
+                    fontWeight: 600,
+                  }}
+                  onClick={() => {
+                    void onStatusChange(s);
+                  }}
+                >
+                  {s}
+                </button>
+              ))}
+            </>
+          }
+        />
+      )}
+
+      <DescriptionCard label="쪽지 내용" timestamp={formatRelativeTime(note.created_at)}>
         {note.content}
-      </ThreadEntry>
+      </DescriptionCard>
 
       {canProcess && (
-        <ThreadComposer
+        <ComposerCard
           label="상태 변경"
           topActions={
             <div style={{ marginLeft: 'auto' }}>
@@ -282,7 +336,7 @@ function NoteDetailPanel({
           }
         />
       )}
-    </ThreadShell>
+    </div>
   );
 }
 

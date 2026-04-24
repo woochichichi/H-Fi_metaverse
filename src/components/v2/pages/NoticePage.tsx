@@ -4,7 +4,7 @@ import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
 import Modal from '../ui/Modal';
-import { ThreadShell, ThreadHeader, ThreadEntry } from '../ui/ConversationThread';
+import { PostHeaderCard, DescriptionCard } from '../ui/PostDetail';
 import MasterDetail, { MasterListCard, MasterListItem } from '../ui/MasterDetail';
 import { useAuthStore } from '../../../stores/authStore';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -213,10 +213,14 @@ function NoticeDetailPanel({
   onDelete: () => void;
   onClose: () => void; // 시그니처 호환
 }) {
+  const tone =
+    notice.urgency === '긴급' ? 'crit' : notice.urgency === '할일' ? 'todo' : 'info';
   return (
-    <ThreadShell>
-      <ThreadHeader
-        title={notice.title}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <PostHeaderCard
+        icon={<Megaphone size={22} />}
+        iconTone={tone}
+        badgeId={`NOTICE-${notice.id.slice(0, 6)}`}
         badges={
           <>
             <UrgencyBadge urgency={notice.urgency} />
@@ -231,27 +235,27 @@ function NoticeDetailPanel({
             )}
           </>
         }
-        canDelete={canDelete}
-        onDelete={onDelete}
-      />
-      <ThreadEntry
-        variant="admin"
-        avatarTone="admin"
-        avatarLabel="공"
-        authorName="공지"
-        timestamp={formatRelativeTime(notice.created_at)}
-        extraMeta={
+        title={notice.title}
+        metaLine={
           <>
             <span>대상: {notice.team ?? '공통'}</span>
-            <span className="w-thread-meta-sep">·</span>
+            <span>·</span>
+            <span>{formatRelativeTime(notice.created_at)}</span>
+            <span>·</span>
             <span>조회 {notice.view_count}</span>
           </>
         }
+        canDelete={canDelete}
+        onDelete={onDelete}
+      />
+      <DescriptionCard
+        label="공지 내용"
+        timestamp={formatRelativeTime(notice.created_at)}
         attachments={notice.attachment_urls}
       >
         {notice.content}
-      </ThreadEntry>
-    </ThreadShell>
+      </DescriptionCard>
+    </div>
   );
 }
 

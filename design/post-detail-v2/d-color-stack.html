@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1440" />
+<title>한울타리 · 게시글 상세 D · Color-Coded Card Stack</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
+<style>
+  :root { font-family: 'Pretendard Variable', Pretendard, system-ui, sans-serif; }
+  body { letter-spacing: -0.01em; margin:0; }
+  .num { font-variant-numeric: tabular-nums; }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; }
+  .warm { --bg:#FBF6EF; --surface:#fff; --surface2:#F5EEE4; --border:#E8DDCE; --border2:#D9C9B2;
+          --text:#2A1F1A; --soft:#5C4B42; --muted:#8A776B;
+          --accent:#E8725C; --accent-soft:#FCE4DD; --accent-hover:#D95F48;
+          --crit:#C8453E; --crit-soft:#FCE4E1;
+          --todo:#D08A2E; --todo-soft:#FAEFD9;
+          --info:#3D7FA8; --info-soft:#E1EEF7;
+          --success:#3F9D6E; --success-soft:#DEF1E5; }
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:14px;
+          box-shadow:0 1px 2px rgba(31,26,20,.04), 0 2px 8px rgba(31,26,20,.04); }
+  .chip { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600;
+          padding:3px 8px; border-radius:999px; }
+  .chip-crit{background:var(--crit-soft);color:var(--crit);} .chip-todo{background:var(--todo-soft);color:var(--todo);}
+  .chip-info{background:var(--info-soft);color:var(--info);} .chip-success{background:var(--success-soft);color:var(--success);}
+  .chip-muted{background:var(--surface2);color:var(--muted);} .chip-accent{background:var(--accent-soft);color:var(--accent-hover);}
+  .nav-item { display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:10px;
+              color:var(--soft); font-size:13px; font-weight:500; cursor:pointer; }
+  .nav-item:hover { background:var(--surface); }
+  .nav-item.on { background:var(--surface); color:var(--text); font-weight:700; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+  .nav-cap { font-size:10.5px; color:var(--muted); font-weight:700; padding:14px 12px 6px; letter-spacing:.05em; }
+  .voc-item { padding:12px 14px; border-radius:10px; cursor:pointer; }
+  .voc-item:hover { background:var(--surface) }
+  .voc-item.sel { background:var(--accent-soft); border:1px solid var(--accent); }
+  /* Color-coded block */
+  .block { position:relative; padding-left:18px; }
+  .block::before { content:""; position:absolute; left:0; top:0; bottom:0; width:5px; border-radius:0 6px 6px 0; }
+  .block-info::before { background:var(--info); }
+  .block-todo::before { background:var(--todo); }
+  .block-accent::before { background:var(--accent); }
+  .block-soft::before { background:var(--border-strong); }
+  .block-success::before { background:var(--success); }
+  .meta-cell { display:flex; flex-direction:column; gap:2px; padding:10px 14px; background:var(--surface2); border-radius:10px; }
+  .meta-cell-l { font-size:10.5px; color:var(--muted); font-weight:600; }
+  .meta-cell-v { font-size:13px; font-weight:700; color:var(--text); }
+</style>
+</head>
+<body class="warm" style="background:var(--bg); color:var(--text);">
+<div class="flex min-h-screen" style="width:1440px; margin:0 auto;">
+
+  <aside class="w-60 shrink-0 flex flex-col" style="background:var(--bg); border-right:1px solid var(--border);">
+    <div class="h-16 flex items-center gap-2.5 px-5 border-b" style="border-color:var(--border);">
+      <div class="w-9 h-9 rounded-xl grid place-items-center text-white text-sm font-bold" style="background:var(--accent)">한</div>
+      <div><div class="text-sm font-bold leading-tight">한울타리</div><div class="text-[11px] leading-tight" style="color:var(--muted)">금융ITO</div></div>
+    </div>
+    <nav class="flex-1 px-3 py-2 space-y-0.5">
+      <div class="nav-cap">소통</div>
+      <a class="nav-item">대시보드</a>
+      <a class="nav-item">공지사항</a>
+      <a class="nav-item on">우리팀 이야기 (VOC)</a>
+      <a class="nav-item">아이디어 제안</a>
+    </nav>
+  </aside>
+
+  <div class="flex-1 flex flex-col min-w-0">
+    <header class="h-16 flex items-center px-7 border-b" style="border-color:var(--border); background:var(--surface);">
+      <div class="text-xs flex items-center gap-2" style="color:var(--muted)">
+        <span>한울타리</span><span>/</span><span style="color:var(--text); font-weight:600">우리팀 이야기 (VOC)</span>
+        <span class="chip chip-accent">증권ITO</span>
+      </div>
+    </header>
+
+    <main class="flex-1 p-7" style="background:var(--bg);">
+      <div class="flex items-end justify-between mb-4">
+        <div>
+          <h1 class="text-[20px] font-bold leading-tight">우리팀 이야기 (VOC)</h1>
+          <p class="text-[11.5px] mt-1" style="color:var(--soft)">불편·요청·칭찬·개선 의견을 전달해요.</p>
+        </div>
+        <button class="px-3.5 py-2 rounded-lg text-xs font-bold text-white" style="background:var(--accent)">+ VOC 올리기</button>
+      </div>
+
+      <div class="grid gap-5" style="grid-template-columns: 340px 1fr;">
+
+        <aside class="card overflow-hidden flex flex-col" style="max-height: calc(100vh - 220px);">
+          <div class="px-4 py-3 border-b flex items-center gap-2" style="border-color:var(--border)">
+            <span class="text-xs font-semibold">전체</span><span class="chip chip-muted">12건</span>
+          </div>
+          <div class="flex-1 overflow-y-auto p-2 space-y-1">
+            <div class="voc-item sel">
+              <div class="flex items-center gap-1.5 mb-1.5"><span class="chip chip-todo">검토중</span><span class="chip chip-muted">요청</span><span class="chip chip-accent">익명</span></div>
+              <div class="text-[13px] font-bold truncate">사내 카페 점심시간 대기줄이 너무 길어요</div>
+              <div class="text-[11px] mt-1" style="color:var(--muted)">증권ITO · 2시간 전</div>
+            </div>
+            <div class="voc-item">
+              <div class="flex items-center gap-1.5 mb-1.5"><span class="chip chip-accent">처리중</span><span class="chip chip-muted">불편</span></div>
+              <div class="text-[13px] font-semibold truncate" style="color:var(--soft)">회의실 예약 시스템이 너무 느립니다</div>
+              <div class="text-[11px] mt-1" style="color:var(--muted)">증권ITO · 어제</div>
+            </div>
+            <div class="voc-item">
+              <div class="flex items-center gap-1.5 mb-1.5"><span class="chip chip-success">완료</span><span class="chip chip-muted">칭찬</span></div>
+              <div class="text-[13px] font-semibold truncate" style="color:var(--soft)">신입사원 멘토링 프로그램 너무 좋아요</div>
+              <div class="text-[11px] mt-1" style="color:var(--muted)">증권ITO · 2일 전</div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- ★ Detail — D: Color-Coded Card Stack ★ -->
+        <section class="space-y-3">
+
+          <!-- Hero header (Magazine style) -->
+          <div class="card p-7 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-48 h-48 rounded-full opacity-30" style="background:radial-gradient(circle, var(--accent-soft), transparent 70%); transform:translate(30%, -40%)"></div>
+            <div class="relative">
+              <div class="flex items-center gap-1.5 mb-3">
+                <span class="mono text-[10px] px-1.5 py-0.5 rounded" style="background:var(--surface2); color:var(--muted)">VOC-318</span>
+                <span class="chip chip-todo">검토중</span>
+                <span class="chip chip-muted">요청</span>
+                <span class="chip chip-accent">익명</span>
+                <span class="chip chip-todo">⚠ 심각도 3/5</span>
+              </div>
+              <h2 class="text-[26px] font-bold leading-tight">사내 카페 점심시간 대기줄이 너무 길어요</h2>
+              <div class="flex items-center gap-3 mt-3 text-[12px]" style="color:var(--muted)">
+                <span class="inline-flex items-center gap-1.5">
+                  <span class="w-6 h-6 rounded-full grid place-items-center text-[10px] font-bold text-white" style="background:linear-gradient(135deg, #8A776B, #5C4B42)">?</span>
+                  익명 작성자
+                </span>
+                <span>·</span><span>증권ITO</span><span>·</span><span>2시간 전</span><span>·</span><span>조회 18</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ① 메타 카드 (info 톤) -->
+          <div class="block block-info">
+            <div class="card p-5">
+              <div class="flex items-center gap-2 mb-3">
+                <svg class="w-4 h-4" style="color:var(--info)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                <div class="text-[12.5px] font-bold">메타데이터</div>
+              </div>
+              <div class="grid grid-cols-4 gap-2">
+                <div class="meta-cell"><div class="meta-cell-l">상태</div><div class="meta-cell-v" style="color:var(--todo)">검토중</div></div>
+                <div class="meta-cell"><div class="meta-cell-l">카테고리</div><div class="meta-cell-v">요청 / 시설</div></div>
+                <div class="meta-cell"><div class="meta-cell-l">심각도</div><div class="meta-cell-v">3 / 5</div></div>
+                <div class="meta-cell"><div class="meta-cell-l">조회</div><div class="meta-cell-v num">18</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ② 본문 카드 (todo 톤) -->
+          <div class="block block-todo">
+            <div class="card p-7">
+              <div class="flex items-center gap-2 mb-3">
+                <svg class="w-4 h-4" style="color:var(--todo)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6"/></svg>
+                <div class="text-[12.5px] font-bold">본문</div>
+                <span class="ml-auto text-[10.5px]" style="color:var(--muted)">2시간 전</span>
+              </div>
+              <div class="text-[14.5px] leading-relaxed" style="color:var(--text)">
+                <p>안녕하세요. 점심 시간(11:30~13:00)에 사내 카페 음료 대기줄이 너무 길어서 점심을 거의 못 먹는 경우가 잦습니다. 특히 화/목요일이 심한데, 음료 한 잔 받는 데 20분 이상 걸려요.</p>
+                <p class="mt-3"><b>제안</b>:</p>
+                <ul class="list-disc pl-5 mt-1 space-y-1">
+                  <li>사전 주문 앱 도입 (스마트오더 류)</li>
+                  <li>오전 11시부터 음료 픽업 가능하도록 시간 조정</li>
+                  <li>화/목요일 카페 인력 보강 (현재 1명 → 2명)</li>
+                </ul>
+              </div>
+              <div class="grid grid-cols-2 gap-2 mt-5 pt-5 border-t" style="border-color:var(--border)">
+                <a class="flex items-center gap-2 px-3 py-2.5 rounded-lg cursor-pointer" style="background:var(--surface2)">
+                  <svg class="w-4 h-4" style="color:var(--info)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                  <span class="text-xs font-semibold flex-1 truncate">카페_대기줄.jpg</span>
+                  <span class="text-[10px] mono" style="color:var(--muted)">1.4MB</span>
+                </a>
+                <a class="flex items-center gap-2 px-3 py-2.5 rounded-lg cursor-pointer" style="background:var(--surface2)">
+                  <svg class="w-4 h-4" style="color:var(--info)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                  <span class="text-xs font-semibold flex-1 truncate">음료_픽업존.jpg</span>
+                  <span class="text-[10px] mono" style="color:var(--muted)">920KB</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- ③ 회신 카드 (accent 톤 — 가장 강조) -->
+          <div class="block block-accent">
+            <div class="card p-6" style="background:linear-gradient(140deg, var(--accent-soft) 0%, var(--surface) 70%);">
+              <div class="flex items-center gap-2 mb-3">
+                <div class="w-8 h-8 rounded-full grid place-items-center text-[12px] font-bold text-white" style="background:linear-gradient(135deg, var(--accent), var(--accent-hover))">박</div>
+                <div>
+                  <div class="text-[12.5px] font-bold">박지훈 <span class="chip chip-accent ml-1" style="font-size:10px">증권ITO 리더</span></div>
+                  <div class="text-[10.5px]" style="color:var(--muted)">30분 전</div>
+                </div>
+                <div class="ml-auto text-[10.5px] font-bold uppercase tracking-widest" style="color:var(--accent-hover)">REPLY</div>
+              </div>
+              <p class="text-[14px] leading-relaxed" style="color:var(--text)">의견 감사합니다. <b>5월 1주차</b>부터 사전 주문 앱(스마트오더) 시범 도입을 검토 중이에요. 화/목요일 인력도 +1명 보강 요청 드렸습니다 🙏</p>
+            </div>
+          </div>
+
+          <!-- ④ 활동 로그 카드 (soft 톤) -->
+          <div class="block block-soft">
+            <div class="card p-5">
+              <div class="flex items-center gap-2 mb-3">
+                <svg class="w-4 h-4" style="color:var(--muted)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                <div class="text-[12.5px] font-bold">활동 로그</div>
+                <span class="chip chip-muted ml-1">3</span>
+              </div>
+              <ul class="space-y-2 text-[11.5px]" style="color:var(--soft)">
+                <li class="flex items-center gap-2">
+                  <span class="w-1.5 h-1.5 rounded-full" style="background:var(--accent)"></span>
+                  <span><b>박지훈</b>이 상태를 <span class="chip chip-todo" style="font-size:10px">검토중</span>으로 변경</span>
+                  <span class="ml-auto mono text-[10.5px]" style="color:var(--muted)">28분 전</span>
+                </li>
+                <li class="flex items-center gap-2">
+                  <span class="w-1.5 h-1.5 rounded-full" style="background:var(--accent)"></span>
+                  <span><b>박지훈</b>이 회신 #1을 작성</span>
+                  <span class="ml-auto mono text-[10.5px]" style="color:var(--muted)">30분 전</span>
+                </li>
+                <li class="flex items-center gap-2">
+                  <span class="w-1.5 h-1.5 rounded-full" style="background:var(--info)"></span>
+                  <span>익명 작성자가 VOC 등록</span>
+                  <span class="ml-auto mono text-[10.5px]" style="color:var(--muted)">2시간 전</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- ⑤ 처리 컴포저 (sticky하면 더 좋지만 여기선 카드) -->
+          <div class="block block-accent">
+            <div class="card p-5">
+              <div class="flex items-center gap-2 mb-3">
+                <svg class="w-4 h-4" style="color:var(--accent)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20l9-7-9-7v14z"/></svg>
+                <div class="text-[12.5px] font-bold">리더 처리</div>
+                <div class="ml-auto inline-flex p-0.5 rounded-md text-[11px] font-semibold" style="background:var(--surface2)">
+                  <button class="px-2.5 py-1 rounded" style="color:var(--muted)">접수</button>
+                  <button class="px-2.5 py-1 rounded text-white" style="background:var(--accent)">검토중</button>
+                  <button class="px-2.5 py-1 rounded" style="color:var(--muted)">처리중</button>
+                  <button class="px-2.5 py-1 rounded" style="color:var(--muted)">완료</button>
+                </div>
+              </div>
+              <textarea class="w-full p-3 rounded-lg border resize-none text-sm placeholder:text-[color:var(--muted)]" rows="3" style="border-color:var(--border); background:var(--surface2)" placeholder="처리 결과 / 회신 메시지를 작성하세요"></textarea>
+              <div class="flex items-center mt-3">
+                <span class="text-[11px]" style="color:var(--muted)">⌘ + Enter로 저장</span>
+                <button class="ml-auto px-4 py-2 rounded-md text-xs font-bold text-white" style="background:var(--accent)">회신 저장</button>
+              </div>
+            </div>
+          </div>
+
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+</body></html>

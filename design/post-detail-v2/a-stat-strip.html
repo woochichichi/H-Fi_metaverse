@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1440" />
+<title>한울타리 · 게시글 상세 A · Stat Strip + Article</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
+<style>
+  :root { font-family: 'Pretendard Variable', Pretendard, system-ui, sans-serif; }
+  body { letter-spacing: -0.01em; margin:0; }
+  .num { font-variant-numeric: tabular-nums; }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; }
+  .warm { --bg:#FBF6EF; --surface:#fff; --surface2:#F5EEE4; --border:#E8DDCE; --border2:#D9C9B2;
+          --text:#2A1F1A; --soft:#5C4B42; --muted:#8A776B;
+          --accent:#E8725C; --accent-soft:#FCE4DD; --accent-hover:#D95F48;
+          --crit:#C8453E; --crit-soft:#FCE4E1;
+          --todo:#D08A2E; --todo-soft:#FAEFD9;
+          --info:#3D7FA8; --info-soft:#E1EEF7;
+          --success:#3F9D6E; --success-soft:#DEF1E5; }
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:14px;
+          box-shadow:0 1px 2px rgba(31,26,20,.04), 0 2px 8px rgba(31,26,20,.04); }
+  .chip { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600;
+          padding:3px 8px; border-radius:999px; }
+  .chip-crit { background:var(--crit-soft); color:var(--crit); }
+  .chip-todo { background:var(--todo-soft); color:var(--todo); }
+  .chip-info { background:var(--info-soft); color:var(--info); }
+  .chip-success { background:var(--success-soft); color:var(--success); }
+  .chip-muted { background:var(--surface2); color:var(--muted); }
+  .chip-accent { background:var(--accent-soft); color:var(--accent-hover); }
+  .nav-item { display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:10px;
+              color:var(--soft); font-size:13px; font-weight:500; cursor:pointer; }
+  .nav-item:hover { background:var(--surface); }
+  .nav-item.on { background:var(--surface); color:var(--text); font-weight:700; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+  .nav-item.on .nav-ico { color:var(--accent); }
+  .nav-cap { font-size:10.5px; color:var(--muted); font-weight:700; padding:14px 12px 6px; letter-spacing:.05em; }
+  .voc-item { padding:12px 14px; border-radius:10px; cursor:pointer; }
+  .voc-item:hover { background:var(--surface) }
+  .voc-item.sel { background:var(--accent-soft); border:1px solid var(--accent); }
+  /* KPI cell — dashboard 동일 톤 */
+  .kpi { display:flex; flex-direction:column; gap:6px; padding:12px 14px;
+         background:var(--surface); border:1px solid var(--border); border-radius:12px; }
+  .kpi-h { display:flex; align-items:center; gap:8px; }
+  .kpi-ic { width:28px; height:28px; border-radius:8px; display:grid; place-items:center; flex-shrink:0; }
+  .kpi-lbl { font-size:11px; color:var(--muted); font-weight:600; }
+  .kpi-v { font-size:18px; font-weight:700; color:var(--text); line-height:1.1; }
+  .kpi-sub { font-size:10.5px; color:var(--muted); }
+  /* severity gauge */
+  .sev { display:flex; gap:2px; }
+  .sev > span { width:5px; height:14px; border-radius:2px; background:var(--surface2); }
+  .sev > span.on { background:var(--todo); }
+</style>
+</head>
+<body class="warm" style="background:var(--bg); color:var(--text);">
+<div class="flex min-h-screen" style="width:1440px; margin:0 auto;">
+
+  <!-- Sidebar -->
+  <aside class="w-60 shrink-0 flex flex-col" style="background:var(--bg); border-right:1px solid var(--border);">
+    <div class="h-16 flex items-center gap-2.5 px-5 border-b" style="border-color:var(--border);">
+      <div class="w-9 h-9 rounded-xl grid place-items-center text-white text-sm font-bold" style="background:var(--accent)">한</div>
+      <div><div class="text-sm font-bold leading-tight">한울타리</div><div class="text-[11px] leading-tight" style="color:var(--muted)">금융ITO</div></div>
+    </div>
+    <nav class="flex-1 px-3 py-2 space-y-0.5">
+      <div class="nav-cap">소통</div>
+      <a class="nav-item"><svg class="nav-ico w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>대시보드</a>
+      <a class="nav-item"><svg class="nav-ico w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-5v12L3 14v-3z"/></svg>공지사항</a>
+      <a class="nav-item on"><svg class="nav-ico w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>우리팀 이야기 (VOC)</a>
+      <a class="nav-item"><svg class="nav-ico w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.4.3.8.8 1 1.3H15c.2-.5.6-1 1-1.3A7 7 0 0 0 12 2z"/></svg>아이디어 제안</a>
+      <a class="nav-item"><svg class="nav-ico w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/></svg>팀 KPI</a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <header class="h-16 flex items-center px-7 border-b" style="border-color:var(--border); background:var(--surface);">
+      <div class="text-xs flex items-center gap-2" style="color:var(--muted)">
+        <span>한울타리</span><span>/</span><span style="color:var(--text); font-weight:600">우리팀 이야기 (VOC)</span>
+        <span class="chip chip-accent">증권ITO</span>
+      </div>
+    </header>
+
+    <main class="flex-1 p-7" style="background:var(--bg);">
+      <div class="flex items-end justify-between mb-4">
+        <div>
+          <h1 class="text-[20px] font-bold leading-tight">우리팀 이야기 (VOC)</h1>
+          <p class="text-[11.5px] mt-1" style="color:var(--soft)">불편·요청·칭찬·개선 의견을 전달해요.</p>
+        </div>
+        <button class="px-3.5 py-2 rounded-lg text-xs font-bold text-white" style="background:var(--accent)">+ VOC 올리기</button>
+      </div>
+
+      <div class="grid gap-5" style="grid-template-columns: 340px 1fr;">
+
+        <!-- Master List -->
+        <aside class="card overflow-hidden flex flex-col" style="max-height: calc(100vh - 220px);">
+          <div class="px-4 py-3 border-b flex items-center gap-2" style="border-color:var(--border)">
+            <span class="text-xs font-semibold">전체</span>
+            <span class="chip chip-muted">12건</span>
+          </div>
+          <div class="flex-1 overflow-y-auto p-2 space-y-1">
+            <div class="voc-item sel">
+              <div class="flex items-center gap-1.5 mb-1.5"><span class="chip chip-todo">검토중</span><span class="chip chip-muted">요청</span><span class="chip chip-accent">익명</span></div>
+              <div class="text-[13px] font-bold truncate">사내 카페 점심시간 대기줄이 너무 길어요</div>
+              <div class="text-[11px] mt-1" style="color:var(--muted)">증권ITO · 2시간 전</div>
+            </div>
+            <div class="voc-item">
+              <div class="flex items-center gap-1.5 mb-1.5"><span class="chip chip-accent">처리중</span><span class="chip chip-muted">불편</span></div>
+              <div class="text-[13px] font-semibold truncate" style="color:var(--soft)">회의실 예약 시스템이 너무 느립니다</div>
+              <div class="text-[11px] mt-1" style="color:var(--muted)">증권ITO · 어제</div>
+            </div>
+            <div class="voc-item">
+              <div class="flex items-center gap-1.5 mb-1.5"><span class="chip chip-success">완료</span><span class="chip chip-muted">칭찬</span></div>
+              <div class="text-[13px] font-semibold truncate" style="color:var(--soft)">신입사원 멘토링 프로그램 너무 좋아요</div>
+              <div class="text-[11px] mt-1" style="color:var(--muted)">증권ITO · 2일 전</div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- ★ Detail Panel — A: Stat Strip + Article ★ -->
+        <section class="space-y-4">
+
+          <!-- 1. 상단 헤더 카드 (제목 + 액션) -->
+          <div class="card p-5">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <div class="text-[11px] font-bold mono uppercase tracking-widest mb-2" style="color:var(--muted)">VOC-318 · 2시간 전</div>
+                <h2 class="text-[22px] font-bold leading-tight">사내 카페 점심시간 대기줄이 너무 길어요</h2>
+              </div>
+              <div class="flex gap-1 shrink-0">
+                <button class="w-9 h-9 grid place-items-center rounded-lg border hover:bg-[color:var(--surface2)]" style="border-color:var(--border); color:var(--muted)">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                </button>
+                <button class="w-9 h-9 grid place-items-center rounded-lg border hover:bg-[color:var(--surface2)]" style="border-color:var(--border); color:var(--muted)">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. KPI Strip (대시보드 KPI 카드와 동일 톤) -->
+          <div class="grid grid-cols-5 gap-3">
+            <div class="kpi">
+              <div class="kpi-h">
+                <div class="kpi-ic" style="background:var(--todo-soft); color:var(--todo)">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                </div>
+                <div class="kpi-lbl">상태</div>
+              </div>
+              <div class="kpi-v" style="color:var(--todo)">검토중</div>
+              <div class="kpi-sub">전 단계: 접수</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-h">
+                <div class="kpi-ic" style="background:var(--accent-soft); color:var(--accent-hover)">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
+                </div>
+                <div class="kpi-lbl">카테고리</div>
+              </div>
+              <div class="kpi-v">요청</div>
+              <div class="kpi-sub">시설/환경</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-h">
+                <div class="kpi-ic" style="background:var(--todo-soft); color:var(--todo)">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
+                </div>
+                <div class="kpi-lbl">심각도</div>
+              </div>
+              <div class="flex items-end gap-2"><div class="kpi-v">3</div><div class="sev mb-1.5"><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span></div></div>
+              <div class="kpi-sub">5단계 중 3</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-h">
+                <div class="kpi-ic" style="background:var(--info-soft); color:var(--info)">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/></svg>
+                </div>
+                <div class="kpi-lbl">조회</div>
+              </div>
+              <div class="kpi-v num">18</div>
+              <div class="kpi-sub" style="color:var(--accent-hover)">+5 오늘</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-h">
+                <div class="kpi-ic" style="background:var(--accent-soft); color:var(--accent-hover)">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                </div>
+                <div class="kpi-lbl">작성자</div>
+              </div>
+              <div class="kpi-v">익명</div>
+              <div class="kpi-sub">증권ITO</div>
+            </div>
+          </div>
+
+          <!-- 3. 본문 article 카드 -->
+          <div class="card p-7">
+            <div class="flex items-center justify-between mb-3">
+              <div class="text-[11px] font-bold uppercase tracking-widest" style="color:var(--muted)">DESCRIPTION</div>
+              <div class="text-[11px]" style="color:var(--muted)">2시간 전</div>
+            </div>
+            <div class="text-[15px] leading-relaxed" style="color:var(--text)">
+              <p>안녕하세요. 점심 시간(11:30~13:00)에 사내 카페 음료 대기줄이 너무 길어서 점심을 거의 못 먹는 경우가 잦습니다. 특히 화/목요일이 심한데, 음료 한 잔 받는 데 20분 이상 걸려요.</p>
+              <p class="mt-4"><b>제안</b>: 사전 주문 앱 도입, 또는 오전 11시부터 음료 픽업 가능하도록 시간 조정 검토 부탁드려요.</p>
+            </div>
+            <div class="grid grid-cols-2 gap-2 mt-5 pt-5 border-t" style="border-color:var(--border)">
+              <a class="flex items-center gap-2 px-3 py-2.5 rounded-lg border cursor-pointer hover:border-[color:var(--accent)]" style="border-color:var(--border); background:var(--surface2)">
+                <svg class="w-4 h-4" style="color:var(--info)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
+                <span class="text-xs font-semibold flex-1 truncate">카페_대기줄.jpg</span>
+                <span class="text-[10px] mono" style="color:var(--muted)">1.4 MB</span>
+              </a>
+              <a class="flex items-center gap-2 px-3 py-2.5 rounded-lg border cursor-pointer hover:border-[color:var(--accent)]" style="border-color:var(--border); background:var(--surface2)">
+                <svg class="w-4 h-4" style="color:var(--info)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
+                <span class="text-xs font-semibold flex-1 truncate">음료_픽업존.jpg</span>
+                <span class="text-[10px] mono" style="color:var(--muted)">920 KB</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- 4. 리더 회신 카드 (있을 때) -->
+          <div class="card p-6" style="background:linear-gradient(140deg, var(--accent-soft) 0%, var(--surface) 60%); border-color:var(--accent);">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full grid place-items-center text-[12px] font-bold text-white" style="background:linear-gradient(135deg, var(--accent), var(--accent-hover))">박</div>
+                <div>
+                  <div class="text-[12.5px] font-bold">박지훈 <span class="chip chip-accent ml-1" style="font-size:10px">증권ITO 리더</span></div>
+                  <div class="text-[10.5px]" style="color:var(--muted)">30분 전 회신</div>
+                </div>
+              </div>
+              <div class="text-[11px] font-bold uppercase tracking-widest" style="color:var(--accent-hover)">LEADER REPLY</div>
+            </div>
+            <p class="text-[14px] leading-relaxed" style="color:var(--text)">
+              의견 감사합니다. 카페 운영팀에 확인했고, <b>5월 1주차</b>부터 사전 주문 앱(스마트오더) 시범 도입을 검토 중이에요. 화/목요일 인력도 +1명 보강 요청 드렸습니다 🙏
+            </p>
+          </div>
+
+          <!-- 5. 처리 컴포저 카드 -->
+          <div class="card p-5">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4" style="color:var(--accent)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                <div class="text-[12.5px] font-bold">리더 처리</div>
+              </div>
+              <div class="inline-flex p-0.5 rounded-md text-[11px] font-semibold" style="background:var(--surface2)">
+                <button class="px-2.5 py-1 rounded" style="color:var(--muted)">접수</button>
+                <button class="px-2.5 py-1 rounded text-white" style="background:var(--accent)">검토중</button>
+                <button class="px-2.5 py-1 rounded" style="color:var(--muted)">처리중</button>
+                <button class="px-2.5 py-1 rounded" style="color:var(--muted)">완료</button>
+                <button class="px-2.5 py-1 rounded" style="color:var(--muted)">보류</button>
+              </div>
+            </div>
+            <textarea class="w-full p-3 rounded-lg border resize-none text-sm placeholder:text-[color:var(--muted)]" rows="3" style="border-color:var(--border); background:var(--surface2)" placeholder="처리 결과 / 회신 메시지를 작성하세요"></textarea>
+            <div class="flex items-center mt-3">
+              <span class="text-[11px]" style="color:var(--muted)">⌘ + Enter로 저장</span>
+              <button class="ml-auto px-4 py-2 rounded-md text-xs font-bold text-white" style="background:var(--accent)">회신 저장</button>
+            </div>
+          </div>
+
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+</body></html>
