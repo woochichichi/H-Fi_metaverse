@@ -54,8 +54,8 @@ export default function VocPage() {
             badge: profile?.team ? { text: profile.team, tone: 'accent' } : undefined,
           },
         ]}
-        title="우리팀 이야기 (VOC)"
-        description="불편·요청·칭찬·개선 의견을 전달해요. 익명 제출이 가능하며, 리더가 확인하고 처리합니다."
+        title="VOC"
+        description="팀원·팀장·회사에 바라는 점을 익명으로 남겨주세요. 불편·요청·칭찬·개선 의견 모두 환영합니다."
         actions={
           <button className="w-btn w-btn-primary" onClick={() => setShowCreate(true)}>
             <Plus size={14} />
@@ -88,8 +88,8 @@ export default function VocPage() {
         <div className="w-card">
           <EmptyState
             icon={MessageSquareHeart}
-            title="등록된 VOC가 없어요"
-            description="첫 VOC를 올려보세요. 리더가 바로 확인합니다."
+            title="아직 VOC가 없어요"
+            description="첫 번째 목소리가 되어보세요 🙋"
           />
         </div>
       ) : (
@@ -452,7 +452,7 @@ function CreateVocModal({
           </Field>
         </div>
         <Field label="제목">
-          <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} placeholder="무엇에 대한 얘기인가요?" />
+          <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} placeholder="예) 회의실 예약이 너무 복잡해요 / 커피머신 자주 고장나요" />
         </Field>
         <Field label="내용">
           <textarea rows={5} value={content} onChange={(e) => setContent(e.target.value)} placeholder="자세한 상황과 의견을 적어주세요" />

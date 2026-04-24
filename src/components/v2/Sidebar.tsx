@@ -21,6 +21,7 @@ import { useAuthStore } from '../../stores/authStore';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useV2Nav, type V2Page } from '../../stores/v2NavStore';
 import { useUrgentUnread } from '../../hooks/useUrgentUnread';
+import { BOARD_LABELS } from '../../lib/boardLabels';
 
 interface MenuItem {
   id: V2Page;
@@ -41,22 +42,22 @@ export default function V2Sidebar() {
   const { urgent } = useUrgentUnread(user?.id ?? null);
   const urgentCount = urgent.length;
 
-  // 1) 소통 - 매일 쓰는 핵심 (공지/VOC/아이디어/KPI)
+  // 1) 소통 - 매일 쓰는 핵심 (공지/VOC/제안/KPI/팀 예산)
   const coreItems = useMemo<MenuItem[]>(() => [
-    { id: 'dashboard', label: '대시보드', icon: LayoutDashboard, visible: true },
+    { id: 'dashboard', label: BOARD_LABELS.dashboard, icon: LayoutDashboard, visible: true },
     {
       id: 'notice',
-      label: '공지사항',
+      label: BOARD_LABELS.notice,
       icon: Megaphone,
       visible: true,
       badge: urgentCount > 0 ? { text: String(urgentCount), tone: 'critical' } : undefined,
     },
-    { id: 'voc', label: '우리팀 이야기(VOC)', icon: MessageSquareHeart, visible: true },
-    { id: 'idea', label: '아이디어 제안', icon: Lightbulb, visible: true },
-    { id: 'kpi', label: '팀 KPI', icon: Target, visible: true },
+    { id: 'voc', label: BOARD_LABELS.voc, icon: MessageSquareHeart, visible: true },
+    { id: 'idea', label: BOARD_LABELS.idea, icon: Lightbulb, visible: true },
+    { id: 'kpi', label: BOARD_LABELS.kpi, icon: Target, visible: true },
     {
       id: 'corp-card',
-      label: '법인카드 현황',
+      label: BOARD_LABELS.budget,
       icon: CreditCard,
       visible: profile?.team === '증권ITO',
     },
@@ -64,8 +65,8 @@ export default function V2Sidebar() {
 
   // 2) 사내 활동 - 가끔 쓰는 (쪽지/소모임)
   const socialItems = useMemo<MenuItem[]>(() => [
-    { id: 'anon-note', label: '익명 쪽지', icon: Mail, visible: true },
-    { id: 'gathering', label: '소모임', icon: PartyPopper, visible: true },
+    { id: 'anon-note', label: BOARD_LABELS.note, icon: Mail, visible: true },
+    { id: 'gathering', label: BOARD_LABELS.gathering, icon: PartyPopper, visible: true },
   ], []);
 
   // 3) 참고 (피플/조직)

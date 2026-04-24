@@ -50,8 +50,8 @@ export default function CorpCardPage() {
     return (
       <div style={{ padding: 24 }}>
         <PageHeader
-          crumbs={[{ label: '한울타리' }, { label: '법인카드 현황' }]}
-          title="법인카드 현황"
+          crumbs={[{ label: '한울타리' }, { label: '팀 예산' }]}
+          title="팀 예산"
           description="이 페이지는 증권ITO 팀 소속자에게만 노출됩니다."
         />
         <div
@@ -119,9 +119,9 @@ function CorpCardPageContent({ team }: { team: string }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <PageHeader
-        crumbs={[{ label: '한울타리' }, { label: '법인카드 현황' }]}
-        title="법인카드 현황"
-        description="실시간 예산 사용 현황과 남은 버퍼를 한눈에 확인하세요."
+        crumbs={[{ label: '한울타리' }, { label: '팀 예산' }]}
+        title="팀 예산"
+        description="우리 팀이 주로 어디에 쓰는지 한눈에 — 실시간 예산 사용 현황과 남은 버퍼를 확인하세요."
         actions={snapshot ? <SyncBadge capturedAt={snapshot.captured_at} periodYm={snapshot.period_ym} /> : undefined}
       />
 
@@ -310,7 +310,7 @@ function LoadingState() {
   return (
     <div className="w-cc-card" style={{ padding: '32px 20px', textAlign: 'center', color: 'var(--w-text-muted)' }}>
       <Loader2 size={18} style={{ animation: 'v2Shimmer 1.2s linear infinite' }} />
-      <div style={{ fontSize: 13, marginTop: 8 }}>법인카드 데이터를 불러오는 중…</div>
+      <div style={{ fontSize: 13, marginTop: 8 }}>팀 예산 데이터를 불러오는 중…</div>
     </div>
   );
 }
@@ -319,7 +319,7 @@ function ErrorState({ message }: { message: string }) {
   return (
     <div className="w-cc-card" style={{ padding: '24px 20px', textAlign: 'center' }}>
       <div style={{ fontSize: 13, color: 'var(--w-urgency-critical)', marginBottom: 4 }}>
-        법인카드 데이터를 불러오지 못했어요
+        팀 예산 데이터를 불러오지 못했어요
       </div>
       <div style={{ fontSize: 12, color: 'var(--w-text-muted)' }}>{message}</div>
     </div>
@@ -344,7 +344,7 @@ function EmptyState() {
         <Inbox size={20} color="var(--w-text-muted)" />
       </div>
       <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--w-text)' }}>
-        아직 수집된 법인카드 데이터가 없어요
+        이번 달 사용 내역이 없어요
       </div>
       <div style={{ fontSize: 12, color: 'var(--w-text-muted)', marginTop: 6 }}>
         매일 오전 7시에 자동 수집됩니다. 첫 수집이 완료되면 이곳에 현황이 표시돼요.

@@ -39,13 +39,13 @@ export default function IdeaPage() {
   return (
     <>
       <PageHeader
-        crumbs={[{ label: '한울타리' }, { label: '아이디어' }]}
-        title="아이디어 제안"
-        description="업무 개선·인적 교류·이벤트 아이디어를 제안하고, 공감 투표로 우선순위를 만들어요."
+        crumbs={[{ label: '한울타리' }, { label: '제안' }]}
+        title="제안"
+        description="업무를 더 낫게 만들 아이디어를 공유해요. 공감 투표로 우선순위를 만듭니다."
         actions={
           <button className="w-btn w-btn-primary" onClick={() => setShowCreate(true)}>
             <Plus size={14} />
-            <span>아이디어 제안</span>
+            <span>제안 올리기</span>
           </button>
         }
       />
@@ -80,7 +80,7 @@ export default function IdeaPage() {
         </div>
       ) : ideas.length === 0 ? (
         <div className="w-card">
-          <EmptyState icon={Lightbulb} title="아직 아이디어가 없어요" description="첫 아이디어를 제안해보세요!" />
+          <EmptyState icon={Lightbulb} title="아직 제안이 없어요" description="작은 아이디어도 환영해요 💡" />
         </div>
       ) : (
         <MasterDetail
@@ -362,7 +362,7 @@ function CreateIdeaModal({
     <Modal
       open={open}
       onClose={onClose}
-      title="아이디어 제안"
+      title="제안 올리기"
       width={560}
       footer={
         <>
@@ -391,7 +391,7 @@ function CreateIdeaModal({
           </select>
         </Field>
         <Field label="제목">
-          <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} placeholder="어떤 아이디어인가요?" />
+          <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} placeholder="예) 주간회의를 격주로 줄이면 어떨까요?" />
         </Field>
         <Field label="설명">
           <textarea rows={5} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="배경·제안 내용·기대 효과" />

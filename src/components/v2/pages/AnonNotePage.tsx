@@ -50,18 +50,18 @@ export default function AnonNotePage() {
         crumbs={[
           { label: '한울타리' },
           {
-            label: '익명 쪽지',
+            label: '쪽지',
             badge:
               perm.canReceiveAnonNotes && profile?.team
                 ? { text: `${profile.team} 수신`, tone: 'accent' }
                 : undefined,
           },
         ]}
-        title="익명 쪽지"
+        title="쪽지"
         description={
           perm.canReceiveAnonNotes
             ? '내가 받은 쪽지와 내가 보낸 쪽지를 관리합니다. 익명 쪽지는 발신자가 숨겨져 있습니다.'
-            : '리더·관리자에게 익명으로 의견을 전할 수 있어요. 실명으로도 보낼 수 있습니다.'
+            : '리더·관리자에게 익명으로 한 줄 전해보세요 — 칭찬·감사·고민 모두 환영합니다.'
         }
         actions={
           <button className="w-btn w-btn-primary" onClick={() => setShowCreate(true)}>
@@ -133,7 +133,7 @@ export default function AnonNotePage() {
         <div className="w-card">
           <EmptyState
             icon={Mail}
-            title={tab === 'inbox' ? '받은 쪽지가 없어요' : '보낸 쪽지가 없어요'}
+            title={tab === 'inbox' ? '아직 받은 쪽지가 없어요 ✉️' : '보낸 쪽지가 없어요'}
             description={tab === 'sent' ? '리더에게 의견을 전해보세요.' : undefined}
           />
         </div>
@@ -423,10 +423,10 @@ function CreateNoteModal({
           </Field>
         </div>
         <Field label="제목">
-          <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} />
+          <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} placeholder="예) 어제 도와주셔서 감사했어요" />
         </Field>
         <Field label="내용">
-          <textarea rows={6} value={content} onChange={(e) => setContent(e.target.value)} />
+          <textarea rows={6} value={content} onChange={(e) => setContent(e.target.value)} placeholder="칭찬·감사·고민 등 전하고 싶은 마음을 편하게 적어주세요" />
         </Field>
         <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--w-text-soft)' }}>
           <input

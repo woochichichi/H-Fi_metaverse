@@ -43,16 +43,16 @@ interface QuickAction {
 }
 
 const FEATURES: FeatureCard[] = [
-  { icon: Megaphone, tone: 'todo', label: '공지사항', desc: '긴급·할일·참고 공지를 한곳에서. 미확인 긴급은 랜딩에서 먼저 안내.' },
-  { icon: MessageSquareHeart, tone: 'accent', label: '우리팀 이야기 (VOC)', desc: '불편·요청·칭찬·개선 의견. 익명 제출 가능, 리더가 처리.' },
-  { icon: Lightbulb, tone: 'success', label: '아이디어 제안', desc: '업무 개선·이벤트·인적 교류 아이디어. 공감 투표로 우선순위.' },
-  { icon: Mail, tone: 'info', label: '익명 쪽지', desc: '리더·관리자에게 비공개로 의견 전달. 발신자 완전 익명.' },
+  { icon: Megaphone, tone: 'todo', label: '공지', desc: '팀 전체가 알아야 할 소식. 긴급·할일·참고 시급성별로 표시.' },
+  { icon: MessageSquareHeart, tone: 'accent', label: 'VOC', desc: '팀원·팀장·회사에 바라는 점. 익명 제출 가능, 리더가 처리.' },
+  { icon: Lightbulb, tone: 'success', label: '제안', desc: '업무를 더 낫게 만들 아이디어. 공감 투표로 우선순위.' },
+  { icon: Mail, tone: 'info', label: '쪽지', desc: '리더·관리자에게 한 줄 전하기. 발신자 완전 익명.' },
 ];
 
 const QUICK_ACTIONS: QuickAction[] = [
   { page: 'dashboard', icon: Target, label: '대시보드 보기', desc: '오늘 처리할 일 한눈에' },
   { page: 'voc', icon: MessageSquareHeart, label: 'VOC 올리기', desc: '의견을 바로 전달하기' },
-  { page: 'idea', icon: Lightbulb, label: '아이디어 제안', desc: '개선 아이디어 공유하기' },
+  { page: 'idea', icon: Lightbulb, label: '제안 올리기', desc: '개선 아이디어 공유하기' },
   { page: 'gathering', icon: PartyPopper, label: '소모임 구경', desc: '관심 모임에 참여하기' },
 ];
 

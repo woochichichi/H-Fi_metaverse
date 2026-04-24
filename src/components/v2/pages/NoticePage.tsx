@@ -49,12 +49,12 @@ export default function NoticePage() {
         crumbs={[
           { label: '한울타리' },
           {
-            label: '공지사항',
+            label: '공지',
             badge: profile?.team ? { text: profile.team, tone: 'accent' } : undefined,
           },
         ]}
-        title="공지사항"
-        description="긴급·할일·참고 공지를 한곳에서 확인하세요. 미확인 긴급 공지는 로그인 직후 랜딩에서 먼저 안내됩니다."
+        title="공지"
+        description="팀 전체가 알아야 할 소식이에요. 긴급·할일·참고 시급성별로 확인하세요."
         actions={
           canWrite && (
             <button className="w-btn w-btn-primary" onClick={() => setShowCreate(true)}>
@@ -94,7 +94,7 @@ export default function NoticePage() {
         <div className="w-card">
           <EmptyState
             icon={Megaphone}
-            title="표시할 공지가 없어요"
+            title="최근 공지가 없어요 📢"
             description="필터를 바꾸거나, 새 공지를 작성해 보세요."
           />
         </div>

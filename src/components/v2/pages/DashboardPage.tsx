@@ -211,7 +211,7 @@ export default function DashboardPage() {
     if (perm.canReceiveAnonNotes) {
       base.push({
         icon: Heart,
-        label: '내 팀 익명 쪽지',
+        label: '내 팀 쪽지',
         value: counts.anonNotesWaiting,
         sub: '답변 대기',
         tone: counts.anonNotesWaiting > 0 ? 'todo' : 'info',
@@ -267,7 +267,7 @@ export default function DashboardPage() {
             VOC 올리기
           </button>
           <button className="w-btn w-btn-primary" onClick={() => setPage('idea')}>
-            아이디어 제안
+            제안 올리기
           </button>
         </div>
       </div>
@@ -744,8 +744,8 @@ function MemberHints() {
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 8 }}>
         <HintButton label="VOC 올리기" onClick={() => setPage('voc')} />
-        <HintButton label="아이디어 제안" onClick={() => setPage('idea')} />
-        <HintButton label="익명 쪽지 보내기" onClick={() => setPage('anon-note')} />
+        <HintButton label="제안 올리기" onClick={() => setPage('idea')} />
+        <HintButton label="쪽지 보내기" onClick={() => setPage('anon-note')} />
         <HintButton label="소모임 구경하기" onClick={() => setPage('gathering')} />
       </div>
     </div>

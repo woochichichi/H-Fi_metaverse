@@ -143,7 +143,7 @@ export default function TopBar() {
           <button
             onClick={handleOpenNotice}
             className="relative flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary transition-colors duration-200 hover:bg-bg-tertiary hover:text-text-primary"
-            title="공지사항"
+            title="공지"
           >
             <Bell size={18} />
             {unreadCount > 0 && (

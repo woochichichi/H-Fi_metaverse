@@ -77,7 +77,7 @@ export default function V2TopBar() {
         </IconButton>
 
         <IconButton
-          title="공지사항"
+          title="공지"
           badge={unread}
           onClick={() => setPage('notice')}
         >
