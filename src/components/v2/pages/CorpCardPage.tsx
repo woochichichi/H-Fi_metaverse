@@ -15,6 +15,8 @@ import { useQuarterCompare } from '../../../hooks/useQuarterCompare';
 import { useMyCardPending } from '../../../hooks/useMyCardPending';
 import { fmt, fmtKR, pct } from '../../../lib/corpCardMockData';
 
+const PRIVILEGED_ROLES = new Set(['admin', 'director', 'leader']);
+
 const WARN_PCT = 60;
 const DANGER_PCT = 80;
 
@@ -71,9 +73,20 @@ export default function CorpCardPage() {
 }
 
 function CorpCardPageContent({ team }: { team: string }) {
+  const profile = useAuthStore((s) => s.profile);
   const { loading, error, snapshot, stats, transactions } = useCorpCardLive(team);
   const quarterCmp = useQuarterCompare(team);
   const myPending = useMyCardPending();
+
+  // 항목 E: 일반 팀원은 팀원별 랭킹에서 본인 행만 표시.
+  // 리더/관리자는 전체 열람 (팀장 피드백 260424 재확인 답변 기준).
+  // 팀 집계·거래 분류 등 개인 식별 없는 지표는 role 무관 공개 유지.
+  const isPrivileged = PRIVILEGED_ROLES.has(profile?.role ?? '');
+  const visibleMembers = useMemo(() => {
+    if (!stats) return [];
+    if (isPrivileged) return stats.activeMembers;
+    return stats.activeMembers.filter((m) => m.name === profile?.name);
+  }, [stats, isPrivileged, profile?.name]);
 
   const alerts = useMemo<AlertItem[]>(() => {
     if (!stats) return [];
@@ -136,10 +149,10 @@ function CorpCardPageContent({ team }: { team: string }) {
           {/* 1) Headline KPI */}
           <CorpCardKpiHeadline stats={stats} />
 
-          {/* 2) 메인 2열 — 계정별 + 팀원별 */}
+          {/* 2) 메인 2열 — 계정별 + 팀원별 (member는 본인 행만) */}
           <div className="w-cc-main-grid">
             <CorpCardAccountList accounts={stats.accounts} />
-            <CorpCardMemberList activeMembers={stats.activeMembers} />
+            <CorpCardMemberList activeMembers={visibleMembers} />
           </div>
 
           {/* 3) 일별 바차트 + 주의 알림 */}
