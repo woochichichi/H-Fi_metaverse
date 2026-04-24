@@ -212,7 +212,7 @@ export default function V2Sidebar() {
         </SidebarSection>
 
         {perm.showAdminSection && visibleAdminItems.length > 0 && (
-          <SidebarSection label="관리">
+          <SidebarSection label="관리" sublabel="관리자·리더 전용">
             {visibleAdminItems.map((item) => (
               <SidebarItem
                 key={item.id}
@@ -228,7 +228,7 @@ export default function V2Sidebar() {
   );
 }
 
-function SidebarSection({ label, children }: { label: string; children: React.ReactNode }) {
+function SidebarSection({ label, sublabel, children }: { label: string; sublabel?: string; children: React.ReactNode }) {
   return (
     <div style={{ marginTop: 8 }}>
       <div
@@ -239,9 +239,28 @@ function SidebarSection({ label, children }: { label: string; children: React.Re
           letterSpacing: '0.04em',
           color: 'var(--w-text-muted)',
           textTransform: 'uppercase',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
         }}
       >
-        {label}
+        <span>{label}</span>
+        {sublabel && (
+          <span
+            style={{
+              fontSize: 9,
+              fontWeight: 600,
+              letterSpacing: '0',
+              textTransform: 'none',
+              padding: '1px 6px',
+              borderRadius: 999,
+              background: 'var(--w-accent-soft)',
+              color: 'var(--w-accent-hover)',
+            }}
+          >
+            {sublabel}
+          </span>
+        )}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>{children}</div>
     </div>

@@ -54,7 +54,7 @@ export default function NoticePage() {
           },
         ]}
         title="공지"
-        description="팀 전체가 알아야 할 소식이에요. 긴급·할일·참고 시급성별로 확인하세요."
+        description="팀 전체가 알아야 할 소식이에요. 긴급·할일·참고 시급성별로 확인하세요. (작성은 리더·관리자 권한)"
         actions={
           canWrite && (
             <button className="w-btn w-btn-primary" onClick={() => setShowCreate(true)}>

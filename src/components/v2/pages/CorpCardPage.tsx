@@ -152,7 +152,7 @@ function CorpCardPageContent({ team }: { team: string }) {
           {/* 2) 메인 2열 — 계정별 + 팀원별 (member는 본인 행만) */}
           <div className="w-cc-main-grid">
             <CorpCardAccountList accounts={stats.accounts} />
-            <CorpCardMemberList activeMembers={visibleMembers} />
+            <CorpCardMemberList activeMembers={visibleMembers} isPrivilegedView={isPrivileged} />
           </div>
 
           {/* 3) 일별 바차트 + 주의 알림 */}

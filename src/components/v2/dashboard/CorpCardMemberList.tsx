@@ -5,6 +5,8 @@ type ActiveMember = CorpMember & { used: number; count: number; lastTx: string |
 
 interface Props {
   activeMembers: ActiveMember[];
+  /** true면 "관리자·리더 전체 보기" 배지를 헤더에 노출 — 일반 팀원은 본인만 보여서 배지 불필요 */
+  isPrivilegedView?: boolean;
 }
 
 type SortKey = 'amount' | 'name' | 'recent';
@@ -13,7 +15,7 @@ type SortKey = 'amount' | 'name' | 'recent';
  * 팀원별 사용 카드 — 레이싱 바 + 정렬 토글.
  * cash/project/app.jsx 의 .member-list 포팅.
  */
-export default function CorpCardMemberList({ activeMembers }: Props) {
+export default function CorpCardMemberList({ activeMembers, isPrivilegedView }: Props) {
   const [sortBy, setSortBy] = useState<SortKey>('amount');
 
   const sorted = useMemo(() => {
@@ -33,8 +35,40 @@ export default function CorpCardMemberList({ activeMembers }: Props) {
   return (
     <div className="w-cc-card">
       <div className="w-cc-card-head">
-        <div className="w-cc-card-title">
-          팀원별 사용 <span className="w-cc-count">{activeMembers.length}</span>
+        <div className="w-cc-card-title" style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+          <span>팀원별 사용</span>
+          <span className="w-cc-count">{activeMembers.length}</span>
+          {isPrivilegedView ? (
+            <span
+              style={{
+                fontSize: 9.5,
+                fontWeight: 700,
+                padding: '2px 7px',
+                borderRadius: 999,
+                background: 'var(--w-accent-soft)',
+                color: 'var(--w-accent-hover)',
+                letterSpacing: '0.02em',
+              }}
+              title="관리자·리더만 전체 팀원을 확인할 수 있습니다"
+            >
+              관리자·리더 전체 보기
+            </span>
+          ) : (
+            <span
+              style={{
+                fontSize: 9.5,
+                fontWeight: 600,
+                padding: '2px 7px',
+                borderRadius: 999,
+                background: 'var(--w-surface-2)',
+                color: 'var(--w-text-muted)',
+                letterSpacing: '0.02em',
+              }}
+              title="일반 팀원은 본인 사용 내역만 볼 수 있습니다"
+            >
+              본인만 표시
+            </span>
+          )}
         </div>
         <button
           type="button"

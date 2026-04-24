@@ -5,24 +5,22 @@ import { useThemeStore, UI_VERSIONS, type UiVersion } from '../stores/themeStore
 import { useUiStore } from '../stores/uiStore';
 
 /**
- * UI 버전 선택 페이지
- * - 사용자가 기존 앱 안에서 원하는 대시보드 디자인을 선택할 수 있다.
- * - 선택하면 localStorage(themeStore)에 저장되고, MainPage 렌더링에 반영된다.
+ * UI 버전 선택 페이지 — 클릭 한 번 = 즉시 적용.
+ * (이전: 체크 후 우측 상단 "적용하기" 2단계 → 현재: 카드 클릭 = setVersion)
  */
 export default function StyleSelectorPage() {
   const navigate = useNavigate();
   const { version: currentVersion, setVersion } = useThemeStore();
   const addToast = useUiStore((s) => s.addToast);
-  const [selected, setSelected] = useState<UiVersion>(currentVersion);
   const [previewOf, setPreviewOf] = useState<UiVersion | null>(null);
 
-  const selectedMeta = UI_VERSIONS.find((v) => v.id === selected)!;
   const previewMeta = previewOf ? UI_VERSIONS.find((v) => v.id === previewOf) : null;
 
-  const handleApply = () => {
-    setVersion(selected);
-    addToast(`'${selectedMeta.name}' 디자인으로 변경되었어요.`, 'success');
-    navigate('/');
+  const handlePick = (id: UiVersion) => {
+    if (id === currentVersion) return;
+    const meta = UI_VERSIONS.find((v) => v.id === id)!;
+    setVersion(id);
+    addToast(`'${meta.name}'로 바뀌었어요`, 'success');
   };
 
   return (
@@ -42,17 +40,9 @@ export default function StyleSelectorPage() {
               <h1 className="text-lg font-bold">디자인 테마 선택</h1>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              원하는 UI 버전을 골라보세요. 언제든 다시 바꿀 수 있어요.
+              카드를 클릭하면 바로 적용돼요. 언제든 다시 바꿀 수 있어요.
             </p>
           </div>
-          <button
-            onClick={handleApply}
-            disabled={selected === currentVersion}
-            className="h-10 px-5 rounded-md bg-slate-900 text-white text-sm font-semibold hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            <Check size={16} />
-            이 디자인 사용하기
-          </button>
         </div>
       </header>
 
@@ -73,18 +63,17 @@ export default function StyleSelectorPage() {
           </span>
         </div>
 
-        {/* 버전 카드 그리드 */}
+        {/* 버전 카드 그리드 — 클릭 즉시 적용 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {UI_VERSIONS.map((v) => {
-            const isSelected = selected === v.id;
             const isCurrent = currentVersion === v.id;
             return (
               <article
                 key={v.id}
-                onClick={() => setSelected(v.id)}
+                onClick={() => handlePick(v.id)}
                 className={`group relative bg-white rounded-xl border-2 overflow-hidden cursor-pointer transition-all ${
-                  isSelected
-                    ? 'border-slate-900 shadow-lg'
+                  isCurrent
+                    ? 'border-emerald-500 shadow-lg ring-2 ring-emerald-100'
                     : 'border-slate-200 hover:border-slate-400 hover:shadow-md'
                 }`}
               >
@@ -94,13 +83,8 @@ export default function StyleSelectorPage() {
                     <div className="flex items-center gap-2">
                       <h3 className="font-bold text-base">{v.name}</h3>
                       {isCurrent && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold">
-                          현재
-                        </span>
-                      )}
-                      {isSelected && !isCurrent && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-900 text-white font-semibold">
-                          선택됨
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500 text-white font-semibold inline-flex items-center gap-1">
+                          <Check size={10} /> 사용 중
                         </span>
                       )}
                     </div>
@@ -108,12 +92,12 @@ export default function StyleSelectorPage() {
                   </div>
                   <div
                     className={`shrink-0 w-6 h-6 rounded-full border-2 grid place-items-center transition-all ${
-                      isSelected
-                        ? 'bg-slate-900 border-slate-900'
+                      isCurrent
+                        ? 'bg-emerald-500 border-emerald-500'
                         : 'bg-white border-slate-300 group-hover:border-slate-500'
                     }`}
                   >
-                    {isSelected && <Check size={14} className="text-white" />}
+                    {isCurrent && <Check size={14} className="text-white" />}
                   </div>
                 </div>
 
@@ -163,7 +147,7 @@ export default function StyleSelectorPage() {
 
         {/* 안내 */}
         <div className="rounded-xl bg-amber-50 border border-amber-200 p-4 text-sm text-amber-900">
-          <b>참고</b> · 3가지 테마 모두 실제 작동합니다. 언제든 이 페이지에서 다시 바꿀 수 있어요.
+          <b>참고</b> · 카드를 누르면 바로 반영됩니다. 돌아가기를 눌러 화면을 확인해보세요.
         </div>
       </main>
 
@@ -185,12 +169,12 @@ export default function StyleSelectorPage() {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                setSelected(previewMeta.id);
+                handlePick(previewMeta.id);
                 setPreviewOf(null);
               }}
-              className="h-9 px-4 rounded-md bg-slate-900 text-white text-sm font-semibold"
+              className="h-9 px-4 rounded-md bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600"
             >
-              이 디자인 선택
+              이 디자인 적용
             </button>
           </div>
           <iframe
