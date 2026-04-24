@@ -8,7 +8,6 @@ import CorpCardDailyChart from '../dashboard/CorpCardDailyChart';
 import CorpCardQuarterChart from '../dashboard/CorpCardQuarterChart';
 import CorpCardCategoryDonut from '../dashboard/CorpCardCategoryDonut';
 import CorpCardCategoryTrend from '../dashboard/CorpCardCategoryTrend';
-import CorpCardTopMerchants from '../dashboard/CorpCardTopMerchants';
 import { useAuthStore } from '../../../stores/authStore';
 import { useCorpCardLive } from '../../../hooks/useCorpCardLive';
 import { useQuarterCompare } from '../../../hooks/useQuarterCompare';
@@ -235,11 +234,9 @@ function CorpCardPageContent({ team }: { team: string }) {
             latestCapturedAt={myPending.latestCapturedAt}
           />
 
-          {/* 6) 용도별 사용 비중 + 상위 사용처 — "사람 기준 아니라 용도 기준" */}
-          <div className="w-cc-main-grid">
-            <CorpCardCategoryDonut transactions={transactions} />
-            <CorpCardTopMerchants transactions={transactions} limit={5} />
-          </div>
+          {/* 6) 용도별 사용 비중 — "사람 기준 아니라 용도 기준"
+                 상위 사용처 TOP은 store_name 원본에 개인 식별자가 섞여 제거됨 */}
+          <CorpCardCategoryDonut transactions={transactions} />
 
           {/* 7) 용도별 일별 추이 */}
           <CorpCardCategoryTrend
