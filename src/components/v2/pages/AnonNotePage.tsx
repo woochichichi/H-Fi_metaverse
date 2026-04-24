@@ -1,18 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Mail, Plus, Send, Calendar, Building2 } from 'lucide-react';
+import { Mail, Plus, Send } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
 import Modal from '../ui/Modal';
-import {
-  DetailBadges,
-  MetaRow,
-  DetailBody,
-  SectionDivider,
-  StatusPicker,
-  DetailPanelHeader,
-  type StatusTone,
-} from '../ui/DetailShell';
+import { StatusPicker, type StatusTone } from '../ui/DetailShell';
+import { ThreadShell, ThreadHeader, ThreadEntry, ThreadComposer } from '../ui/ConversationThread';
 import MasterDetail, { MasterListCard, MasterListItem } from '../ui/MasterDetail';
 import { useAuthStore } from '../../../stores/authStore';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -248,36 +241,48 @@ function NoteDetailPanel({
   onDelete: () => Promise<void>;
 }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <DetailPanelHeader title={note.title} canDelete={canDelete} onDelete={onDelete} />
-
-      <DetailBadges>
-        <NoteStatusBadge status={note.status} />
-        {note.category && <span className="w-badge w-badge-muted">{note.category}</span>}
-        {note.anonymous && <span className="w-badge w-badge-accent">익명</span>}
-      </DetailBadges>
-
-      <MetaRow
-        items={[
-          { icon: <Building2 size={13} />, label: '팀', value: note.team },
-          { icon: <Calendar size={13} />, label: '접수', value: formatRelativeTime(note.created_at) },
-        ]}
+    <ThreadShell>
+      <ThreadHeader
+        title={note.title}
+        badges={
+          <>
+            <NoteStatusBadge status={note.status} />
+            {note.category && <span className="w-badge w-badge-muted">{note.category}</span>}
+            {note.anonymous && <span className="w-badge w-badge-accent">익명</span>}
+          </>
+        }
+        canDelete={canDelete}
+        onDelete={onDelete}
       />
 
-      <DetailBody>{note.content}</DetailBody>
+      <ThreadEntry
+        avatarTone={note.anonymous ? 'anon' : 'author'}
+        avatarLabel={note.anonymous ? '?' : '쪽'}
+        authorName={note.anonymous ? '익명 발신자' : '발신자'}
+        timestamp={formatRelativeTime(note.created_at)}
+        extraMeta={<span>{note.team}</span>}
+      >
+        {note.content}
+      </ThreadEntry>
 
       {canProcess && (
-        <>
-          <SectionDivider label="상태 변경" />
-          <StatusPicker<NoteStatus>
-            current={note.status}
-            options={[...NOTE_STATUSES]}
-            toneOf={(s) => NOTE_STATUS_TONE[s]}
-            onChange={(s) => { void onStatusChange(s); }}
-          />
-        </>
+        <ThreadComposer
+          label="상태 변경"
+          topActions={
+            <div style={{ marginLeft: 'auto' }}>
+              <StatusPicker<NoteStatus>
+                current={note.status}
+                options={[...NOTE_STATUSES]}
+                toneOf={(s) => NOTE_STATUS_TONE[s]}
+                onChange={(s) => {
+                  void onStatusChange(s);
+                }}
+              />
+            </div>
+          }
+        />
       )}
-    </div>
+    </ThreadShell>
   );
 }
 

@@ -1,18 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Lightbulb, Plus, ThumbsUp, Calendar, Eye, Heart } from 'lucide-react';
+import { Lightbulb, Plus, ThumbsUp } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
 import Modal from '../ui/Modal';
-import {
-  DetailBadges,
-  MetaRow,
-  DetailBody,
-  SectionDivider,
-  StatusPicker,
-  DetailPanelHeader,
-  type StatusTone,
-} from '../ui/DetailShell';
+import { StatusPicker, type StatusTone } from '../ui/DetailShell';
+import { ThreadShell, ThreadHeader, ThreadEntry, ThreadComposer } from '../ui/ConversationThread';
 import MasterDetail, { MasterListCard, MasterListItem } from '../ui/MasterDetail';
 import { useAuthStore } from '../../../stores/authStore';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -217,12 +210,20 @@ function IdeaDetailPanel({
   onStatusChange: (s: IdeaStatus) => Promise<void>;
 }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <DetailPanelHeader
+    <ThreadShell>
+      <ThreadHeader
         title={idea.title}
+        badges={
+          <>
+            {idea.category && <span className="w-badge w-badge-muted">{idea.category}</span>}
+            <StatusBadge status={idea.status} />
+          </>
+        }
         extraActions={
           <button
-            onClick={() => { void onVote(); }}
+            onClick={() => {
+              void onVote();
+            }}
             className="w-btn"
             style={{
               padding: '6px 12px',
@@ -232,6 +233,9 @@ function IdeaDetailPanel({
               fontWeight: 700,
               border: voted ? '1px solid var(--w-accent)' : '1px solid var(--w-border)',
               flexShrink: 0,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
             }}
             title={voted ? '공감 취소' : '공감'}
           >
@@ -241,34 +245,40 @@ function IdeaDetailPanel({
         }
       />
 
-      <DetailBadges>
-        {idea.category && <span className="w-badge w-badge-muted">{idea.category}</span>}
-        <StatusBadge status={idea.status} />
-      </DetailBadges>
-
-      <MetaRow
-        items={[
-          { icon: <Calendar size={13} />, label: '제안일', value: formatRelativeTime(idea.created_at) },
-          { icon: <Eye size={13} />, label: '조회', value: idea.view_count },
-          { icon: <Heart size={13} />, label: '공감', value: idea.vote_count },
-        ]}
-      />
-
-      <DetailBody>{idea.description}</DetailBody>
+      <ThreadEntry
+        avatarTone="author"
+        avatarLabel="아"
+        authorName="제안자"
+        timestamp={formatRelativeTime(idea.created_at)}
+        extraMeta={
+          <>
+            <span>조회 {idea.view_count}</span>
+            <span className="w-thread-meta-sep">·</span>
+            <span>공감 {idea.vote_count}</span>
+          </>
+        }
+      >
+        {idea.description}
+      </ThreadEntry>
 
       {canChangeStatus && (
-        <>
-          <SectionDivider label="리더 처리" />
-          <StatusPicker<IdeaStatus>
-            label="상태 변경"
-            current={idea.status}
-            options={[...IDEA_STATUSES]}
-            toneOf={(s) => IDEA_STATUS_TONE[s]}
-            onChange={(s) => { void onStatusChange(s); }}
-          />
-        </>
+        <ThreadComposer
+          label="리더 처리 — 상태 변경"
+          topActions={
+            <div style={{ marginLeft: 'auto' }}>
+              <StatusPicker<IdeaStatus>
+                current={idea.status}
+                options={[...IDEA_STATUSES]}
+                toneOf={(s) => IDEA_STATUS_TONE[s]}
+                onChange={(s) => {
+                  void onStatusChange(s);
+                }}
+              />
+            </div>
+          }
+        />
       )}
-    </div>
+    </ThreadShell>
   );
 }
 

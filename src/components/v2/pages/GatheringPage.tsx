@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { PartyPopper, Plus, Users, Calendar } from 'lucide-react';
+import { PartyPopper, Plus, Users } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
 import Modal from '../ui/Modal';
-import { DetailBadges, MetaRow, DetailBody, DetailPanelHeader } from '../ui/DetailShell';
+import { ThreadShell, ThreadHeader, ThreadEntry, ThreadEvent } from '../ui/ConversationThread';
 import MasterDetail, { MasterListCard, MasterListItem } from '../ui/MasterDetail';
 import { useAuthStore } from '../../../stores/authStore';
 import { useGatherings } from '../../../hooks/useGatherings';
@@ -180,16 +180,25 @@ function GatheringDetailPanel({
 }) {
   const isRecruiting = gathering.status === 'recruiting';
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <DetailPanelHeader
+    <ThreadShell>
+      <ThreadHeader
         title={gathering.title}
+        badges={
+          <>
+            <span className="w-badge w-badge-muted">{gathering.category}</span>
+            <StatusBadge status={gathering.status} />
+            {joined && <span className="w-badge w-badge-accent">참여중</span>}
+          </>
+        }
         extraActions={
           <>
             {isAuthor && isRecruiting && (
               <button
                 className="w-btn w-btn-ghost"
                 style={{ padding: '6px 10px', fontSize: 12 }}
-                onClick={() => { void onCloseRecruit(); }}
+                onClick={() => {
+                  void onCloseRecruit();
+                }}
               >
                 모집 마감
               </button>
@@ -198,7 +207,9 @@ function GatheringDetailPanel({
               <button
                 className={joined ? 'w-btn w-btn-ghost' : 'w-btn w-btn-primary'}
                 style={{ padding: '6px 12px', fontSize: 12 }}
-                onClick={() => { void onJoinToggle(); }}
+                onClick={() => {
+                  void onJoinToggle();
+                }}
               >
                 {joined ? '참여 취소' : '참여하기'}
               </button>
@@ -207,32 +218,39 @@ function GatheringDetailPanel({
         }
       />
 
-      <DetailBadges>
-        <span className="w-badge w-badge-muted">{gathering.category}</span>
-        <StatusBadge status={gathering.status} />
-        {joined && <span className="w-badge w-badge-accent">참여중</span>}
-      </DetailBadges>
-
-      <MetaRow
-        items={[
-          {
-            icon: <Users size={13} />,
-            label: '인원',
-            value: `${gathering.member_count}${gathering.max_members ? ` / ${gathering.max_members}` : ''}명`,
-          },
-          { icon: <Calendar size={13} />, label: '등록', value: formatRelativeTime(gathering.created_at) },
-          ...(gathering.deadline ? [{ icon: <Calendar size={13} />, label: '마감', value: gathering.deadline }] : []),
-        ]}
-      />
-
-      <DetailBody>{gathering.description}</DetailBody>
+      <ThreadEntry
+        variant="leader"
+        avatarTone="leader"
+        avatarLabel="모"
+        authorName={isAuthor ? '내 모임' : '모임장'}
+        authorBadge={<span className="w-badge w-badge-muted">호스트</span>}
+        timestamp={formatRelativeTime(gathering.created_at)}
+        extraMeta={
+          <>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              <Users size={11} />
+              {gathering.member_count}
+              {gathering.max_members ? ` / ${gathering.max_members}` : ''}명
+            </span>
+            {gathering.deadline && (
+              <>
+                <span className="w-thread-meta-sep">·</span>
+                <span>마감 {gathering.deadline}</span>
+              </>
+            )}
+          </>
+        }
+      >
+        {gathering.description}
+      </ThreadEntry>
 
       {gathering.contact_info && (
-        <div style={{ fontSize: 12, color: 'var(--w-text-muted)' }}>
-          문의: <span style={{ color: 'var(--w-text)', fontWeight: 600 }}>{gathering.contact_info}</span>
-        </div>
+        <ThreadEvent icon="✉">
+          문의:&nbsp;
+          <b style={{ color: 'var(--w-text)' }}>{gathering.contact_info}</b>
+        </ThreadEvent>
       )}
-    </div>
+    </ThreadShell>
   );
 }
 

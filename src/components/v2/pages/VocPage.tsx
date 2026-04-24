@@ -1,20 +1,11 @@
 import { useEffect, useState } from 'react';
-import { MessageSquareHeart, Plus, Calendar, Eye, Building2, AlertTriangle } from 'lucide-react';
+import { MessageSquareHeart, Plus, AlertTriangle } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
 import Modal from '../ui/Modal';
-import {
-  DetailBadges,
-  MetaRow,
-  DetailBody,
-  SectionDivider,
-  AttachmentsGrid,
-  StatusPicker,
-  ResolutionPanel,
-  DetailPanelHeader,
-  type StatusTone,
-} from '../ui/DetailShell';
+import { StatusPicker, type StatusTone } from '../ui/DetailShell';
+import { ThreadShell, ThreadHeader, ThreadEntry, ThreadComposer } from '../ui/ConversationThread';
 import MasterDetail, { MasterListCard, MasterListItem } from '../ui/MasterDetail';
 import { useAuthStore } from '../../../stores/authStore';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -135,6 +126,7 @@ export default function VocPage() {
           detail={
             detail && user && (
               <VocDetailPanel
+                key={detail.id}
                 voc={detail}
                 onClose={() => setDetail(null)}
                 canProcess={perm.canProcessVoc}
@@ -222,74 +214,93 @@ function VocDetailPanel({
   onResolution: (r: string) => Promise<void>;
   onDelete: () => Promise<void>;
 }) {
+  // 선택 VOC가 바뀌면 부모에서 key={voc.id}로 컴포넌트가 재마운트 →
+  // useState 초기값이 새 voc의 resolution으로 자동 동기화.
   const [resolution, setResolution] = useState(voc.resolution ?? '');
-  // 선택 VOC가 바뀌면 로컬 회신 입력도 해당 VOC의 것으로 동기화
-  useEffect(() => {
-    setResolution(voc.resolution ?? '');
-  }, [voc.id, voc.resolution]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <DetailPanelHeader title={voc.title} canDelete={canDelete} onDelete={onDelete} />
-
-      <DetailBadges>
-        <StatusBadge status={voc.status} />
-        <span className="w-badge w-badge-muted">{voc.category}</span>
-        {voc.sub_category && <span className="w-badge w-badge-muted">{voc.sub_category}</span>}
-        {voc.anonymous && <span className="w-badge w-badge-accent">익명</span>}
-        {voc.severity && (
-          <span className="w-badge w-badge-todo" style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-            <AlertTriangle size={10} /> 심각도 {voc.severity}
-          </span>
-        )}
-      </DetailBadges>
-
-      <MetaRow
-        items={[
-          { icon: <Building2 size={13} />, label: '팀', value: voc.team },
-          { icon: <Calendar size={13} />, label: '접수', value: formatRelativeTime(voc.created_at) },
-          { icon: <Eye size={13} />, label: '조회', value: voc.view_count },
-        ]}
+    <ThreadShell>
+      <ThreadHeader
+        title={voc.title}
+        badges={
+          <>
+            <StatusBadge status={voc.status} />
+            <span className="w-badge w-badge-muted">{voc.category}</span>
+            {voc.sub_category && <span className="w-badge w-badge-muted">{voc.sub_category}</span>}
+            {voc.anonymous && <span className="w-badge w-badge-accent">익명</span>}
+            {voc.severity && (
+              <span
+                className="w-badge w-badge-todo"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}
+              >
+                <AlertTriangle size={10} /> 심각도 {voc.severity}
+              </span>
+            )}
+          </>
+        }
+        canDelete={canDelete}
+        onDelete={onDelete}
       />
 
-      <DetailBody>{voc.content}</DetailBody>
+      <ThreadEntry
+        avatarTone={voc.anonymous ? 'anon' : 'author'}
+        avatarLabel={voc.anonymous ? '?' : 'V'}
+        authorName={voc.anonymous ? '익명 작성자' : '작성자'}
+        timestamp={formatRelativeTime(voc.created_at)}
+        extraMeta={
+          <>
+            <span>{voc.team}</span>
+            <span className="w-thread-meta-sep">·</span>
+            <span>조회 {voc.view_count}</span>
+          </>
+        }
+        attachments={voc.attachment_urls}
+      >
+        {voc.content}
+      </ThreadEntry>
 
-      <AttachmentsGrid urls={voc.attachment_urls} />
-
-      {voc.resolution && !canProcess && <ResolutionPanel resolution={voc.resolution} />}
+      {voc.resolution && (
+        <ThreadEntry
+          variant="leader"
+          avatarTone="leader"
+          avatarLabel="리"
+          authorName="리더 회신"
+          authorBadge={<span className="w-badge w-badge-accent">{voc.team} 리더</span>}
+          timestamp="처리됨"
+        >
+          {voc.resolution}
+        </ThreadEntry>
+      )}
 
       {canProcess && (
-        <>
-          <SectionDivider label="리더 처리" />
-          <StatusPicker<VocStatus>
-            label="상태 변경"
-            current={voc.status}
-            options={[...VOC_STATUSES]}
-            toneOf={(s) => VOC_STATUS_TONE[s]}
-            onChange={(s) => { void onStatusChange(s); }}
-          />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--w-text-muted)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-              회신
+        <ThreadComposer
+          label="리더 회신 / 상태 변경"
+          topActions={
+            <div style={{ marginLeft: 'auto' }}>
+              <StatusPicker<VocStatus>
+                current={voc.status}
+                options={[...VOC_STATUSES]}
+                toneOf={(s) => VOC_STATUS_TONE[s]}
+                onChange={(s) => {
+                  void onStatusChange(s);
+                }}
+              />
             </div>
-            <textarea
-              rows={3}
-              placeholder="처리 결과 / 회신 메시지를 작성해주세요"
-              value={resolution}
-              onChange={(e) => setResolution(e.target.value)}
-            />
-            <button
-              className="w-btn w-btn-primary"
-              style={{ alignSelf: 'flex-start' }}
-              onClick={() => onResolution(resolution)}
-              disabled={resolution === (voc.resolution ?? '')}
-            >
-              회신 저장
-            </button>
-          </div>
-        </>
+          }
+          textarea={{
+            value: resolution,
+            onChange: setResolution,
+            placeholder: '처리 결과 / 회신 메시지를 작성해주세요',
+            rows: 3,
+          }}
+          submitLabel="회신 저장"
+          submitDisabled={resolution === (voc.resolution ?? '')}
+          onSubmit={() => {
+            void onResolution(resolution);
+          }}
+        />
       )}
-    </div>
+    </ThreadShell>
   );
 }
 

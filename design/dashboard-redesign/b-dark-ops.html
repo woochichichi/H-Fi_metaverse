@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1440" />
+<title>한울타리 · 공지사항 B안 · Dark "Ops Center"</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
+<style>
+  :root { font-family: 'Pretendard Variable', Pretendard, system-ui, sans-serif; }
+  body { letter-spacing: -0.01em; }
+  .num { font-variant-numeric: tabular-nums; }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; }
+  .dark-t { --bg:#09090B; --surface:#0F0F12; --surface2:#17171B; --surface3:#1D1D22;
+            --border:#26262C; --border2:#2A2A30;
+            --text:#F4F4F5; --soft:#D4D4D8; --muted:#A1A1AA;
+            --accent:#2DD4BF; --accent-soft:rgba(45,212,191,.12); --accent-hover:#14B8A6;
+            --crit:#F87171; --crit-soft:rgba(248,113,113,.15);
+            --todo:#FBBF24; --todo-soft:rgba(251,191,36,.15);
+            --info:#818CF8; --info-soft:rgba(129,140,248,.15); }
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; }
+  .card-2 { background:var(--surface2); border:1px solid var(--border); border-radius:10px; }
+  .chip { display:inline-flex; align-items:center; gap:4px; font-size:10.5px; font-weight:600;
+          padding:3px 7px; border-radius:6px; letter-spacing:.02em; }
+  .chip-crit { background:var(--crit-soft); color:var(--crit); }
+  .chip-todo { background:var(--todo-soft); color:var(--todo); }
+  .chip-info { background:var(--info-soft); color:var(--info); }
+  .chip-muted { background:var(--surface3); color:var(--muted); }
+  .chip-accent { background:var(--accent-soft); color:var(--accent); }
+  .dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .bar { height:5px; border-radius:999px; background:var(--surface3); overflow:hidden; }
+  .bar > span { display:block; height:100%; background:linear-gradient(90deg, var(--accent) 0%, var(--accent-hover) 100%); }
+  .row:hover { background:var(--surface2); }
+  .row.sel { background:var(--surface2); border-left:2px solid var(--accent); }
+  .seg { display:inline-flex; padding:3px; background:var(--surface2); border-radius:8px; gap:2px; border:1px solid var(--border); }
+  .seg button { font-size:11px; font-weight:600; padding:4px 9px; border-radius:6px; color:var(--muted); }
+  .seg button.on { background:var(--surface3); color:var(--text); }
+  .nav-item { display:flex; align-items:center; gap:10px; padding:7px 10px; border-radius:8px;
+              color:var(--soft); font-size:12.5px; font-weight:500; cursor:pointer; }
+  .nav-item:hover { background:var(--surface2); color:var(--text); }
+  .nav-item.on { background:var(--surface2); color:var(--text); font-weight:700; border:1px solid var(--border); }
+  .nav-item.on .nav-ico { color:var(--accent); }
+  .nav-cap { font-size:10px; color:var(--muted); font-weight:700; padding:14px 10px 4px; letter-spacing:.08em; }
+</style>
+</head>
+<body class="dark-t" style="background:var(--bg); color:var(--text); margin:0;">
+
+<div class="flex min-h-screen" style="width:1440px; margin:0 auto;">
+
+  <!-- ==== Sidebar ==== -->
+  <aside class="w-60 shrink-0 flex flex-col" style="background:var(--bg); border-right:1px solid var(--border);">
+    <div class="h-16 flex items-center gap-2.5 px-5 border-b" style="border-color:var(--border);">
+      <div class="w-9 h-9 rounded-lg grid place-items-center text-sm font-bold" style="background:var(--accent); color:#09090B;">한</div>
+      <div>
+        <div class="text-sm font-bold leading-tight">한울타리</div>
+        <div class="text-[10.5px] mono leading-tight" style="color:var(--muted)">FIN-ITO · v2</div>
+      </div>
+    </div>
+    <nav class="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
+      <div class="nav-cap mono">소통</div>
+      <a class="nav-item">
+        <svg class="nav-ico w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        대시보드
+      </a>
+      <a class="nav-item on">
+        <svg class="nav-ico w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+        공지사항
+        <span class="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded" style="background:var(--crit); color:#09090B">2</span>
+      </a>
+      <a class="nav-item">
+        <svg class="nav-ico w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        우리팀 이야기 (VOC)
+      </a>
+      <a class="nav-item">
+        <svg class="nav-ico w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.4.3.8.8 1 1.3H15c.2-.5.6-1 1-1.3A7 7 0 0 0 12 2z"/></svg>
+        아이디어 제안
+      </a>
+      <a class="nav-item">
+        <svg class="nav-ico w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        팀 KPI
+      </a>
+      <a class="nav-item">
+        <svg class="nav-ico w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+        법인카드 현황
+      </a>
+
+      <div class="nav-cap mono">사내 활동</div>
+      <a class="nav-item">
+        <svg class="nav-ico w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+        익명 쪽지
+      </a>
+      <a class="nav-item">
+        <svg class="nav-ico w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg>
+        소모임
+      </a>
+
+      <div class="nav-cap mono">참고</div>
+      <a class="nav-item">
+        <svg class="nav-ico w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        피플 목록
+      </a>
+      <a class="nav-item">
+        <svg class="nav-ico w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/></svg>
+        조직 활동
+      </a>
+    </nav>
+    <div class="px-3 py-3 border-t" style="border-color:var(--border)">
+      <div class="card-2 flex items-center gap-2.5 p-2.5">
+        <div class="w-8 h-8 rounded-md grid place-items-center text-xs font-bold" style="background:var(--accent); color:#09090B">전</div>
+        <div class="min-w-0 flex-1">
+          <div class="text-[12px] font-semibold truncate">전우형</div>
+          <div class="text-[10px] mono" style="color:var(--muted)">ADMIN · 증권ITO</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==== Main Column ==== -->
+  <div class="flex-1 flex flex-col min-w-0">
+
+    <!-- Top Bar -->
+    <header class="h-16 flex items-center gap-3 px-7 border-b" style="border-color:var(--border); background:var(--bg);">
+      <div class="text-xs flex items-center gap-2" style="color:var(--muted)">
+        <span>한울타리</span><span>/</span>
+        <span style="color:var(--text); font-weight:600">공지사항</span>
+        <span class="chip chip-accent">증권ITO</span>
+      </div>
+      <div class="ml-auto flex items-center gap-2">
+        <div class="flex items-center gap-1.5 text-[11px] mr-2 mono" style="color:var(--muted)">
+          <span class="block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          REALTIME · sync 2s
+        </div>
+        <div class="card-2 flex items-center gap-2 px-3 py-1.5">
+          <svg class="w-3.5 h-3.5" style="color:var(--muted)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input class="bg-transparent outline-none text-xs w-52 placeholder:text-[color:var(--muted)]" placeholder="제목·내용·작성자 검색" />
+          <kbd class="text-[10px] px-1.5 py-0.5 rounded mono" style="background:var(--surface3); color:var(--muted)">⌘K</kbd>
+        </div>
+        <button class="card-2 w-9 h-9 grid place-items-center relative">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+          <span class="absolute top-1 right-1 w-2 h-2 rounded-full" style="background:var(--crit)"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Page Body -->
+    <main class="flex-1 overflow-auto p-7" style="background:var(--bg);">
+
+      <!-- Page Header -->
+      <div class="flex items-center justify-between gap-6 mb-4">
+        <div class="flex items-baseline gap-3">
+          <h1 class="text-[20px] font-bold leading-tight">공지사항</h1>
+          <span class="text-[11px] mono" style="color:var(--muted)">/ notices</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="seg">
+            <button class="on">오늘</button>
+            <button>7일</button>
+            <button>30일</button>
+            <button>분기</button>
+          </div>
+          <button class="px-3 py-1.5 rounded-md text-[11px] font-semibold border" style="border-color:var(--border); background:var(--surface2); color:var(--text)">CSV</button>
+          <button class="px-3 py-1.5 rounded-md text-[11px] font-bold inline-flex items-center gap-1.5" style="background:var(--accent); color:#09090B">
+            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5v14"/></svg>
+            NEW
+          </button>
+        </div>
+      </div>
+
+      <!-- 6 KPI 스파크라인 스트립 -->
+      <div class="grid grid-cols-6 gap-3 mb-5">
+        <div class="card p-3.5">
+          <div class="text-[9.5px] mono uppercase tracking-widest" style="color:var(--muted)">TOTAL</div>
+          <div class="flex items-end justify-between mt-1">
+            <div class="text-[22px] font-bold num leading-none">42</div>
+            <span class="text-[10px] num" style="color:var(--accent)">+3 ▲</span>
+          </div>
+          <svg class="w-full h-6 mt-2" viewBox="0 0 100 24" preserveAspectRatio="none">
+            <polyline fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--info)" points="0,18 14,14 28,16 42,10 56,12 70,8 84,10 100,4"/>
+          </svg>
+        </div>
+        <div class="card p-3.5">
+          <div class="text-[9.5px] mono uppercase tracking-widest" style="color:var(--muted)">UNREAD · ME</div>
+          <div class="flex items-end justify-between mt-1">
+            <div class="text-[22px] font-bold num leading-none">7</div>
+            <span class="text-[10px] num" style="color:var(--crit)">+2 ▲</span>
+          </div>
+          <svg class="w-full h-6 mt-2" viewBox="0 0 100 24" preserveAspectRatio="none">
+            <polyline fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--accent)" points="0,16 14,12 28,14 42,8 56,10 70,6 84,12 100,8"/>
+          </svg>
+        </div>
+        <div class="card p-3.5" style="background:linear-gradient(135deg, rgba(248,113,113,.12) 0%, var(--surface) 80%); border-color:var(--crit);">
+          <div class="text-[9.5px] mono uppercase tracking-widest" style="color:var(--crit)">URGENT · UNREAD</div>
+          <div class="flex items-end justify-between mt-1">
+            <div class="text-[22px] font-bold num leading-none" style="color:var(--crit)">2</div>
+            <span class="text-[10px] mono" style="color:var(--crit)">SLA 2h</span>
+          </div>
+          <svg class="w-full h-6 mt-2" viewBox="0 0 100 24" preserveAspectRatio="none">
+            <polyline fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--crit)" points="0,20 14,18 28,16 42,14 56,10 70,12 84,8 100,4"/>
+          </svg>
+        </div>
+        <div class="card p-3.5">
+          <div class="text-[9.5px] mono uppercase tracking-widest" style="color:var(--muted)">PINNED</div>
+          <div class="flex items-end justify-between mt-1">
+            <div class="text-[22px] font-bold num leading-none">3</div>
+            <span class="text-[10px] num" style="color:var(--muted)">≈</span>
+          </div>
+          <svg class="w-full h-6 mt-2" viewBox="0 0 100 24" preserveAspectRatio="none">
+            <polyline fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--todo)" points="0,12 14,12 28,12 42,10 56,12 70,12 84,12 100,12"/>
+          </svg>
+        </div>
+        <div class="card p-3.5">
+          <div class="text-[9.5px] mono uppercase tracking-widest" style="color:var(--muted)">READ RATE</div>
+          <div class="flex items-end justify-between mt-1">
+            <div class="text-[22px] font-bold num leading-none" style="color:var(--accent)">78<span class="text-sm" style="color:var(--muted)">%</span></div>
+            <span class="text-[10px] num" style="color:var(--accent)">+3.2 ▲</span>
+          </div>
+          <svg class="w-full h-6 mt-2" viewBox="0 0 100 24" preserveAspectRatio="none">
+            <polyline fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--accent)" points="0,14 14,12 28,10 42,12 56,8 70,10 84,6 100,4"/>
+          </svg>
+        </div>
+        <div class="card p-3.5">
+          <div class="text-[9.5px] mono uppercase tracking-widest" style="color:var(--muted)">AVG ACK</div>
+          <div class="flex items-end justify-between mt-1">
+            <div class="text-[22px] font-bold num leading-none">1.4<span class="text-xs" style="color:var(--muted)">d</span></div>
+            <span class="text-[10px] num" style="color:var(--accent)">-0.3 ▼</span>
+          </div>
+          <svg class="w-full h-6 mt-2" viewBox="0 0 100 24" preserveAspectRatio="none">
+            <polyline fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--info)" points="0,8 14,10 28,8 42,12 56,10 70,12 84,14 100,16"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Filter Toolbar -->
+      <div class="card-2 flex items-center gap-2 px-3 py-2 mb-4">
+        <span class="text-[10px] mono uppercase tracking-widest mr-1" style="color:var(--muted)">LEVEL</span>
+        <div class="seg"><button class="on">ALL</button><button>CRIT</button><button>TODO</button><button>INFO</button></div>
+        <span class="text-[10px] mono uppercase tracking-widest ml-3 mr-1" style="color:var(--muted)">CAT</span>
+        <div class="seg"><button class="on">ALL</button><button>system</button><button>hr</button><button>culture</button><button>event</button></div>
+        <span class="text-[10px] mono uppercase tracking-widest ml-3 mr-1" style="color:var(--muted)">SCOPE</span>
+        <div class="seg"><button class="on">ALL</button><button>증권ITO</button><button>공통</button></div>
+        <div class="ml-auto flex items-center gap-2">
+          <span class="text-[10px] mono uppercase tracking-widest" style="color:var(--muted)">SORT</span>
+          <div class="seg"><button class="on">최신</button><button>조회</button><button>읽음률</button></div>
+        </div>
+      </div>
+
+      <!-- Main Grid: 좌(7) 테이블 + 우(5) Detail Drawer -->
+      <div class="grid grid-cols-12 gap-5">
+
+        <!-- 좌측 — 데이터 테이블 -->
+        <div class="col-span-7 card overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-2.5 border-b" style="border-color:var(--border)">
+            <div class="flex items-center gap-2">
+              <input type="checkbox" class="w-3.5 h-3.5 accent-[color:var(--accent)]" />
+              <span class="text-xs font-semibold">42건</span>
+              <span class="chip chip-muted mono">selected · 1</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <button class="text-[11px] mono px-2 py-1 rounded hover:bg-[color:var(--surface2)]" style="color:var(--muted)">mark all read</button>
+              <button class="text-[11px] mono px-2 py-1 rounded hover:bg-[color:var(--surface2)]" style="color:var(--muted)">archive</button>
+            </div>
+          </div>
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-[9.5px] mono uppercase tracking-widest" style="color:var(--muted); background:var(--surface2);">
+                <th class="text-left font-semibold px-3 py-2 w-7"></th>
+                <th class="text-left font-semibold px-2 py-2 w-14">LVL</th>
+                <th class="text-left font-semibold px-2 py-2">TITLE</th>
+                <th class="text-left font-semibold px-2 py-2 w-20">SCOPE</th>
+                <th class="text-right font-semibold px-2 py-2 w-12">VIEW</th>
+                <th class="text-right font-semibold px-2 py-2 w-24">READ</th>
+                <th class="text-right font-semibold px-3 py-2 w-16">AGO</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y" style="border-color:var(--border)">
+              <tr class="row sel transition cursor-pointer">
+                <td class="px-3 py-2.5"><input type="checkbox" class="w-3 h-3 accent-[color:var(--accent)]" checked /></td>
+                <td class="px-2 py-2.5"><span class="chip chip-crit">CRIT</span></td>
+                <td class="px-2 py-2.5">
+                  <div class="flex items-center gap-1.5">
+                    <span class="dot" style="background:var(--crit)"></span>
+                    <span class="font-semibold">증권 시스템 긴급점검 (4/25 02:00)</span>
+                    <span class="chip chip-accent mono">PIN</span>
+                  </div>
+                </td>
+                <td class="px-2 py-2.5 text-[11px]" style="color:var(--soft)">증권ITO</td>
+                <td class="px-2 py-2.5 text-right num mono text-[11px]">24</td>
+                <td class="px-2 py-2.5 text-right">
+                  <div class="flex items-center gap-1.5 justify-end">
+                    <div class="bar w-12"><span style="width:48%; background:var(--crit)"></span></div>
+                    <span class="num mono text-[10.5px]" style="color:var(--crit)">48%</span>
+                  </div>
+                </td>
+                <td class="px-3 py-2.5 text-right text-[11px] mono" style="color:var(--muted)">1h</td>
+              </tr>
+              <tr class="row transition cursor-pointer">
+                <td class="px-3 py-2.5"><input type="checkbox" class="w-3 h-3 accent-[color:var(--accent)]" /></td>
+                <td class="px-2 py-2.5"><span class="chip chip-crit">CRIT</span></td>
+                <td class="px-2 py-2.5">
+                  <div class="flex items-center gap-1.5">
+                    <span class="dot" style="background:var(--crit)"></span>
+                    <span class="font-semibold">5월 1일 근로자의 날 휴무 안내</span>
+                  </div>
+                </td>
+                <td class="px-2 py-2.5 text-[11px]" style="color:var(--soft)">공통</td>
+                <td class="px-2 py-2.5 text-right num mono text-[11px]">58</td>
+                <td class="px-2 py-2.5 text-right">
+                  <div class="flex items-center gap-1.5 justify-end">
+                    <div class="bar w-12"><span style="width:72%; background:var(--todo)"></span></div>
+                    <span class="num mono text-[10.5px]" style="color:var(--todo)">72%</span>
+                  </div>
+                </td>
+                <td class="px-3 py-2.5 text-right text-[11px] mono" style="color:var(--muted)">10m</td>
+              </tr>
+              <tr class="row transition cursor-pointer">
+                <td class="px-3 py-2.5"><input type="checkbox" class="w-3 h-3 accent-[color:var(--accent)]" /></td>
+                <td class="px-2 py-2.5"><span class="chip chip-todo">TODO</span></td>
+                <td class="px-2 py-2.5">
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-semibold" style="color:var(--text)">연차 소진 계획서 제출 (~4/30)</span>
+                    <span class="chip chip-accent mono">PIN</span>
+                  </div>
+                </td>
+                <td class="px-2 py-2.5 text-[11px]" style="color:var(--soft)">증권ITO</td>
+                <td class="px-2 py-2.5 text-right num mono text-[11px]">41</td>
+                <td class="px-2 py-2.5 text-right">
+                  <div class="flex items-center gap-1.5 justify-end">
+                    <div class="bar w-12"><span style="width:91%"></span></div>
+                    <span class="num mono text-[10.5px]" style="color:var(--accent)">91%</span>
+                  </div>
+                </td>
+                <td class="px-3 py-2.5 text-right text-[11px] mono" style="color:var(--muted)">3h</td>
+              </tr>
+              <tr class="row transition cursor-pointer">
+                <td class="px-3 py-2.5"><input type="checkbox" class="w-3 h-3 accent-[color:var(--accent)]" /></td>
+                <td class="px-2 py-2.5"><span class="chip chip-info">INFO</span></td>
+                <td class="px-2 py-2.5" style="color:var(--soft)">2분기 조직문화 설문 결과 공유</td>
+                <td class="px-2 py-2.5 text-[11px]" style="color:var(--soft)">공통</td>
+                <td class="px-2 py-2.5 text-right num mono text-[11px]">102</td>
+                <td class="px-2 py-2.5 text-right">
+                  <div class="flex items-center gap-1.5 justify-end">
+                    <div class="bar w-12"><span style="width:100%"></span></div>
+                    <span class="num mono text-[10.5px]" style="color:var(--accent)">100%</span>
+                  </div>
+                </td>
+                <td class="px-3 py-2.5 text-right text-[11px] mono" style="color:var(--muted)">1d</td>
+              </tr>
+              <tr class="row transition cursor-pointer">
+                <td class="px-3 py-2.5"><input type="checkbox" class="w-3 h-3 accent-[color:var(--accent)]" /></td>
+                <td class="px-2 py-2.5"><span class="chip chip-info">INFO</span></td>
+                <td class="px-2 py-2.5" style="color:var(--soft)">신규 입사자 환영 (2명)</td>
+                <td class="px-2 py-2.5 text-[11px]" style="color:var(--soft)">증권ITO</td>
+                <td class="px-2 py-2.5 text-right num mono text-[11px]">76</td>
+                <td class="px-2 py-2.5 text-right">
+                  <div class="flex items-center gap-1.5 justify-end">
+                    <div class="bar w-12"><span style="width:100%"></span></div>
+                    <span class="num mono text-[10.5px]" style="color:var(--accent)">100%</span>
+                  </div>
+                </td>
+                <td class="px-3 py-2.5 text-right text-[11px] mono" style="color:var(--muted)">2d</td>
+              </tr>
+              <tr class="row transition cursor-pointer">
+                <td class="px-3 py-2.5"><input type="checkbox" class="w-3 h-3 accent-[color:var(--accent)]" /></td>
+                <td class="px-2 py-2.5"><span class="chip chip-info">INFO</span></td>
+                <td class="px-2 py-2.5" style="color:var(--soft)">사내 도서 신청 4월 마감 안내</td>
+                <td class="px-2 py-2.5 text-[11px]" style="color:var(--soft)">공통</td>
+                <td class="px-2 py-2.5 text-right num mono text-[11px]">33</td>
+                <td class="px-2 py-2.5 text-right">
+                  <div class="flex items-center gap-1.5 justify-end">
+                    <div class="bar w-12"><span style="width:88%"></span></div>
+                    <span class="num mono text-[10.5px]" style="color:var(--accent)">88%</span>
+                  </div>
+                </td>
+                <td class="px-3 py-2.5 text-right text-[11px] mono" style="color:var(--muted)">3d</td>
+              </tr>
+              <tr class="row transition cursor-pointer">
+                <td class="px-3 py-2.5"><input type="checkbox" class="w-3 h-3 accent-[color:var(--accent)]" /></td>
+                <td class="px-2 py-2.5"><span class="chip chip-todo">TODO</span></td>
+                <td class="px-2 py-2.5" style="color:var(--soft)">비밀번호 변경 (90일 경과)</td>
+                <td class="px-2 py-2.5 text-[11px]" style="color:var(--soft)">공통</td>
+                <td class="px-2 py-2.5 text-right num mono text-[11px]">112</td>
+                <td class="px-2 py-2.5 text-right">
+                  <div class="flex items-center gap-1.5 justify-end">
+                    <div class="bar w-12"><span style="width:64%; background:var(--todo)"></span></div>
+                    <span class="num mono text-[10.5px]" style="color:var(--todo)">64%</span>
+                  </div>
+                </td>
+                <td class="px-3 py-2.5 text-right text-[11px] mono" style="color:var(--muted)">4d</td>
+              </tr>
+              <tr class="row transition cursor-pointer">
+                <td class="px-3 py-2.5"><input type="checkbox" class="w-3 h-3 accent-[color:var(--accent)]" /></td>
+                <td class="px-2 py-2.5"><span class="chip chip-info">INFO</span></td>
+                <td class="px-2 py-2.5" style="color:var(--soft)">증권ITO 4월 회식 안내</td>
+                <td class="px-2 py-2.5 text-[11px]" style="color:var(--soft)">증권ITO</td>
+                <td class="px-2 py-2.5 text-right num mono text-[11px]">68</td>
+                <td class="px-2 py-2.5 text-right">
+                  <div class="flex items-center gap-1.5 justify-end">
+                    <div class="bar w-12"><span style="width:96%"></span></div>
+                    <span class="num mono text-[10.5px]" style="color:var(--accent)">96%</span>
+                  </div>
+                </td>
+                <td class="px-3 py-2.5 text-right text-[11px] mono" style="color:var(--muted)">5d</td>
+              </tr>
+            </tbody>
+          </table>
+          <!-- Footer / Pager -->
+          <div class="flex items-center justify-between px-4 py-2.5 border-t" style="border-color:var(--border)">
+            <div class="text-[11px] mono" style="color:var(--muted)">1–8 of 42</div>
+            <div class="seg"><button>‹</button><button class="on">1</button><button>2</button><button>3</button><button>···</button><button>7</button><button>›</button></div>
+          </div>
+        </div>
+
+        <!-- 우측 — Detail Drawer -->
+        <aside class="col-span-5 card flex flex-col" style="max-height: calc(100vh - 280px);">
+          <!-- Drawer Header -->
+          <div class="flex items-center justify-between px-5 py-3 border-b" style="border-color:var(--border)">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="chip chip-crit">CRIT</span>
+              <span class="text-[10.5px] mono" style="color:var(--muted)">notice#318</span>
+              <span class="chip chip-accent mono">PIN</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <button class="w-7 h-7 grid place-items-center rounded hover:bg-[color:var(--surface2)]" title="이전">
+                <svg class="w-3.5 h-3.5" style="color:var(--muted)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+              </button>
+              <button class="w-7 h-7 grid place-items-center rounded hover:bg-[color:var(--surface2)]" title="다음">
+                <svg class="w-3.5 h-3.5" style="color:var(--muted)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+              </button>
+              <button class="w-7 h-7 grid place-items-center rounded hover:bg-[color:var(--surface2)]" title="닫기">
+                <svg class="w-3.5 h-3.5" style="color:var(--muted)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Drawer Body -->
+          <div class="p-5 overflow-y-auto flex-1">
+            <h2 class="text-base font-bold leading-snug">증권 시스템 긴급점검 (4/25 02:00 ~ 04:00)</h2>
+
+            <!-- Meta strip -->
+            <div class="grid grid-cols-3 gap-2 mt-4">
+              <div class="card-2 p-2.5">
+                <div class="text-[10px] mono uppercase tracking-widest" style="color:var(--muted)">SCOPE</div>
+                <div class="text-xs font-semibold mt-0.5">증권ITO</div>
+              </div>
+              <div class="card-2 p-2.5">
+                <div class="text-[10px] mono uppercase tracking-widest" style="color:var(--muted)">VIEW</div>
+                <div class="text-xs font-semibold mt-0.5 num">24</div>
+              </div>
+              <div class="card-2 p-2.5">
+                <div class="text-[10px] mono uppercase tracking-widest" style="color:var(--muted)">POSTED</div>
+                <div class="text-xs font-semibold mt-0.5 mono">14:32</div>
+              </div>
+            </div>
+
+            <!-- Read Progress -->
+            <div class="card-2 p-3 mt-3">
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="text-[11px] mono uppercase tracking-widest" style="color:var(--muted)">READ PROGRESS</div>
+                <div class="text-[11px] mono"><span style="color:var(--crit)">12/25</span> · 48%</div>
+              </div>
+              <div class="bar" style="height:7px"><span style="width:48%; background:var(--crit)"></span></div>
+              <div class="text-[10.5px] mt-2" style="color:var(--muted)">아직 읽지 않은 13명 · SLA 2h 내 회수 필요</div>
+            </div>
+
+            <!-- Body -->
+            <div class="mt-4 text-[13px] leading-relaxed" style="color:var(--soft)">
+              <p>증권 핵심 시스템(거래·정산) 긴급 보안 패치 적용을 위해 아래와 같이 점검을 진행합니다.</p>
+              <p class="mt-3"><b style="color:var(--text)">일시</b><br/>2026-04-25 (금) 02:00 ~ 04:00 (KST)</p>
+              <p class="mt-3"><b style="color:var(--text)">영향 범위</b><br/>거래 시스템 전체, 모바일 앱, 영업점 단말 (통합 비가용)</p>
+              <p class="mt-3"><b style="color:var(--text)">담당</b><br/>인프라팀 박지훈, 증권ITO 김도윤</p>
+            </div>
+
+            <!-- Attachments -->
+            <div class="mt-4">
+              <div class="text-[11px] mono uppercase tracking-widest mb-2" style="color:var(--muted)">ATTACHMENTS · 2</div>
+              <div class="space-y-1.5">
+                <a class="card-2 flex items-center gap-2 px-3 py-2 cursor-pointer hover:border-[color:var(--accent)]">
+                  <svg class="w-3.5 h-3.5" style="color:var(--info)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6"/></svg>
+                  <span class="text-xs flex-1 truncate">2026-04-25_점검계획서.pdf</span>
+                  <span class="text-[10px] mono" style="color:var(--muted)">128 KB</span>
+                </a>
+                <a class="card-2 flex items-center gap-2 px-3 py-2 cursor-pointer hover:border-[color:var(--accent)]">
+                  <svg class="w-3.5 h-3.5" style="color:var(--info)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6"/></svg>
+                  <span class="text-xs flex-1 truncate">롤백_시나리오.xlsx</span>
+                  <span class="text-[10px] mono" style="color:var(--muted)">42 KB</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Drawer Footer Actions -->
+          <div class="flex items-center gap-2 px-5 py-3 border-t" style="border-color:var(--border); background:var(--surface2)">
+            <button class="flex-1 text-xs font-bold py-2 rounded-md" style="background:var(--accent); color:#09090B">읽음 처리</button>
+            <button class="px-3 py-2 rounded-md text-xs font-semibold border" style="border-color:var(--border); background:var(--surface3); color:var(--text)">고정 해제</button>
+            <button class="px-3 py-2 rounded-md text-xs font-semibold border" style="border-color:var(--border); background:var(--surface3); color:var(--crit)">삭제</button>
+          </div>
+        </aside>
+
+      </div>
+
+    </main>
+  </div>
+
+</div>
+
+</body>
+</html>

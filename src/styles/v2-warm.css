@@ -351,4 +351,279 @@
   border-radius: 999px;
   border: 2px solid var(--w-bg);
 }
+
+/* ============================================================
+   ConversationThread — 게시글 상세 패널 공통 (v2-warm / v2-dark)
+   VOC/공지/아이디어/익명쪽지의 우측 detail에서 발언/이벤트/회신을
+   "대화 스레드" 형태로 일관되게 표현. 토큰만 사용해 양 테마 자동 대응.
+   ============================================================ */
+.v2-warm .w-thread-shell,
+.v2-dark .w-thread-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Header */
+.v2-warm .w-thread-header,
+.v2-dark .w-thread-header {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--w-border);
+}
+.v2-warm .w-thread-header-main,
+.v2-dark .w-thread-header-main {
+  flex: 1;
+  min-width: 0;
+}
+.v2-warm .w-thread-badges,
+.v2-dark .w-thread-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.v2-warm .w-thread-title,
+.v2-dark .w-thread-title {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--w-text);
+  line-height: 1.3;
+  word-break: break-word;
+}
+.v2-warm .w-thread-meta,
+.v2-dark .w-thread-meta {
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: var(--w-text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.v2-warm .w-thread-actions,
+.v2-dark .w-thread-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+  align-items: center;
+}
+.v2-warm .w-thread-action-btn,
+.v2-dark .w-thread-action-btn {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--w-radius-sm);
+  background: transparent;
+  color: var(--w-text-muted);
+  border: 1px solid var(--w-border);
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+.v2-warm .w-thread-action-btn:hover,
+.v2-dark .w-thread-action-btn:hover {
+  background: var(--w-surface-2);
+  color: var(--w-text);
+}
+.v2-warm .w-thread-action-danger:hover,
+.v2-dark .w-thread-action-danger:hover {
+  background: var(--w-urgency-critical-soft);
+  color: var(--w-danger);
+  border-color: transparent;
+}
+
+/* Entry: 아바타 + 발언 카드 */
+.v2-warm .w-thread-entry,
+.v2-dark .w-thread-entry {
+  position: relative;
+  padding-left: 50px;
+  min-height: 38px;
+}
+.v2-warm .w-thread-shell > .w-thread-entry::before,
+.v2-dark .w-thread-shell > .w-thread-entry::before,
+.v2-warm .w-thread-shell > .w-thread-event::before,
+.v2-dark .w-thread-shell > .w-thread-event::before {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 42px;
+  bottom: -18px;
+  width: 1px;
+  background: var(--w-border);
+}
+.v2-warm .w-thread-shell > .w-thread-entry:last-child::before,
+.v2-dark .w-thread-shell > .w-thread-entry:last-child::before,
+.v2-warm .w-thread-shell > .w-thread-event:last-child::before,
+.v2-dark .w-thread-shell > .w-thread-event:last-child::before {
+  display: none;
+}
+
+/* Avatar */
+.v2-warm .w-thread-av,
+.v2-dark .w-thread-av {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+.v2-warm .w-thread-av-author,
+.v2-warm .w-thread-av-anon {
+  background: linear-gradient(135deg, #8A776B 0%, #5C4B42 100%);
+}
+.v2-dark .w-thread-av-author,
+.v2-dark .w-thread-av-anon {
+  background: linear-gradient(135deg, #71717A 0%, #52525B 100%);
+}
+.v2-warm .w-thread-av-leader,
+.v2-warm .w-thread-av-admin {
+  background: linear-gradient(135deg, var(--w-accent) 0%, var(--w-accent-hover) 100%);
+}
+.v2-dark .w-thread-av-leader,
+.v2-dark .w-thread-av-admin {
+  background: linear-gradient(135deg, var(--w-accent) 0%, var(--w-accent-hover) 100%);
+  color: #09090B;
+}
+.v2-warm .w-thread-av-system,
+.v2-dark .w-thread-av-system {
+  background: var(--w-surface-2);
+  border: 1px dashed var(--w-border-strong);
+  color: var(--w-text-muted);
+  font-size: 11px;
+}
+
+/* Entry body */
+.v2-warm .w-thread-entry-body,
+.v2-dark .w-thread-entry-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.v2-warm .w-thread-entry-meta,
+.v2-dark .w-thread-entry-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  color: var(--w-text-muted);
+  flex-wrap: wrap;
+}
+.v2-warm .w-thread-author,
+.v2-dark .w-thread-author {
+  font-weight: 700;
+  color: var(--w-text);
+  font-size: 12.5px;
+}
+.v2-warm .w-thread-meta-sep,
+.v2-dark .w-thread-meta-sep {
+  color: var(--w-text-muted);
+  user-select: none;
+}
+
+/* Bubble */
+.v2-warm .w-thread-bubble,
+.v2-dark .w-thread-bubble {
+  border-radius: var(--w-radius);
+  padding: 14px 16px;
+  background: var(--w-surface);
+  border: 1px solid var(--w-border);
+}
+.v2-warm .w-thread-bubble-leader,
+.v2-warm .w-thread-bubble-admin {
+  background: linear-gradient(140deg, var(--w-accent-soft) 0%, var(--w-surface) 70%);
+  border-color: var(--w-accent);
+}
+.v2-dark .w-thread-bubble-leader,
+.v2-dark .w-thread-bubble-admin {
+  background: linear-gradient(140deg, var(--w-accent-soft) 0%, var(--w-surface) 70%);
+  border-color: var(--w-accent);
+}
+.v2-warm .w-thread-body,
+.v2-dark .w-thread-body {
+  font-size: 14px;
+  color: var(--w-text);
+  white-space: pre-wrap;
+  line-height: 1.7;
+  word-break: break-word;
+}
+.v2-warm .w-thread-bubble-attachments,
+.v2-dark .w-thread-bubble-attachments {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--w-border);
+}
+
+/* System event row (작은 시스템 메타 - 점선 아바타) */
+.v2-warm .w-thread-event,
+.v2-dark .w-thread-event {
+  position: relative;
+  padding-left: 50px;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  font-size: 11.5px;
+  color: var(--w-text-muted);
+}
+.v2-warm .w-thread-event-text,
+.v2-dark .w-thread-event-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* Composer (회신 입력 카드) */
+.v2-warm .w-thread-composer-card,
+.v2-dark .w-thread-composer-card {
+  background: var(--w-surface);
+  border: 1px solid var(--w-border);
+  border-radius: var(--w-radius);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.v2-warm .w-thread-composer-head,
+.v2-dark .w-thread-composer-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.v2-warm .w-thread-composer-label,
+.v2-dark .w-thread-composer-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--w-text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.v2-warm .w-thread-composer-textarea,
+.v2-dark .w-thread-composer-textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+.v2-warm .w-thread-composer-foot,
+.v2-dark .w-thread-composer-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.v2-warm .w-thread-submit,
+.v2-dark .w-thread-submit {
+  margin-left: auto;
+}
 .v2-dark ::-webkit-scrollbar-thumb:hover { background: var(--w-border-strong); }

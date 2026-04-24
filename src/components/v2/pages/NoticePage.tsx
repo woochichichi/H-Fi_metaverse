@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Megaphone, Pin, Plus, Calendar, Eye, Building2 } from 'lucide-react';
+import { Megaphone, Pin, Plus } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
 import Modal from '../ui/Modal';
-import { DetailBadges, MetaRow, DetailBody, AttachmentsGrid, DetailPanelHeader } from '../ui/DetailShell';
+import { ThreadShell, ThreadHeader, ThreadEntry } from '../ui/ConversationThread';
 import MasterDetail, { MasterListCard, MasterListItem } from '../ui/MasterDetail';
 import { useAuthStore } from '../../../stores/authStore';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -214,10 +214,44 @@ function NoticeDetailPanel({
   onClose: () => void; // 시그니처 호환
 }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <DetailPanelHeader title={notice.title} canDelete={canDelete} onDelete={onDelete} />
-      <NoticeDetailView notice={notice} />
-    </div>
+    <ThreadShell>
+      <ThreadHeader
+        title={notice.title}
+        badges={
+          <>
+            <UrgencyBadge urgency={notice.urgency} />
+            <span className="w-badge w-badge-muted">{notice.category}</span>
+            {notice.pinned && (
+              <span
+                className="w-badge w-badge-accent"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}
+              >
+                <Pin size={10} /> 고정
+              </span>
+            )}
+          </>
+        }
+        canDelete={canDelete}
+        onDelete={onDelete}
+      />
+      <ThreadEntry
+        variant="admin"
+        avatarTone="admin"
+        avatarLabel="공"
+        authorName="공지"
+        timestamp={formatRelativeTime(notice.created_at)}
+        extraMeta={
+          <>
+            <span>대상: {notice.team ?? '공통'}</span>
+            <span className="w-thread-meta-sep">·</span>
+            <span>조회 {notice.view_count}</span>
+          </>
+        }
+        attachments={notice.attachment_urls}
+      >
+        {notice.content}
+      </ThreadEntry>
+    </ThreadShell>
   );
 }
 
@@ -225,34 +259,6 @@ function UrgencyBadge({ urgency }: { urgency: UrgencyLevel }) {
   if (urgency === '긴급') return <span className="w-badge w-badge-critical">긴급</span>;
   if (urgency === '할일') return <span className="w-badge w-badge-todo">할 일</span>;
   return <span className="w-badge w-badge-info">참고</span>;
-}
-
-function NoticeDetailView({ notice }: { notice: Notice }) {
-  const metaItems = [
-    { icon: <Calendar size={13} />, label: '게시일', value: formatRelativeTime(notice.created_at) },
-    { icon: <Eye size={13} />, label: '조회', value: notice.view_count },
-    ...(notice.team ? [{ icon: <Building2 size={13} />, label: '대상', value: notice.team }] : []),
-  ];
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <DetailBadges>
-        <UrgencyBadge urgency={notice.urgency} />
-        <span className="w-badge w-badge-muted">{notice.category}</span>
-        {notice.pinned && (
-          <span className="w-badge w-badge-accent" style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-            <Pin size={10} /> 고정
-          </span>
-        )}
-      </DetailBadges>
-
-      <MetaRow items={metaItems} />
-
-      <DetailBody>{notice.content}</DetailBody>
-
-      <AttachmentsGrid urls={notice.attachment_urls} />
-    </div>
-  );
 }
 
 function CreateNoticeModal({
