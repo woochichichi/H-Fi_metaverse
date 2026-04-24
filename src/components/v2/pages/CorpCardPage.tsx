@@ -9,7 +9,7 @@ import CorpCardQuarterChart from '../dashboard/CorpCardQuarterChart';
 import CorpCardTxFeed from '../dashboard/CorpCardTxFeed';
 import { useAuthStore } from '../../../stores/authStore';
 import { useCorpCardLive } from '../../../hooks/useCorpCardLive';
-import { useCorpCardTrend } from '../../../hooks/useCorpCardTrend';
+import { useQuarterCompare } from '../../../hooks/useQuarterCompare';
 import { useMyCardPending } from '../../../hooks/useMyCardPending';
 import { fmt, fmtKR, pct } from '../../../lib/corpCardMockData';
 
@@ -70,7 +70,7 @@ export default function CorpCardPage() {
 
 function CorpCardPageContent({ team }: { team: string }) {
   const { loading, error, snapshot, stats, transactions } = useCorpCardLive(team);
-  const trend = useCorpCardTrend(team, 30);
+  const quarterCmp = useQuarterCompare(team);
   const myPending = useMyCardPending();
 
   const alerts = useMemo<AlertItem[]>(() => {
@@ -112,7 +112,7 @@ function CorpCardPageContent({ team }: { team: string }) {
   console.log('[CorpCardPageContent] render', {
     team,
     live: { loading, error, hasSnapshot: !!snapshot, hasStats: !!stats, txCount: transactions.length },
-    trend: { loading: trend.loading, error: trend.error, points: trend.points.length },
+    quarter: { loading: quarterCmp.loading, error: quarterCmp.error, curPoints: quarterCmp.current?.points.length ?? 0, prevPoints: quarterCmp.previous?.points.length ?? 0, todayDay: quarterCmp.currentTodayDay },
     pending: { loading: myPending.loading, rows: myPending.rows.length },
   });
 
@@ -157,21 +157,20 @@ function CorpCardPageContent({ team }: { team: string }) {
           <div className="w-cc-card">
             <div className="w-cc-card-head">
               <div className="w-cc-card-title">
-                분기 소진 흐름 <span className="w-cc-count">최근 {trend.points.length}일</span>
-              </div>
-              <div className="w-cc-legend">
-                <span>
-                  <i style={{ background: 'var(--w-accent)' }} />
-                  Q2 누적 소진
-                </span>
+                분기 소진 흐름
+                {quarterCmp.current && quarterCmp.previous && (
+                  <span className="w-cc-count">
+                    {quarterCmp.previous.label} vs {quarterCmp.current.label}
+                  </span>
+                )}
               </div>
             </div>
             <div style={{ padding: '4px 12px 12px' }}>
               <CorpCardQuarterChart
-                points={trend.points}
-                totalPlanned={stats.totalPlanned}
-                totalUsed={stats.totalUsed}
-                loading={trend.loading}
+                current={quarterCmp.current}
+                previous={quarterCmp.previous}
+                currentTodayDay={quarterCmp.currentTodayDay}
+                loading={quarterCmp.loading}
               />
             </div>
             <div className="w-cc-q-strip">

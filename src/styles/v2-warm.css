@@ -1072,6 +1072,109 @@
 }
 
 /* ============================================================
+   border-radius 강제 (전역 *{border-radius:0!important} 우회)
+   index.css 의 픽셀 레트로 강제를 .v2-warm * { revert !important }
+   로 풀었지만 revert는 div의 ua-default(=0)로 가서 모서리가
+   다시 각지게 됨. PostDetail/PostDetail-cc/Thread 카드 클래스에
+   !important 명시로 둥글기 강제.
+   ============================================================ */
+.v2-warm .w-card,
+.v2-dark .w-card { border-radius: var(--w-radius) !important; }
+
+.v2-warm .w-pd-card,
+.v2-dark .w-pd-card { border-radius: 14px !important; }
+
+.v2-warm .w-pd-header-ic,
+.v2-dark .w-pd-header-ic { border-radius: 12px !important; }
+
+.v2-warm .w-pd-step-circle,
+.v2-warm .w-pd-av,
+.v2-dark .w-pd-step-circle,
+.v2-dark .w-pd-av { border-radius: 50% !important; }
+
+.v2-warm .w-pd-id,
+.v2-dark .w-pd-id { border-radius: 4px !important; }
+
+.v2-warm .w-pd-composer-textarea,
+.v2-dark .w-pd-composer-textarea { border-radius: var(--w-radius-sm) !important; }
+
+.v2-warm .w-pd-icon-btn,
+.v2-dark .w-pd-icon-btn { border-radius: var(--w-radius-sm) !important; }
+
+/* 공용 chip / badge / button — 둥글기 강제 */
+.v2-warm .w-badge,
+.v2-dark .w-badge { border-radius: 999px !important; }
+
+.v2-warm .w-btn,
+.v2-dark .w-btn { border-radius: var(--w-radius-sm) !important; }
+
+/* 입력 요소 */
+.v2-warm input,
+.v2-warm select,
+.v2-warm textarea,
+.v2-dark input,
+.v2-dark select,
+.v2-dark textarea { border-radius: var(--w-radius-sm) !important; }
+
+/* Thread (legacy ConversationThread CSS, 미사용 시 무해) */
+.v2-warm .w-thread-bubble,
+.v2-dark .w-thread-bubble { border-radius: var(--w-radius) !important; }
+
+.v2-warm .w-thread-av,
+.v2-dark .w-thread-av { border-radius: 50% !important; }
+
+.v2-warm .w-thread-composer-card,
+.v2-dark .w-thread-composer-card { border-radius: var(--w-radius) !important; }
+
+/* 법인카드 .w-cc-* prefix — 카드성 클래스 일괄 fix */
+.v2-warm [class*="w-cc-"],
+.v2-dark [class*="w-cc-"] {
+  border-radius: var(--w-radius) !important;
+}
+/* 예외: 동그라미 / pill / 막대 — 후행 규칙으로 override */
+.v2-warm .w-cc-avatar,
+.v2-warm .w-cc-mem-rank,
+.v2-dark .w-cc-avatar,
+.v2-dark .w-cc-mem-rank { border-radius: 50% !important; }
+
+.v2-warm .w-cc-cat-pill,
+.v2-warm .w-cc-delta,
+.v2-warm .w-cc-delta-up,
+.v2-warm .w-cc-delta-down,
+.v2-warm .w-cc-count,
+.v2-dark .w-cc-cat-pill,
+.v2-dark .w-cc-delta,
+.v2-dark .w-cc-delta-up,
+.v2-dark .w-cc-delta-down,
+.v2-dark .w-cc-count { border-radius: 999px !important; }
+
+.v2-warm .w-cc-progress,
+.v2-warm .w-cc-progress-fill,
+.v2-warm .w-cc-bar,
+.v2-warm .w-cc-bar-cell,
+.v2-warm .w-cc-mem-bar,
+.v2-warm .w-cc-stack,
+.v2-warm .w-cc-stack-completed,
+.v2-warm .w-cc-stack-pending,
+.v2-warm .w-cc-stack-saved,
+.v2-dark .w-cc-progress,
+.v2-dark .w-cc-progress-fill,
+.v2-dark .w-cc-bar,
+.v2-dark .w-cc-bar-cell,
+.v2-dark .w-cc-mem-bar,
+.v2-dark .w-cc-stack,
+.v2-dark .w-cc-stack-completed,
+.v2-dark .w-cc-stack-pending,
+.v2-dark .w-cc-stack-saved { border-radius: 999px !important; }
+
+.v2-warm .w-cc-acct-icon,
+.v2-warm .w-cc-alert-icon,
+.v2-warm .w-cc-flag-icon,
+.v2-dark .w-cc-acct-icon,
+.v2-dark .w-cc-alert-icon,
+.v2-dark .w-cc-flag-icon { border-radius: 8px !important; }
+
+/* ============================================================
    CorpCard (법인카드 현황판) — cash/project 목업 포팅
    .w-cc-* prefix · .v2-warm/.v2-dark 양 스코프 자동 대응
    ============================================================ */
