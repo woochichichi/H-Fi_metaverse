@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { X, Filter, MousePointerClick, Clock, TrendingUp } from 'lucide-react';
+import { X, Filter, MousePointerClick, Clock, TrendingUp, Plus } from 'lucide-react';
 import NoteList from './NoteList';
 import NoteForm from './NoteForm';
 import NoteDetail from './NoteDetail';
@@ -211,15 +211,25 @@ export default function NotePanel({ onClose }: NotePanelProps) {
         )}
       </div>
 
-      {/* 온보딩: 편지 보내기 안내 */}
+      {/* 온보딩: 편지 보내기 안내 (데스크탑 보조) */}
       <div className="border-t border-white/[.06] px-4 py-3">
         <div className="flex items-center gap-2.5 rounded-xl bg-accent/10 px-4 py-3">
           <MousePointerClick size={18} className="flex-shrink-0 text-accent-light" />
           <p className="text-xs leading-relaxed text-text-secondary">
-            편지를 보내려면 <span className="font-semibold text-accent-light">우측 피플 목록</span>에서 상대방을 <span className="font-semibold text-accent-light">우클릭</span>하세요
+            특정인에게 보내려면 <span className="font-semibold text-accent-light">피플 목록</span>에서 상대방을 <span className="font-semibold text-accent-light">우클릭</span>하세요 (리더에게 보내는 건 우측 하단 버튼)
           </p>
         </div>
       </div>
+
+      {/* FAB: 리더에게 쪽지 보내기 (모바일 필수 진입점) */}
+      <button
+        onClick={() => setView('form')}
+        className="absolute bottom-6 right-6 flex h-12 w-12 items-center justify-center rounded-full bg-accent text-white shadow-lg transition-colors duration-200 hover:bg-accent/80"
+        style={{ boxShadow: '0 4px 20px rgba(108,92,231,.4)' }}
+        title="리더에게 쪽지 보내기"
+      >
+        <Plus size={22} />
+      </button>
       </div>
 
       {view === 'form' && (
