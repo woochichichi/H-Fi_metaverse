@@ -60,11 +60,13 @@ export function useCorpCardLive(team: string): CorpCardLiveResult {
       setLoading(true);
       setError(null);
       try {
-        // 1) 가장 최근 snapshot 1건
+        // 1) 가장 최근 분기(period_ym DESC)의 최신 snapshot 1건
+        //    captured_at 만으로 정렬하면 동시에 업로드된 여러 분기 중 엉뚱한 게 잡힘.
         const { data: snapRows, error: snapErr } = await supabase
           .from('corp_card_snapshots')
           .select('id, captured_at, period_ym, dept_cd, team')
           .eq('team', team)
+          .order('period_ym', { ascending: false })
           .order('captured_at', { ascending: false })
           .limit(1);
 

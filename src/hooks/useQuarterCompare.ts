@@ -150,11 +150,13 @@ export function useQuarterCompare(team: string): QuarterCompareResult {
       setLoading(true);
       setError(null);
       try {
-        // 가장 최신 snapshot 으로 현재 분기 period_ym 결정
+        // 가장 최근 분기(period_ym DESC) 의 snapshot 기준으로 현재 분기 결정.
+        // captured_at 만으로 정렬하면 같은 시각에 업로드된 여러 분기 중 엉뚱한 게 잡힘.
         const { data: latest, error: latestErr } = await supabase
           .from('corp_card_snapshots')
           .select('id, period_ym, captured_at')
           .eq('team', team)
+          .order('period_ym', { ascending: false })
           .order('captured_at', { ascending: false })
           .limit(1);
         if (latestErr) throw latestErr;
