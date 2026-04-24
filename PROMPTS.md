@@ -130,3 +130,6 @@
 - 목업과 다르게 모서리 각진 문제 발견 → 전역 *{border-radius:0!important} 우회용 명시 !important fix (PostDetail/Thread/Card/.w-cc-* + 예외 override)
 - 그 외 페이지(KPI/Admin/Directory 등 10개) 톤 일관성 점검 → Agent 분석 결과 잔재 극소, --w-success-soft/--w-heat-1~5 토큰 추가 + #E8F5EE 10건 치환 + heatColor 함수 CSS 변수화
 - 첫 접속 디폴트를 v2 Warm으로 변경 + 온보딩 페이지 신설 → themeStore v3 마이그레이션(classic→warm 정규화, dark 유지) + OnboardingV2 4단계 카드(환영/핵심기능/워크플로우/빠른시작) + 양 테마 자동 + 키보드 ←→Esc 단축키
+- 260424 팀장 피드백 반영 7개 항목 작업 지시 (A:글쓰기UX, B:모달톤, C:공지수정+이력3개, D:메뉴리네임, E:법인카드→팀예산+이름보호, F:용도기준시각화, G:게시판가이드문구) → [1/2] 조사 단계부터 (수정 금지)
+- 모바일 UX 개선 + 모바일에서 볼 때 홈화면에 바로가기(PWA 설치) 기능 추가 요청
+- 시스템 건의(site_reports)에 오늘 접수된 에러들 확인 후 수정 요청

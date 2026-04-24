@@ -15,6 +15,9 @@ export function useInbox(userId: string | null) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  // 훅 인스턴스마다 고유 채널 — 동일 userId로 여러 곳(TopBar+MobileHome)에서 호출돼도
+  // Supabase 채널 레지스트리 공유로 인한 on-after-subscribe 충돌 방지
+  const [channelSuffix] = useState(() => Math.random().toString(36).slice(2, 8));
 
   const fetchInbox = useCallback(async () => {
     if (!userId) return;
@@ -95,7 +98,7 @@ export function useInbox(userId: string | null) {
     if (!userId) return;
 
     const channel = supabase
-      .channel(`inbox_${userId}`)
+      .channel(`inbox_${userId}_${channelSuffix}`)
       .on(
         'postgres_changes',
         {
@@ -129,7 +132,7 @@ export function useInbox(userId: string | null) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId]);
+  }, [userId, channelSuffix]);
 
   return { items, loading, error, unreadCount, fetchInbox, markAsRead, markAllAsRead };
 }
