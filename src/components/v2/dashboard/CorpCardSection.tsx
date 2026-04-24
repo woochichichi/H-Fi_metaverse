@@ -31,6 +31,12 @@ export default function CorpCardSection({ team }: Props) {
   const myPending = useMyCardPending();
   const trend = useCorpCardTrend(team, 14);
 
+  // Rules of Hooks — early return 앞에서 호출되어야 훅 개수가 렌더마다 일정.
+  const recentTx = useMemo(
+    () => [...transactions].sort((a, b) => (b.regDate || '').localeCompare(a.regDate || '')).slice(0, 8),
+    [transactions],
+  );
+
   console.log('[CorpCardSection] render', {
     team,
     live: { loading, error, hasSnapshot: !!snapshot, hasStats: !!stats, txCount: transactions.length },
@@ -68,10 +74,6 @@ export default function CorpCardSection({ team }: Props) {
   const txAll = transactions;
   const totalUsedPct = pct(totalUsed, totalPlanned);
   const maxMember = Math.max(...activeMembers.map((m) => m.used), 1);
-  const recentTx = useMemo(
-    () => [...txAll].sort((a, b) => (b.regDate || '').localeCompare(a.regDate || '')).slice(0, 8),
-    [txAll],
-  );
 
   // 표시용 메타
   const year = parseInt(snapshot.period_ym.slice(0, 4), 10);
