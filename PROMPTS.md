@@ -129,3 +129,4 @@
 - 2차 적용: 대시보드 톤 통일(KpiCard 아이콘 박스 + AdminHints/MemberHints 헤더 + WidgetHeader 라벨) + 법인카드 페이지 cash 목업 풀 이식(KPI 4열/계정행/팀원 레이싱/일별바차트/분기차트/거래피드 6위젯, w-cc-* CSS 양 테마)
 - 목업과 다르게 모서리 각진 문제 발견 → 전역 *{border-radius:0!important} 우회용 명시 !important fix (PostDetail/Thread/Card/.w-cc-* + 예외 override)
 - 그 외 페이지(KPI/Admin/Directory 등 10개) 톤 일관성 점검 → Agent 분석 결과 잔재 극소, --w-success-soft/--w-heat-1~5 토큰 추가 + #E8F5EE 10건 치환 + heatColor 함수 CSS 변수화
+- 첫 접속 디폴트를 v2 Warm으로 변경 + 온보딩 페이지 신설 → themeStore v3 마이그레이션(classic→warm 정규화, dark 유지) + OnboardingV2 4단계 카드(환영/핵심기능/워크플로우/빠른시작) + 양 테마 자동 + 키보드 ←→Esc 단축키

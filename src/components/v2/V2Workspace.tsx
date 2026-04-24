@@ -6,6 +6,7 @@ import { useV2Nav } from '../../stores/v2NavStore';
 import { useThemeStore } from '../../stores/themeStore';
 import DashboardLayout from './DashboardLayout';
 import NoticeLanding from './NoticeLanding';
+import OnboardingV2 from './OnboardingV2';
 import DashboardPage from './pages/DashboardPage';
 import NoticePage from './pages/NoticePage';
 import VocPage from './pages/VocPage';
@@ -39,6 +40,10 @@ const GATE_DISMISSED_KEY = 'hanultari_v2_urgent_gate_dismissed';
 const gateKeyFor = (userId: string | null | undefined) =>
   userId ? `${GATE_DISMISSED_KEY}_${userId}` : GATE_DISMISSED_KEY;
 
+const ONBOARDING_KEY = 'hanultari_v2_onboarding_done';
+const onboardingKeyFor = (userId: string | null | undefined) =>
+  userId ? `${ONBOARDING_KEY}_${userId}` : ONBOARDING_KEY;
+
 export default function V2Workspace() {
   const user = useAuthStore((s) => s.user);
   const perm = usePermissions();
@@ -57,14 +62,51 @@ export default function V2Workspace() {
   });
 
   // 사용자 변경 시 dismissed 상태도 초기화
+  // 외부 storage(sessionStorage)에서 1회 read → setState. set-state-in-effect 룰의
+  // 정당한 예외 (외부 시스템과 동기화).
   useEffect(() => {
     if (!user) return;
+    let next = false;
     try {
-      setDismissed(sessionStorage.getItem(gateKeyFor(user.id)) === '1');
+      next = sessionStorage.getItem(gateKeyFor(user.id)) === '1';
     } catch {
-      setDismissed(false);
+      /* ignore */
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setDismissed(next);
   }, [user]);
+
+  // v2 온보딩: 사용자별 localStorage. 한 번 완료하면 다시 안 보임
+  // ("튜토리얼 다시 보기" 이벤트로 재진입 가능)
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  useEffect(() => {
+    if (!user) return;
+    let done = false;
+    try {
+      done = localStorage.getItem(onboardingKeyFor(user.id)) === '1';
+    } catch {
+      /* ignore */
+    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setShowOnboarding(!done);
+  }, [user]);
+
+  useEffect(() => {
+    const handler = () => setShowOnboarding(true);
+    window.addEventListener('restart-onboarding', handler);
+    return () => window.removeEventListener('restart-onboarding', handler);
+  }, []);
+
+  const completeOnboarding = () => {
+    setShowOnboarding(false);
+    if (user) {
+      try {
+        localStorage.setItem(onboardingKeyFor(user.id), '1');
+      } catch {
+        /* ignore */
+      }
+    }
+  };
 
   const handleDismiss = () => {
     setDismissed(true);
@@ -104,19 +146,29 @@ export default function V2Workspace() {
   // gate: 미확인 긴급 공지가 있고, 아직 skip하지 않았으면 랜딩
   if (!dismissed && urgent.length > 0) {
     return (
-      <NoticeLanding
-        urgent={urgent}
-        onContinue={handleDismiss}
-        onAllRead={handleAllRead}
-        themeClass={themeClass}
-      />
+      <>
+        <NoticeLanding
+          urgent={urgent}
+          onContinue={handleDismiss}
+          onAllRead={handleAllRead}
+          themeClass={themeClass}
+        />
+        {showOnboarding && (
+          <OnboardingV2 themeClass={themeClass} onComplete={completeOnboarding} />
+        )}
+      </>
     );
   }
 
   return (
-    <DashboardLayout themeClass={themeClass}>
-      <V2Router page={page} role={perm.role} />
-    </DashboardLayout>
+    <>
+      <DashboardLayout themeClass={themeClass}>
+        <V2Router page={page} role={perm.role} />
+      </DashboardLayout>
+      {showOnboarding && (
+        <OnboardingV2 themeClass={themeClass} onComplete={completeOnboarding} />
+      )}
+    </>
   );
 }
 
