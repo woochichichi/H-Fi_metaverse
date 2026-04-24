@@ -299,3 +299,36 @@ const useDeviceMode = () => {
 **원인:** "빨리 고쳐야지" 모드에서 검증 단계를 건너뜀. CLAUDE.md에 MUST로 적혀있지만 강제 트리거가 없었음
 **해결:** `.claude/settings.json`에 PreToolUse hook 추가 — `git commit` 실행 시 자체검증 리마인더 표시
 **교훈:** MUST 규칙은 문서에만 적어두면 안 되고, 자동화된 트리거(hook)로 강제해야 실효성이 있음
+
+### Supabase Realtime `subscribe-after-on` 에러 — 동일 채널 멀티 구독 (2026-04-24)
+**증상:** 우측 상단 인박스 아이콘 클릭 시 ErrorBoundary 노출
+```
+Error: cannot add `postgres_changes` callbacks for
+realtime:inbox_<userId> after `subscribe()`.
+```
+**원인:** `useInbox(userId)` 훅이 `TopBar.tsx`와 `MobileHome.tsx`의 `DashboardHome` 두 곳에서 동시 호출됨. 채널명이 `inbox_${userId}` **고정**이라 Supabase 클라이언트가 내부 레지스트리에서 같은 채널 인스턴스를 재사용 → 두 번째 훅의 `.on('postgres_changes',…)` 가 이미 `.subscribe()` 완료된 채널에 등록되려다 API 제약 위반.
+**해결:** 훅 인스턴스마다 `useState(() => Math.random().toString(36).slice(2, 8))` 로 고유 서픽스 생성 → `inbox_${userId}_${suffix}` 로 독립 채널 구독. cleanup deps에도 suffix 추가.
+**교훈:** 같은 Realtime 채널명을 여러 컴포넌트에서 공유하면 Supabase가 저지함. 훅 하나가 여러 곳에서 호출될 가능성이 있으면 **채널명은 반드시 인스턴스별로 고유**해야 함. 정적 채널명(`vocs_realtime`, `notes_realtime`)을 쓰는 훅도 같은 리스크 있음 — StrictMode·빠른 재마운트에서 발현 가능.
+**근거:** `site_reports#08ea4800` 실제 접수. 수정 커밋 `547c7b3`.
+
+### Tailwind v4 `@theme` 토큰 CSS 스코프 오버라이드로 모바일 테마 전환 (2026-04-25)
+**증상:** 모바일에서 warm/dark 테마를 선택해도 UI는 항상 classic 다크 navy 팔레트. `MobileLayout`이 쓰는 `bg-bg-primary` / `text-text-primary` 시맨틱 유틸리티가 테마 스코프 밖에 있었음.
+**원인:** 구버전 기준으로 "Tailwind는 빌드 시점 고정값"이라 생각해 모바일은 테마 적용 불가로 단정. 하지만 **Tailwind v4의 `@theme { --color-X }` 는 CSS 변수 기반**이라 하위 스코프에서 재정의 가능.
+**해결:** `src/styles/v2-warm.css`의 `.v2-warm` / `.v2-dark` 블록에 `--color-bg-primary` / `--color-text-primary` / `--color-accent` 등 Tailwind @theme 토큰을 각각 해당 팔레트 값으로 재정의. `MainPage.tsx` 모바일 분기에서 `uiVersion`에 따라 `v2-warm` / `v2-dark` 클래스를 루트 div에 부착. CSS 변수는 inherited이므로 하위 Tailwind 유틸리티가 자동 전환됨.
+**한계:** `border-white/[.06]`, `bg-white/[.06]` 같은 **arbitrary value는 rgba 고정값으로 컴파일**되어 CSS 변수 오버라이드 불가. warm 배경에선 거의 투명해져 보더가 약해질 수 있음. 필요하면 `[class*="border-white/"]` 속성 선택자로 blanket override.
+**교훈:** 신규 테마 추가·레이아웃 통일 시 Tailwind v4 `@theme` 토큰 스코프 재정의 패턴 우선 고려. Tailwind의 시맨틱 유틸만 쓰고 arbitrary value는 최소화하면 완전한 테마 분리 가능.
+**커밋:** `c25d22d`
+
+### ERP `corp_card_transactions.store_name` 원본 오염 — 가맹점 집계에 실명 노출 (2026-04-25)
+**증상:** 팀 예산 "상위 사용처 TOP 5"에 `전우형-2019`, `김용현-2013` 같은 팀원 **실명·사번**이 가맹점으로 집계됨.
+**원인:** ERP 수집 원천(`cash/automation`이 긁어오는 `budgetHistList.do` 응답)의 `store_name` 컬럼에 일부 거래는 가맹점 대신 "사용자명-사번" 문자열이 들어 있음. 수집 로직은 이 값을 그대로 저장하므로 `corp_card_transactions.store_name` 에 오염 데이터가 혼재.
+**영향:** Wave 5(팀원별 랭킹 role 필터)는 `CorpCardMemberList` 위젯에만 적용되고, `CorpCardTopMerchants`는 필터 밖이라 **일반 팀원도 다른 팀원의 실명·사용 금액 TOP을 볼 수 있었음**.
+**해결:** `CorpCardTopMerchants` 섹션 자체 제거 (컴포넌트 파일 삭제). 용도(classifyTransaction) 기반 도넛·월 추이 2위젯만 유지 — 이들은 카테고리 집계라 개인 식별 없음.
+**교훈:** ERP 원천 데이터를 그대로 화면에 노출할 때는 **모든 집계 축에서 개인 식별 위험 재검토 필수**. 한 위젯에 필터를 걸었다고 같은 필드를 쓰는 다른 위젯이 안전하다고 가정하면 안 됨. 이름·사번 패턴은 화면 렌더 직전에 감지·병합하는 유틸을 고려할 것 (`/^[가-힣]{2,4}([\s\-_]?\d{2,6})?$/` 패턴).
+**커밋:** `f5941ae`
+
+### 검증용 `git checkout <베이스라인>` 은 파괴적 액션 (2026-04-25)
+**증상:** 이번 세션 전체 검증 중 "baseline 빌드가 성공하는지" 비교하려고 `git checkout e72b720` 을 실행. 이후 모든 Edit/Read 도구 호출에서 working tree가 pre-session 상태로 바뀌어 "이 파일이 변경됨" 리마인더가 폭주.
+**원인:** `git checkout <commit>`은 working tree 파일을 해당 커밋 내용으로 **덮어쓴다**. 사용자 에디터에 열려있던 파일도 같이 바뀌어 혼란 유발. 다행히 원격에 push된 커밋들은 손상 없음.
+**해결:** `git checkout main` 으로 복귀 → stash 복원 → 원상 회복. 소요 30초.
+**교훈:** 빌드/린트 비교는 별도 **worktree** (`git worktree add`) 또는 **`git show <commit>:<file>`** 로 하는 게 안전. working tree를 이동시키는 명령은 사용자의 에디터 상태에 영향 주는 파괴적 액션 — 피해야 함. 라이브 작업 중에는 특히.
