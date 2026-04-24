@@ -300,7 +300,7 @@ export default function VocForm({ onClose, onCreated }: VocFormProps) {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value.slice(0, 100))}
-            placeholder="VOC 제목을 입력하세요"
+            placeholder="예) 회의실 예약이 너무 복잡해요 / 커피머신 자주 고장나요"
             className="w-full rounded-lg bg-white/[.06] px-3 py-2 text-sm text-text-primary placeholder-text-muted outline-none focus:ring-1 focus:ring-accent"
           />
           <p className="text-[10px] text-text-muted mt-1 text-right">{title.length}/100</p>

@@ -129,10 +129,11 @@ export default function NotePanel({ onClose }: NotePanelProps) {
       </div>
 
       {/* 보드 설명 */}
-      <div className="border-b border-white/[.06] bg-accent/[.04] px-4 py-2">
-        <p className="text-[11px] leading-relaxed text-text-muted">
-          <span className="font-semibold text-text-secondary">마음을 전하는 비밀 우체통</span> — 익명 또는 실명으로 편지를 보내고, 답장을 통해 대화를 이어갈 수 있습니다.
+      <div className="border-b border-white/[.06] bg-accent/[.04] px-4 py-2 flex items-center gap-2">
+        <p className="flex-1 text-[11px] leading-relaxed text-text-muted">
+          <span className="font-semibold text-text-secondary">누구에게든 익명으로 한 줄 전해보세요</span> — 칭찬·감사·고민 모두 환영, 답장으로 대화를 이어갈 수 있습니다.
         </p>
+        <span className="flex-shrink-0 rounded-full bg-accent/20 px-2 py-0.5 text-[10px] font-semibold text-accent">익명 가능</span>
       </div>
 
       {/* 카테고리 칩 — 항상 표시 */}

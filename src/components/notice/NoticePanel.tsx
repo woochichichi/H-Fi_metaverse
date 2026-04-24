@@ -137,7 +137,7 @@ export default function NoticePanel({ onClose }: NoticePanelProps) {
       {/* 보드 설명 */}
       <div className="border-b border-white/[.06] bg-accent/[.04] px-4 py-2">
         <p className="text-[11px] leading-relaxed text-text-muted">
-          <span className="font-semibold text-text-secondary">놓치면 안 되는 소식을 한눈에</span> — 팀 공지, 일정, 필독 안내를 시급성(긴급/할일/참고)별로 확인하세요. 중요한 공지는 알림으로 즉시 전달되며, 읽음 여부가 자동 추적됩니다.
+          <span className="font-semibold text-text-secondary">팀 전체가 알아야 할 소식이에요</span> — 긴급·할일·참고 시급성별로 확인하세요. 중요한 공지는 알림으로 즉시 전달되며, 읽음 여부가 자동 추적됩니다.
         </p>
       </div>
 

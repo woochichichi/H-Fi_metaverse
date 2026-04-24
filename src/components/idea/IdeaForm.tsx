@@ -114,7 +114,7 @@ export default function IdeaForm({ onClose, onCreated, editId, initialData }: Id
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value.slice(0, 100))}
-            placeholder="아이디어 제목을 입력하세요"
+            placeholder="예) 주간회의를 격주로 줄이면 어떨까요?"
             className="w-full rounded-lg bg-white/[.06] px-3 py-2 text-sm text-text-primary placeholder-text-muted outline-none focus:ring-1 focus:ring-accent"
           />
           <p className="text-[10px] text-text-muted mt-1 text-right">{title.length}/100</p>

@@ -138,10 +138,11 @@ export default function VocPanel({ onClose }: VocPanelProps) {
       </div>
 
       {/* 보드 설명 */}
-      <div className="border-b border-white/[.06] bg-accent/[.04] px-4 py-2">
-        <p className="text-[11px] leading-relaxed text-text-muted">
-          <span className="font-semibold text-text-secondary">현장의 목소리를 전달하는 창구</span> — 업무 중 느낀 불편, 개선 요청, 칭찬을 자유롭게 접수하세요. 익명으로도 남길 수 있어 솔직한 의견이 가능합니다. 접수된 VOC는 리더가 확인하고 양방향 대화로 해결해 나갑니다.
+      <div className="border-b border-white/[.06] bg-accent/[.04] px-4 py-2 flex items-center gap-2">
+        <p className="flex-1 text-[11px] leading-relaxed text-text-muted">
+          <span className="font-semibold text-text-secondary">팀에 바라는 점, 불편한 점</span>을 익명으로 남겨주세요. 리더가 확인하고 양방향 대화로 해결합니다.
         </p>
+        <span className="flex-shrink-0 rounded-full bg-accent/20 px-2 py-0.5 text-[10px] font-semibold text-accent">익명 가능</span>
       </div>
 
       {/* 카테고리 칩 — 항상 표시 */}
