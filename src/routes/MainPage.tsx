@@ -39,13 +39,17 @@ export default function MainPage() {
     }
   };
 
-  // 모바일은 기존 classic 레이아웃만 지원 (1440px 데스크탑 목업이 모바일엔 부적합)
+  // 모바일은 MobileLayout 구조 유지하되, v2 테마 선택 시 CSS 토큰 스코프를 덧씌워
+  // 배경·텍스트·액센트 색이 warm/dark 팔레트로 전환되게 한다.
+  // (v2 데스크탑 풀 레이아웃은 1440px 목업 기반이라 모바일엔 부적합 — Sidebar 등 생략)
   if (mode === 'mobile') {
+    const mobileThemeClass =
+      uiVersion === 'dark' ? 'v2-dark' : uiVersion === 'warm' ? 'v2-warm' : '';
     return (
-      <>
+      <div className={mobileThemeClass} style={{ minHeight: '100vh' }}>
         <MobileLayout />
         {showTutorial && <OnboardingGuide onComplete={closeTutorial} />}
-      </>
+      </div>
     );
   }
 
