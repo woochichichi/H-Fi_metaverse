@@ -126,3 +126,4 @@
 - 게시글 상세 패널이 게더타운 느낌 남아있어 대시보드 톤으로 4안 mockup 요청 → C안(Workflow Tracker) 선택 → Warm/Dark 둘 다 적용
 - 법인카드 화면도 cash/project 목업대로 안 했음 지적 → 모든 화면 게더타운 → C안 톤 일괄 변경 요청, 병렬 진행 + Agent 활용 가능
 - 1차 적용: PostDetail 컴포넌트 셋(PostHeaderCard/WorkflowStepper/DescriptionCard/ReplyCard/ComposerCard/MiniStat/ActivityLogCard) 신설 + 게시글 5개 페이지 교체 + ConversationThread 정리
+- 2차 적용: 대시보드 톤 통일(KpiCard 아이콘 박스 + AdminHints/MemberHints 헤더 + WidgetHeader 라벨) + 법인카드 페이지 cash 목업 풀 이식(KPI 4열/계정행/팀원 레이싱/일별바차트/분기차트/거래피드 6위젯, w-cc-* CSS 양 테마)

@@ -484,11 +484,25 @@ function WidgetHeader({ title, onMore }: { title: string; onMore: () => void }) 
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '12px 16px',
+        padding: '14px 18px',
         borderBottom: '1px solid var(--w-border)',
       }}
     >
-      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--w-text)' }}>{title}</div>
+      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+        <span
+          style={{
+            fontSize: 10.5,
+            fontWeight: 700,
+            color: 'var(--w-text-muted)',
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+          }}
+        >
+          Widget
+        </span>
+        <span style={{ color: 'var(--w-border-strong)' }}>·</span>
+        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--w-text)' }}>{title}</span>
+      </div>
       <button
         onClick={onMore}
         style={{
@@ -583,12 +597,12 @@ function KpiCard({
       onClick={onClick}
       className="w-card"
       style={{
-        padding: 16,
+        padding: 18,
         textAlign: 'left',
         cursor: 'pointer',
         display: 'flex',
         flexDirection: 'column',
-        gap: 10,
+        gap: 12,
         background: 'var(--w-surface)',
       }}
       onMouseEnter={(e) => {
@@ -598,27 +612,47 @@ function KpiCard({
         (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--w-border)';
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <div
           style={{
-            width: 32,
-            height: 32,
-            borderRadius: 'var(--w-radius-sm)',
+            width: 40,
+            height: 40,
+            borderRadius: 12,
             background: toneBg,
             color: toneColor,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            display: 'grid',
+            placeItems: 'center',
+            flexShrink: 0,
           }}
         >
-          <Icon size={16} color={toneColor} />
+          <Icon size={18} color={toneColor} />
         </div>
-        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--w-text-soft)' }}>{label}</div>
+        <div
+          style={{
+            fontSize: 10.5,
+            fontWeight: 700,
+            color: 'var(--w-text-muted)',
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+          }}
+        >
+          {label}
+        </div>
       </div>
-      <div style={{ fontSize: 30, fontWeight: 700, color: 'var(--w-text)', lineHeight: 1.1 }}>
-        {value.toLocaleString()}
+      <div>
+        <div
+          style={{
+            fontSize: 30,
+            fontWeight: 700,
+            color: 'var(--w-text)',
+            lineHeight: 1.05,
+            fontVariantNumeric: 'tabular-nums',
+          }}
+        >
+          {value.toLocaleString()}
+        </div>
+        <div style={{ fontSize: 11.5, color: 'var(--w-text-muted)', marginTop: 4 }}>{sub}</div>
       </div>
-      <div style={{ fontSize: 12, color: 'var(--w-text-muted)' }}>{sub}</div>
     </button>
   );
 }
@@ -626,11 +660,37 @@ function KpiCard({
 function AdminHints({ perm }: { perm: ReturnType<typeof usePermissions> }) {
   const setPage = useV2Nav((s) => s.setPage);
   return (
-    <div className="w-card" style={{ padding: 18 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-        <Target size={16} color="var(--w-accent-hover)" />
-        <div style={{ fontSize: 14, fontWeight: 700 }}>
-          {perm.isAdmin ? '관리 업무 바로가기' : '리더 업무 바로가기 (내 팀)'}
+    <div className="w-card" style={{ padding: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+        <div
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 12,
+            background: 'var(--w-accent-soft)',
+            color: 'var(--w-accent-hover)',
+            display: 'grid',
+            placeItems: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <Target size={18} />
+        </div>
+        <div>
+          <div
+            style={{
+              fontSize: 10.5,
+              fontWeight: 700,
+              color: 'var(--w-text-muted)',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+            }}
+          >
+            {perm.isAdmin ? 'ADMIN ACTIONS' : 'LEADER ACTIONS'}
+          </div>
+          <div style={{ fontSize: 14, fontWeight: 700, marginTop: 2 }}>
+            {perm.isAdmin ? '관리 업무 바로가기' : '리더 업무 바로가기 (내 팀)'}
+          </div>
         </div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 8 }}>
@@ -651,8 +711,37 @@ function AdminHints({ perm }: { perm: ReturnType<typeof usePermissions> }) {
 function MemberHints() {
   const setPage = useV2Nav((s) => s.setPage);
   return (
-    <div className="w-card" style={{ padding: 18 }}>
-      <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 10 }}>자주 쓰는 기능</div>
+    <div className="w-card" style={{ padding: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+        <div
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 12,
+            background: 'var(--w-accent-soft)',
+            color: 'var(--w-accent-hover)',
+            display: 'grid',
+            placeItems: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <Users2 size={18} />
+        </div>
+        <div>
+          <div
+            style={{
+              fontSize: 10.5,
+              fontWeight: 700,
+              color: 'var(--w-text-muted)',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+            }}
+          >
+            QUICK ACTIONS
+          </div>
+          <div style={{ fontSize: 14, fontWeight: 700, marginTop: 2 }}>자주 쓰는 기능</div>
+        </div>
+      </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 8 }}>
         <HintButton label="VOC 올리기" onClick={() => setPage('voc')} />
         <HintButton label="아이디어 제안" onClick={() => setPage('idea')} />
