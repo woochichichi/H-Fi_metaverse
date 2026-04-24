@@ -31,6 +31,13 @@ export default function CorpCardSection({ team }: Props) {
   const myPending = useMyCardPending();
   const trend = useCorpCardTrend(team, 14);
 
+  console.log('[CorpCardSection] render', {
+    team,
+    live: { loading, error, hasSnapshot: !!snapshot, hasStats: !!stats, txCount: transactions.length },
+    myPending: { loading: myPending.loading, error: myPending.error, rowCount: myPending.rows.length },
+    trend: { loading: trend.loading, error: trend.error, points: trend.points.length },
+  });
+
   if (loading) return <LoadingState />;
   if (error) return <ErrorState message={error} />;
   if (!snapshot || !stats) return <EmptyState />;

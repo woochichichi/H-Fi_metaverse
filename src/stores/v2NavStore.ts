@@ -30,12 +30,41 @@ export type V2Page =
   | 'admin-invites'
   | 'admin-mod-logs';
 
+const VALID_PAGES: readonly V2Page[] = [
+  'dashboard', 'notice', 'voc', 'idea', 'kpi', 'anon-note', 'gathering',
+  'directory', 'unit-activities', 'corp-card', 'site-report',
+  'admin-users', 'admin-eval-items', 'admin-eval', 'admin-invites', 'admin-mod-logs',
+];
+
+function readHashPage(): V2Page {
+  if (typeof window === 'undefined') return 'dashboard';
+  const raw = window.location.hash.replace(/^#/, '');
+  return (VALID_PAGES as readonly string[]).includes(raw) ? (raw as V2Page) : 'dashboard';
+}
+
 interface V2NavState {
   page: V2Page;
   setPage: (p: V2Page) => void;
 }
 
-export const useV2Nav = create<V2NavState>((set) => ({
-  page: 'dashboard',
-  setPage: (p) => set({ page: p }),
+export const useV2Nav = create<V2NavState>((set, get) => ({
+  page: readHashPage(),
+  setPage: (p) => {
+    if (get().page === p) return;
+    set({ page: p });
+    if (typeof window !== 'undefined') {
+      // URL hash 동기화 — 브라우저 뒤로가기로 이전 페이지 복귀 가능하게.
+      const newHash = p === 'dashboard' ? '' : `#${p}`;
+      const next = window.location.pathname + window.location.search + newHash;
+      window.history.pushState({ v2page: p }, '', next);
+    }
+  },
 }));
+
+// 브라우저 뒤로가기/앞으로가기 → store 동기화 (pushState 재호출 방지 위해 setState 직접 사용)
+if (typeof window !== 'undefined') {
+  window.addEventListener('popstate', () => {
+    const p = readHashPage();
+    useV2Nav.setState({ page: p });
+  });
+}

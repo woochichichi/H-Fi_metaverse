@@ -11,6 +11,12 @@ import { useAuthStore } from '../../../stores/authStore';
 export default function CorpCardPage() {
   const profile = useAuthStore((s) => s.profile);
 
+  console.log('[CorpCardPage] render', {
+    hasProfile: !!profile,
+    team: profile?.team,
+    userId: profile?.id,
+  });
+
   if (profile?.team !== '증권ITO') {
     return (
       <div style={{ padding: 24 }}>
