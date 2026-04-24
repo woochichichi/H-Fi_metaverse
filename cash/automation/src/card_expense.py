@@ -47,8 +47,12 @@ class CardExpenseRow:
     @staticmethod
     def from_json(obj: dict) -> "CardExpenseRow":
         def _i(v):
-            try: return int(str(v).replace(",", "").strip() or 0)
-            except: return 0
+            try:
+                s = str(v).replace(",", "").strip()
+                if not s: return 0
+                return int(float(s))
+            except Exception:
+                return 0
         # 응답 스키마는 프로빙 시 0건이라 미확인.
         # 실행 시 실제 필드명으로 보강 필요. 여기서는 추정 기반 + raw 보존.
         card_no = obj.get("cardNo") or obj.get("cardNum") or ""

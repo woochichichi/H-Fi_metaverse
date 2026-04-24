@@ -1,4 +1,4 @@
-# Windows 작업 스케줄러 등록 — 매일 07:00 run.bat 실행
+# Windows 작업 스케줄러 등록 — 평일(월~금) 07:00 run.bat 실행
 #
 # 실행 (관리자 권한 불필요, 본인 계정 태스크):
 #   powershell -ExecutionPolicy Bypass -File install_schedule.ps1
@@ -24,7 +24,10 @@ if (Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue) {
 }
 
 $action = New-ScheduledTaskAction -Execute $batPath -WorkingDirectory $scriptRoot
-$trigger = New-ScheduledTaskTrigger -Daily -At "07:00"
+# 평일(월~금) 07:00 — 주말 실행 안 함
+$trigger = New-ScheduledTaskTrigger -Weekly `
+    -DaysOfWeek Monday,Tuesday,Wednesday,Thursday,Friday `
+    -At "07:00"
 $settings = New-ScheduledTaskSettingsSet `
     -AllowStartIfOnBatteries `
     -DontStopIfGoingOnBatteries `
@@ -41,7 +44,7 @@ Register-ScheduledTask -TaskName $taskName `
 
 Write-Host ""
 Write-Host "✓ Registered: $taskName" -ForegroundColor Green
-Write-Host "  trigger  : Daily 07:00"
+Write-Host "  trigger  : Weekly Mon-Fri 07:00"
 Write-Host "  command  : $batPath"
 Write-Host "  logs     : $scriptRoot\logs\"
 Write-Host ""

@@ -150,6 +150,34 @@ async def _full_login(page: Page) -> None:
     except PWTimeout:
         pass
 
+    # 세션 살아있으면 SMS OTP 단계 자체를 건너뛰고 바로 메인 진입하는 경우가 있음.
+    # → SMART ERP 버튼이 이미 보이면 OTP 스킵하고 성공 처리.
+    erp_btn_name = SEL["smart_erp"]["entry_btn_name"]
+    async def _erp_visible() -> bool:
+        try:
+            for kind in ("button", "link"):
+                loc = page.get_by_role(kind, name=erp_btn_name)
+                if await loc.count() > 0 and await loc.first.is_visible():
+                    return True
+            loc = page.get_by_text(erp_btn_name, exact=False)
+            if await loc.count() > 0 and await loc.first.is_visible():
+                return True
+        except Exception:
+            pass
+        return False
+
+    # 로그인 직후 ~3s 동안 OTP 화면/메인 화면 둘 중 어느 쪽으로 갔는지 polling
+    otp_needed = True
+    for _ in range(6):
+        if await _erp_visible():
+            print("[login] ✓ OTP 생략 로그인 (세션 재사용) — SMART ERP 버튼 visible")
+            otp_needed = False
+            break
+        await asyncio.sleep(0.5)
+
+    if not otp_needed:
+        return  # OTP 단계 전부 스킵
+
     login_started = time.time()
 
     # SMS 선택 + 요청하기 — 연속 호출 (지연 최소, locator.or_ 로 한 번에)

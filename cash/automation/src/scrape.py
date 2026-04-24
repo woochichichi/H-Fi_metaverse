@@ -59,8 +59,13 @@ class BudgetRow:
     @staticmethod
     def from_json(obj: dict) -> "BudgetRow":
         def _i(v):
-            try: return int(str(v).replace(",", "").strip() or 0)
-            except: return 0
+            # API 가 소수점 포함 문자열 반환(예: "5835815.000") → float 거쳐 int.
+            try:
+                s = str(v).replace(",", "").strip()
+                if not s: return 0
+                return int(float(s))
+            except Exception:
+                return 0
         return BudgetRow(
             acctCode=obj.get("acctCode", ""),
             acctName=obj.get("acctName", ""),
@@ -95,8 +100,12 @@ class BudgetHistRow:
     @staticmethod
     def from_json(obj: dict, rtn_type: str = "") -> "BudgetHistRow":
         def _i(v):
-            try: return int(str(v).replace(",", "").strip() or 0)
-            except: return 0
+            try:
+                s = str(v).replace(",", "").strip()
+                if not s: return 0
+                return int(float(s))
+            except Exception:
+                return 0
         return BudgetHistRow(
             slipNo=obj.get("slipNo") or "",
             slipTypenm=obj.get("slipTypenm") or "",
