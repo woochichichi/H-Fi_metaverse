@@ -37,3 +37,28 @@ supabase/.temp/
 
 # custom
 note.txt
+
+# 민감 문서 / 실데이터 — 커밋 금지
+testDocs/
+design/promo/
+juel-business-master.skill
+.claude/worktrees/
+.playwright-mcp/
+
+# 법인카드 대시보드 업로드·실데이터·작업지시서
+cash/project/uploads/
+cash/**/*.xlsx
+cash/법인카드_*.md
+cash/project/법인카드 현황판.html
+cash/*.html
+
+# 스크래핑 원본·디버그·세션 (automation 하위는 자체 .gitignore 도 있음)
+cash/automation/debug/
+cash/automation/data/
+cash/automation/logs/
+cash/automation/recordings/
+cash/automation/state.json*
+cash/automation/*.session*
+cash/automation/.tg_otp.txt
+cash/automation/.tg_2fa.txt
+cash/automation/.tg_auth_tmp.json

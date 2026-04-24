@@ -1,0 +1,108 @@
+# 사이트 셀렉터 + API 스펙 — 3차 프로빙(2026-04-24)까지 반영.
+#
+# 원칙: 사용자가 화면에서 실제 클릭·조회한 API만 사용. 백그라운드 호출 API는
+#       화면 범위 밖이라 제외 (보안/감사 관점).
+
+login:
+  url: "https://hsi.cleverse.kr/auth/login/login?reUrl=/"
+  id_input_placeholder: "아이디"
+  pw_input_placeholder: "비밀번호"
+  submit_btn_name: "로그인"
+
+otp:
+  method_text: "SMS"
+  request_btn_name: "요청하기"
+  input_placeholder: "인증번호"
+  submit_btn_name: "확인"
+
+smart_erp:
+  entry_btn_name: "SMART ERP"   # 클릭 시 새 팝업 열림
+
+budget_query:
+  accounting_menu_img_alt: "회계관리"
+  menu_btn_name: "통제예산조회"
+  search_btn_name: " 조회"       # 선행 공백 1칸 주의
+  search_btn_scope: "dialog"
+
+# ===== API 스펙 =====
+# 좌표 클릭 대신 API 응답을 Playwright 리스너로 가로채는 방식을 쓴다.
+# UI는 클릭으로 트리거하되(봇 탐지 회피), 데이터는 JSON에서 바로 꺼낸다.
+api:
+  host: "https://www.smarthcps.hsnc.co.kr"
+  budget_list:
+    path: "/FW/cmmn/budgetList.do"
+    method: POST
+    body_template:
+      toDate: "{YYYYMM}"    # 예: 202604
+      status: ""
+      deptCd: "{DEPT_CD}"   # 예: M110301 (AMS-한화투자증권)
+      accountflag: "Y"      # 통제성계정 only
+    response_fields:
+      - compCd              # 회사코드
+      - bdgetYy             # 회계연도
+      - expRvsnDept         # 부서
+      - acctCode            # 계정코드 (53001040 등)
+      - acctName            # 계정과목명
+      - budgetCtrlGbn       # 통제구분
+      - ctrlUnitNm          # 통제단위 (분기)
+      - baseAmt             # 편성예산(A)
+      - sinBdget            # 저장금액(B)
+      - misBdget            # 처리중금액(C)
+      - nonBdget            # 처리완료금액(D)
+      - rstAmt              # 잔여(A-B-C-D)
+      - rmtAmt              # 잔여(확인용 중복?)
+
+  budget_hist_list:
+    path: "/FW/cmmn/budgetHistList.do"
+    method: POST
+    body_template:
+      yymm: "{YYYY}"        # 예: 2026
+      rtnType: "{RTN_TYPE}" # SIN=저장 / MIS=처리중 / NON=처리완료
+      zuonr: "{DEPT_CD}"
+      acctCode: "{ACCT_CODE}"
+      budgetGbn: "2"        # 2=분기 (1=월 추정)
+      accountflag: "Y"
+      toDate: "{YYYYMM}"
+    rtn_type_map:
+      SIN: "저장금액(B)"
+      MIS: "처리중금액(C)"
+      NON: "처리완료금액(D)"
+    response_fields:
+      - bdgtYy
+      - slipNo              # EA관리번호 (XP2026...)
+      - slipType
+      - slipTypenm          # EA유형 (법인카드)
+      - addDate             # 등록일자
+      - postingDate         # 전기일
+      - addUserId           # 작성자 사번
+      - userNm              # 작성자 이름
+      - storeName           # 지급처
+      - tText               # 적요
+      - status
+      - statusNm            # 처리상태 텍스트
+      - acctCode
+      - blart
+      - blartNm             # 관리항목
+      - belnr               # 전표번호
+      - realTAmt            # 금액 (문자열)
+      - realUserName        # 실사용자
+
+  # "법인카드 사용내역" 메뉴를 열면 자동 조회되는 화면의 기본 데이터.
+  # EA 생성 이전의 카드 원본 승인내역 (실시간성).
+  # 조회 화면에 "등록일자 범위"로 노출됨 → 같은 범위로 호출 가능.
+  card_expense_list:
+    path: "/FW/account/corporationCardExpenseList.do"
+    method: POST
+    body_template:
+      empNo: "{EMP_NO}"             # 본인 사번 (로그인 사용자)
+      status: "01"                  # 01=미처리(EA 미생성) 추정
+      cardNo: " "
+      apprNo: ""
+      addDateStart: "{YYYY-MM-DD}"  # 예: 2026-03-01
+      addDateEnd: "{YYYY-MM-DD}"    # 예: 2026-04-24
+      aiYn: "on"
+      useType: " "
+    precondition:
+      description: "메뉴 열기 호출이 선행되어야 함 (세션에 menuseq 등록)."
+      trigger_path: "/FW/account/corporationCardExpense.do"
+      trigger_body: { menuseq: "MN3" }

@@ -1,0 +1,22 @@
+.env
+.env.local
+state.json
+state.json.*
+*.session
+*.session*
+__pycache__/
+*.pyc
+debug/
+data/
+logs/
+recordings/*.webm
+recordings/*.zip
+recordings/*.py
+recordings/flow*.py
+venv/
+.venv/
+
+# 텔레그램 인증 중 임시 파일 (OTP/2FA 주입용)
+.tg_otp.txt
+.tg_2fa.txt
+.tg_auth_tmp.json
