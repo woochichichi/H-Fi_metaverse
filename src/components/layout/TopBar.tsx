@@ -7,6 +7,7 @@ import AdminPanel from '../admin/AdminPanel';
 import MoodPicker from './MoodPicker';
 import NicknameEditor from './NicknameEditor';
 import CharacterCustomModal from '../metaverse/CharacterCustomModal';
+import IosInstallGuide from '../common/IosInstallGuide';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
 import { useMetaverseStore } from '../../stores/metaverseStore';
@@ -30,7 +31,8 @@ export default function TopBar() {
   const [showNicknameEditor, setShowNicknameEditor] = useState(false);
   const [showCharacterCustom, setShowCharacterCustom] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const { canInstall, install } = usePWAInstall();
+  const { canInstall, canChromeInstall, canIOSInstall, install } = usePWAInstall();
+  const [showIosGuide, setShowIosGuide] = useState(false);
   const moodRef = useRef<HTMLDivElement>(null);
   const moodBtnRef = useRef<HTMLDivElement>(null);
 
@@ -172,12 +174,15 @@ export default function TopBar() {
             <span className="hidden sm:inline">디자인</span>
           </button>
 
-          {/* 바탕화면 바로가기 */}
+          {/* 바탕화면/홈 화면 바로가기 — Chrome은 네이티브 프롬프트, iOS Safari는 수동 안내 */}
           {canInstall && (
             <button
-              onClick={install}
+              onClick={() => {
+                if (canChromeInstall) install();
+                else if (canIOSInstall) setShowIosGuide(true);
+              }}
               className="flex h-8 items-center gap-1.5 rounded-lg bg-accent/15 px-2.5 text-[11px] font-semibold text-accent-light transition-colors duration-200 hover:bg-accent/25"
-              title="바탕화면에 바로가기 만들기"
+              title={canIOSInstall ? '홈 화면에 추가하는 방법 보기' : '바탕화면에 바로가기 만들기'}
             >
               <Download size={14} />
               <span className="hidden sm:inline">바로가기</span>
@@ -240,6 +245,9 @@ export default function TopBar() {
       {showCharacterCustom && (
         <CharacterCustomModal onClose={() => setShowCharacterCustom(false)} />
       )}
+
+      {/* iOS 설치 안내 바텀시트 */}
+      {showIosGuide && <IosInstallGuide onClose={() => setShowIosGuide(false)} />}
 
       {/* 로그아웃 확인 모달 */}
       {showLogoutConfirm && createPortal(

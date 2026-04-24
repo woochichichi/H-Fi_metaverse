@@ -4,6 +4,8 @@ import NoteList from './NoteList';
 import NoteForm from './NoteForm';
 import NoteDetail from './NoteDetail';
 import { useNotes, useNoteRealtime } from '../../hooks/useNotes';
+import { usePullToRefresh } from '../../hooks/usePullToRefresh';
+import PullToRefreshIndicator from '../common/PullToRefreshIndicator';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
 import { NOTE_CATEGORIES, NOTE_STATUSES } from '../../lib/constants';
@@ -42,6 +44,11 @@ export default function NotePanel({ onClose }: NotePanelProps) {
   useEffect(() => {
     loadNotes();
   }, [loadNotes]);
+
+  // Pull-to-refresh
+  const { containerRef, pullDistance, isRefreshing, willTrigger } = usePullToRefresh(loadNotes, {
+    disabled: loading,
+  });
 
   // Realtime: 새 쪽지 알림
   useNoteRealtime(
@@ -170,7 +177,8 @@ export default function NotePanel({ onClose }: NotePanelProps) {
       )}
 
       {/* 쪽지 목록 */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div ref={containerRef} className="relative flex-1 overflow-y-auto p-4 space-y-4">
+        <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isRefreshing} willTrigger={willTrigger} />
         {/* 받은 편지 */}
         {received.length > 0 && (
           <div>

@@ -5,6 +5,8 @@ import IdeaDetail from './IdeaDetail';
 import IdeaForm from './IdeaForm';
 import LoadMore from '../common/LoadMore';
 import { useIdeas } from '../../hooks/useIdeas';
+import { usePullToRefresh } from '../../hooks/usePullToRefresh';
+import PullToRefreshIndicator from '../common/PullToRefreshIndicator';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
 import { IDEA_CATEGORIES, IDEA_STATUSES } from '../../lib/constants';
@@ -44,6 +46,11 @@ export default function IdeaPanel({ onClose }: IdeaPanelProps) {
   useEffect(() => {
     loadIdeas();
   }, [loadIdeas]);
+
+  // Pull-to-refresh
+  const { containerRef, pullDistance, isRefreshing, willTrigger } = usePullToRefresh(loadIdeas, {
+    disabled: loading,
+  });
 
   useEffect(() => {
     if (!loading) {
@@ -213,7 +220,8 @@ export default function IdeaPanel({ onClose }: IdeaPanelProps) {
       )}
 
       {/* 아이디어 목록 */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div ref={containerRef} className="relative flex-1 overflow-y-auto p-4">
+        <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isRefreshing} willTrigger={willTrigger} />
         {(loading && skeletonTimeout) || error ? (
           <div className="flex flex-col items-center justify-center py-12">
             <span className="text-3xl mb-2">⚠️</span>

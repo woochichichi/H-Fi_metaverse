@@ -9,7 +9,7 @@ interface BottomTabBarProps {
 
 const TABS: { id: MobileTab; label: string; icon: typeof Phone }[] = [
   { id: 'voc', label: 'VOC', icon: Phone },
-  { id: 'idea', label: '아이디어', icon: Lightbulb },
+  { id: 'idea', label: '제안', icon: Lightbulb },
   { id: 'notice', label: '공지', icon: ClipboardList },
   { id: 'note', label: '쪽지', icon: Mail },
   { id: 'more', label: '더보기', icon: Coffee },
@@ -17,7 +17,14 @@ const TABS: { id: MobileTab; label: string; icon: typeof Phone }[] = [
 
 export default function BottomTabBar({ activeTab, onTabChange }: BottomTabBarProps) {
   return (
-    <nav className="flex h-14 flex-shrink-0 items-center border-t border-white/[.06]" style={{ background: 'rgba(30,30,48,.95)' }}>
+    <nav
+      className="flex flex-shrink-0 items-center border-t border-white/[.06]"
+      style={{
+        background: 'rgba(30,30,48,.95)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+        minHeight: 'calc(56px + env(safe-area-inset-bottom))',
+      }}
+    >
       {TABS.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;

@@ -4,6 +4,8 @@ import NoticeList from './NoticeList';
 import NoticeForm from './NoticeForm';
 import NoticeDetail from './NoticeDetail';
 import { useNotices } from '../../hooks/useNotices';
+import { usePullToRefresh } from '../../hooks/usePullToRefresh';
+import PullToRefreshIndicator from '../common/PullToRefreshIndicator';
 import { useAuthStore } from '../../stores/authStore';
 import { NOTICE_CATEGORIES } from '../../lib/constants';
 import type { UrgencyLevel, NoticeCategory } from '../../lib/constants';
@@ -38,6 +40,11 @@ export default function NoticePanel({ onClose }: NoticePanelProps) {
   useEffect(() => {
     loadNotices();
   }, [loadNotices]);
+
+  // Pull-to-refresh
+  const { containerRef, pullDistance, isRefreshing, willTrigger } = usePullToRefresh(loadNotices, {
+    disabled: loading,
+  });
 
   // 수정 후 목록 갱신 시 selectedNotice도 최신 데이터로 동기화
   useEffect(() => {
@@ -181,7 +188,8 @@ export default function NoticePanel({ onClose }: NoticePanelProps) {
       )}
 
       {/* 공지 목록 */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div ref={containerRef} className="relative flex-1 overflow-y-auto p-4">
+        <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isRefreshing} willTrigger={willTrigger} />
         <NoticeList
           notices={notices}
           loading={loading}

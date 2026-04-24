@@ -5,6 +5,8 @@ import VocForm from './VocForm';
 import VocDetail from './VocDetail';
 import VocStats from './VocStats';
 import { useVocs, useVocRealtime } from '../../hooks/useVocs';
+import { usePullToRefresh } from '../../hooks/usePullToRefresh';
+import PullToRefreshIndicator from '../common/PullToRefreshIndicator';
 import { useAuthStore } from '../../stores/authStore';
 import { useUiStore } from '../../stores/uiStore';
 import { supabase } from '../../lib/supabase';
@@ -59,6 +61,11 @@ export default function VocPanel({ onClose }: VocPanelProps) {
   useEffect(() => {
     loadVocs();
   }, [loadVocs]);
+
+  // Pull-to-refresh
+  const { containerRef, pullDistance, isRefreshing, willTrigger } = usePullToRefresh(loadVocs, {
+    disabled: loading,
+  });
 
   // Realtime: 새 VOC 알림
   useVocRealtime(
@@ -199,7 +206,8 @@ export default function VocPanel({ onClose }: VocPanelProps) {
       )}
 
       {/* VOC 목록 — 비공개(is_hidden) VOC는 리더 이상에게만 표시 */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div ref={containerRef} className="relative flex-1 overflow-y-auto p-4">
+        <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isRefreshing} willTrigger={willTrigger} />
         <VocList
           vocs={isLeader ? vocs : vocs.filter((v) => !v.is_hidden)}
           loading={loading}

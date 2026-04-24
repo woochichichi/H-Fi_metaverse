@@ -2,6 +2,7 @@ import { useState } from 'react';
 import TopBar from '../layout/TopBar';
 import BottomTabBar, { type MobileTab } from './BottomTabBar';
 import MobileHome from './MobileHome';
+import PwaInstallBanner from '../common/PwaInstallBanner';
 
 export default function MobileLayout() {
   const [activeTab, setActiveTab] = useState<MobileTab>('voc');
@@ -13,6 +14,7 @@ export default function MobileLayout() {
         <MobileHome activeTab={activeTab} />
       </main>
       <BottomTabBar activeTab={activeTab} onTabChange={setActiveTab} />
+      <PwaInstallBanner />
     </div>
   );
 }
