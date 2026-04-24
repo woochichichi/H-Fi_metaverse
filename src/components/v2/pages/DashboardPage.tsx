@@ -101,19 +101,14 @@ export default function DashboardPage() {
               .eq('team', team)
           : { count: 0 };
 
-        // 아이디어 제안 상태
+        // 아이디어 제안 상태 — ideas 테이블에 team 컬럼 없음(전사 광장 설계).
+        // team 별 구분이 무의미하므로 ideaAll/ideaMine 모두 동일 카운트 사용.
         const ideaQ = supabase
           .from('ideas')
           .select('*', { count: 'exact', head: true })
           .eq('status', '제안');
         const { count: ideaAll } = await ideaQ;
-        const { count: ideaMine } = team
-          ? await supabase
-              .from('ideas')
-              .select('*', { count: 'exact', head: true })
-              .eq('status', '제안')
-              .eq('team', team)
-          : { count: 0 };
+        const ideaMine = ideaAll;
 
         // 익명 쪽지 (leader/admin): 자기 팀 수신 기준 미답변만
         let anonWaiting = 0;
