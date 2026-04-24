@@ -6,7 +6,9 @@ import CorpCardAccountList from '../dashboard/CorpCardAccountList';
 import CorpCardMemberList from '../dashboard/CorpCardMemberList';
 import CorpCardDailyChart from '../dashboard/CorpCardDailyChart';
 import CorpCardQuarterChart from '../dashboard/CorpCardQuarterChart';
-import CorpCardTxFeed from '../dashboard/CorpCardTxFeed';
+import CorpCardCategoryDonut from '../dashboard/CorpCardCategoryDonut';
+import CorpCardCategoryTrend from '../dashboard/CorpCardCategoryTrend';
+import CorpCardTopMerchants from '../dashboard/CorpCardTopMerchants';
 import { useAuthStore } from '../../../stores/authStore';
 import { useCorpCardLive } from '../../../hooks/useCorpCardLive';
 import { useQuarterCompare } from '../../../hooks/useQuarterCompare';
@@ -220,8 +222,17 @@ function CorpCardPageContent({ team }: { team: string }) {
             latestCapturedAt={myPending.latestCapturedAt}
           />
 
-          {/* 6) 실시간 거래 피드 */}
-          <CorpCardTxFeed transactions={transactions} limit={12} />
+          {/* 6) 용도별 사용 비중 + 상위 사용처 — "사람 기준 아니라 용도 기준" */}
+          <div className="w-cc-main-grid">
+            <CorpCardCategoryDonut transactions={transactions} />
+            <CorpCardTopMerchants transactions={transactions} limit={5} />
+          </div>
+
+          {/* 7) 용도별 일별 추이 */}
+          <CorpCardCategoryTrend
+            transactions={transactions}
+            monthLabel={`${snapshot.period_ym.slice(0, 4)}.${snapshot.period_ym.slice(4, 6)}`}
+          />
         </>
       )}
     </div>
