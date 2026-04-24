@@ -170,8 +170,18 @@ class ResponseWaiter:
 
 
 async def _enter_budget_menu(erp_page: Page) -> None:
-    """회계관리 → 통제예산조회 메뉴 진입."""
+    """회계관리 → 통제예산조회 메뉴 진입. 이미 활성이면 스킵 (탭 중복 방지)."""
     cfg = SEL["budget_query"]
+    # 이미 통제예산조회 dialog 가 떠있고 '조회' 버튼이 visible 이면 재진입 스킵.
+    try:
+        search_btn_name = cfg["search_btn_name"]
+        dlg = erp_page.get_by_role("dialog").get_by_role("button", name=search_btn_name)
+        if await dlg.count() > 0 and await dlg.first.is_visible():
+            print("[scrape] 통제예산조회 이미 활성 — 메뉴 재진입 스킵")
+            return
+    except Exception:
+        pass
+
     print("[scrape] 회계관리 메뉴")
     await erp_page.get_by_role("img", name=cfg["accounting_menu_img_alt"]).click()
     await human_delay(1.5, 2.5)
@@ -223,39 +233,45 @@ async def _trigger_hist_api(erp_page: Page, dept_cd: str, period_ym: str,
     import random
     host = SEL["api"]["host"]
 
-    # 공통 payload (Pop과 List가 같은 키를 쓰되 Pop은 menulink/prtmenuseq/isAuth 추가)
+    # Budget 분기 — period_ym 끝 월로 Q1(1)~Q4(4) 판단
+    month = int(period_ym[4:6])
+    quarter = (month - 1) // 3 + 1
+
+    # List 요청 (JSON) — 조회 조건 실데이터
     common = {
         "yymm": period_ym[:4],
         "rtnType": rtn_type,
         "zuonr": dept_cd,
         "acctCode": acct_code,
-        "budgetGbn": "2",
+        "budgetGbn": str(quarter),   # 1/2/3/4 분기
         "accountflag": "Y",
         "toDate": period_ym,
     }
-    pop_body = {
-        **common,
+
+    # Pop 요청 (form-urlencoded) — probe 로 확인된 실제 포맷.
+    # 최소 payload: isAuth/menulink/prtmenuseq. JSON 으로 보내면 400.
+    pop_form = {
+        "isAuth": "true",
         "menulink": "/cmmn/budgetHistListPop.do",
         "prtmenuseq": "MN3",
-        # isAuth 는 서버가 세션에서 평가하므로 클라가 명시하지 않아도 되지만,
-        # 실제 요청에서 포함되던 키이므로 빈 값이라도 유지해 payload shape 일치.
-        "isAuth": "",
     }
 
-    # Playwright 내부 fetch — 브라우저 쿠키·origin·UA 그대로 사용
     result = await erp_page.evaluate(
-        """async ({host, popPath, listPath, popBody, listBody, gapMs}) => {
-            const hdr = {'Content-Type': 'application/json; charset=UTF-8'};
+        """async ({host, popPath, listPath, popForm, listBody, gapMs}) => {
+            // Pop: form-urlencoded (실제 브라우저 동작과 동일)
+            const popParams = new URLSearchParams();
+            for (const [k, v] of Object.entries(popForm)) popParams.set(k, v);
             const pop = await fetch(host + popPath, {
                 method: 'POST', credentials: 'include',
-                headers: hdr, body: JSON.stringify(popBody)
+                headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                body: popParams.toString()
             });
-            const popText = await pop.text();
-            // 사용자 클릭과 비슷한 짧은 간격
             await new Promise(r => setTimeout(r, gapMs));
+            // List: JSON
             const list = await fetch(host + listPath, {
                 method: 'POST', credentials: 'include',
-                headers: hdr, body: JSON.stringify(listBody)
+                headers: {'Content-Type': 'application/json; charset=UTF-8'},
+                body: JSON.stringify(listBody)
             });
             const listText = await list.text();
             let listData = null;
@@ -271,13 +287,15 @@ async def _trigger_hist_api(erp_page: Page, dept_cd: str, period_ym: str,
             "host": host,
             "popPath": BUDGET_HIST_POP_PATH,
             "listPath": BUDGET_HIST_PATH,
-            "popBody": pop_body,
+            "popForm": pop_form,
             "listBody": common,
             "gapMs": random.randint(50, 120),
         },
     )
+    # Pop 은 서버 상태 준비 호출로 추정 — 400 이어도 List 가 성공하는 경우 있음.
+    # List 결과가 핵심이므로 List 상태만 엄격히 판정.
     if not result.get("popOk"):
-        raise RuntimeError(f"budgetHistListPop 실패: status={result.get('popStatus')}")
+        print(f"  [warn] Pop status={result.get('popStatus')} — List 로 직접 시도")
     if not result.get("listOk"):
         raise RuntimeError(
             f"budgetHistList 실패: status={result.get('listStatus')} "
