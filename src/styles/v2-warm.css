@@ -24,9 +24,13 @@
   --w-accent-hover: #D95F48;
 
   --w-success: #3F9D6E;
+  --w-success-soft: #E8F5EE;
   --w-warning: #D08A2E;
+  --w-warning-soft: #FAEFD9;
   --w-danger: #C8453E;
+  --w-danger-soft: #FCE4E1;
   --w-info: #3D7FA8;
+  --w-info-soft: #E1EEF7;
 
   /* 시급성 */
   --w-urgency-critical: #C8453E;
@@ -35,6 +39,13 @@
   --w-urgency-todo-soft: #FAEFD9;
   --w-urgency-info: #3D7FA8;
   --w-urgency-info-soft: #E1EEF7;
+
+  /* heatmap 5단계 (코랄 alpha) */
+  --w-heat-1: rgba(232, 114, 92, 0.12);
+  --w-heat-2: rgba(232, 114, 92, 0.22);
+  --w-heat-3: rgba(232, 114, 92, 0.38);
+  --w-heat-4: rgba(232, 114, 92, 0.55);
+  --w-heat-5: rgba(232, 114, 92, 0.75);
 
   /* 레이아웃 */
   --w-radius-sm: 8px;
@@ -211,9 +222,13 @@
   --w-accent-hover: #14B8A6;
 
   --w-success: #34D399;
+  --w-success-soft: rgba(52, 211, 153, 0.15);
   --w-warning: #FBBF24;
+  --w-warning-soft: rgba(251, 191, 36, 0.15);
   --w-danger: #F87171;
+  --w-danger-soft: rgba(248, 113, 113, 0.15);
   --w-info: #818CF8;
+  --w-info-soft: rgba(129, 140, 248, 0.15);
 
   --w-urgency-critical: #F87171;
   --w-urgency-critical-soft: rgba(248, 113, 113, 0.15);
@@ -221,6 +236,13 @@
   --w-urgency-todo-soft: rgba(251, 191, 36, 0.15);
   --w-urgency-info: #818CF8;
   --w-urgency-info-soft: rgba(129, 140, 248, 0.15);
+
+  /* heatmap 5단계 (다크 teal alpha) */
+  --w-heat-1: rgba(45, 212, 191, 0.12);
+  --w-heat-2: rgba(45, 212, 191, 0.22);
+  --w-heat-3: rgba(45, 212, 191, 0.38);
+  --w-heat-4: rgba(45, 212, 191, 0.55);
+  --w-heat-5: rgba(45, 212, 191, 0.75);
 
   --w-radius-sm: 8px;
   --w-radius: 12px;

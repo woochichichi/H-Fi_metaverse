@@ -127,3 +127,5 @@
 - 법인카드 화면도 cash/project 목업대로 안 했음 지적 → 모든 화면 게더타운 → C안 톤 일괄 변경 요청, 병렬 진행 + Agent 활용 가능
 - 1차 적용: PostDetail 컴포넌트 셋(PostHeaderCard/WorkflowStepper/DescriptionCard/ReplyCard/ComposerCard/MiniStat/ActivityLogCard) 신설 + 게시글 5개 페이지 교체 + ConversationThread 정리
 - 2차 적용: 대시보드 톤 통일(KpiCard 아이콘 박스 + AdminHints/MemberHints 헤더 + WidgetHeader 라벨) + 법인카드 페이지 cash 목업 풀 이식(KPI 4열/계정행/팀원 레이싱/일별바차트/분기차트/거래피드 6위젯, w-cc-* CSS 양 테마)
+- 목업과 다르게 모서리 각진 문제 발견 → 전역 *{border-radius:0!important} 우회용 명시 !important fix (PostDetail/Thread/Card/.w-cc-* + 예외 override)
+- 그 외 페이지(KPI/Admin/Directory 등 10개) 톤 일관성 점검 → Agent 분석 결과 잔재 극소, --w-success-soft/--w-heat-1~5 토큰 추가 + #E8F5EE 10건 치환 + heatColor 함수 CSS 변수화

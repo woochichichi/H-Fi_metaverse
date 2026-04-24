@@ -27,7 +27,7 @@ const STATUS_CLASS: Record<string, string> = {
 
 function statusStyle(status: string): React.CSSProperties {
   if (status === '퇴사') return { background: 'var(--w-urgency-critical-soft)', color: 'var(--w-danger)' };
-  if (status === 'online') return { background: '#E8F5EE', color: 'var(--w-success)' };
+  if (status === 'online') return { background: 'var(--w-success-soft)', color: 'var(--w-success)' };
   if (status === '재택') return { background: 'var(--w-urgency-info-soft)', color: 'var(--w-info)' };
   return { background: 'var(--w-surface-2)', color: 'var(--w-text-muted)' };
 }
@@ -197,7 +197,7 @@ export default function AdminUsersPage() {
                 style={{
                   padding: '3px 8px',
                   fontSize: 11,
-                  background: u.status === 'offline' ? '#E8F5EE' : 'var(--w-urgency-critical-soft)',
+                  background: u.status === 'offline' ? 'var(--w-success-soft)' : 'var(--w-urgency-critical-soft)',
                   color: u.status === 'offline' ? 'var(--w-success)' : 'var(--w-danger)',
                 }}
               >
@@ -211,7 +211,7 @@ export default function AdminUsersPage() {
                 style={{
                   padding: '3px 8px',
                   fontSize: 11,
-                  background: u.status === '퇴사' ? '#E8F5EE' : 'var(--w-urgency-critical-soft)',
+                  background: u.status === '퇴사' ? 'var(--w-success-soft)' : 'var(--w-urgency-critical-soft)',
                   color: u.status === '퇴사' ? 'var(--w-success)' : 'var(--w-danger)',
                   display: 'flex',
                   alignItems: 'center',

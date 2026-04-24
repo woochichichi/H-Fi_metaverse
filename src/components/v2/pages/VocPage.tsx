@@ -181,7 +181,7 @@ export default function VocPage() {
 }
 
 function StatusBadge({ status }: { status: VocStatus }) {
-  if (status === '완료') return <span className="w-badge" style={{ background: '#E8F5EE', color: 'var(--w-success)' }}>완료</span>;
+  if (status === '완료') return <span className="w-badge" style={{ background: 'var(--w-success-soft)', color: 'var(--w-success)' }}>완료</span>;
   if (status === '보류') return <span className="w-badge w-badge-muted">보류</span>;
   if (status === '처리중') return <span className="w-badge w-badge-accent">처리중</span>;
   if (status === '검토중') return <span className="w-badge w-badge-todo">검토중</span>;

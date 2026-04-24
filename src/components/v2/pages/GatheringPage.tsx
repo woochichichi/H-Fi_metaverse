@@ -167,7 +167,7 @@ export default function GatheringPage() {
 function StatusBadge({ status }: { status: Gathering['status'] }) {
   if (status === 'recruiting') return <span className="w-badge w-badge-accent">모집중</span>;
   if (status === 'closed') return <span className="w-badge w-badge-muted">마감</span>;
-  return <span className="w-badge" style={{ background: '#E8F5EE', color: 'var(--w-success)' }}>종료</span>;
+  return <span className="w-badge" style={{ background: 'var(--w-success-soft)', color: 'var(--w-success)' }}>종료</span>;
 }
 
 function GatheringDetailPanel({

@@ -168,7 +168,7 @@ export default function SiteReportPage() {
 }
 
 function ReportStatusBadge({ status }: { status: SiteReport['status'] }) {
-  if (status === '완료') return <span className="w-badge" style={{ background: '#E8F5EE', color: 'var(--w-success)' }}>완료</span>;
+  if (status === '완료') return <span className="w-badge" style={{ background: 'var(--w-success-soft)', color: 'var(--w-success)' }}>완료</span>;
   if (status === '처리중') return <span className="w-badge w-badge-accent">처리중</span>;
   if (status === '확인') return <span className="w-badge w-badge-todo">확인</span>;
   return <span className="w-badge w-badge-info">접수</span>;

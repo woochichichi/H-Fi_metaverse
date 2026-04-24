@@ -187,7 +187,7 @@ function StatusBadge({ status }: { status: IdeaStatus }) {
     '반려': { cls: 'w-badge w-badge-muted', label: '반려' },
   };
   const it = map[status];
-  const style = status === '완료' ? { background: '#E8F5EE', color: 'var(--w-success)' } : undefined;
+  const style = status === '완료' ? { background: 'var(--w-success-soft)', color: 'var(--w-success)' } : undefined;
   return <span className={it.cls} style={style}>{it.label}</span>;
 }
 

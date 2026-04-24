@@ -98,7 +98,7 @@ export default function AdminEvalItemsPage() {
         <span
           className="w-badge"
           style={{
-            background: it.active ? '#E8F5EE' : 'var(--w-surface-2)',
+            background: it.active ? 'var(--w-success-soft)' : 'var(--w-surface-2)',
             color: it.active ? 'var(--w-success)' : 'var(--w-text-muted)',
           }}
         >

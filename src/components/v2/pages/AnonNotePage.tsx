@@ -341,7 +341,7 @@ function NoteDetailPanel({
 }
 
 function NoteStatusBadge({ status }: { status: NoteStatus }) {
-  if (status === '답변완료') return <span className="w-badge" style={{ background: '#E8F5EE', color: 'var(--w-success)' }}>답변완료</span>;
+  if (status === '답변완료') return <span className="w-badge" style={{ background: 'var(--w-success-soft)', color: 'var(--w-success)' }}>답변완료</span>;
   if (status === '읽음') return <span className="w-badge w-badge-info">읽음</span>;
   return <span className="w-badge w-badge-todo">미읽음</span>;
 }

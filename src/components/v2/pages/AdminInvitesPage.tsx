@@ -162,7 +162,7 @@ export default function AdminInvitesPage() {
           <span
             className="w-badge"
             style={{
-              background: active ? '#E8F5EE' : 'var(--w-surface-2)',
+              background: active ? 'var(--w-success-soft)' : 'var(--w-surface-2)',
               color: active ? 'var(--w-success)' : 'var(--w-text-muted)',
             }}
           >

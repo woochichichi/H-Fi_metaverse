@@ -39,14 +39,14 @@ const TYPE_LABELS: Record<string, string> = {
   exchange_join: '인적교류',
 };
 
-// coral tone heat color
+// heatmap 5단계 — CSS 토큰(--w-heat-*)으로 양 테마 자동 대응
 function heatColor(rate: number): string {
   if (rate === 0) return 'var(--w-surface-2)';
-  if (rate < 0.5) return 'rgba(232, 114, 92, 0.12)';
-  if (rate < 1) return 'rgba(232, 114, 92, 0.22)';
-  if (rate < 2) return 'rgba(232, 114, 92, 0.38)';
-  if (rate < 3) return 'rgba(232, 114, 92, 0.55)';
-  return 'rgba(232, 114, 92, 0.75)';
+  if (rate < 0.5) return 'var(--w-heat-1)';
+  if (rate < 1) return 'var(--w-heat-2)';
+  if (rate < 2) return 'var(--w-heat-3)';
+  if (rate < 3) return 'var(--w-heat-4)';
+  return 'var(--w-heat-5)';
 }
 
 export default function AdminEvalDashboardPage() {
