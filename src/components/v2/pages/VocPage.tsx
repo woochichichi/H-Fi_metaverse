@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
-import { MessageSquareHeart, Plus, AlertTriangle, ShieldCheck, Users, X } from 'lucide-react';
+import { MessageSquareHeart, Plus, AlertTriangle, ShieldCheck, Users, Sparkles, X } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
-import EmptyState from '../ui/EmptyState';
 import { StatusPicker, type StatusTone } from '../ui/DetailShell';
 import {
   PostHeaderCard,
@@ -530,7 +529,7 @@ function AnonymityNotice() {
         padding: 14,
         marginBottom: 14,
         display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
+        gridTemplateColumns: 'repeat(3, 1fr)',
         gap: 14,
         background: 'var(--w-surface)',
         border: '1px solid var(--w-border)',
@@ -557,6 +556,19 @@ function AnonymityNotice() {
           <div style={{ fontSize: 12, color: 'var(--w-text-soft)', lineHeight: 1.5 }}>
             익명 체크 시 작성자 ID가 DB에 <b>NULL</b>로 저장되며, 활동 로그에도 기록되지 않습니다.
             관리자·리더·팀장 누구도 누가 썼는지 알 수 없고, 추후에도 조회·복원할 방법이 없습니다.
+          </div>
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 10 }}>
+        <Sparkles size={18} style={{ color: 'var(--w-warn, #d97706)', flexShrink: 0, marginTop: 2 }} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--w-text)' }}>
+            마음 편히, 다만 서로를 향한 예의는 지켜요
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--w-text-soft)', lineHeight: 1.5 }}>
+            평소엔 말 꺼내기 어려웠던 불편·아쉬움·바람을 풀어서 적어주세요.
+            상황·맥락·바라는 변화를 함께 적어주시면 처리에 큰 도움이 됩니다.
+            특정 인물을 겨냥한 인신공격이나 비난성 표현은 지양해 주세요 — 같은 내용도 사실과 감정을 나눠 적으면 더 잘 전달됩니다.
           </div>
         </div>
       </div>
