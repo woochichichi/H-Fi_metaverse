@@ -332,3 +332,18 @@ realtime:inbox_<userId> after `subscribe()`.
 **원인:** `git checkout <commit>`은 working tree 파일을 해당 커밋 내용으로 **덮어쓴다**. 사용자 에디터에 열려있던 파일도 같이 바뀌어 혼란 유발. 다행히 원격에 push된 커밋들은 손상 없음.
 **해결:** `git checkout main` 으로 복귀 → stash 복원 → 원상 회복. 소요 30초.
 **교훈:** 빌드/린트 비교는 별도 **worktree** (`git worktree add`) 또는 **`git show <commit>:<file>`** 로 하는 게 안전. working tree를 이동시키는 명령은 사용자의 에디터 상태에 영향 주는 파괴적 액션 — 피해야 함. 라이브 작업 중에는 특히.
+
+
+### 용도별 도넛/트렌드 카테고리 오분류 — memo 기반 분류의 함정 (2026-04-25)
+**증상:** "용도별 사용 비중" 도넛이 회의 60%, 기타 28%, 식대 11%, 교통 1% 로 표시. 동일 페이지 위쪽 **계정별 예산** 카드는 식대 78% / 회의 15% / 교통 7% 로 정반대. "어디에 쓰는지 한눈에" 가 페이지의 핵심 가치인데 두 위젯이 서로 모순되는 정보를 던지고 있었음.
+**원인:** `classifyTransaction(memo)` 가 거래의 자유 텍스트(`t_text`)를 한글 키워드 regex 로 재분류. 그런데 ERP 메모는 "재해복구훈련 점심", "AX 업무 회의 및 노트북 수령(택시)", "(공용)금융ITO인력간 인적네트워크활성화간담회" 처럼 **목적·수단·동석자가 한 줄에 섞여서** 들어옴. 결과적으로:
+- 식대 거래의 "재해복구훈련 점심", "GC Unit 리더간 식사", "야간작업:크립토" 등이 키워드 미스로 → "기타" 또는 "회의" 로 오분류 (식대 20건 중 절반 가까이 오분류).
+- 교통 거래의 "AX 업무 회의 및 노트북 수령" 두 건이 "회의" 키워드 매치로 → 회의로 오분류.
+- 정작 회계 시스템에는 `acct_code` 가 식대=53001040 / 교통=53401010 / 회의=53405010 으로 **이미 정확하게 분류돼 있었음** — 도넛이 이 authoritative 분류 키를 무시하고 자체 regex 를 돌렸던 게 본질.
+**해결:**
+1. `CorpTransaction` 타입에 `acctCode: string` 추가, `useCorpCardLive.toTx()` 에서 `r.acct_code` 전파.
+2. `classifyByAcctCode(acctCode)` 헬퍼 신설 — `classifyTransaction(memo)` 와 동일한 `{account, icon, label}` 인터페이스.
+3. `CorpCardCategoryDonut` / `CorpCardCategoryTrend` 가 `classifyByAcctCode(t.acctCode)` 를 사용하도록 변경.
+4. 동시에 두 위젯이 받는 `transactions` 를 `stats.txThisMonth` 로 좁힘 — 일별 바차트와 스코프 통일 (분기 누적이면 도넛이 매월 의미 흐려짐).
+**교훈:** authoritative 분류 키(외부 시스템이 이미 정한 코드)가 있으면 **휴리스틱 재분류는 금지**. 자유 텍스트 재분류는 분류 키가 없을 때만 폴백으로 사용. 한 페이지에 같은 축의 정보를 두 번 표시할 때(계정별 예산 ↔ 용도 도넛) 두 위젯이 같은 소스에서 같은 결과를 내는지 반드시 교차 검증.
+**관련 파일:** `src/lib/corpCardMockData.ts`, `src/hooks/useCorpCardLive.ts`, `src/components/v2/dashboard/CorpCardCategoryDonut.tsx`, `src/components/v2/dashboard/CorpCardCategoryTrend.tsx`, `src/components/v2/pages/CorpCardPage.tsx`

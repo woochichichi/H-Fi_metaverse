@@ -1592,6 +1592,19 @@
   flex-direction: column;
   justify-content: flex-end;
 }
+/* 오늘 셀에 세로 점선 — 일별 바차트에서 "지금 어디" 표시 */
+.v2-warm .w-cc-bar-col.is-today .w-cc-bar-cell::before,
+.v2-dark .w-cc-bar-col.is-today .w-cc-bar-cell::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 1px dashed var(--w-accent-hover);
+  opacity: 0.6;
+  pointer-events: none;
+}
 .v2-warm .w-cc-bar,
 .v2-dark .w-cc-bar {
   width: 100%;

@@ -120,6 +120,16 @@ function CorpCardPageContent({ team }: { team: string }) {
         desc: `예상 대비 ${(100 - stats.burnPct).toFixed(0)}% 적게 사용 중. 계획된 회식·회의 일정 점검.`,
       });
     }
+
+    // 그 외 모든 지표 정상이면 "정상" 카드를 1건 노출 — 빈 카드가 화면 차지하는 것보다
+    // 긍정 시그널이 정보 밀도에 도움 (paceStatus 가 이미 계산돼 있으니 활용).
+    if (list.length === 0 && stats.burnPct > 0) {
+      list.push({
+        kind: 'info',
+        title: `${stats.paceDesc} · 소진 ${stats.burnPct.toFixed(0)}%`,
+        desc: `이번 달 ${fmtKR(stats.monthUsed)} 사용 / 예상 ${fmtKR(stats.expectedByNow)}. 분기말 예상 ${stats.projectedQuarterPct.toFixed(0)}%.`,
+      });
+    }
     return list;
   }, [stats]);
 
@@ -220,7 +230,17 @@ function CorpCardPageContent({ team }: { team: string }) {
                 >
                   {fmtKR(stats.projectedQuarterEnd)}원
                 </div>
-                <div className="sub">편성 {stats.projectedQuarterPct.toFixed(0)}%</div>
+                <div className="sub">
+                  편성 {stats.projectedQuarterPct.toFixed(0)}%
+                  {' · '}
+                  {stats.projectedQuarterPct > 100
+                    ? '초과 위험'
+                    : stats.projectedQuarterPct > 90
+                      ? '여유 부족'
+                      : stats.projectedQuarterPct < 60
+                        ? '미소진 위험'
+                        : '양호'}
+                </div>
               </div>
             </div>
           </div>
@@ -235,12 +255,12 @@ function CorpCardPageContent({ team }: { team: string }) {
           />
 
           {/* 6) 용도별 사용 비중 — "사람 기준 아니라 용도 기준"
-                 상위 사용처 TOP은 store_name 원본에 개인 식별자가 섞여 제거됨 */}
-          <CorpCardCategoryDonut transactions={transactions} />
+                 acct_code 로 분류(memo 오분류 방지). 이번 달 거래만 대상 — 일별 바차트와 스코프 통일 */}
+          <CorpCardCategoryDonut transactions={stats.txThisMonth} />
 
-          {/* 7) 용도별 일별 추이 */}
+          {/* 7) 용도별 일별 추이 — 이번 달 거래만 대상 */}
           <CorpCardCategoryTrend
-            transactions={transactions}
+            transactions={stats.txThisMonth}
             monthLabel={`${snapshot.period_ym.slice(0, 4)}.${snapshot.period_ym.slice(4, 6)}`}
           />
         </>

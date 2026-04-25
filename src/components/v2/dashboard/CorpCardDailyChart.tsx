@@ -51,7 +51,7 @@ export default function CorpCardDailyChart({
           const isToday = day === today;
 
           return (
-            <div key={date} className="w-cc-bar-col">
+            <div key={date} className={`w-cc-bar-col${isToday ? ' is-today' : ''}`}>
               <div className="w-cc-bar-cell">
                 {!isFuture && val > 0 && (
                   <div
@@ -62,7 +62,12 @@ export default function CorpCardDailyChart({
                 )}
                 {isFuture && <div className="w-cc-bar muted" style={{ height: '2%' }} />}
               </div>
-              <div className={`w-cc-bar-label${isToday ? ' today' : ''}`}>{day}</div>
+              <div
+                className={`w-cc-bar-label${isToday ? ' today' : ''}`}
+                title={isToday ? '오늘' : undefined}
+              >
+                {day}
+              </div>
             </div>
           );
         })}

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { classifyTransaction, fmtKR, type CorpTransaction } from '../../../lib/corpCardMockData';
+import { classifyByAcctCode, fmtKR, type CorpTransaction } from '../../../lib/corpCardMockData';
 
 interface Props {
   transactions: CorpTransaction[];
@@ -27,7 +27,7 @@ export default function CorpCardCategoryTrend({ transactions, monthLabel }: Prop
     const seenCategories = new Set<string>();
 
     transactions.forEach((t) => {
-      const c = classifyTransaction(t.memo);
+      const c = classifyByAcctCode(t.acctCode);
       const day = t.regDate?.slice(5) ?? ''; // "MM-DD"
       if (!day) return;
       seenCategories.add(c.label);
@@ -99,7 +99,9 @@ export default function CorpCardCategoryTrend({ transactions, monthLabel }: Prop
             {chartData.categories.map((cat) => (
               <Line
                 key={cat}
-                type="monotone"
+                /* step: 무거래일에 부드러운 곡선이 값이 있는 듯한 착시를 줘서 회계 데이터엔
+                   계단형이 더 정확. monotone 으로 되돌리려면 'monotone'. */
+                type="stepAfter"
                 dataKey={cat}
                 stroke={CATEGORY_COLOR[cat]}
                 strokeWidth={2}

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { classifyTransaction, fmt, fmtKR, type CorpTransaction } from '../../../lib/corpCardMockData';
+import { classifyByAcctCode, fmt, fmtKR, type CorpTransaction } from '../../../lib/corpCardMockData';
 
 interface Props {
   transactions: CorpTransaction[];
@@ -8,7 +8,8 @@ interface Props {
 
 /**
  * 카테고리별 사용 비중 도넛 — 팀장 피드백 "사람 기준 아니라 용도 기준으로".
- * classifyTransaction(memo) 로 거래를 4개 카테고리(교통/회의/식대/기타)로 분류.
+ * 회계 계정 코드(acctCode) 로 분류 — memo 기반 분류는 "AX 업무 회의 후 택시" 같은
+ * 복합 의미의 식대·교통 거래를 회의로 잘못 분류하는 이슈가 있어 acct_code 를 사용.
  */
 export default function CorpCardCategoryDonut({ transactions }: Props) {
   const { data, total } = useMemo(() => {
@@ -20,7 +21,7 @@ export default function CorpCardCategoryDonut({ transactions }: Props) {
       '기타': '#94a3b8',
     };
     transactions.forEach((t) => {
-      const c = classifyTransaction(t.memo);
+      const c = classifyByAcctCode(t.acctCode);
       const prev = agg.get(c.label) ?? {
         label: c.label,
         icon: c.icon,

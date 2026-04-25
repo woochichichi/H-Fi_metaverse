@@ -153,6 +153,7 @@ function toTx(r: TxRow): CorpTransaction {
     memo: r.t_text ?? '',
     status: (r.status_nm as any) || '승인',
     docNo: '',
+    acctCode: r.acct_code ?? '',
   };
 }
 

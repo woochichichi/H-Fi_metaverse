@@ -27,6 +27,8 @@ export interface CorpTransaction {
   memo: string;
   status: '승인' | '처리중' | '반려';
   docNo: string;
+  /** 회계 계정 코드 — 53001040=식대, 53401010=교통, 53405010=회의. 오분류 방지용 authoritative 분류 키 */
+  acctCode: string;
 }
 
 export interface CorpMember {
@@ -70,6 +72,18 @@ export function classifyTransaction(memo: string): { account: string; icon: stri
   if (/회의|간담회|미팅|리뷰|점검|워크샵|멘토링|네트워|팀회의|unit회의/.test(memo)) return { account: '53405010', icon: '💬', label: '회의' };
   if (/야근|배민|도시락|점심|저녁|식대|회식|환영|온보딩|분식/.test(memo)) return { account: '53001040', icon: '🍱', label: '식대' };
   return { account: '53001040', icon: '📋', label: '기타' };
+}
+
+/**
+ * acct_code 기반 용도 분류 — 도넛/트렌드 차트는 이 함수를 사용.
+ * memo 기반 classifyTransaction 은 memo 텍스트가 "택시비로 회의 참석" 같이 복합 의미를 담아
+ * 식대/교통 거래가 회의로 잘못 분류되는 이슈가 있어, 회계 계정 코드를 authoritative 분류 키로 사용.
+ */
+export function classifyByAcctCode(acctCode: string): { account: string; icon: string; label: string } {
+  if (acctCode === '53001040') return { account: acctCode, icon: '🍱', label: '식대' };
+  if (acctCode === '53401010') return { account: acctCode, icon: '🚕', label: '교통' };
+  if (acctCode === '53405010') return { account: acctCode, icon: '💬', label: '회의' };
+  return { account: acctCode || '-', icon: '📋', label: '기타' };
 }
 
 export function extractHeadcount(memo: string): number {
