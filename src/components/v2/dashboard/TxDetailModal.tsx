@@ -1,7 +1,10 @@
 import { createPortal } from 'react-dom';
-import { useEffect } from 'react';
-import { X, Mail } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { X, MessageSquarePlus, Check } from 'lucide-react';
 import { fmt, fmtKR, type CorpTransaction } from '../../../lib/corpCardMockData';
+import { useThemeStore } from '../../../stores/themeStore';
+import { useAuthStore } from '../../../stores/authStore';
+import { useVocs } from '../../../hooks/useVocs';
 
 interface Props {
   /** 모달 제목. 예: "전우형 · 7건" 또는 "기타 (미분류) · 19건" */
@@ -33,6 +36,13 @@ export default function TxDetailModal({
   categoryLabel,
   onClose,
 }: Props) {
+  // portal 은 .v2-warm/.v2-dark 스코프 밖이라 토큰이 안 먹음 → wrapper 에 themeClass 적용
+  const themeClass = useThemeStore((s) => (s.version === 'dark' ? 'v2-dark' : 'v2-warm'));
+  const { user, profile } = useAuthStore();
+  const { createVoc } = useVocs();
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
   // ESC 닫기
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -44,19 +54,39 @@ export default function TxDetailModal({
 
   const total = transactions.reduce((s, t) => s + t.amount, 0);
 
-  const handleRequestAdmin = () => {
-    const subject = encodeURIComponent(`[팀 예산] '${categoryLabel ?? '미분류'}' 카테고리 키워드 추가 요청`);
-    const memos = transactions.slice(0, 20).map((t) => `- ${t.memo} (${fmt(t.amount)}원)`).join('\n');
-    const body = encodeURIComponent(
+  const handleRequestAdmin = async () => {
+    if (!user || !profile) {
+      alert('로그인 정보가 없습니다.');
+      return;
+    }
+    const memos = transactions.slice(0, 30).map((t) => `- ${t.memo} (${fmt(t.amount)}원)`).join('\n');
+    const title = `[팀 예산] '${categoryLabel ?? '미분류'}' 카테고리 키워드 추가 요청`;
+    const content =
       `아래 거래들이 '${categoryLabel ?? '미분류'}' 로 잡혀 있습니다.\n` +
       `적절한 카테고리로 분류될 수 있도록 키워드 추가를 요청합니다.\n\n` +
-      `=== 거래 적요 (상위 ${Math.min(20, transactions.length)}건 / 총 ${transactions.length}건) ===\n${memos}`
-    );
-    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+      `=== 거래 적요 (상위 ${Math.min(30, transactions.length)}건 / 총 ${transactions.length}건) ===\n${memos}`;
+
+    setSubmitting(true);
+    const { error } = await createVoc({
+      anonymous: false,
+      author_id: user.id,
+      category: '개선',
+      sub_category: '프로세스 개선',
+      title,
+      content,
+      team: profile.team ?? '증권ITO',
+      severity: 3,
+    });
+    setSubmitting(false);
+    if (error) {
+      alert(`VOC 등록 실패: ${error}`);
+      return;
+    }
+    setSubmitted(true);
   };
 
   return createPortal(
-    <>
+    <div className={themeClass}>
       <div
         onClick={onClose}
         style={{
@@ -103,10 +133,11 @@ export default function TxDetailModal({
               </div>
             )}
           </div>
-          {variant === 'category' && transactions.length > 0 && (
+          {variant === 'category' && transactions.length > 0 && !submitted && (
             <button
               type="button"
-              onClick={handleRequestAdmin}
+              onClick={() => { void handleRequestAdmin(); }}
+              disabled={submitting}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -118,14 +149,32 @@ export default function TxDetailModal({
                 borderRadius: 6,
                 fontSize: 12,
                 fontWeight: 700,
-                cursor: 'pointer',
+                cursor: submitting ? 'progress' : 'pointer',
+                opacity: submitting ? 0.7 : 1,
                 fontFamily: 'inherit',
               }}
-              title="이 거래들에 맞는 키워드를 카테고리에 추가해달라고 관리자에게 요청합니다"
+              title="이 거래들의 적요를 모아 VOC 로 등록해 키워드 추가를 요청합니다"
             >
-              <Mail size={13} />
-              관리자에게 요청하기
+              <MessageSquarePlus size={13} />
+              {submitting ? '등록 중...' : 'VOC 로 키워드 추가 요청'}
             </button>
+          )}
+          {submitted && (
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
+                padding: '6px 12px',
+                background: 'var(--w-success-soft)',
+                color: 'var(--w-success)',
+                borderRadius: 6,
+                fontSize: 12,
+                fontWeight: 700,
+              }}
+            >
+              <Check size={13} /> VOC 등록 완료
+            </span>
           )}
           <button
             type="button"
@@ -189,7 +238,7 @@ export default function TxDetailModal({
           )}
         </div>
       </div>
-    </>,
+    </div>,
     document.body,
   );
 }

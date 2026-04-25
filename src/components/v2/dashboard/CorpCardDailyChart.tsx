@@ -74,7 +74,7 @@ export default function CorpCardDailyChart({
                 className={`w-cc-bar-label${isToday ? ' today' : ''}`}
                 title={isToday ? '오늘' : `${month}월 ${day}일`}
               >
-                {showMonth ? `${month}월` : showDay ? day : ''}
+                {showMonth ? `${month}월` : showDay ? day : ' ' /* 빈 라벨도 NBSP 로 같은 높이 확보 */}
               </div>
             </div>
           );

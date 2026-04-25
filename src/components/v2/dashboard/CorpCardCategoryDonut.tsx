@@ -49,7 +49,7 @@ export default function CorpCardCategoryDonut({ transactions }: Props) {
   }
 
   return (
-    <div className="w-cc-card" style={{ display: 'flex', flexDirection: 'column' }}>
+    <div className="w-cc-card" style={{ display: 'flex', flexDirection: 'column', overflow: 'visible' }}>
       <div className="w-cc-card-head">
         <div className="w-cc-card-title">
           주로 어디에 <span className="w-cc-count">이번 달</span>
@@ -77,12 +77,18 @@ export default function CorpCardCategoryDonut({ transactions }: Props) {
                 ))}
               </Pie>
               <Tooltip
+                allowEscapeViewBox={{ x: true, y: true }}
+                wrapperStyle={{ outline: 'none', zIndex: 100 }}
                 contentStyle={{
-                  background: 'var(--w-surface)',
-                  border: '1px solid var(--w-border)',
+                  background: '#1f1a18',
+                  border: '1px solid #1f1a18',
                   borderRadius: 8,
                   fontSize: 12,
+                  color: '#fbf6ef',
+                  boxShadow: '0 6px 24px rgba(0,0,0,.28)',
                 }}
+                labelStyle={{ color: '#fbf6ef' }}
+                itemStyle={{ color: '#fbf6ef' }}
                 formatter={(value, _name, entry) => {
                   const v = typeof value === 'number' ? value : 0;
                   const payload = entry?.payload as { count?: number; label?: string } | undefined;

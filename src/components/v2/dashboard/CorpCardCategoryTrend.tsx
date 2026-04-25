@@ -61,7 +61,7 @@ export default function CorpCardCategoryTrend({ transactions, label }: Props) {
   }
 
   return (
-    <div className="w-cc-card">
+    <div className="w-cc-card" style={{ overflow: 'visible' }}>
       <div className="w-cc-card-head">
         <div className="w-cc-card-title">
           용도별 일별 추이
@@ -86,12 +86,18 @@ export default function CorpCardCategoryTrend({ transactions, label }: Props) {
             />
             <Tooltip
               cursor={{ fill: 'var(--w-surface-2)', opacity: 0.4 }}
+              allowEscapeViewBox={{ x: true, y: true }}
+              wrapperStyle={{ outline: 'none', zIndex: 100 }}
               contentStyle={{
-                background: 'var(--w-surface)',
-                border: '1px solid var(--w-border)',
+                background: '#1f1a18',
+                border: '1px solid #1f1a18',
                 borderRadius: 8,
                 fontSize: 12,
+                color: '#fbf6ef',
+                boxShadow: '0 6px 24px rgba(0,0,0,.28)',
               }}
+              labelStyle={{ color: '#fbf6ef', fontWeight: 700, marginBottom: 4 }}
+              itemStyle={{ color: '#fbf6ef' }}
               formatter={(value) => (typeof value === 'number' ? `${fmtKR(value)}` : String(value))}
             />
             <Legend wrapperStyle={{ fontSize: 11, paddingTop: 4 }} iconType="square" />

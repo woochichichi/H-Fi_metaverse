@@ -1,5 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef, useEffect, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { CreditCard, Loader2, Inbox, AlertTriangle, Clock } from 'lucide-react';
+import { useThemeStore } from '../../../stores/themeStore';
 import PageHeader from '../ui/PageHeader';
 import CorpCardSummaryHero from '../dashboard/CorpCardSummaryHero';
 import CorpCardAccountList from '../dashboard/CorpCardAccountList';
@@ -304,58 +306,94 @@ function AlertCard({ alerts }: { alerts: AlertItem[] }) {
 }
 
 /**
- * 커스텀 hover 툴팁 — 브라우저 기본 title 보다 디자인 일치.
- * children 을 wrapping 하고, hover 시 위로 popup 표시.
- * 모달 아니라 hover-only — 클릭 인터랙션 필요하면 별도 컴포넌트로.
+ * 커스텀 hover 툴팁 — children 을 wrapping. portal 로 body 에 띄워
+ * 부모 overflow:hidden / z-index stacking 영향 없이 항상 보이게.
+ * children 의 BoundingClientRect 를 측정해 그 위로 화살표 포함 popup 표시.
  */
-function Tip({ content, children }: { content: string | React.ReactNode; children: React.ReactNode }) {
-  const [show, setShow] = useState(false);
+export function Tip({ content, children }: { content: string | ReactNode; children: ReactNode }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+  const themeClass = useThemeStore((s) => (s.version === 'dark' ? 'v2-dark' : 'v2-warm'));
+
+  // 위치 갱신 — show 시점 + scroll/resize 시 동기화
+  useEffect(() => {
+    if (!pos) return;
+    const update = () => {
+      const r = ref.current?.getBoundingClientRect();
+      if (!r) return;
+      setPos({ x: r.left + r.width / 2, y: r.top });
+    };
+    window.addEventListener('scroll', update, true);
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update, true);
+      window.removeEventListener('resize', update);
+    };
+  }, [pos]);
+
+  const onEnter = () => {
+    const r = ref.current?.getBoundingClientRect();
+    if (!r) return;
+    setPos({ x: r.left + r.width / 2, y: r.top });
+  };
+
   return (
-    <div
-      style={{ position: 'relative' }}
-      onMouseEnter={() => setShow(true)}
-      onMouseLeave={() => setShow(false)}
-    >
-      {children}
-      {show && (
-        <div
-          style={{
-            position: 'absolute',
-            left: '50%',
-            bottom: 'calc(100% + 8px)',
-            transform: 'translateX(-50%)',
-            zIndex: 50,
-            minWidth: 240,
-            maxWidth: 320,
-            padding: '10px 14px',
-            background: 'var(--w-text)',
-            color: 'var(--w-bg)',
-            borderRadius: 8,
-            fontSize: 11.5,
-            lineHeight: 1.6,
-            whiteSpace: 'pre-line',
-            boxShadow: '0 4px 16px rgba(0,0,0,.18)',
-            pointerEvents: 'none',
-          }}
-        >
-          {content}
-          {/* 화살표 */}
+    <>
+      <span
+        ref={ref}
+        style={{ display: 'inline-flex', alignItems: 'center' }}
+        onMouseEnter={onEnter}
+        onMouseLeave={() => setPos(null)}
+      >
+        {children}
+      </span>
+      {pos &&
+        createPortal(
           <div
+            className={themeClass}
             style={{
-              position: 'absolute',
-              top: '100%',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: 0,
-              height: 0,
-              borderLeft: '5px solid transparent',
-              borderRight: '5px solid transparent',
-              borderTop: '5px solid var(--w-text)',
+              position: 'fixed',
+              left: pos.x,
+              top: pos.y - 10,
+              transform: 'translate(-50%, -100%)',
+              zIndex: 1000,
+              pointerEvents: 'none',
             }}
-          />
-        </div>
-      )}
-    </div>
+          >
+            <div
+              style={{
+                minWidth: 220,
+                maxWidth: 340,
+                padding: '10px 14px',
+                background: '#1f1a18',
+                color: '#fbf6ef',
+                borderRadius: 8,
+                fontSize: 11.5,
+                lineHeight: 1.6,
+                whiteSpace: 'pre-line',
+                boxShadow: '0 6px 24px rgba(0,0,0,.28)',
+              }}
+            >
+              {content}
+            </div>
+            {/* 화살표 — popup 아래쪽 중앙 */}
+            <div
+              style={{
+                position: 'absolute',
+                top: '100%',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: 0,
+                height: 0,
+                borderLeft: '6px solid transparent',
+                borderRight: '6px solid transparent',
+                borderTop: '6px solid #1f1a18',
+              }}
+            />
+          </div>,
+          document.body,
+        )}
+    </>
   );
 }
 
