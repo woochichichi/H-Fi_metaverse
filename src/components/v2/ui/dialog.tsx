@@ -66,7 +66,7 @@ export default function V2ConfirmHost() {
     <div className={themeClass} style={{ position: 'fixed', inset: 0, zIndex: 600 }}>
       <div
         onClick={() => close(false)}
-        style={{ position: 'absolute', inset: 0, background: 'rgba(42,31,26,.22)' }}
+        style={{ position: 'absolute', inset: 0, background: 'transparent' }}
       />
       <div
         role="alertdialog"
@@ -80,7 +80,7 @@ export default function V2ConfirmHost() {
           background: 'var(--w-surface)',
           border: '1px solid var(--w-border)',
           borderRadius: 'var(--w-radius-lg)',
-          boxShadow: 'var(--w-shadow-lg)',
+          boxShadow: '0 4px 12px rgba(42,31,26,.10), 0 1px 3px rgba(42,31,26,.08)',
           overflow: 'hidden',
         }}
       >

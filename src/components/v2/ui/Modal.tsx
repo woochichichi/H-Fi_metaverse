@@ -18,7 +18,6 @@ interface Props {
  */
 export default function Modal({ open, onClose, title, children, width = 520, footer }: Props) {
   const themeClass = useThemeStore((s) => (s.version === 'dark' ? 'v2-dark' : 'v2-warm'));
-  const isDark = themeClass === 'v2-dark';
 
   useEffect(() => {
     if (!open) return;
@@ -34,12 +33,8 @@ export default function Modal({ open, onClose, title, children, width = 520, foo
   return createPortal(
     <div className={themeClass} style={{ position: 'fixed', inset: 0, zIndex: 400 }}>
       <div
-        // backdrop: 너무 진하면 뒤 페이지가 안 보여 컨텍스트 손실. 약하게 + blur 제거.
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: isDark ? 'rgba(0, 0, 0, 0.35)' : 'rgba(42, 31, 26, 0.18)',
-        }}
+        // backdrop: 완전 투명. 뒤 페이지 보이고, 모달은 자체 진한 그림자로 분리감 확보.
+        style={{ position: 'absolute', inset: 0, background: 'transparent' }}
         onClick={onClose}
       />
       <div
@@ -54,7 +49,8 @@ export default function Modal({ open, onClose, title, children, width = 520, foo
           maxHeight: 'calc(100vh - 64px)',
           background: 'var(--w-surface)',
           borderRadius: 'var(--w-radius-lg)',
-          boxShadow: 'var(--w-shadow-lg)',
+          // backdrop 투명이라 모달이 페이지 위로 떠있음을 약한 그림자로만 표현.
+          boxShadow: '0 4px 12px rgba(42,31,26,.10), 0 1px 3px rgba(42,31,26,.08)',
           border: '1px solid var(--w-border)',
           display: 'flex',
           flexDirection: 'column',

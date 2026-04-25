@@ -90,7 +90,7 @@ export default function TxDetailModal({
         style={{
           position: 'fixed',
           inset: 0,
-          background: 'rgba(42,31,26,.18)',
+          background: 'transparent',
           zIndex: 300,
         }}
       />
@@ -109,7 +109,8 @@ export default function TxDetailModal({
           background: 'var(--w-surface)',
           color: 'var(--w-text)',
           borderRadius: 12,
-          boxShadow: '0 12px 48px rgba(0,0,0,.25)',
+          boxShadow: '0 4px 12px rgba(42,31,26,.10), 0 1px 3px rgba(42,31,26,.08)',
+          border: '1px solid var(--w-border)',
           overflow: 'hidden',
         }}
       >
