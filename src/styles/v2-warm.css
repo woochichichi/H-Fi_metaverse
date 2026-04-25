@@ -1565,6 +1565,165 @@
   color: var(--w-text);
 }
 
+/* ===== Summary hero (top of 팀 예산) ===== */
+.v2-warm .w-cc-hero-grid,
+.v2-dark .w-cc-hero-grid {
+  display: grid;
+  grid-template-columns: 1.55fr 1fr;
+  gap: 12px;
+  align-items: stretch;
+}
+@media (max-width: 1100px) {
+  .v2-warm .w-cc-hero-grid,
+  .v2-dark .w-cc-hero-grid { grid-template-columns: 1fr; }
+}
+.v2-warm .w-cc-hero,
+.v2-dark .w-cc-hero {
+  background: linear-gradient(135deg, #2A1F1A 0%, #4A372E 100%);
+  color: #FBF6EF;
+  border: 1px solid transparent;
+  border-radius: var(--w-radius);
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 220px;
+}
+.v2-dark .w-cc-hero {
+  background: linear-gradient(135deg, var(--w-accent) 0%, var(--w-accent-hover) 100%);
+}
+.v2-warm .w-cc-hero-head,
+.v2-dark .w-cc-hero-head {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: rgba(251, 246, 239, 0.7);
+  text-transform: uppercase;
+}
+.v2-warm .w-cc-hero-numbers,
+.v2-dark .w-cc-hero-numbers {
+  display: flex;
+  align-items: stretch;
+  gap: 24px;
+}
+.v2-warm .w-cc-hero-stat,
+.v2-dark .w-cc-hero-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.v2-warm .w-cc-hero-stat .lbl,
+.v2-dark .w-cc-hero-stat .lbl {
+  font-size: 11.5px;
+  color: rgba(251, 246, 239, 0.7);
+  font-weight: 600;
+}
+.v2-warm .w-cc-hero-stat .val,
+.v2-dark .w-cc-hero-stat .val {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.v2-warm .w-cc-hero-stat .val .unit,
+.v2-dark .w-cc-hero-stat .val .unit {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(251, 246, 239, 0.7);
+  margin-left: 3px;
+}
+.v2-warm .w-cc-hero-stat.alt .val,
+.v2-dark .w-cc-hero-stat.alt .val {
+  color: #FFD37A;
+}
+.v2-warm .w-cc-hero-divider,
+.v2-dark .w-cc-hero-divider {
+  width: 1px;
+  background: rgba(251, 246, 239, 0.15);
+}
+.v2-warm .w-cc-hero-progress,
+.v2-dark .w-cc-hero-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.v2-warm .w-cc-hero-progress .bar,
+.v2-dark .w-cc-hero-progress .bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(251, 246, 239, 0.12);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.v2-warm .w-cc-hero-progress .fill,
+.v2-dark .w-cc-hero-progress .fill {
+  height: 100%;
+  background: linear-gradient(90deg, #FFC97A 0%, #FFD37A 100%);
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.v2-warm .w-cc-hero-progress .meta,
+.v2-dark .w-cc-hero-progress .meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: rgba(251, 246, 239, 0.75);
+  font-variant-numeric: tabular-nums;
+}
+.v2-warm .w-cc-hero-progress .meta strong,
+.v2-dark .w-cc-hero-progress .meta strong {
+  color: #FBF6EF;
+  font-weight: 700;
+}
+.v2-warm .w-cc-hero-chips,
+.v2-dark .w-cc-hero-chips {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: auto;
+}
+@media (max-width: 720px) {
+  .v2-warm .w-cc-hero-chips,
+  .v2-dark .w-cc-hero-chips { grid-template-columns: 1fr; }
+}
+.v2-warm .w-cc-hero-chips .chip,
+.v2-dark .w-cc-hero-chips .chip {
+  background: rgba(251, 246, 239, 0.07);
+  border: 1px solid rgba(251, 246, 239, 0.1);
+  border-radius: 10px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.v2-warm .w-cc-hero-chips .cl,
+.v2-dark .w-cc-hero-chips .cl {
+  font-size: 10.5px;
+  color: rgba(251, 246, 239, 0.65);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2-warm .w-cc-hero-chips .cv,
+.v2-dark .w-cc-hero-chips .cv {
+  font-size: 13px;
+  font-weight: 700;
+  color: #FBF6EF;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2-warm .w-cc-hero-chips .cs,
+.v2-dark .w-cc-hero-chips .cs {
+  font-size: 10.5px;
+  color: rgba(251, 246, 239, 0.6);
+  font-weight: 500;
+}
+
 /* ===== Daily bar chart ===== */
 .v2-warm .w-cc-bars,
 .v2-dark .w-cc-bars {

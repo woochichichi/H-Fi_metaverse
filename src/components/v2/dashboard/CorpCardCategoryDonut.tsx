@@ -50,10 +50,10 @@ export default function CorpCardCategoryDonut({ transactions }: Props) {
   }
 
   return (
-    <div className="w-cc-card">
+    <div className="w-cc-card" style={{ display: 'flex', flexDirection: 'column' }}>
       <div className="w-cc-card-head">
         <div className="w-cc-card-title">
-          용도별 사용 비중 <span className="w-cc-count">{data.length}개 카테고리</span>
+          주로 어디에 <span className="w-cc-count">이번 달</span>
         </div>
       </div>
       <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: '8px 16px 14px', gap: 16, flexWrap: 'wrap' }}>

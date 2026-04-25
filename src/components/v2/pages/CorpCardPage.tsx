@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { CreditCard, Loader2, Inbox, AlertTriangle, Clock } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
-import CorpCardKpiHeadline from '../dashboard/CorpCardKpiHeadline';
+import CorpCardSummaryHero from '../dashboard/CorpCardSummaryHero';
 import CorpCardAccountList from '../dashboard/CorpCardAccountList';
 import CorpCardMemberList from '../dashboard/CorpCardMemberList';
 import CorpCardDailyChart from '../dashboard/CorpCardDailyChart';
@@ -155,14 +155,15 @@ function CorpCardPageContent({ team }: { team: string }) {
 
       {stats && snapshot && (
         <>
-          {/* 1) Headline KPI */}
-          <CorpCardKpiHeadline stats={stats} />
-
-          {/* 2) 메인 2열 — 계정별 + 팀원별 (member는 본인 행만) */}
-          <div className="w-cc-main-grid">
-            <CorpCardAccountList accounts={stats.accounts} />
-            <CorpCardMemberList activeMembers={visibleMembers} isPrivilegedView={isPrivileged} />
+          {/* 1) Hero — "얼마 썼고/남았고/주로 어디에" 한 줄 답.
+                 좌: 사용/잔여 + 진행바 + 월/주/분기말 예상 chip. 우: 카테고리 도넛. */}
+          <div className="w-cc-hero-grid">
+            <CorpCardSummaryHero stats={stats} />
+            <CorpCardCategoryDonut transactions={stats.txThisMonth} />
           </div>
+
+          {/* 2) 계정별 예산 — 카테고리별 잔여 세부 (식대/회의/교통) */}
+          <CorpCardAccountList accounts={stats.accounts} />
 
           {/* 3) 일별 바차트 + 주의 알림 */}
           <div className="w-cc-main-grid">
@@ -177,7 +178,8 @@ function CorpCardPageContent({ team }: { team: string }) {
             <AlertCard alerts={alerts} />
           </div>
 
-          {/* 4) 분기 소진 흐름 + KPI 스트립 */}
+          {/* 4) 분기 소진 흐름 — 전 분기 비교 (긴 시야).
+                 KPI 스트립은 hero 와 중복돼 제거. 분기 차트는 추세 시각화 단독. */}
           <div className="w-cc-card">
             <div className="w-cc-card-head">
               <div className="w-cc-card-title">
@@ -197,52 +199,6 @@ function CorpCardPageContent({ team }: { team: string }) {
                 loading={quarterCmp.loading}
               />
             </div>
-            <div className="w-cc-q-strip">
-              <div className="w-cc-q-cell">
-                <div className="lbl">분기 누적 사용</div>
-                <div className="val">{fmtKR(stats.totalUsed)}원</div>
-                <div className="sub">편성 {fmtKR(stats.totalPlanned)}</div>
-              </div>
-              <div className="w-cc-q-cell">
-                <div className="lbl">분기 잔여</div>
-                <div className="val">{fmtKR(stats.totalRemaining)}원</div>
-                <div className="sub">{pct(stats.totalUsed, stats.totalPlanned)}% 소진</div>
-              </div>
-              <div className="w-cc-q-cell">
-                <div className="lbl">월말 예상</div>
-                <div
-                  className={`val${pct(stats.projectedMonth, stats.monthBudget) > 100 ? ' up' : ''}`}
-                >
-                  {fmtKR(stats.projectedMonth)}원
-                </div>
-                <div className="sub">월 예산 {pct(stats.projectedMonth, stats.monthBudget)}%</div>
-              </div>
-              <div className="w-cc-q-cell">
-                <div className="lbl">분기말 예상</div>
-                <div
-                  className={`val${
-                    stats.projectedQuarterPct > 100
-                      ? ' up'
-                      : stats.projectedQuarterPct > 90
-                        ? ' warn'
-                        : ' down'
-                  }`}
-                >
-                  {fmtKR(stats.projectedQuarterEnd)}원
-                </div>
-                <div className="sub">
-                  편성 {stats.projectedQuarterPct.toFixed(0)}%
-                  {' · '}
-                  {stats.projectedQuarterPct > 100
-                    ? '초과 위험'
-                    : stats.projectedQuarterPct > 90
-                      ? '여유 부족'
-                      : stats.projectedQuarterPct < 60
-                        ? '미소진 위험'
-                        : '양호'}
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* 5) 본인 미처리 카드 — 본인에게만 RLS로 보임 */}
@@ -254,11 +210,10 @@ function CorpCardPageContent({ team }: { team: string }) {
             latestCapturedAt={myPending.latestCapturedAt}
           />
 
-          {/* 6) 용도별 사용 비중 — "사람 기준 아니라 용도 기준"
-                 acct_code 로 분류(memo 오분류 방지). 이번 달 거래만 대상 — 일별 바차트와 스코프 통일 */}
-          <CorpCardCategoryDonut transactions={stats.txThisMonth} />
+          {/* 6) 팀원별 사용 — 일반 팀원은 본인 행만 (RLS 아닌 프론트 필터, 한계는 docs/BUDGET.md 참조) */}
+          <CorpCardMemberList activeMembers={visibleMembers} isPrivilegedView={isPrivileged} />
 
-          {/* 7) 용도별 일별 추이 — 이번 달 거래만 대상 */}
+          {/* 7) 용도별 일별 추이 — 보조 (도넛이 메인, 일별 분포는 패턴 확인용) */}
           <CorpCardCategoryTrend
             transactions={stats.txThisMonth}
             monthLabel={`${snapshot.period_ym.slice(0, 4)}.${snapshot.period_ym.slice(4, 6)}`}
