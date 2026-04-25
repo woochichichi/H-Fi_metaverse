@@ -102,7 +102,7 @@ function CorpCardPageContent({ team }: { team: string }) {
   const [selectedPeriod, setSelectedPeriod] = useState<string | null>(null);
   const { quarters } = useCorpCardQuarters(team);
   const { loading, error, snapshot, stats, transactions } = useCorpCardLive(team, selectedPeriod);
-  const quarterCmp = useQuarterCompare(team);
+  const quarterCmp = useQuarterCompare(team, selectedPeriod);
   const myPending = useMyCardPending();
   // 예정 지출 — 선택 분기 (또는 snapshot.period_ym) 기준
   const activePeriod = snapshot?.period_ym ?? selectedPeriod ?? null;
@@ -200,12 +200,16 @@ function CorpCardPageContent({ team }: { team: string }) {
 
       {stats && snapshot && (
         <>
-          {/* 1) Hero — "얼마 썼고/남았고" 한 줄 답. 가로 폭 단독 사용. */}
-          <CorpCardSummaryHero stats={stats} plannedTotal={planned.total} />
+          {/* 1) Hero — "얼마 썼고/남았고" 한 줄 답 + 분기 안 월별 분포 chip */}
+          <CorpCardSummaryHero
+            stats={stats}
+            transactions={transactions}
+            periodYm={snapshot.period_ym}
+            plannedTotal={planned.total}
+          />
 
-          {/* 2) 주로 어디에 (도넛 좌 + 내역 리스트 우) — 가로 폭 전체 사용해
-                 갈색 잉여 공간 제거 + 내역이 시원하게 펼쳐짐 */}
-          <CorpCardCategoryDonut transactions={stats.txThisMonth} />
+          {/* 2) 주로 어디에 (도넛 좌 + 내역 리스트 우) — 분기 전체 거래 기준 */}
+          <CorpCardCategoryDonut transactions={transactions} />
 
           {/* 3) 계정별 예산 — 카테고리별 잔여 세부 (식대/회의/교통) */}
           <CorpCardAccountList accounts={stats.accounts} capturedAt={snapshot.captured_at} />

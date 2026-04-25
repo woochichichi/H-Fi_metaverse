@@ -3,7 +3,7 @@ import { PartyPopper, Plus, Users } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
-import Modal from '../ui/Modal';
+import PanelShell, { PanelFoot } from '../ui/PanelShell';
 import {
   PostHeaderCard,
   WorkflowStepper,
@@ -85,17 +85,27 @@ export default function GatheringPage() {
         </div>
       ) : (
         <MasterDetail
-          hasSelection={!!detail}
-          onBackMobile={() => setDetail(null)}
+          hasSelection={showCreate || !!detail}
+          onBackMobile={() => {
+            setShowCreate(false);
+            setDetail(null);
+          }}
           emptyTitle="모임을 선택하세요"
           emptyDescription="왼쪽 목록에서 하나를 선택하면 상세와 참여 현황이 여기에 표시됩니다."
           master={
             <MasterListCard>
               {gatherings.map((g) => {
-                const selected = detail?.id === g.id;
+                const selected = !showCreate && detail?.id === g.id;
                 const joined = myJoins.has(g.id);
                 return (
-                  <MasterListItem key={g.id} selected={selected} onClick={() => setDetail(g)}>
+                  <MasterListItem
+                    key={g.id}
+                    selected={selected}
+                    onClick={() => {
+                      setShowCreate(false);
+                      setDetail(g);
+                    }}
+                  >
                     <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                       <span className="w-badge w-badge-muted">{g.category}</span>
                       <StatusBadge status={g.status} />
@@ -128,7 +138,21 @@ export default function GatheringPage() {
             </MasterListCard>
           }
           detail={
-            detail && user && (
+            showCreate && user ? (
+              <CreateGatheringPanel
+                onClose={() => setShowCreate(false)}
+                onSubmit={async (input) => {
+                  const { error } = await createGathering({ ...input, author_id: user.id });
+                  if (error) {
+                    showToast(`등록 실패: ${error}`, 'error');
+                    return;
+                  }
+                  setShowCreate(false);
+                  await fetchGatherings({ category, status });
+                  showToast('모임이 등록되었습니다', 'success');
+                }}
+              />
+            ) : detail && user ? (
               <GatheringDetailPanel
                 gathering={detail}
                 joined={myJoins.has(detail.id)}
@@ -144,24 +168,11 @@ export default function GatheringPage() {
                   setDetail(null);
                 }}
               />
-            )
+            ) : null
           }
         />
       )}
 
-      {showCreate && user && (
-        <CreateGatheringModal
-          open={showCreate}
-          onClose={() => setShowCreate(false)}
-          onSubmit={async (input) => {
-            const { error } = await createGathering({ ...input, author_id: user.id });
-            if (!error) {
-              setShowCreate(false);
-              await fetchGatherings({ category, status });
-            } else showToast(`등록 실패: ${error}`, 'error');
-          }}
-        />
-      )}
     </>
   );
 }
@@ -284,12 +295,10 @@ function GatheringDetailPanel({
   );
 }
 
-function CreateGatheringModal({
-  open,
+function CreateGatheringPanel({
   onClose,
   onSubmit,
 }: {
-  open: boolean;
   onClose: () => void;
   onSubmit: (input: {
     title: string;
@@ -309,39 +318,8 @@ function CreateGatheringModal({
   const [submitting, setSubmitting] = useState(false);
 
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title="모임 만들기"
-      width={560}
-      footer={
-        <>
-          <button className="w-btn w-btn-ghost" onClick={onClose} disabled={submitting}>취소</button>
-          <button
-            className="w-btn w-btn-primary"
-            disabled={!title.trim() || !description.trim() || submitting}
-            onClick={async () => {
-              setSubmitting(true);
-              try {
-                await onSubmit({
-                  title: title.trim(),
-                  description: description.trim(),
-                  category,
-                  max_members: maxMembers ? Number(maxMembers) : null,
-                  contact_info: contact.trim() || null,
-                  deadline: deadline || null,
-                });
-              } finally {
-                setSubmitting(false);
-              }
-            }}
-          >
-            {submitting ? '등록 중...' : '등록'}
-          </button>
-        </>
-      }
-    >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <PanelShell title="모임 만들기" onClose={onClose}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '0 18px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
           <Field label="카테고리">
             <select value={category} onChange={(e) => setCategory(e.target.value as GatheringCategory)}>
@@ -365,7 +343,31 @@ function CreateGatheringModal({
         <Field label="소개"><textarea rows={5} value={description} onChange={(e) => setDescription(e.target.value)} /></Field>
         <Field label="문의 (선택)"><input value={contact} onChange={(e) => setContact(e.target.value)} placeholder="예: 슬랙 @홍길동" /></Field>
       </div>
-    </Modal>
+      <PanelFoot>
+        <button className="w-btn w-btn-ghost" onClick={onClose} disabled={submitting}>취소</button>
+        <button
+          className="w-btn w-btn-primary"
+          disabled={!title.trim() || !description.trim() || submitting}
+          onClick={async () => {
+            setSubmitting(true);
+            try {
+              await onSubmit({
+                title: title.trim(),
+                description: description.trim(),
+                category,
+                max_members: maxMembers ? Number(maxMembers) : null,
+                contact_info: contact.trim() || null,
+                deadline: deadline || null,
+              });
+            } finally {
+              setSubmitting(false);
+            }
+          }}
+        >
+          {submitting ? '등록 중...' : '등록'}
+        </button>
+      </PanelFoot>
+    </PanelShell>
   );
 }
 

@@ -3,7 +3,7 @@ import { Mail, Plus, Send } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
-import Modal from '../ui/Modal';
+import PanelShell, { PanelFoot } from '../ui/PanelShell';
 import { StatusPicker, type StatusTone } from '../ui/DetailShell';
 import {
   PostHeaderCard,
@@ -142,20 +142,24 @@ export default function AnonNotePage() {
         </div>
       ) : (
         <MasterDetail
-          hasSelection={!!detail}
-          onBackMobile={() => setDetail(null)}
+          hasSelection={showCreate || !!detail}
+          onBackMobile={() => {
+            setShowCreate(false);
+            setDetail(null);
+          }}
           emptyTitle="쪽지를 선택하세요"
           emptyDescription="왼쪽 목록에서 쪽지를 선택하면 내용이 여기에 표시됩니다."
           master={
             <MasterListCard>
               {notes.map((n) => {
-                const selected = detail?.id === n.id;
+                const selected = !showCreate && detail?.id === n.id;
                 const unread = n.status === '미읽음';
                 return (
                   <MasterListItem
                     key={n.id}
                     selected={selected}
                     onClick={() => {
+                      setShowCreate(false);
                       setDetail(n);
                       if (tab === 'inbox' && unread) void updateNoteStatus(n.id, '읽음');
                     }}
@@ -186,7 +190,23 @@ export default function AnonNotePage() {
             </MasterListCard>
           }
           detail={
-            detail && user && (
+            showCreate && user && profile ? (
+              <CreateNotePanel
+                myTeam={profile.team}
+                onClose={() => setShowCreate(false)}
+                onSubmit={async (input) => {
+                  const { error } = await createNote({ ...input, sender_id: user.id });
+                  if (error) {
+                    showToast(`발송 실패: ${error}`, 'error');
+                    return;
+                  }
+                  setShowCreate(false);
+                  if (tab === 'inbox') await fetchNotes({ status, category, team: teamFilter });
+                  else await fetchMyNotes(user.id);
+                  showToast('쪽지가 발송되었습니다', 'success');
+                }}
+              />
+            ) : detail && user ? (
               <NoteDetailPanel
                 note={detail}
                 onClose={() => setDetail(null)}
@@ -205,24 +225,8 @@ export default function AnonNotePage() {
                   else setDetail(null);
                 }}
               />
-            )
+            ) : null
           }
-        />
-      )}
-
-      {showCreate && user && profile && (
-        <CreateNoteModal
-          open={showCreate}
-          onClose={() => setShowCreate(false)}
-          myTeam={profile.team}
-          onSubmit={async (input) => {
-            const { error } = await createNote({ ...input, sender_id: user.id });
-            if (!error) {
-              setShowCreate(false);
-              if (tab === 'inbox') await fetchNotes({ status, category, team: teamFilter });
-              else await fetchMyNotes(user.id);
-            } else showToast(`발송 실패: ${error}`, 'error');
-          }}
         />
       )}
     </>
@@ -350,13 +354,11 @@ function NoteStatusBadge({ status }: { status: NoteStatus }) {
   return <span className="w-badge w-badge-todo">미읽음</span>;
 }
 
-function CreateNoteModal({
-  open,
+function CreateNotePanel({
   onClose,
   onSubmit,
   myTeam,
 }: {
-  open: boolean;
   onClose: () => void;
   myTeam: string;
   onSubmit: (input: {
@@ -377,41 +379,8 @@ function CreateNoteModal({
   const [submitting, setSubmitting] = useState(false);
 
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title="쪽지 보내기"
-      width={520}
-      footer={
-        <>
-          <button className="w-btn w-btn-ghost" onClick={onClose} disabled={submitting}>취소</button>
-          <button
-            className="w-btn w-btn-primary"
-            disabled={!title.trim() || !content.trim() || submitting}
-            onClick={async () => {
-              setSubmitting(true);
-              try {
-                await onSubmit({
-                  anonymous,
-                  recipient_role: recipient,
-                  recipient_team: recipient === 'team_leaders' ? myTeam : null,
-                  category,
-                  title: title.trim(),
-                  content: content.trim(),
-                  team: myTeam,
-                });
-              } finally {
-                setSubmitting(false);
-              }
-            }}
-          >
-            <Send size={14} />
-            <span>{submitting ? '전송 중...' : '전송'}</span>
-          </button>
-        </>
-      }
-    >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <PanelShell title="쪽지 보내기" onClose={onClose}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '0 18px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <Field label="수신 대상">
             <select value={recipient} onChange={(e) => setRecipient(e.target.value as NoteRecipient)}>
@@ -442,7 +411,33 @@ function CreateNoteModal({
           익명으로 전송 (받는 사람이 작성자를 알 수 없어요)
         </label>
       </div>
-    </Modal>
+      <PanelFoot>
+        <button className="w-btn w-btn-ghost" onClick={onClose} disabled={submitting}>취소</button>
+        <button
+          className="w-btn w-btn-primary"
+          disabled={!title.trim() || !content.trim() || submitting}
+          onClick={async () => {
+            setSubmitting(true);
+            try {
+              await onSubmit({
+                anonymous,
+                recipient_role: recipient,
+                recipient_team: recipient === 'team_leaders' ? myTeam : null,
+                category,
+                title: title.trim(),
+                content: content.trim(),
+                team: myTeam,
+              });
+            } finally {
+              setSubmitting(false);
+            }
+          }}
+        >
+          <Send size={14} />
+          <span>{submitting ? '전송 중...' : '전송'}</span>
+        </button>
+      </PanelFoot>
+    </PanelShell>
   );
 }
 

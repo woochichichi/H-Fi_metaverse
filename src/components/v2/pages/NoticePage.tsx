@@ -3,7 +3,7 @@ import { Megaphone, Pin, Plus } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
-import Modal from '../ui/Modal';
+import PanelShell, { PanelFoot } from '../ui/PanelShell';
 import { PostHeaderCard, DescriptionCard } from '../ui/PostDetail';
 import MasterDetail, { MasterListCard, MasterListItem } from '../ui/MasterDetail';
 import { useAuthStore } from '../../../stores/authStore';
@@ -103,20 +103,24 @@ export default function NoticePage() {
         </div>
       ) : (
         <MasterDetail
-          hasSelection={!!detail}
-          onBackMobile={() => setDetail(null)}
+          hasSelection={showCreate || !!detail}
+          onBackMobile={() => {
+            setShowCreate(false);
+            setDetail(null);
+          }}
           emptyTitle="공지를 선택하세요"
           emptyDescription="왼쪽 목록에서 공지를 선택하면 내용이 여기에 표시됩니다."
           master={
             <MasterListCard>
               {notices.map((n) => {
                 const isRead = readIds.has(n.id);
-                const selected = detail?.id === n.id;
+                const selected = !showCreate && detail?.id === n.id;
                 return (
                   <MasterListItem
                     key={n.id}
                     selected={selected}
                     onClick={() => {
+                      setShowCreate(false);
                       setDetail(n);
                       if (user && !isRead) void markAsRead(n.id, user.id);
                     }}
@@ -166,7 +170,25 @@ export default function NoticePage() {
             </MasterListCard>
           }
           detail={
-            detail && (
+            showCreate && canWrite && profile && user ? (
+              <CreateNoticePanel
+                defaultTeam={perm.isLeaderOnly ? profile.team : null}
+                onClose={() => setShowCreate(false)}
+                onSubmit={async (input) => {
+                  const { error } = await createNotice({
+                    ...input,
+                    author_id: user.id,
+                  });
+                  if (error) {
+                    showToast(`등록 실패: ${error}`, 'error');
+                    return;
+                  }
+                  setShowCreate(false);
+                  await fetchNotices({ urgency, category });
+                  showToast('공지가 등록되었습니다', 'success');
+                }}
+              />
+            ) : detail ? (
               <NoticeDetailPanel
                 notice={detail}
                 canDelete={perm.isAdmin || detail.author_id === user?.id}
@@ -179,28 +201,8 @@ export default function NoticePage() {
                   else setDetail(null);
                 }}
               />
-            )
+            ) : null
           }
-        />
-      )}
-
-      {showCreate && canWrite && profile && (
-        <CreateNoticeModal
-          open={showCreate}
-          onClose={() => setShowCreate(false)}
-          defaultTeam={perm.isLeaderOnly ? profile.team : null}
-          onSubmit={async (input) => {
-            const { error } = await createNotice({
-              ...input,
-              author_id: user!.id,
-            });
-            if (!error) {
-              setShowCreate(false);
-              await fetchNotices({ urgency, category });
-            } else {
-              showToast(`등록 실패: ${error}`, 'error');
-            }
-          }}
         />
       )}
     </>
@@ -269,13 +271,11 @@ function UrgencyBadge({ urgency }: { urgency: UrgencyLevel }) {
   return <span className="w-badge w-badge-info">참고</span>;
 }
 
-function CreateNoticeModal({
-  open,
+function CreateNoticePanel({
   onClose,
   onSubmit,
   defaultTeam,
 }: {
-  open: boolean;
   onClose: () => void;
   defaultTeam: string | null;
   onSubmit: (input: {
@@ -301,34 +301,8 @@ function CreateNoticeModal({
   );
 
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title="새 공지 작성"
-      width={560}
-      footer={
-        <>
-          <button className="w-btn w-btn-ghost" onClick={onClose} disabled={submitting}>
-            취소
-          </button>
-          <button
-            className="w-btn w-btn-primary"
-            disabled={!title.trim() || !content.trim() || submitting}
-            onClick={async () => {
-              setSubmitting(true);
-              try {
-                await onSubmit({ title: title.trim(), content: content.trim(), urgency, category, pinned, team });
-              } finally {
-                setSubmitting(false);
-              }
-            }}
-          >
-            {submitting ? '등록 중...' : '등록'}
-          </button>
-        </>
-      }
-    >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <PanelShell title="새 공지 작성" onClose={onClose}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '0 18px' }}>
         <Field label="제목">
           <input
             value={title}
@@ -378,7 +352,26 @@ function CreateNoticeModal({
           />
         </Field>
       </div>
-    </Modal>
+      <PanelFoot>
+        <button className="w-btn w-btn-ghost" onClick={onClose} disabled={submitting}>
+          취소
+        </button>
+        <button
+          className="w-btn w-btn-primary"
+          disabled={!title.trim() || !content.trim() || submitting}
+          onClick={async () => {
+            setSubmitting(true);
+            try {
+              await onSubmit({ title: title.trim(), content: content.trim(), urgency, category, pinned, team });
+            } finally {
+              setSubmitting(false);
+            }
+          }}
+        >
+          {submitting ? '등록 중...' : '등록'}
+        </button>
+      </PanelFoot>
+    </PanelShell>
   );
 }
 

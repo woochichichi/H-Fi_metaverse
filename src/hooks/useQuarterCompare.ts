@@ -136,7 +136,7 @@ async function loadSeries(
   return buildSeries(periodYm, txs ?? [], totalPlanned, untilDay);
 }
 
-export function useQuarterCompare(team: string): QuarterCompareResult {
+export function useQuarterCompare(team: string, periodYm: string | null = null): QuarterCompareResult {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [current, setCurrent] = useState<QuarterSeries | null>(null);
@@ -150,26 +150,29 @@ export function useQuarterCompare(team: string): QuarterCompareResult {
       setLoading(true);
       setError(null);
       try {
-        // 가장 최근 분기(period_ym DESC) 의 snapshot 기준으로 현재 분기 결정.
-        // captured_at 만으로 정렬하면 같은 시각에 업로드된 여러 분기 중 엉뚱한 게 잡힘.
-        const { data: latest, error: latestErr } = await supabase
-          .from('corp_card_snapshots')
-          .select('id, period_ym, captured_at')
-          .eq('team', team)
-          .order('period_ym', { ascending: false })
-          .order('captured_at', { ascending: false })
-          .limit(1);
-        if (latestErr) throw latestErr;
-        if (!latest || latest.length === 0) {
-          if (!cancelled) {
-            setCurrent(null);
-            setPrevious(null);
-            setCurrentTodayDay(null);
+        // periodYm 명시 → 그 분기, null 이면 가장 최근 분기 (snapshot 기준).
+        let curPeriod: string;
+        if (periodYm) {
+          curPeriod = periodYm;
+        } else {
+          const { data: latest, error: latestErr } = await supabase
+            .from('corp_card_snapshots')
+            .select('id, period_ym, captured_at')
+            .eq('team', team)
+            .order('period_ym', { ascending: false })
+            .order('captured_at', { ascending: false })
+            .limit(1);
+          if (latestErr) throw latestErr;
+          if (!latest || latest.length === 0) {
+            if (!cancelled) {
+              setCurrent(null);
+              setPrevious(null);
+              setCurrentTodayDay(null);
+            }
+            return;
           }
-          return;
+          curPeriod = latest[0].period_ym as string;
         }
-
-        const curPeriod = latest[0].period_ym as string;
         const prevPeriod = prevQuarterPeriodYm(curPeriod);
 
         // 현재 분기는 오늘까지만 그림
@@ -202,7 +205,7 @@ export function useQuarterCompare(team: string): QuarterCompareResult {
     return () => {
       cancelled = true;
     };
-  }, [team]);
+  }, [team, periodYm]);
 
   return { loading, error, current, previous, currentTodayDay };
 }

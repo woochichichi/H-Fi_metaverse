@@ -3,7 +3,7 @@ import { Lightbulb, Plus, ThumbsUp } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
-import Modal from '../ui/Modal';
+import PanelShell, { PanelFoot } from '../ui/PanelShell';
 import { StatusPicker, type StatusTone } from '../ui/DetailShell';
 import {
   PostHeaderCard,
@@ -86,17 +86,27 @@ export default function IdeaPage() {
         </div>
       ) : (
         <MasterDetail
-          hasSelection={!!detail}
-          onBackMobile={() => setDetail(null)}
+          hasSelection={showCreate || !!detail}
+          onBackMobile={() => {
+            setShowCreate(false);
+            setDetail(null);
+          }}
           emptyTitle="아이디어를 선택하세요"
           emptyDescription="왼쪽 목록에서 하나를 선택하면 상세와 공감 현황이 여기에 표시됩니다."
           master={
             <MasterListCard>
               {ideas.map((idea) => {
                 const voted = !!(idea as IdeaWithVotes & { _voted?: boolean })._voted;
-                const selected = detail?.id === idea.id;
+                const selected = !showCreate && detail?.id === idea.id;
                 return (
-                  <MasterListItem key={idea.id} selected={selected} onClick={() => setDetail(idea)}>
+                  <MasterListItem
+                    key={idea.id}
+                    selected={selected}
+                    onClick={() => {
+                      setShowCreate(false);
+                      setDetail(idea);
+                    }}
+                  >
                     <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                       {idea.category && <span className="w-badge w-badge-muted">{idea.category}</span>}
                       <StatusBadge status={idea.status} />
@@ -141,7 +151,22 @@ export default function IdeaPage() {
             </MasterListCard>
           }
           detail={
-            detail && (
+            showCreate && user ? (
+              <CreateIdeaPanel
+                onClose={() => setShowCreate(false)}
+                onSubmit={async (input) => {
+                  const { error } = await createIdea({ ...input, author_id: user.id });
+                  if (error) {
+                    showToast(`등록 실패: ${error}`, 'error');
+                    return;
+                  }
+                  setShowCreate(false);
+                  await fetchIdeas({ category, status, sort });
+                  await fetchUserVotes(user.id);
+                  showToast('아이디어가 등록되었습니다', 'success');
+                }}
+              />
+            ) : detail ? (
               <IdeaDetailPanel
                 idea={detail}
                 voted={!!(detail as IdeaWithVotes & { _voted?: boolean })._voted}
@@ -156,23 +181,8 @@ export default function IdeaPage() {
                   else setDetail({ ...detail, status: s });
                 }}
               />
-            )
+            ) : null
           }
-        />
-      )}
-
-      {showCreate && user && (
-        <CreateIdeaModal
-          open={showCreate}
-          onClose={() => setShowCreate(false)}
-          onSubmit={async (input) => {
-            const { error } = await createIdea({ ...input, author_id: user.id });
-            if (!error) {
-              setShowCreate(false);
-              await fetchIdeas({ category, status, sort });
-              await fetchUserVotes(user.id);
-            } else showToast(`등록 실패: ${error}`, 'error');
-          }}
         />
       )}
     </>
@@ -346,12 +356,10 @@ function IdeaDetailPanel({
   );
 }
 
-function CreateIdeaModal({
-  open,
+function CreateIdeaPanel({
   onClose,
   onSubmit,
 }: {
-  open: boolean;
   onClose: () => void;
   onSubmit: (input: { title: string; description: string; category: IdeaCategory }) => Promise<void>;
 }) {
@@ -361,32 +369,8 @@ function CreateIdeaModal({
   const [submitting, setSubmitting] = useState(false);
 
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title="아이디어 올리기"
-      width={560}
-      footer={
-        <>
-          <button className="w-btn w-btn-ghost" onClick={onClose} disabled={submitting}>취소</button>
-          <button
-            className="w-btn w-btn-primary"
-            disabled={!title.trim() || !description.trim() || submitting}
-            onClick={async () => {
-              setSubmitting(true);
-              try {
-                await onSubmit({ title: title.trim(), description: description.trim(), category });
-              } finally {
-                setSubmitting(false);
-              }
-            }}
-          >
-            {submitting ? '등록 중...' : '등록'}
-          </button>
-        </>
-      }
-    >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <PanelShell title="아이디어 올리기" onClose={onClose}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '0 18px' }}>
         <Field label="카테고리">
           <select value={category} onChange={(e) => setCategory(e.target.value as IdeaCategory)}>
             {IDEA_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -396,10 +380,27 @@ function CreateIdeaModal({
           <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} placeholder="예) 주간회의를 격주로 줄이면 어떨까요?" />
         </Field>
         <Field label="설명">
-          <textarea rows={5} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="배경·아이디어 내용·기대 효과" />
+          <textarea rows={6} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="배경·아이디어 내용·기대 효과" />
         </Field>
       </div>
-    </Modal>
+      <PanelFoot>
+        <button className="w-btn w-btn-ghost" onClick={onClose} disabled={submitting}>취소</button>
+        <button
+          className="w-btn w-btn-primary"
+          disabled={!title.trim() || !description.trim() || submitting}
+          onClick={async () => {
+            setSubmitting(true);
+            try {
+              await onSubmit({ title: title.trim(), description: description.trim(), category });
+            } finally {
+              setSubmitting(false);
+            }
+          }}
+        >
+          {submitting ? '등록 중...' : '등록'}
+        </button>
+      </PanelFoot>
+    </PanelShell>
   );
 }
 

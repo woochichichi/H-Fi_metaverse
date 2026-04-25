@@ -43,7 +43,7 @@ export default function CorpCardCategoryDonut({ transactions }: Props) {
         <div className="w-cc-card-head">
           <div className="w-cc-card-title">용도별 사용 비중</div>
         </div>
-        <div className="w-cc-empty">이번 달 분류할 거래가 없습니다.</div>
+        <div className="w-cc-empty">이번 분기 분류할 거래가 없습니다.</div>
       </div>
     );
   }
@@ -52,7 +52,7 @@ export default function CorpCardCategoryDonut({ transactions }: Props) {
     <div className="w-cc-card" style={{ display: 'flex', flexDirection: 'column', overflow: 'visible' }}>
       <div className="w-cc-card-head">
         <div className="w-cc-card-title">
-          주로 어디에 <span className="w-cc-count">이번 달</span>
+          주로 어디에 <span className="w-cc-count">이번 분기</span>
         </div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', alignItems: 'center', padding: '12px 20px 18px', gap: 24 }}>
@@ -213,7 +213,7 @@ export default function CorpCardCategoryDonut({ transactions }: Props) {
       {drillLabel && (
         <TxDetailModal
           title={`${drillLabel}${drillLabel === '기타' ? ' (미분류)' : ''} · ${drillTxs.length}건`}
-          subtitle="이번 달 거래 적요"
+          subtitle="이번 분기 거래 적요"
           transactions={drillTxs}
           // 모든 카테고리에서 "적요 수정 요청" 버튼 노출 → 분류 오류 발견 시 즉시 제보
           variant="category"

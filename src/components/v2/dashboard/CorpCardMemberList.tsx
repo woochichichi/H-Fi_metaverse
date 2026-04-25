@@ -100,7 +100,7 @@ export default function CorpCardMemberList({ activeMembers, transactions, isPriv
       </div>
       <div className="w-cc-mem-list">
         {sorted.length === 0 ? (
-          <div className="w-cc-empty">이번 달 사용 내역이 없습니다.</div>
+          <div className="w-cc-empty">이번 분기 사용 내역이 없습니다.</div>
         ) : (
           sorted.map((m, i) => (
             <div

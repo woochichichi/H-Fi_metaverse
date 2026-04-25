@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Bug, Plus } from 'lucide-react';
+import { Bug, Plus, X } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import EmptyState from '../ui/EmptyState';
-import Modal from '../ui/Modal';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSiteReports } from '../../../hooks/useSiteReports';
 import { formatRelativeTime } from '../../../lib/utils';
@@ -42,6 +41,24 @@ export default function SiteReportPage() {
           </button>
         }
       />
+
+      {/* 인라인 작성 폼 — 목록 위에 펼침 */}
+      {showCreate && (
+        <CreateReportInline
+          onClose={() => setShowCreate(false)}
+          onSubmit={async ({ title, content }) => {
+            const { error } = await createReport({ title, content });
+            if (error) {
+              showToast(error, 'error');
+              return;
+            }
+            setShowCreate(false);
+            if (perm.isSuperAdmin) await fetchAllReports();
+            else await fetchMyReports();
+            showToast('제보가 접수되었습니다', 'success');
+          }}
+        />
+      )}
 
       {loading ? (
         <div className="w-card" style={{ padding: 40, textAlign: 'center', color: 'var(--w-text-muted)' }}>
@@ -102,68 +119,71 @@ export default function SiteReportPage() {
         </div>
       )}
 
-      {showCreate && (
-        <CreateReportModal
-          open={showCreate}
-          onClose={() => setShowCreate(false)}
-          onSubmit={async ({ title, content }) => {
-            const { error } = await createReport({ title, content });
-            if (error) showToast(error, 'error');
-            else {
-              setShowCreate(false);
-              if (perm.isSuperAdmin) await fetchAllReports();
-              else await fetchMyReports();
-            }
-          }}
-        />
-      )}
-
+      {/* 상세 — 모달 대신 페이지 안에 인라인으로 펼침 */}
       {detail && (
-        <Modal
-          open
-          onClose={() => setDetail(null)}
-          title={detail.title}
-          width={640}
-          footer={<button className="w-btn w-btn-primary" onClick={() => setDetail(null)}>닫기</button>}
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ display: 'flex', gap: 6 }}>
-              <ReportStatusBadge status={detail.status} />
-            </div>
-            <div style={{ fontSize: 12, color: 'var(--w-text-muted)' }}>
-              {formatRelativeTime(detail.created_at)}
-              {perm.isSuperAdmin && authorNames[detail.author_id] && ` · ${authorNames[detail.author_id]}`}
-            </div>
-            <div style={{ fontSize: 14, color: 'var(--w-text)', whiteSpace: 'pre-wrap', lineHeight: 1.7 }}>
-              {detail.content}
-            </div>
-            {perm.isSuperAdmin && (
-              <div
-                style={{
-                  padding: 12,
-                  background: 'var(--w-surface-2)',
-                  borderRadius: 'var(--w-radius-sm)',
-                  fontSize: 11,
-                  color: 'var(--w-text-muted)',
-                  fontFamily: 'monospace',
-                  lineHeight: 1.6,
-                  maxHeight: 240,
-                  overflowY: 'auto',
-                }}
-              >
-                <div>URL: {detail.current_url}</div>
-                <div>Screen: {detail.screen_size}</div>
-                <div>UA: {detail.user_agent}</div>
-                {detail.console_logs && (
-                  <details style={{ marginTop: 6 }}>
-                    <summary style={{ cursor: 'pointer', color: 'var(--w-text-soft)' }}>콘솔 로그</summary>
-                    <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{detail.console_logs}</pre>
-                  </details>
-                )}
-              </div>
-            )}
+        <div className="w-card" style={{ marginTop: 12, padding: 18, position: 'relative' }}>
+          <button
+            type="button"
+            onClick={() => setDetail(null)}
+            aria-label="닫기"
+            style={{
+              position: 'absolute',
+              top: 12,
+              right: 12,
+              width: 28,
+              height: 28,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'transparent',
+              color: 'var(--w-text-muted)',
+              border: 0,
+              borderRadius: 6,
+              cursor: 'pointer',
+            }}
+          >
+            <X size={16} />
+          </button>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 8 }}>
+            <ReportStatusBadge status={detail.status} />
           </div>
-        </Modal>
+          <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--w-text)', marginBottom: 4, paddingRight: 32 }}>
+            {detail.title}
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--w-text-muted)', marginBottom: 12 }}>
+            {formatRelativeTime(detail.created_at)}
+            {perm.isSuperAdmin && authorNames[detail.author_id] && ` · ${authorNames[detail.author_id]}`}
+          </div>
+          <div style={{ fontSize: 14, color: 'var(--w-text)', whiteSpace: 'pre-wrap', lineHeight: 1.7 }}>
+            {detail.content}
+          </div>
+          {perm.isSuperAdmin && (
+            <div
+              style={{
+                marginTop: 12,
+                padding: 12,
+                background: 'var(--w-surface-2)',
+                borderRadius: 'var(--w-radius-sm)',
+                fontSize: 11,
+                color: 'var(--w-text-muted)',
+                fontFamily: 'monospace',
+                lineHeight: 1.6,
+                maxHeight: 240,
+                overflowY: 'auto',
+              }}
+            >
+              <div>URL: {detail.current_url}</div>
+              <div>Screen: {detail.screen_size}</div>
+              <div>UA: {detail.user_agent}</div>
+              {detail.console_logs && (
+                <details style={{ marginTop: 6 }}>
+                  <summary style={{ cursor: 'pointer', color: 'var(--w-text-soft)' }}>콘솔 로그</summary>
+                  <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{detail.console_logs}</pre>
+                </details>
+              )}
+            </div>
+          )}
+        </div>
       )}
     </>
   );
@@ -176,12 +196,10 @@ function ReportStatusBadge({ status }: { status: SiteReport['status'] }) {
   return <span className="w-badge w-badge-info">접수</span>;
 }
 
-function CreateReportModal({
-  open,
+function CreateReportInline({
   onClose,
   onSubmit,
 }: {
-  open: boolean;
   onClose: () => void;
   onSubmit: (input: { title: string; content: string }) => Promise<void>;
 }) {
@@ -190,33 +208,53 @@ function CreateReportModal({
   const [submitting, setSubmitting] = useState(false);
 
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title="사이트 제보"
-      width={520}
-      footer={
-        <>
-          <button className="w-btn w-btn-ghost" onClick={onClose} disabled={submitting}>취소</button>
-          <button
-            className="w-btn w-btn-primary"
-            disabled={!title.trim() || !content.trim() || submitting}
-            onClick={async () => {
-              setSubmitting(true);
-              try {
-                await onSubmit({ title: title.trim(), content: content.trim() });
-              } finally {
-                setSubmitting(false);
-              }
-            }}
-          >
-            {submitting ? '전송 중...' : '제출'}
-          </button>
-        </>
-      }
+    <div
+      className="w-card"
+      style={{
+        marginBottom: 12,
+        padding: 0,
+        border: '2px solid var(--w-accent)',
+        animation: 'slideUp .25s ease-out',
+      }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <Field label="제목"><input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} placeholder="간단히 요약해주세요" /></Field>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '12px 18px',
+          background: 'var(--w-accent-soft)',
+          borderBottom: '1px solid var(--w-accent)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Plus size={16} style={{ color: 'var(--w-accent-hover)' }} />
+          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--w-accent-hover)' }}>사이트 제보</span>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="닫기"
+          style={{
+            width: 28,
+            height: 28,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'transparent',
+            color: 'var(--w-text-muted)',
+            border: 0,
+            borderRadius: 6,
+            cursor: 'pointer',
+          }}
+        >
+          <X size={16} />
+        </button>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: 18 }}>
+        <Field label="제목">
+          <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} placeholder="간단히 요약해주세요" />
+        </Field>
         <Field label="내용">
           <textarea
             rows={6}
@@ -229,7 +267,33 @@ function CreateReportModal({
           제출 시 현재 URL·화면 크기·콘솔 로그가 자동으로 첨부됩니다.
         </div>
       </div>
-    </Modal>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          gap: 8,
+          padding: '12px 18px',
+          borderTop: '1px solid var(--w-border)',
+          background: 'var(--w-surface-2)',
+        }}
+      >
+        <button className="w-btn w-btn-ghost" onClick={onClose} disabled={submitting}>취소</button>
+        <button
+          className="w-btn w-btn-primary"
+          disabled={!title.trim() || !content.trim() || submitting}
+          onClick={async () => {
+            setSubmitting(true);
+            try {
+              await onSubmit({ title: title.trim(), content: content.trim() });
+            } finally {
+              setSubmitting(false);
+            }
+          }}
+        >
+          {submitting ? '전송 중...' : '제출'}
+        </button>
+      </div>
+    </div>
   );
 }
 
