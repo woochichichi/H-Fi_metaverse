@@ -90,7 +90,7 @@ export default function TxDetailModal({
         style={{
           position: 'fixed',
           inset: 0,
-          background: 'rgba(0,0,0,.45)',
+          background: 'rgba(42,31,26,.18)',
           zIndex: 300,
         }}
       />

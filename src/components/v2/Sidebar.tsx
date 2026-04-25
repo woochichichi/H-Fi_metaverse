@@ -74,12 +74,13 @@ export default function V2Sidebar() {
     { id: 'site-report', label: '사이트 제보', icon: Bug, visible: true },
   ], []);
 
+  // scope 라벨 정책: 권한이 제한된 경우(리더 = 내 팀)만 배지 표시.
+  // 관리자/담당은 전 팀이 default 라 굳이 "전체" 라벨로 알리지 않음 (의미 중복 회피).
   const adminItems = useMemo<MenuItem[]>(() => [
     {
       id: 'directory',
       label: '피플 목록',
       icon: Users2,
-      scope: '전체',
       visible: perm.isAdmin,
       adminOnly: true,
     },
@@ -87,21 +88,21 @@ export default function V2Sidebar() {
       id: 'admin-users',
       label: '사용자 관리',
       icon: UserCog,
-      scope: perm.isLeaderOnly ? '내 팀' : '전체',
+      scope: perm.isLeaderOnly ? '내 팀' : undefined,
       visible: perm.canManageUsers,
     },
     {
       id: 'admin-eval-items',
       label: '평가 항목',
       icon: ListChecks,
-      scope: perm.isLeaderOnly ? '내 팀' : '전체',
+      scope: perm.isLeaderOnly ? '내 팀' : undefined,
       visible: perm.canManageEvalItems,
     },
     {
       id: 'admin-eval',
       label: '평가 대시보드',
       icon: GaugeCircle,
-      scope: perm.isLeaderOnly ? '내 팀' : '전체',
+      scope: perm.isLeaderOnly ? '내 팀' : undefined,
       visible: perm.canAccessEvalDashboard,
     },
     {

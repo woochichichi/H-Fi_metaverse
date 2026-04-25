@@ -66,7 +66,7 @@ export default function V2ConfirmHost() {
     <div className={themeClass} style={{ position: 'fixed', inset: 0, zIndex: 600 }}>
       <div
         onClick={() => close(false)}
-        style={{ position: 'absolute', inset: 0, background: 'rgba(42,31,26,.5)', backdropFilter: 'blur(2px)' }}
+        style={{ position: 'absolute', inset: 0, background: 'rgba(42,31,26,.22)' }}
       />
       <div
         role="alertdialog"

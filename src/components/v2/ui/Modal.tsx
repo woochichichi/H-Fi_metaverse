@@ -34,11 +34,11 @@ export default function Modal({ open, onClose, title, children, width = 520, foo
   return createPortal(
     <div className={themeClass} style={{ position: 'fixed', inset: 0, zIndex: 400 }}>
       <div
+        // backdrop: 너무 진하면 뒤 페이지가 안 보여 컨텍스트 손실. 약하게 + blur 제거.
         style={{
           position: 'absolute',
           inset: 0,
-          background: isDark ? 'rgba(0, 0, 0, 0.6)' : 'rgba(42, 31, 26, 0.45)',
-          backdropFilter: 'blur(2px)',
+          background: isDark ? 'rgba(0, 0, 0, 0.35)' : 'rgba(42, 31, 26, 0.18)',
         }}
         onClick={onClose}
       />

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Modal from '../ui/Modal';
+import DatePicker from '../ui/DatePicker';
 import { COLOR, type PurposeLabel } from '../../../lib/corpCardMockData';
 import type { PlannedExpense, PlannedExpenseInput } from '../../../hooks/usePlannedExpenses';
 import { quarterRange } from '../../../hooks/useCorpCardQuarters';
@@ -81,46 +82,66 @@ export default function PlannedExpenseModal({ mode, periodYm, initial, onClose, 
         </>
       }
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {/* 1행: 카테고리 (필수) — 가장 먼저 결정해야 색·분류가 잡히므로 위로 */}
+        <Field label="카테고리" required>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {CATEGORY_OPTIONS.map((c) => {
+              const active = category === c;
+              return (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setCategory(c)}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: 999,
+                    border: active ? `1.5px solid ${COLOR[c]}` : '1px solid var(--w-border)',
+                    background: active ? `${COLOR[c]}1a` : 'var(--w-surface)',
+                    color: active ? COLOR[c] : 'var(--w-text-soft)',
+                    fontSize: 12,
+                    fontWeight: active ? 700 : 500,
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 5,
+                  }}
+                >
+                  <span style={{ width: 8, height: 8, borderRadius: 999, background: COLOR[c] }} />
+                  {c}
+                </button>
+              );
+            })}
+          </div>
+        </Field>
+
+        {/* 2행: 예정일 + 금액 — 좌/우 */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          <Field label="예정일">
-            <input
-              type="date"
+          <Field label="예정일" required>
+            <DatePicker
               value={plannedDate}
-              onChange={(e) => setPlannedDate(e.target.value)}
+              onChange={setPlannedDate}
               min={range.start}
               max={range.end}
+              quickPicks={buildQuickPicks(range)}
             />
-            <small style={hintStyle}>
-              분기 범위: {range.start} ~ {range.end}
-            </small>
           </Field>
-          <Field label="카테고리">
-            <select value={category} onChange={(e) => setCategory(e.target.value as PurposeLabel)}>
-              {CATEGORY_OPTIONS.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-              <span style={{ width: 10, height: 10, borderRadius: 999, background: COLOR[category] }} />
-              <small style={hintStyle}>차트·도넛에서 이 색으로 구분됩니다</small>
-            </div>
+
+          <Field label="금액" required hint="원">
+            <input
+              type="text"
+              inputMode="numeric"
+              value={amount === '' ? '' : Number(amount).toLocaleString('ko-KR')}
+              onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, ''))}
+              placeholder="500,000"
+              style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}
+            />
           </Field>
         </div>
 
-        <Field label="금액 (원)">
-          <input
-            type="text"
-            inputMode="numeric"
-            value={amount === '' ? '' : Number(amount).toLocaleString('ko-KR')}
-            onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, ''))}
-            placeholder="500,000"
-          />
-        </Field>
-
-        <Field label="메모 (선택)">
+        {/* 3행: 메모 (선택) */}
+        <Field label="메모" optional>
           <textarea
             rows={3}
             value={memo}
@@ -129,14 +150,15 @@ export default function PlannedExpenseModal({ mode, periodYm, initial, onClose, 
           />
         </Field>
 
-        <Field label="참석 예정 인원 (선택)">
+        {/* 4행: 참석 인원 (선택, 작게) */}
+        <Field label="참석 예정 인원" optional hint="명">
           <input
             type="text"
             inputMode="numeric"
             value={headcount}
             onChange={(e) => setHeadcount(e.target.value.replace(/[^0-9]/g, ''))}
             placeholder="12"
-            style={{ maxWidth: 120 }}
+            style={{ maxWidth: 120, fontVariantNumeric: 'tabular-nums' }}
           />
         </Field>
       </div>
@@ -144,20 +166,56 @@ export default function PlannedExpenseModal({ mode, periodYm, initial, onClose, 
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+/** 분기 범위 안에서 자주 쓸 빠른 선택 칩 */
+function buildQuickPicks(range: { start: string; end: string }): Array<{ label: string; date: string }> {
+  const todayD = new Date();
+  const today = `${todayD.getFullYear()}-${String(todayD.getMonth() + 1).padStart(2, '0')}-${String(todayD.getDate()).padStart(2, '0')}`;
+  // 이번 주말(가장 가까운 토요일)
+  const dow = todayD.getDay();
+  const sat = new Date(todayD);
+  sat.setDate(todayD.getDate() + ((6 - dow + 7) % 7 || 7));
+  const weekend = `${sat.getFullYear()}-${String(sat.getMonth() + 1).padStart(2, '0')}-${String(sat.getDate()).padStart(2, '0')}`;
+  return [
+    { label: '오늘', date: today },
+    { label: '이번 주말', date: weekend },
+    { label: '분기 마지막', date: range.end },
+  ];
+}
+
+function Field({
+  label,
+  children,
+  required,
+  optional,
+  hint,
+}: {
+  label: string;
+  children: React.ReactNode;
+  required?: boolean;
+  optional?: boolean;
+  hint?: string;
+}) {
   return (
-    <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--w-text-soft)' }}>{label}</span>
+    <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <span
+        style={{
+          fontSize: 12,
+          fontWeight: 700,
+          color: 'var(--w-text)',
+          display: 'flex',
+          alignItems: 'baseline',
+          gap: 5,
+        }}
+      >
+        {label}
+        {required && <span style={{ color: 'var(--w-accent)', fontSize: 12 }}>*</span>}
+        {optional && <span style={{ fontSize: 10.5, color: 'var(--w-text-muted)', fontWeight: 500 }}>(선택)</span>}
+        {hint && <span style={{ fontSize: 10.5, color: 'var(--w-text-muted)', fontWeight: 500, marginLeft: 'auto' }}>{hint}</span>}
+      </span>
       {children}
     </label>
   );
 }
-
-const hintStyle: React.CSSProperties = {
-  fontSize: 10.5,
-  color: 'var(--w-text-muted)',
-  marginTop: 2,
-};
 
 function defaultDate(range: { start: string; end: string }): string {
   // 오늘이 분기 범위 안이면 오늘, 아니면 분기 끝
