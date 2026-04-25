@@ -49,10 +49,9 @@ export default function PwaInstallBanner() {
   return createPortal(
     <>
       <div
-        className="fixed inset-x-0 z-[150] mx-3 rounded-2xl border border-accent/30 shadow-xl"
+        className="fixed inset-x-0 z-[150] mx-3 rounded-2xl border border-accent/30 bg-bg-secondary shadow-xl"
         style={{
           bottom: 'calc(env(safe-area-inset-bottom) + 64px)',
-          background: 'rgba(42,31,40,0.97)',
           backdropFilter: 'blur(12px)',
           animation: 'slideUp .3s ease-out',
         }}

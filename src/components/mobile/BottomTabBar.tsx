@@ -18,9 +18,8 @@ const TABS: { id: MobileTab; label: string; icon: typeof Phone }[] = [
 export default function BottomTabBar({ activeTab, onTabChange }: BottomTabBarProps) {
   return (
     <nav
-      className="flex flex-shrink-0 items-center border-t border-white/[.06]"
+      className="hwk-tabbar flex flex-shrink-0 items-center border-t border-white/[.06] bg-bg-secondary"
       style={{
-        background: 'rgba(30,30,48,.95)',
         paddingBottom: 'env(safe-area-inset-bottom)',
         minHeight: 'calc(56px + env(safe-area-inset-bottom))',
       }}

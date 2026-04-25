@@ -98,7 +98,10 @@ export default function TopBar() {
 
   return (
     <>
-      <header className="flex h-12 flex-shrink-0 items-center justify-between border-b border-white/[.06] px-4" style={{ background: 'rgba(42,31,40,.97)', backdropFilter: 'blur(12px)' }}>
+      <header
+        className="hwk-topbar flex h-12 flex-shrink-0 items-center justify-between border-b border-white/[.06] bg-bg-secondary px-4"
+        style={{ backdropFilter: 'blur(12px)' }}
+      >
         {/* 왼쪽: 로고 — 클릭 시 내 팀 방(홈)으로 이동 */}
         <button
           onClick={() => {

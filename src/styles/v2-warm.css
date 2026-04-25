@@ -1971,3 +1971,10 @@
   color: var(--w-text-muted);
   font-size: 12.5px;
 }
+
+/* ============================================================
+   모바일 헤더/탭바 — classic 다크 인라인 색을 제거하면서
+   흰 배경(warm)에서 white/[.06] 보더가 묻히는 문제를 보정.
+   ============================================================ */
+.v2-warm .hwk-topbar { border-bottom-color: var(--w-border); }
+.v2-warm .hwk-tabbar { border-top-color: var(--w-border); }

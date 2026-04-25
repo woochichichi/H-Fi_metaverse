@@ -45,10 +45,10 @@ export default function MainPage() {
   if (mode === 'mobile') {
     const mobileThemeClass =
       uiVersion === 'dark' ? 'v2-dark' : uiVersion === 'warm' ? 'v2-warm' : '';
+    // 모바일은 메타버스 맵이 없어 키보드/WASD 기반 OnboardingGuide가 부적합 — 제외
     return (
       <div className={mobileThemeClass} style={{ minHeight: '100vh' }}>
         <MobileLayout />
-        {showTutorial && <OnboardingGuide onComplete={closeTutorial} />}
       </div>
     );
   }
