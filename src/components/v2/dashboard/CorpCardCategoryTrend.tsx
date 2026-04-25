@@ -87,18 +87,10 @@ export default function CorpCardCategoryTrend({ transactions, label }: Props) {
             <Tooltip
               cursor={{ fill: 'var(--w-surface-2)', opacity: 0.4 }}
               allowEscapeViewBox={{ x: true, y: true }}
-              wrapperStyle={{ outline: 'none', zIndex: 100 }}
-              contentStyle={{
-                background: '#1f1a18',
-                border: '1px solid #1f1a18',
-                borderRadius: 8,
-                fontSize: 12,
-                color: '#fbf6ef',
-                boxShadow: '0 6px 24px rgba(0,0,0,.28)',
-              }}
-              labelStyle={{ color: '#fbf6ef', fontWeight: 700, marginBottom: 4 }}
-              itemStyle={{ color: '#fbf6ef' }}
-              formatter={(value) => (typeof value === 'number' ? `${fmtKR(value)}` : String(value))}
+              // 차트 위쪽 여유 공간으로 고정 → 카드 아래로 흘러 스크롤 발생 방지
+              position={{ y: -8 }}
+              wrapperStyle={{ outline: 'none', zIndex: 100, pointerEvents: 'none' }}
+              content={<TrendTooltipContent />}
             />
             <Legend wrapperStyle={{ fontSize: 11, paddingTop: 4 }} iconType="square" />
             {chartData.categories.map((cat) => (
@@ -113,6 +105,79 @@ export default function CorpCardCategoryTrend({ transactions, label }: Props) {
             ))}
           </BarChart>
         </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * 용도별 추이 커스텀 툴팁 — Tip 컴포넌트와 디자인 통일.
+ * 기본 recharts tooltip 은 1열 세로 나열이라 카테고리 많으면 길어져
+ * 차트 아래쪽으로 흘러 스크롤 유발. 2열 grid 로 압축 + position 으로
+ * 차트 상단 고정 → 카드 안에서 항상 보이게.
+ *
+ * recharts 의 TooltipProps 가 generic 이라 우리 시그니처와 맞추기 까다로움 →
+ * any 로 받아서 내부에서 안전하게 분해.
+ */
+type RechartsTipPayloadItem = {
+  dataKey?: string | number;
+  name?: string | number;
+  value?: number | string;
+  color?: string;
+};
+function TrendTooltipContent(props: { active?: boolean; payload?: RechartsTipPayloadItem[]; label?: string | number }) {
+  const { active, payload, label } = props;
+  if (!active || !payload || payload.length === 0) return null;
+  const visible = payload.filter((p) => typeof p.value === 'number' && (p.value as number) > 0);
+  if (visible.length === 0) return null;
+  const total = visible.reduce((s, p) => s + (p.value as number), 0);
+
+  return (
+    <div
+      style={{
+        minWidth: 200,
+        maxWidth: 320,
+        padding: '10px 12px',
+        background: '#1f1a18',
+        color: '#fbf6ef',
+        borderRadius: 8,
+        fontSize: 11.5,
+        lineHeight: 1.4,
+        boxShadow: '0 6px 24px rgba(0,0,0,.28)',
+        fontVariantNumeric: 'tabular-nums',
+      }}
+    >
+      <div
+        style={{
+          fontWeight: 700,
+          fontSize: 12.5,
+          marginBottom: 6,
+          paddingBottom: 6,
+          borderBottom: '1px solid rgba(255,255,255,.12)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          gap: 8,
+        }}
+      >
+        <span>{label}</span>
+        <span style={{ color: '#fcd34d' }}>{fmtKR(total)}</span>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 12px' }}>
+        {visible.map((p) => (
+          <div key={String(p.dataKey)} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 2,
+                background: p.color,
+                flexShrink: 0,
+              }}
+            />
+            <span style={{ flex: 1, color: '#d4cfc7' }}>{p.name}</span>
+            <span style={{ fontWeight: 700 }}>{fmtKR(p.value as number)}</span>
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -7,6 +7,8 @@ import { useThemeStore } from '../../stores/themeStore';
 import DashboardLayout from './DashboardLayout';
 import NoticeLanding from './NoticeLanding';
 import OnboardingV2 from './OnboardingV2';
+import V2ToastHost from './ui/Toast';
+import V2ConfirmHost from './ui/dialog';
 import DashboardPage from './pages/DashboardPage';
 import NoticePage from './pages/NoticePage';
 import VocPage from './pages/VocPage';
@@ -168,6 +170,8 @@ export default function V2Workspace() {
       {showOnboarding && (
         <OnboardingV2 themeClass={themeClass} onComplete={completeOnboarding} />
       )}
+      <V2ToastHost />
+      <V2ConfirmHost />
     </>
   );
 }

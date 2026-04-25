@@ -43,10 +43,11 @@ export interface CorpCardLiveResult {
 }
 
 /**
- * 최신 법인카드 snapshot 을 Supabase 에서 가져와 DashboardStats 로 환산.
+ * 법인카드 snapshot 을 Supabase 에서 가져와 DashboardStats 로 환산.
+ * periodYm 이 명시되면 그 분기, null 이면 가장 최근 분기.
  * 데이터가 없으면 snapshot=null 로 반환 (빈 상태 UI 용).
  */
-export function useCorpCardLive(team: string): CorpCardLiveResult {
+export function useCorpCardLive(team: string, periodYm: string | null = null): CorpCardLiveResult {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [snapshot, setSnapshot] = useState<SnapshotRow | null>(null);
@@ -60,12 +61,16 @@ export function useCorpCardLive(team: string): CorpCardLiveResult {
       setLoading(true);
       setError(null);
       try {
-        // 1) 가장 최근 분기(period_ym DESC)의 최신 snapshot 1건
+        // 1) snapshot 선택 — periodYm 지정 시 그 분기, 아니면 가장 최근 분기.
         //    captured_at 만으로 정렬하면 동시에 업로드된 여러 분기 중 엉뚱한 게 잡힘.
-        const { data: snapRows, error: snapErr } = await supabase
+        let snapQuery = supabase
           .from('corp_card_snapshots')
           .select('id, captured_at, period_ym, dept_cd, team')
-          .eq('team', team)
+          .eq('team', team);
+        if (periodYm) {
+          snapQuery = snapQuery.eq('period_ym', periodYm);
+        }
+        const { data: snapRows, error: snapErr } = await snapQuery
           .order('period_ym', { ascending: false })
           .order('captured_at', { ascending: false })
           .limit(1);
@@ -116,7 +121,7 @@ export function useCorpCardLive(team: string): CorpCardLiveResult {
     return () => {
       cancelled = true;
     };
-  }, [team]);
+  }, [team, periodYm]);
 
   return { loading, error, snapshot, stats, transactions };
 }

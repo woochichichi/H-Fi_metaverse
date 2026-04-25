@@ -16,11 +16,13 @@ import { useGatherings } from '../../../hooks/useGatherings';
 import { GATHERING_CATEGORIES } from '../../../lib/constants';
 import type { GatheringCategory } from '../../../lib/constants';
 import { formatRelativeTime } from '../../../lib/utils';
+import { useV2Toast } from '../ui/Toast';
 import type { Gathering } from '../../../types';
 
 export default function GatheringPage() {
   const { user } = useAuthStore();
   const { gatherings, loading, fetchGatherings, fetchMyJoins, createGathering, joinGathering, leaveGathering, closeGathering } = useGatherings();
+  const showToast = useV2Toast((s) => s.show);
 
   const [category, setCategory] = useState<GatheringCategory | null>(null);
   const [status, setStatus] = useState<'recruiting' | 'closed' | 'completed' | null>('recruiting');
@@ -156,7 +158,7 @@ export default function GatheringPage() {
             if (!error) {
               setShowCreate(false);
               await fetchGatherings({ category, status });
-            } else alert(`등록 실패: ${error}`);
+            } else showToast(`등록 실패: ${error}`, 'error');
           }}
         />
       )}

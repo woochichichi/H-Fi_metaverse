@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { MessageSquareHeart, Plus, AlertTriangle } from 'lucide-react';
+import { MessageSquareHeart, Plus, AlertTriangle, ShieldCheck, Users } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
@@ -25,12 +25,15 @@ import {
 } from '../../../lib/constants';
 import type { VocCategory, VocStatus } from '../../../lib/constants';
 import { formatRelativeTime } from '../../../lib/utils';
+import { useV2Toast } from '../ui/Toast';
+import { confirm } from '../ui/dialog';
 import type { Voc } from '../../../types';
 
 export default function VocPage() {
   const { user, profile } = useAuthStore();
   const perm = usePermissions();
   const { vocs, loading, fetchVocs, createVoc, updateVoc, deleteVoc } = useVocs();
+  const showToast = useV2Toast((s) => s.show);
 
   const [status, setStatus] = useState<VocStatus | null>(null);
   const [category, setCategory] = useState<VocCategory | null>(null);
@@ -50,19 +53,21 @@ export default function VocPage() {
         crumbs={[
           { label: '한울타리' },
           {
-            label: 'VOC',
+            label: '바라는점',
             badge: profile?.team ? { text: profile.team, tone: 'accent' } : undefined,
           },
         ]}
-        title="VOC"
-        description="팀원·팀장·회사에 바라는 점을 익명으로 남겨주세요. 불편·요청·칭찬·개선 의견 모두 환영합니다."
+        title="바라는점"
+        description="팀원·팀장·회사에 바라는 점을 남겨주세요. 불편·요청·칭찬·개선 의견 모두 환영합니다."
         actions={
           <button className="w-btn w-btn-primary" onClick={() => setShowCreate(true)}>
             <Plus size={14} />
-            <span>VOC 올리기</span>
+            <span>바라는점 올리기</span>
           </button>
         }
       />
+
+      <AnonymityNotice />
 
       <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginBottom: 14 }}>
         <FilterBar
@@ -88,7 +93,7 @@ export default function VocPage() {
         <div className="w-card">
           <EmptyState
             icon={MessageSquareHeart}
-            title="아직 VOC가 없어요"
+            title="아직 등록된 바라는점이 없어요"
             description="첫 번째 목소리가 되어보세요 🙋"
           />
         </div>
@@ -96,7 +101,7 @@ export default function VocPage() {
         <MasterDetail
           hasSelection={!!detail}
           onBackMobile={() => setDetail(null)}
-          emptyTitle="VOC를 선택하세요"
+          emptyTitle="바라는점을 선택하세요"
           emptyDescription="왼쪽 목록에서 하나를 선택하면 내용과 처리 영역이 여기에 표시됩니다."
           master={
             <MasterListCard>
@@ -139,18 +144,19 @@ export default function VocPage() {
                 canDelete={perm.isAdmin || detail.author_id === user.id}
                 onStatusChange={async (s) => {
                   const { error } = await updateVoc(detail.id, { status: s });
-                  if (error) alert(`변경 실패: ${error}`);
+                  if (error) showToast(`변경 실패: ${error}`, 'error');
                   else setDetail({ ...detail, status: s });
                 }}
                 onResolution={async (r) => {
                   const { error } = await updateVoc(detail.id, { resolution: r });
-                  if (error) alert(`저장 실패: ${error}`);
+                  if (error) showToast(`저장 실패: ${error}`, 'error');
                   else setDetail({ ...detail, resolution: r });
                 }}
                 onDelete={async () => {
-                  if (!confirm('정말 삭제하시겠어요?')) return;
+                  const ok = await confirm({ title: 'VOC 삭제', message: '정말 삭제하시겠어요?' });
+                  if (!ok) return;
                   const { error } = await deleteVoc(detail.id);
-                  if (error) alert(`삭제 실패: ${error}`);
+                  if (error) showToast(`삭제 실패: ${error}`, 'error');
                   else setDetail(null);
                 }}
               />
@@ -172,7 +178,7 @@ export default function VocPage() {
             if (!error) {
               setShowCreate(false);
               await fetchVocs({ status, category, team: teamFilter });
-            } else alert(`등록 실패: ${error}`);
+            } else showToast(`등록 실패: ${error}`, 'error');
           }}
         />
       )}
@@ -309,7 +315,7 @@ function VocDetailPanel({
       )}
 
       <DescriptionCard
-        label="VOC 내용"
+        label="바라는점 내용"
         timestamp={formatRelativeTime(voc.created_at)}
         attachments={voc.attachment_urls}
       >
@@ -394,7 +400,7 @@ function CreateVocModal({
     <Modal
       open={open}
       onClose={onClose}
-      title="VOC 올리기"
+      title="바라는점 올리기"
       width={560}
       footer={
         <>
@@ -464,7 +470,7 @@ function CreateVocModal({
             onChange={(e) => setAnonymous(e.target.checked)}
             style={{ width: 'auto', padding: 0 }}
           />
-          익명으로 제출 (리더가 작성자를 알 수 없어요)
+          익명으로 제출 — 작성자 식별 정보가 DB에 저장되지 않아요 (리더·팀장·관리자 누구도 작성자 조회 불가)
         </label>
       </div>
     </Modal>
@@ -477,5 +483,47 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--w-text-soft)' }}>{label}</span>
       {children}
     </label>
+  );
+}
+
+function AnonymityNotice() {
+  return (
+    <div
+      className="w-card"
+      style={{
+        padding: 14,
+        marginBottom: 14,
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: 14,
+        background: 'var(--w-surface)',
+        border: '1px solid var(--w-border)',
+      }}
+    >
+      <div style={{ display: 'flex', gap: 10 }}>
+        <Users size={18} style={{ color: 'var(--w-accent)', flexShrink: 0, marginTop: 2 }} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--w-text)' }}>
+            유닛 리더 + 팀장이 함께 봅니다
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--w-text-soft)', lineHeight: 1.5 }}>
+            접수된 내용은 해당 유닛 리더와 팀장이 함께 검토해 처리 방향을 정합니다.
+            처리 진행 단계(접수 → 검토중 → 처리중 → 완료)는 우측 상세에서 확인할 수 있어요.
+          </div>
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 10 }}>
+        <ShieldCheck size={18} style={{ color: 'var(--w-success)', flexShrink: 0, marginTop: 2 }} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--w-text)' }}>
+            익명 제출은 정말 익명입니다
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--w-text-soft)', lineHeight: 1.5 }}>
+            익명 체크 시 작성자 ID가 DB에 <b>NULL</b>로 저장되며, 활동 로그에도 기록되지 않습니다.
+            관리자·리더·팀장 누구도 누가 썼는지 알 수 없고, 추후에도 조회·복원할 방법이 없습니다.
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>예정 지출 섹션 — 목업 3안</title>
+<style>
+  :root {
+    --w-bg: #FBF6EF;
+    --w-surface: #FFFFFF;
+    --w-surface-2: #F5EEE4;
+    --w-border: #E8DDCE;
+    --w-border-strong: #D9C9B2;
+    --w-text: #2A1F1A;
+    --w-text-soft: #5C4B42;
+    --w-text-muted: #8A776B;
+    --w-accent: #E8725C;
+    --w-accent-soft: #FCE4DD;
+    --w-accent-hover: #D95F48;
+    --w-success: #3F9D6E;
+    --w-success-soft: #E8F5EE;
+    --w-warning: #D08A2E;
+    --w-warning-soft: #FAEFD9;
+    --w-danger: #C8453E;
+    --w-info: #3D7FA8;
+    --w-info-soft: #E1EEF7;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Pretendard', -apple-system, system-ui, sans-serif;
+    background: var(--w-bg);
+    color: var(--w-text);
+    padding: 32px;
+    margin: 0;
+    line-height: 1.5;
+  }
+  h1 { font-size: 18px; margin: 0 0 8px; }
+  h2 { font-size: 14px; margin: 32px 0 6px; color: var(--w-text-soft); }
+  .h2-desc { font-size: 12px; color: var(--w-text-muted); margin-bottom: 14px; line-height: 1.6; }
+  .pro { color: var(--w-success); font-weight: 600; }
+  .con { color: var(--w-danger); font-weight: 600; }
+  .subtitle { color: var(--w-text-muted); font-size: 12px; margin-bottom: 24px; line-height: 1.7; }
+  .container { max-width: 1180px; margin: 0 auto; }
+  .card-section {
+    background: var(--w-surface);
+    border: 1px solid var(--w-border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+  .card-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--w-border);
+    margin-bottom: 12px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .card-title { font-size: 14px; font-weight: 700; display:flex; align-items:center; gap:8px; }
+  .count-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-left: 4px;
+    padding: 0 6px;
+    height: 20px;
+    background: var(--w-surface-2);
+    border-radius: 999px;
+    font-size: 11px; color: var(--w-text-muted);
+    font-weight: 600;
+  }
+  .total-chip {
+    display: inline-flex; align-items: baseline; gap: 6px;
+    padding: 6px 12px;
+    background: var(--w-warning-soft);
+    color: var(--w-warning);
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .total-chip b { font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+  .btn-add {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 6px 12px;
+    background: var(--w-accent);
+    color: #fff;
+    border: 0;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-add:hover { background: var(--w-accent-hover); }
+  .btn-icon {
+    width: 24px; height: 24px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: transparent;
+    color: var(--w-text-muted);
+    border: 0; border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .btn-icon:hover { background: var(--w-surface-2); color: var(--w-text); }
+
+  /* Hero 보조 표시 (잔여 옆) */
+  .hero {
+    background: linear-gradient(135deg, #2A1F1A 0%, #3D2F28 100%);
+    color: #FBF6EF;
+    border-radius: 14px;
+    padding: 18px 22px;
+    margin-bottom: 16px;
+    display: flex;
+    gap: 28px;
+    align-items: center;
+  }
+  .hero-block .label { font-size: 10.5px; color: rgba(251,246,239,.65); margin-bottom: 4px; font-weight: 600; }
+  .hero-block .value { font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
+  .hero-block .value.warn { color: #FBBF24; }
+  .hero-block .sub { font-size: 11px; color: rgba(251,246,239,.55); margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .hero-divider { width: 1px; align-self: stretch; background: rgba(251,246,239,.12); }
+
+
+  /* ───── 안 A : 카드 리스트 (시간순, 3컬럼 그리드) ───── */
+  .a-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+  }
+  .a-card {
+    border: 1px solid var(--w-border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    background: var(--w-bg);
+    position: relative;
+    transition: box-shadow .15s, border-color .15s;
+  }
+  .a-card:hover { border-color: var(--w-border-strong); box-shadow: 0 2px 8px rgba(42,31,26,.06); }
+  .a-card.upcoming { border-left: 3px solid var(--w-warning); }
+  .a-card.future { border-left: 3px solid var(--w-info); }
+  .a-card.past { opacity: 0.6; border-left: 3px solid var(--w-text-muted); }
+  .a-cat-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+  .a-cat-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 700;
+  }
+  .a-cat-pill .dot { width: 6px; height: 6px; border-radius: 999px; }
+  .a-date { font-size: 11px; color: var(--w-text-muted); margin-left: auto; font-variant-numeric: tabular-nums; }
+  .a-amt {
+    font-size: 18px; font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 4px;
+  }
+  .a-amt .unit { font-size: 12px; font-weight: 700; color: var(--w-text-muted); margin-left: 2px; }
+  .a-memo {
+    font-size: 12px; color: var(--w-text-soft);
+    line-height: 1.4;
+    margin-bottom: 4px;
+  }
+  .a-meta {
+    display: flex; gap: 6px; align-items: center;
+    font-size: 10.5px; color: var(--w-text-muted);
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px dashed var(--w-border);
+  }
+  .a-meta .actions { margin-left: auto; display: flex; gap: 2px; opacity: 0; transition: opacity .15s; }
+  .a-card:hover .a-meta .actions { opacity: 1; }
+
+
+  /* ───── 안 B : 테이블 (날짜순) ───── */
+  .b-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+  }
+  .b-table th, .b-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--w-border);
+  }
+  .b-table th {
+    font-size: 11px;
+    color: var(--w-text-muted);
+    font-weight: 600;
+    background: var(--w-surface-2);
+  }
+  .b-table td.right { text-align: right; }
+  .b-table tr.past td { opacity: 0.55; }
+  .b-table tr:hover { background: var(--w-surface-2); }
+  .b-table .date-block {
+    font-weight: 700;
+    color: var(--w-text);
+  }
+  .b-table .date-block .rel {
+    font-size: 10.5px;
+    font-weight: 500;
+    color: var(--w-text-muted);
+    margin-top: 1px;
+  }
+  .b-table .amt {
+    font-weight: 800;
+    font-size: 13.5px;
+  }
+  .b-table .actions {
+    display: flex;
+    gap: 2px;
+    justify-content: flex-end;
+    opacity: 0;
+    transition: opacity .15s;
+  }
+  .b-table tr:hover .actions { opacity: 1; }
+
+
+  /* ───── 안 C : 가로 타임라인 + 카드 ───── */
+  .c-timeline-wrap {
+    position: relative;
+    margin: 12px 0 24px;
+    padding: 30px 0 50px;
+  }
+  .c-axis {
+    position: absolute;
+    left: 0; right: 0;
+    top: 50%;
+    height: 3px;
+    background: var(--w-border);
+    border-radius: 999px;
+  }
+  .c-axis-now {
+    position: absolute;
+    top: 50%;
+    width: 2px;
+    height: 30px;
+    background: var(--w-accent);
+    transform: translate(-50%, -50%);
+    z-index: 1;
+  }
+  .c-axis-now::after {
+    content: '오늘';
+    position: absolute;
+    top: -16px; left: 50%; transform: translateX(-50%);
+    font-size: 10px; color: var(--w-accent); font-weight: 700;
+    white-space: nowrap;
+  }
+  .c-month-label {
+    position: absolute;
+    top: calc(50% + 12px);
+    transform: translateX(-50%);
+    font-size: 10.5px;
+    color: var(--w-text-muted);
+    font-weight: 600;
+  }
+  .c-pin {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--w-surface);
+    z-index: 2;
+    cursor: pointer;
+  }
+  .c-pin-card {
+    position: absolute;
+    bottom: calc(50% + 14px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--w-surface);
+    border: 1px solid var(--w-border);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 11px;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(42,31,26,.08);
+    pointer-events: none;
+  }
+  .c-pin-card.below {
+    bottom: auto;
+    top: calc(50% + 14px);
+  }
+  .c-pin-card .amt { font-weight: 800; }
+  .c-pin-card .cat {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 999px;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+
+  .c-stack {
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    font-size: 11.5px;
+  }
+  .c-stack-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: var(--w-surface-2);
+  }
+  .c-stack-item .dot { width: 8px; height: 8px; border-radius: 999px; flex-shrink: 0; }
+  .c-stack-item .lbl { flex: 1; font-weight: 600; color: var(--w-text-soft); }
+  .c-stack-item .v { font-weight: 800; font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>예정 지출 섹션 — 목업 3안</h1>
+  <p class="subtitle">
+    <b>목적</b>: 분기 말 회식·교육 등 예정된 지출 계획을 미리 등록 → 팀장이 "어떤 일정에 어떤 규모 지출 예정인지" 미리 파악.<br>
+    <b>핵심 정보</b>: 얼마가 예정돼 있는지 (합계). 부가: 언제·뭐로·메모.<br>
+    <b>입력 폼</b>: 새 추가/수정은 모달로 (날짜·카테고리·금액·메모·참석자수).<br>
+    <b>잔여 연결</b>: Hero 잔여 옆에 "예정 차감 시 N원" 보조 표시 (실제 합계엔 반영 안 함).
+  </p>
+
+  <!-- Hero 예시: 잔여 옆 보조 -->
+  <div class="hero">
+    <div class="hero-block">
+      <div class="label">사용</div>
+      <div class="value">214만<span style="font-size:14px;color:rgba(251,246,239,.5);font-weight:600;margin-left:1px">원</span></div>
+      <div class="sub">23.2% 소진</div>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-block">
+      <div class="label">남은 예산</div>
+      <div class="value warn">708만<span style="font-size:14px;color:rgba(251,246,239,.5);font-weight:600;margin-left:1px">원</span></div>
+      <div class="sub" style="color:#fcd34d">예정 차감 시 <b style="color:#fcd34d;font-weight:800">583만</b> · 분기 가용</div>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-block">
+      <div class="label">예정 지출 합계</div>
+      <div class="value" style="color:#fcd34d">125만<span style="font-size:14px;color:rgba(251,246,239,.5);font-weight:600;margin-left:1px">원</span></div>
+      <div class="sub">3건 · 분기 말 집중</div>
+    </div>
+  </div>
+
+  <!-- ============ A : 카드 그리드 (시간순) ============ -->
+  <h2>안 A — 카드 그리드 (시간순 정렬, hover 시 액션 노출)</h2>
+  <p class="h2-desc">
+    <span class="pro">✓ 메모·참석자 같은 부가정보까지 함께 보임</span>
+    <span class="pro">· 카테고리 컬러 사이드바로 한눈에 분류</span><br>
+    <span class="con">△ 모바일·좁은 화면에선 카드 1개씩 세로로</span>
+  </p>
+  <div class="card-section">
+    <div class="card-head">
+      <div class="card-title">
+        예정 지출 <span class="count-badge">3</span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <div class="total-chip">
+          이번 분기 예정 합계 <b>1,250,000원</b>
+        </div>
+        <button class="btn-add">+ 예정 추가</button>
+      </div>
+    </div>
+
+    <div class="a-grid">
+      <div class="a-card upcoming">
+        <div class="a-cat-row">
+          <span class="a-cat-pill" style="background:#fce7f3;color:#ec4899">
+            <span class="dot" style="background:#ec4899"></span>회식
+          </span>
+          <span class="a-date">06/15 · D-51</span>
+        </div>
+        <div class="a-amt">50<span class="unit">만 원</span></div>
+        <div class="a-memo">분기말 단합 회식 · 한식당 예약</div>
+        <div class="a-meta">
+          <span>👤 12명 · 등록 우치</span>
+          <span class="actions">
+            <button class="btn-icon" title="수정">✎</button>
+            <button class="btn-icon" title="삭제">🗑</button>
+          </span>
+        </div>
+      </div>
+
+      <div class="a-card future">
+        <div class="a-cat-row">
+          <span class="a-cat-pill" style="background:#cffafe;color:#06b6d4">
+            <span class="dot" style="background:#06b6d4"></span>교육
+          </span>
+          <span class="a-date">05/20 · D-25</span>
+        </div>
+        <div class="a-amt">40<span class="unit">만 원</span></div>
+        <div class="a-memo">신입사원 OJT 외부 강사 초청</div>
+        <div class="a-meta">
+          <span>👤 8명 · 등록 김용현</span>
+          <span class="actions">
+            <button class="btn-icon" title="수정">✎</button>
+            <button class="btn-icon" title="삭제">🗑</button>
+          </span>
+        </div>
+      </div>
+
+      <div class="a-card future">
+        <div class="a-cat-row">
+          <span class="a-cat-pill" style="background:#dcfce7;color:#16a34a">
+            <span class="dot" style="background:#16a34a"></span>간담회
+          </span>
+          <span class="a-date">05/10 · D-15</span>
+        </div>
+        <div class="a-amt">35<span class="unit">만 원</span></div>
+        <div class="a-memo">파트장 분기 간담회</div>
+        <div class="a-meta">
+          <span>👤 6명 · 등록 우치</span>
+          <span class="actions">
+            <button class="btn-icon" title="수정">✎</button>
+            <button class="btn-icon" title="삭제">🗑</button>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ============ B : 테이블 (가장 정보 밀도 높음) ============ -->
+  <h2>안 B — 테이블 (가장 정보 밀도 높음, SAP 표와 디자인 통일)</h2>
+  <p class="h2-desc">
+    <span class="pro">✓ 컬럼 정렬로 비교 쉬움 — 위 "계정별 예산" 표와 디자인 일관</span>
+    <span class="pro">· 정렬·필터 추가하기 좋음</span><br>
+    <span class="con">△ 카드형보다 시각적 매력 떨어질 수 있음</span>
+  </p>
+  <div class="card-section">
+    <div class="card-head">
+      <div class="card-title">
+        예정 지출 <span class="count-badge">3</span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <div class="total-chip">
+          이번 분기 예정 합계 <b>1,250,000원</b>
+        </div>
+        <button class="btn-add">+ 예정 추가</button>
+      </div>
+    </div>
+    <table class="b-table">
+      <thead>
+        <tr>
+          <th style="width:14%">예정일</th>
+          <th style="width:11%">카테고리</th>
+          <th>메모</th>
+          <th style="width:8%">참석</th>
+          <th style="width:10%">등록자</th>
+          <th class="right" style="width:14%">금액</th>
+          <th style="width:6%"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="date-block">
+            05/10
+            <div class="rel">D-15</div>
+          </td>
+          <td><span class="a-cat-pill" style="background:#dcfce7;color:#16a34a"><span class="dot" style="background:#16a34a"></span>간담회</span></td>
+          <td>파트장 분기 간담회</td>
+          <td>6명</td>
+          <td>우치</td>
+          <td class="right amt">350,000원</td>
+          <td><div class="actions"><button class="btn-icon">✎</button><button class="btn-icon">🗑</button></div></td>
+        </tr>
+        <tr>
+          <td class="date-block">
+            05/20
+            <div class="rel">D-25</div>
+          </td>
+          <td><span class="a-cat-pill" style="background:#cffafe;color:#06b6d4"><span class="dot" style="background:#06b6d4"></span>교육</span></td>
+          <td>신입사원 OJT 외부 강사 초청</td>
+          <td>8명</td>
+          <td>김용현</td>
+          <td class="right amt">400,000원</td>
+          <td><div class="actions"><button class="btn-icon">✎</button><button class="btn-icon">🗑</button></div></td>
+        </tr>
+        <tr>
+          <td class="date-block">
+            06/15
+            <div class="rel">D-51</div>
+          </td>
+          <td><span class="a-cat-pill" style="background:#fce7f3;color:#ec4899"><span class="dot" style="background:#ec4899"></span>회식</span></td>
+          <td>분기말 단합 회식 · 한식당 예약</td>
+          <td>12명</td>
+          <td>우치</td>
+          <td class="right amt">500,000원</td>
+          <td><div class="actions"><button class="btn-icon">✎</button><button class="btn-icon">🗑</button></div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+  <!-- ============ C : 가로 타임라인 + 카테고리 합계 ============ -->
+  <h2>안 C — 가로 타임라인 (분기 시간축에 핀, 하단 카테고리 합계)</h2>
+  <p class="h2-desc">
+    <span class="pro">✓ "어떤 시점에 몰려있는지" 가장 직관적 — 팀장이 보는 핵심 정보</span>
+    <span class="pro">· 분기 안에서의 분포가 즉시 보임</span><br>
+    <span class="con">△ 핀 클릭/hover 시 상세 — 정보 밀도는 A·B보다 낮음 (분기 100건 넘으면 겹침)</span>
+  </p>
+  <div class="card-section">
+    <div class="card-head">
+      <div class="card-title">
+        예정 지출 <span class="count-badge">3</span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <div class="total-chip">
+          이번 분기 예정 합계 <b>1,250,000원</b>
+        </div>
+        <button class="btn-add">+ 예정 추가</button>
+      </div>
+    </div>
+
+    <div class="c-timeline-wrap">
+      <div class="c-axis"></div>
+
+      <!-- 월 라벨 -->
+      <div class="c-month-label" style="left:0%">4월</div>
+      <div class="c-month-label" style="left:33%">5월</div>
+      <div class="c-month-label" style="left:66%">6월</div>
+      <div class="c-month-label" style="left:100%">분기 끝</div>
+
+      <!-- 오늘 마커 (4/25 → 분기 시작 4/1 기준 약 28%) -->
+      <div class="c-axis-now" style="left:28%"></div>
+
+      <!-- 핀: 5/10 간담회 (약 44%) -->
+      <div class="c-pin" style="left:44%; background:#16a34a"></div>
+      <div class="c-pin-card" style="left:44%">
+        <span class="cat" style="background:#16a34a"></span>
+        <span class="amt">35만</span> · 5/10 간담회
+      </div>
+
+      <!-- 핀: 5/20 교육 (약 55%) -->
+      <div class="c-pin" style="left:55%; background:#06b6d4"></div>
+      <div class="c-pin-card below" style="left:55%">
+        <span class="cat" style="background:#06b6d4"></span>
+        <span class="amt">40만</span> · 5/20 교육
+      </div>
+
+      <!-- 핀: 6/15 회식 (약 83%) -->
+      <div class="c-pin" style="left:83%; background:#ec4899"></div>
+      <div class="c-pin-card" style="left:83%">
+        <span class="cat" style="background:#ec4899"></span>
+        <span class="amt">50만</span> · 6/15 회식
+      </div>
+    </div>
+
+    <!-- 카테고리 합계 -->
+    <div class="c-stack">
+      <div class="c-stack-item">
+        <span class="dot" style="background:#ec4899"></span>
+        <span class="lbl">회식</span>
+        <span class="v">500,000</span>
+      </div>
+      <div class="c-stack-item">
+        <span class="dot" style="background:#06b6d4"></span>
+        <span class="lbl">교육</span>
+        <span class="v">400,000</span>
+      </div>
+      <div class="c-stack-item">
+        <span class="dot" style="background:#16a34a"></span>
+        <span class="lbl">간담회</span>
+        <span class="v">350,000</span>
+      </div>
+      <div class="c-stack-item" style="background:var(--w-warning-soft)">
+        <span class="dot" style="background:var(--w-warning)"></span>
+        <span class="lbl" style="color:var(--w-warning)">합계</span>
+        <span class="v" style="color:var(--w-warning)">1,250,000</span>
+      </div>
+    </div>
+  </div>
+
+  <h2 style="margin-top:36px">비교 요약</h2>
+  <div class="card-section">
+    <table class="b-table" style="font-size:12.5px">
+      <thead>
+        <tr>
+          <th>기준</th>
+          <th>A 카드 그리드</th>
+          <th>B 테이블</th>
+          <th>C 타임라인</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>"얼마 예정?" 합계 강조</td>
+          <td>헤더 chip ✓</td>
+          <td>헤더 chip ✓</td>
+          <td><b>헤더 + 하단 분류 ✓✓</b></td>
+        </tr>
+        <tr>
+          <td>"언제 몰려있는지" 직관</td>
+          <td>날짜 라벨</td>
+          <td>날짜 컬럼</td>
+          <td><b>가장 직관적</b></td>
+        </tr>
+        <tr>
+          <td>메모/참석 등 부가정보</td>
+          <td><b>한눈에</b></td>
+          <td><b>한눈에</b></td>
+          <td>핀 hover</td>
+        </tr>
+        <tr>
+          <td>건수 많을 때 대응</td>
+          <td>auto-fill grid</td>
+          <td><b>스크롤로 무한</b></td>
+          <td>핀 겹침 우려</td>
+        </tr>
+        <tr>
+          <td>SAP 표(계정별 예산)와 디자인 일관</td>
+          <td>다른 형태</td>
+          <td><b>완전 일관</b></td>
+          <td>다른 형태</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card-section" style="background:#F0FDF4;border-color:#86EFAC;margin-top:24px">
+    <p style="margin:0 0 8px;font-size:13px;color:#166534"><b>추천: 안 B (테이블) + 안 C (타임라인) 조합</b></p>
+    <ul style="margin:0;padding-left:20px;font-size:12px;color:var(--w-text-soft);line-height:1.8">
+      <li><b>상단 작은 타임라인</b>(C 변형) — 분기 어디에 몰려있는지 시각적</li>
+      <li><b>하단 테이블</b>(B) — 클릭/수정/삭제하는 작업 인터페이스</li>
+      <li>합계 chip은 헤더에 1번 노출</li>
+    </ul>
+    <p style="margin:8px 0 0;font-size:11.5px;color:var(--w-text-muted)">
+      또는 단순화 버전이 좋다면 <b>B 단독</b>이 가장 안전 (계정별 예산 표와 디자인 통일).
+    </p>
+  </div>
+
+</div>
+</body>
+</html>

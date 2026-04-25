@@ -12,11 +12,14 @@ import { useNotices } from '../../../hooks/useNotices';
 import { URGENCY_LEVELS, NOTICE_CATEGORIES, TEAMS } from '../../../lib/constants';
 import type { UrgencyLevel, NoticeCategory } from '../../../lib/constants';
 import { formatRelativeTime } from '../../../lib/utils';
+import { useV2Toast } from '../ui/Toast';
+import { confirm } from '../ui/dialog';
 import type { Notice } from '../../../types';
 
 export default function NoticePage() {
   const { user, profile } = useAuthStore();
   const perm = usePermissions();
+  const showToast = useV2Toast((s) => s.show);
   const {
     notices,
     loading,
@@ -169,9 +172,10 @@ export default function NoticePage() {
                 canDelete={perm.isAdmin || detail.author_id === user?.id}
                 onClose={() => setDetail(null)}
                 onDelete={async () => {
-                  if (!confirm('공지를 삭제하시겠어요?')) return;
+                  const ok = await confirm({ title: '공지 삭제', message: '공지를 삭제하시겠어요?' });
+                  if (!ok) return;
                   const { error } = await deleteNotice(detail.id);
-                  if (error) alert(`삭제 실패: ${error}`);
+                  if (error) showToast(`삭제 실패: ${error}`, 'error');
                   else setDetail(null);
                 }}
               />
@@ -194,7 +198,7 @@ export default function NoticePage() {
               setShowCreate(false);
               await fetchNotices({ urgency, category });
             } else {
-              alert(`등록 실패: ${error}`);
+              showToast(`등록 실패: ${error}`, 'error');
             }
           }}
         />

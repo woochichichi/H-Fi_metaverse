@@ -6,11 +6,13 @@ import Modal from '../ui/Modal';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSiteReports } from '../../../hooks/useSiteReports';
 import { formatRelativeTime } from '../../../lib/utils';
+import { useV2Toast } from '../ui/Toast';
 import type { SiteReport } from '../../../types/database';
 
 export default function SiteReportPage() {
   const perm = usePermissions();
   const { reports, authorNames, loading, fetchMyReports, fetchAllReports, createReport } = useSiteReports();
+  const showToast = useV2Toast((s) => s.show);
 
   const [showCreate, setShowCreate] = useState(false);
   const [detail, setDetail] = useState<SiteReport | null>(null);
@@ -106,7 +108,7 @@ export default function SiteReportPage() {
           onClose={() => setShowCreate(false)}
           onSubmit={async ({ title, content }) => {
             const { error } = await createReport({ title, content });
-            if (error) alert(error);
+            if (error) showToast(error, 'error');
             else {
               setShowCreate(false);
               if (perm.isSuperAdmin) await fetchAllReports();

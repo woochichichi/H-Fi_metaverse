@@ -215,8 +215,8 @@ export default function CorpCardCategoryDonut({ transactions }: Props) {
           title={`${drillLabel}${drillLabel === '기타' ? ' (미분류)' : ''} · ${drillTxs.length}건`}
           subtitle="이번 달 거래 적요"
           transactions={drillTxs}
-          // '기타(미분류)' 일 때만 관리자 요청 버튼 노출 — 다른 카테고리는 단순 조회
-          variant={drillLabel === '기타' ? 'category' : 'member'}
+          // 모든 카테고리에서 "적요 수정 요청" 버튼 노출 → 분류 오류 발견 시 즉시 제보
+          variant="category"
           categoryLabel={drillLabel}
           onClose={() => setDrillLabel(null)}
         />

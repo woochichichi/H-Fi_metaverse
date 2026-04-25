@@ -66,7 +66,7 @@ export default function CorpCardAccountList({ accounts, capturedAt }: Props) {
                       ? 'var(--w-warning)'
                       : 'var(--w-danger)';
                 return (
-                  <tr key={a.code} title={`${a.code} · ${a.name}`}>
+                  <tr key={a.code}>
                     <td style={{ ...tdStyle, textAlign: 'left' }}>
                       <div style={{ fontWeight: 700, color: 'var(--w-text)', fontSize: 13 }}>
                         {a.shortName}

@@ -1,7 +1,6 @@
-import { useMemo, useState, useRef, useEffect, type ReactNode } from 'react';
-import { createPortal } from 'react-dom';
+import { useMemo, useState } from 'react';
 import { CreditCard, Loader2, Inbox, AlertTriangle, Clock } from 'lucide-react';
-import { useThemeStore } from '../../../stores/themeStore';
+import { Tip, HelpDot } from '../ui/Tip';
 import PageHeader from '../ui/PageHeader';
 import CorpCardSummaryHero from '../dashboard/CorpCardSummaryHero';
 import CorpCardAccountList from '../dashboard/CorpCardAccountList';
@@ -14,8 +13,11 @@ import { useAuthStore } from '../../../stores/authStore';
 import { useCorpCardLive } from '../../../hooks/useCorpCardLive';
 import { useQuarterCompare } from '../../../hooks/useQuarterCompare';
 import { useMyCardPending } from '../../../hooks/useMyCardPending';
+import { useCorpCardQuarters, quarterLabel } from '../../../hooks/useCorpCardQuarters';
+import { usePlannedExpenses } from '../../../hooks/usePlannedExpenses';
 import { fmt, fmtKR, pct } from '../../../lib/corpCardMockData';
 import { formatKST } from '../../../lib/utils';
+import PlannedExpenseSection from '../dashboard/PlannedExpenseSection';
 
 const PRIVILEGED_ROLES = new Set(['admin', 'director', 'leader']);
 
@@ -96,9 +98,15 @@ export default function CorpCardPage() {
 
 function CorpCardPageContent({ team }: { team: string }) {
   const profile = useAuthStore((s) => s.profile);
-  const { loading, error, snapshot, stats, transactions } = useCorpCardLive(team);
+  // 분기 선택기 state — null 이면 가장 최근 분기 (default).
+  const [selectedPeriod, setSelectedPeriod] = useState<string | null>(null);
+  const { quarters } = useCorpCardQuarters(team);
+  const { loading, error, snapshot, stats, transactions } = useCorpCardLive(team, selectedPeriod);
   const quarterCmp = useQuarterCompare(team);
   const myPending = useMyCardPending();
+  // 예정 지출 — 선택 분기 (또는 snapshot.period_ym) 기준
+  const activePeriod = snapshot?.period_ym ?? selectedPeriod ?? null;
+  const planned = usePlannedExpenses(team, activePeriod);
 
   // 항목 E: 일반 팀원은 팀원별 랭킹에서 본인 행만 표시.
   // 리더/관리자는 전체 열람 (팀장 피드백 260424 재확인 답변 기준).
@@ -174,7 +182,16 @@ function CorpCardPageContent({ team }: { team: string }) {
         crumbs={[{ label: '한울타리' }, { label: '팀 예산' }]}
         title="팀 예산"
         description="우리 팀이 주로 어디에 쓰는지 한눈에 — 실시간 예산 사용 현황과 남은 버퍼를 확인하세요."
-        actions={snapshot ? <SyncBadge capturedAt={snapshot.captured_at} periodYm={snapshot.period_ym} /> : undefined}
+        actions={
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <QuarterPicker
+              quarters={quarters.map((q) => q.period_ym)}
+              value={selectedPeriod ?? snapshot?.period_ym ?? null}
+              onChange={(p) => setSelectedPeriod(p)}
+            />
+            {snapshot && <SyncBadge capturedAt={snapshot.captured_at} periodYm={snapshot.period_ym} />}
+          </div>
+        }
       />
 
       {loading && <LoadingState />}
@@ -184,14 +201,21 @@ function CorpCardPageContent({ team }: { team: string }) {
       {stats && snapshot && (
         <>
           {/* 1) Hero — "얼마 썼고/남았고" 한 줄 답. 가로 폭 단독 사용. */}
-          <CorpCardSummaryHero stats={stats} />
+          <CorpCardSummaryHero stats={stats} plannedTotal={planned.total} />
 
           {/* 2) 주로 어디에 (도넛 좌 + 내역 리스트 우) — 가로 폭 전체 사용해
                  갈색 잉여 공간 제거 + 내역이 시원하게 펼쳐짐 */}
           <CorpCardCategoryDonut transactions={stats.txThisMonth} />
 
-          {/* 2) 계정별 예산 — 카테고리별 잔여 세부 (식대/회의/교통) */}
+          {/* 3) 계정별 예산 — 카테고리별 잔여 세부 (식대/회의/교통) */}
           <CorpCardAccountList accounts={stats.accounts} capturedAt={snapshot.captured_at} />
+
+          {/* 4) 예정 지출 — 분기 말 회식·교육 등 미리 등록 (기존 합계와 분리) */}
+          <PlannedExpenseSection
+            periodYm={snapshot.period_ym}
+            todayISO={todayISO()}
+            planned={planned}
+          />
 
           {/* 3) 일별 바차트(분기 90일) + 주의 알림 */}
           <div className="w-cc-main-grid">
@@ -306,119 +330,42 @@ function AlertCard({ alerts }: { alerts: AlertItem[] }) {
 }
 
 /**
- * 커스텀 hover 툴팁 — children 을 wrapping. portal 로 body 에 띄워
- * 부모 overflow:hidden / z-index stacking 영향 없이 항상 보이게.
- * children 의 BoundingClientRect 를 측정해 그 위로 화살표 포함 popup 표시.
+ * 분기 선택기 — 페이지 상단에서 전체 차트·표·hero 동기화.
+ * DB 에 데이터가 있는 분기만 노출 (useCorpCardQuarters 결과).
  */
-export function Tip({ content, children }: { content: string | ReactNode; children: ReactNode }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
-  const themeClass = useThemeStore((s) => (s.version === 'dark' ? 'v2-dark' : 'v2-warm'));
-
-  // 위치 갱신 — show 시점 + scroll/resize 시 동기화
-  useEffect(() => {
-    if (!pos) return;
-    const update = () => {
-      const r = ref.current?.getBoundingClientRect();
-      if (!r) return;
-      setPos({ x: r.left + r.width / 2, y: r.top });
-    };
-    window.addEventListener('scroll', update, true);
-    window.addEventListener('resize', update);
-    return () => {
-      window.removeEventListener('scroll', update, true);
-      window.removeEventListener('resize', update);
-    };
-  }, [pos]);
-
-  const onEnter = () => {
-    const r = ref.current?.getBoundingClientRect();
-    if (!r) return;
-    setPos({ x: r.left + r.width / 2, y: r.top });
-  };
-
+function QuarterPicker({
+  quarters,
+  value,
+  onChange,
+}: {
+  quarters: string[];
+  value: string | null;
+  onChange: (p: string | null) => void;
+}) {
+  if (quarters.length === 0) return null;
   return (
-    <>
-      <span
-        ref={ref}
-        style={{ display: 'inline-flex', alignItems: 'center' }}
-        onMouseEnter={onEnter}
-        onMouseLeave={() => setPos(null)}
-      >
-        {children}
-      </span>
-      {pos &&
-        createPortal(
-          <div
-            className={themeClass}
-            style={{
-              position: 'fixed',
-              left: pos.x,
-              top: pos.y - 10,
-              transform: 'translate(-50%, -100%)',
-              zIndex: 1000,
-              pointerEvents: 'none',
-            }}
-          >
-            <div
-              style={{
-                minWidth: 220,
-                maxWidth: 340,
-                padding: '10px 14px',
-                background: '#1f1a18',
-                color: '#fbf6ef',
-                borderRadius: 8,
-                fontSize: 11.5,
-                lineHeight: 1.6,
-                whiteSpace: 'pre-line',
-                boxShadow: '0 6px 24px rgba(0,0,0,.28)',
-              }}
-            >
-              {content}
-            </div>
-            {/* 화살표 — popup 아래쪽 중앙 */}
-            <div
-              style={{
-                position: 'absolute',
-                top: '100%',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: 0,
-                height: 0,
-                borderLeft: '6px solid transparent',
-                borderRight: '6px solid transparent',
-                borderTop: '6px solid #1f1a18',
-              }}
-            />
-          </div>,
-          document.body,
-        )}
-    </>
-  );
-}
-
-/** "?" 아이콘 — 헤더에 hover 시 툴팁으로 가이드 표시. */
-function HelpDot({ tip }: { tip: React.ReactNode }) {
-  return (
-    <Tip content={tip}>
-      <span
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: 16,
-          height: 16,
-          borderRadius: '50%',
-          background: 'var(--w-surface-2)',
-          color: 'var(--w-text-muted)',
-          fontSize: 10,
-          fontWeight: 700,
-          cursor: 'help',
-        }}
-      >
-        ?
-      </span>
-    </Tip>
+    <select
+      value={value ?? ''}
+      onChange={(e) => onChange(e.target.value || null)}
+      style={{
+        padding: '6px 10px',
+        borderRadius: 6,
+        border: '1px solid var(--w-border)',
+        background: 'var(--w-surface)',
+        fontSize: 12,
+        fontWeight: 600,
+        color: 'var(--w-text)',
+        cursor: 'pointer',
+        fontFamily: 'inherit',
+      }}
+      title="분기 변경"
+    >
+      {quarters.map((p) => (
+        <option key={p} value={p}>
+          {quarterLabel(p)}
+        </option>
+      ))}
+    </select>
   );
 }
 

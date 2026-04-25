@@ -2,6 +2,8 @@ import { fmtKR, pct, type DashboardStats } from '../../../lib/corpCardMockData';
 
 interface Props {
   stats: DashboardStats;
+  /** 예정 지출 합계 — "예정 차감 시 N원" 보조 표시용 (실제 합계엔 영향 없음) */
+  plannedTotal?: number;
 }
 
 /**
@@ -9,9 +11,10 @@ interface Props {
  * 분기 단위가 회계 편성 단위라 메인 숫자는 분기로, 이번 달·주·분기말 예상은 chip 으로 보조.
  * 옆에 CorpCardCategoryDonut 가 "어디에" 답을 책임짐.
  */
-export default function CorpCardSummaryHero({ stats }: Props) {
+export default function CorpCardSummaryHero({ stats, plannedTotal = 0 }: Props) {
   const usedPct = pct(stats.totalUsed, stats.totalPlanned);
   const monthUsedPct = pct(stats.monthUsed, stats.monthBudget);
+  const remainAfterPlanned = Math.max(0, stats.totalRemaining - plannedTotal);
 
   const paceTone =
     stats.paceStatus === 'danger'
@@ -48,6 +51,19 @@ export default function CorpCardSummaryHero({ stats }: Props) {
           <div className="val">
             {fmtKR(stats.totalRemaining)}<span className="unit">원</span>
           </div>
+          {plannedTotal > 0 && (
+            <div
+              style={{
+                fontSize: 11,
+                color: '#fcd34d',
+                marginTop: 4,
+                fontVariantNumeric: 'tabular-nums',
+              }}
+              title={`예정 지출 ${fmtKR(plannedTotal)} 차감 시 실 가용`}
+            >
+              예정 차감 시 <b style={{ fontWeight: 800 }}>{fmtKR(remainAfterPlanned)}</b>
+            </div>
+          )}
         </div>
       </div>
 

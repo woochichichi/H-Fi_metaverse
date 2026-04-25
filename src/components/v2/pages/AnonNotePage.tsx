@@ -18,11 +18,14 @@ import { useNotes } from '../../../hooks/useNotes';
 import { NOTE_CATEGORIES, NOTE_STATUSES } from '../../../lib/constants';
 import type { NoteCategory, NoteStatus, NoteRecipient } from '../../../lib/constants';
 import { formatRelativeTime } from '../../../lib/utils';
+import { useV2Toast } from '../ui/Toast';
+import { confirm } from '../ui/dialog';
 import type { AnonymousNote } from '../../../types';
 
 type Tab = 'inbox' | 'sent';
 
 export default function AnonNotePage() {
+  const showToast = useV2Toast((s) => s.show);
   const { user, profile } = useAuthStore();
   const perm = usePermissions();
   const { notes, loading, fetchNotes, fetchMyNotes, createNote, updateNoteStatus, deleteNote } = useNotes();
@@ -191,13 +194,14 @@ export default function AnonNotePage() {
                 canDelete={perm.isAdmin || detail.sender_id === user.id}
                 onStatusChange={async (s) => {
                   const { error } = await updateNoteStatus(detail.id, s);
-                  if (error) alert(`변경 실패: ${error}`);
+                  if (error) showToast(`변경 실패: ${error}`, 'error');
                   else setDetail({ ...detail, status: s });
                 }}
                 onDelete={async () => {
-                  if (!confirm('쪽지를 삭제하시겠어요?')) return;
+                  const ok = await confirm({ title: '쪽지 삭제', message: '쪽지를 삭제하시겠어요?' });
+                  if (!ok) return;
                   const { error } = await deleteNote(detail.id);
-                  if (error) alert(`삭제 실패: ${error}`);
+                  if (error) showToast(`삭제 실패: ${error}`, 'error');
                   else setDetail(null);
                 }}
               />
@@ -217,7 +221,7 @@ export default function AnonNotePage() {
               setShowCreate(false);
               if (tab === 'inbox') await fetchNotes({ status, category, team: teamFilter });
               else await fetchMyNotes(user.id);
-            } else alert(`발송 실패: ${error}`);
+            } else showToast(`발송 실패: ${error}`, 'error');
           }}
         />
       )}

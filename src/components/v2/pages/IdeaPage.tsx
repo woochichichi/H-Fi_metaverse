@@ -18,11 +18,13 @@ import { useIdeas } from '../../../hooks/useIdeas';
 import { IDEA_CATEGORIES, IDEA_STATUSES } from '../../../lib/constants';
 import type { IdeaCategory, IdeaStatus } from '../../../lib/constants';
 import { formatRelativeTime } from '../../../lib/utils';
+import { useV2Toast } from '../ui/Toast';
 import type { IdeaWithVotes } from '../../../types';
 
 export default function IdeaPage() {
   const { user } = useAuthStore();
   const perm = usePermissions();
+  const showToast = useV2Toast((s) => s.show);
   const { ideas, loading, fetchIdeas, fetchUserVotes, createIdea, toggleVote, updateIdeaStatus } = useIdeas();
   const [category, setCategory] = useState<IdeaCategory | null>(null);
   const [status, setStatus] = useState<IdeaStatus | null>(null);
@@ -39,13 +41,13 @@ export default function IdeaPage() {
   return (
     <>
       <PageHeader
-        crumbs={[{ label: '한울타리' }, { label: '제안' }]}
-        title="제안"
-        description="업무를 더 낫게 만들 아이디어를 공유해요. 공감 투표로 우선순위를 만듭니다."
+        crumbs={[{ label: '한울타리' }, { label: '아이디어' }]}
+        title="아이디어"
+        description="업무를 더 낫게 만들 아이디어를 자유롭게 공유해요. 공감 투표로 우선순위를 만듭니다."
         actions={
           <button className="w-btn w-btn-primary" onClick={() => setShowCreate(true)}>
             <Plus size={14} />
-            <span>제안 올리기</span>
+            <span>아이디어 올리기</span>
           </button>
         }
       />
@@ -80,7 +82,7 @@ export default function IdeaPage() {
         </div>
       ) : ideas.length === 0 ? (
         <div className="w-card">
-          <EmptyState icon={Lightbulb} title="아직 제안이 없어요" description="작은 아이디어도 환영해요 💡" />
+          <EmptyState icon={Lightbulb} title="아직 등록된 아이디어가 없어요" description="작은 아이디어도 환영해요 💡" />
         </div>
       ) : (
         <MasterDetail
@@ -150,7 +152,7 @@ export default function IdeaPage() {
                 }}
                 onStatusChange={async (s) => {
                   const { error } = await updateIdeaStatus(detail.id, s);
-                  if (error) alert(`변경 실패: ${error}`);
+                  if (error) showToast(`변경 실패: ${error}`, 'error');
                   else setDetail({ ...detail, status: s });
                 }}
               />
@@ -169,7 +171,7 @@ export default function IdeaPage() {
               setShowCreate(false);
               await fetchIdeas({ category, status, sort });
               await fetchUserVotes(user.id);
-            } else alert(`등록 실패: ${error}`);
+            } else showToast(`등록 실패: ${error}`, 'error');
           }}
         />
       )}
@@ -247,7 +249,7 @@ function IdeaDetailPanel({
         title={idea.title}
         metaLine={
           <>
-            <span>제안자</span>
+            <span>작성자</span>
             <span>·</span>
             <span>{formatRelativeTime(idea.created_at)}</span>
             <span>·</span>
@@ -284,7 +286,7 @@ function IdeaDetailPanel({
 
       {!isRejected && (
         <WorkflowStepper<IdeaStatus>
-          title="제안 진행"
+          title="아이디어 진행"
           steps={flowSteps}
           currentKey={idea.status === '반려' ? '제안' : idea.status}
           quickActions={
@@ -362,7 +364,7 @@ function CreateIdeaModal({
     <Modal
       open={open}
       onClose={onClose}
-      title="제안 올리기"
+      title="아이디어 올리기"
       width={560}
       footer={
         <>
@@ -394,7 +396,7 @@ function CreateIdeaModal({
           <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} placeholder="예) 주간회의를 격주로 줄이면 어떨까요?" />
         </Field>
         <Field label="설명">
-          <textarea rows={5} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="배경·제안 내용·기대 효과" />
+          <textarea rows={5} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="배경·아이디어 내용·기대 효과" />
         </Field>
       </div>
     </Modal>
