@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { Bell, Inbox, LogOut, Palette, Search } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
@@ -6,6 +7,8 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { useNotices } from '../../hooks/useNotices';
 import { useInbox } from '../../hooks/useInbox';
 import { useV2Nav } from '../../stores/v2NavStore';
+import { useThemeStore } from '../../stores/themeStore';
+import InboxPanel from '../inbox/InboxPanel';
 
 export default function V2TopBar() {
   const navigate = useNavigate();
@@ -14,7 +17,9 @@ export default function V2TopBar() {
   const setPage = useV2Nav((s) => s.setPage);
   const { fetchUnreadCount } = useNotices();
   const { unreadCount: inboxUnread } = useInbox(user?.id ?? null);
+  const themeClass = useThemeStore((s) => (s.version === 'dark' ? 'v2-dark' : 'v2-warm'));
   const [unread, setUnread] = useState(0);
+  const [showInbox, setShowInbox] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -27,6 +32,7 @@ export default function V2TopBar() {
   const displayName = profile?.nickname || profile?.name || '사용자';
 
   return (
+    <>
     <header
       style={{
         display: 'flex',
@@ -69,9 +75,7 @@ export default function V2TopBar() {
         <IconButton
           title="수집함"
           badge={inboxUnread}
-          onClick={() => {
-            // 기존 수집함 모달은 v1 전용. v2에서는 일단 대시보드로 이동(후속 연결)
-          }}
+          onClick={() => setShowInbox(true)}
         >
           <Inbox size={17} />
         </IconButton>
@@ -136,6 +140,39 @@ export default function V2TopBar() {
         </IconButton>
       </div>
     </header>
+
+    {/* 수집함 패널 — body로 portal해 부모 stacking context 영향 회피.
+        portal은 .v2-warm/.v2-dark 스코프 밖이므로 themeClass를 다시 입혀
+        토큰(--w-border, --color-bg-secondary 등)이 적용되게 한다. */}
+    {showInbox && createPortal(
+      <div className={themeClass}>
+        <div
+          onClick={() => setShowInbox(false)}
+          style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,.4)' }}
+        />
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            right: 0,
+            zIndex: 201,
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+            width: '100%',
+            maxWidth: 420,
+            background: 'var(--color-bg-secondary)',
+            borderLeft: '1px solid var(--w-border)',
+            boxShadow: '0 0 24px rgba(0,0,0,.2)',
+            animation: 'slideInRight .25s ease-out',
+          }}
+        >
+          <InboxPanel onClose={() => setShowInbox(false)} />
+        </div>
+      </div>,
+      document.body,
+    )}
+    </>
   );
 }
 
