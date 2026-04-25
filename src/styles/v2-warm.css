@@ -1794,6 +1794,10 @@
   font-size: 10px;
   color: var(--w-text-muted);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap; /* 90일 막대에서 "4월" 같은 라벨이 줄바꿈되는 현상 방지 */
+  overflow: visible;   /* 좁은 컬럼에서도 라벨이 옆 컬럼 위로 보이도록 */
+  text-align: center;
+  min-height: 12px;    /* 빈 라벨 셀들이 라벨 셀과 같은 높이로 정렬되도록 */
 }
 .v2-warm .w-cc-bar-label.today,
 .v2-dark .w-cc-bar-label.today {

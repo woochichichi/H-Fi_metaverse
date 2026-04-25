@@ -1,10 +1,13 @@
 import { useMemo, useState } from 'react';
-import { avatarColor, fmtKR, initial, type CorpMember } from '../../../lib/corpCardMockData';
+import { avatarColor, fmtKR, initial, type CorpMember, type CorpTransaction } from '../../../lib/corpCardMockData';
+import TxDetailModal from './TxDetailModal';
 
 type ActiveMember = CorpMember & { used: number; count: number; lastTx: string | null };
 
 interface Props {
   activeMembers: ActiveMember[];
+  /** 분기 전체 거래 — 팀원 클릭 시 그 사람 적요 필터링용. */
+  transactions?: CorpTransaction[];
   /** true면 "관리자·리더 전체 보기" 배지를 헤더에 노출 — 일반 팀원은 본인만 보여서 배지 불필요 */
   isPrivilegedView?: boolean;
 }
@@ -15,8 +18,16 @@ type SortKey = 'amount' | 'name' | 'recent';
  * 팀원별 사용 카드 — 레이싱 바 + 정렬 토글.
  * cash/project/app.jsx 의 .member-list 포팅.
  */
-export default function CorpCardMemberList({ activeMembers, isPrivilegedView }: Props) {
+export default function CorpCardMemberList({ activeMembers, transactions, isPrivilegedView }: Props) {
   const [sortBy, setSortBy] = useState<SortKey>('amount');
+  const [detailFor, setDetailFor] = useState<ActiveMember | null>(null);
+
+  const memberTxs = useMemo(() => {
+    if (!detailFor || !transactions) return [];
+    return transactions
+      .filter((t) => t.user === detailFor.name)
+      .sort((a, b) => (b.regDate || '').localeCompare(a.regDate || ''));
+  }, [detailFor, transactions]);
 
   const sorted = useMemo(() => {
     const m = [...activeMembers];
@@ -92,15 +103,18 @@ export default function CorpCardMemberList({ activeMembers, isPrivilegedView }: 
           <div className="w-cc-empty">이번 달 사용 내역이 없습니다.</div>
         ) : (
           sorted.map((m, i) => (
-            <div key={m.name} className="w-cc-mem-row">
+            <div
+              key={m.name}
+              className="w-cc-mem-row"
+              onClick={() => transactions && setDetailFor(m)}
+              role={transactions ? 'button' : undefined}
+              title={transactions ? `${m.name}의 적요 ${m.count}건 보기` : undefined}
+            >
               <div className={`w-cc-mem-rank${i < 3 ? ' top' : ''}`}>{i + 1}</div>
               <div className="w-cc-avatar" style={{ background: avatarColor(m.name) }}>
                 {initial(m.name)}
               </div>
-              <div
-                style={{ minWidth: 0 }}
-                title={m.cardLast4 ? `카드 ****${m.cardLast4}` : undefined}
-              >
+              <div style={{ minWidth: 0 }}>
                 <div className="w-cc-mem-name">{m.name}</div>
                 <div className="w-cc-mem-sub">{m.count}건</div>
               </div>
@@ -112,6 +126,16 @@ export default function CorpCardMemberList({ activeMembers, isPrivilegedView }: 
           ))
         )}
       </div>
+
+      {detailFor && (
+        <TxDetailModal
+          title={`${detailFor.name} · ${detailFor.count}건`}
+          subtitle="이번 분기 사용 내역"
+          transactions={memberTxs}
+          variant="member"
+          onClose={() => setDetailFor(null)}
+        />
+      )}
     </div>
   );
 }

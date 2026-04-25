@@ -1,6 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { classifyByPurpose, fmt, fmtKR, type CorpTransaction } from '../../../lib/corpCardMockData';
+import { classifyByPurpose, fmt, fmtKR, type CorpTransaction, type PurposeLabel } from '../../../lib/corpCardMockData';
+import TxDetailModal from './TxDetailModal';
 
 interface Props {
   transactions: CorpTransaction[];
@@ -12,6 +13,15 @@ interface Props {
  * (취소 거래는 집계에서 제외)
  */
 export default function CorpCardCategoryDonut({ transactions }: Props) {
+  const [hovered, setHovered] = useState(false);
+  const [drillLabel, setDrillLabel] = useState<PurposeLabel | null>(null);
+
+  // 선택한 카테고리의 거래만 필터 — 라벨 매칭으로 동일 분류 함수 사용
+  const drillTxs = useMemo(() => {
+    if (!drillLabel) return [];
+    return transactions.filter((t) => classifyByPurpose(t.memo, t.acctCode).label === drillLabel);
+  }, [drillLabel, transactions]);
+
   const { data, total } = useMemo(() => {
     const agg = new Map<string, { label: string; amount: number; count: number; color: string }>();
     transactions.forEach((t) => {
@@ -45,16 +55,20 @@ export default function CorpCardCategoryDonut({ transactions }: Props) {
           주로 어디에 <span className="w-cc-count">이번 달</span>
         </div>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: '8px 16px 14px', gap: 16, flexWrap: 'wrap' }}>
-        <div style={{ position: 'relative', width: 160, height: 160, flexShrink: 0 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', alignItems: 'center', padding: '12px 20px 18px', gap: 24 }}>
+        <div
+          style={{ position: 'relative', width: 200, height: 200, flexShrink: 0 }}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+        >
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={data}
                 dataKey="amount"
                 nameKey="label"
-                innerRadius={50}
-                outerRadius={80}
+                innerRadius={62}
+                outerRadius={100}
                 paddingAngle={2}
                 stroke="var(--w-surface)"
               >
@@ -86,21 +100,43 @@ export default function CorpCardCategoryDonut({ transactions }: Props) {
               alignItems: 'center',
               justifyContent: 'center',
               pointerEvents: 'none',
+              opacity: hovered ? 0 : 1,
+              transition: 'opacity 0.15s',
             }}
           >
-            <div style={{ fontSize: 10.5, color: 'var(--w-text-muted)', fontWeight: 600 }}>총 사용</div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--w-text)', fontVariantNumeric: 'tabular-nums' }}>
+            <div style={{ fontSize: 11, color: 'var(--w-text-muted)', fontWeight: 600 }}>총 사용</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--w-text)', fontVariantNumeric: 'tabular-nums', marginTop: 2 }}>
               {fmtKR(total)}
             </div>
           </div>
         </div>
 
-        {/* 와이드 화면에서 라벨·금액·% 가 화면 양 끝으로 흩어지지 않도록 maxWidth 캡 + 바 시각화 */}
-        <div style={{ flex: '1 1 280px', maxWidth: 420, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {/* 내역 리스트 — 도넛 우측 남는 공간 전부 사용 (이전 maxWidth 캡 제거) */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '8px 18px' }}>
           {data.map((d) => {
             const pct = total === 0 ? 0 : (d.amount / total) * 100;
             return (
-              <div key={d.label} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <button
+                key={d.label}
+                type="button"
+                onClick={() => setDrillLabel(d.label as PurposeLabel)}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 4,
+                  background: 'transparent',
+                  border: 0,
+                  borderRadius: 6,
+                  padding: '6px 8px',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  transition: 'background 0.15s',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--w-surface-2)')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                title={`${d.label} 거래 ${d.count}건 보기`}
+              >
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
                   <span
                     style={{
@@ -162,11 +198,23 @@ export default function CorpCardCategoryDonut({ transactions }: Props) {
                     }}
                   />
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
       </div>
+
+      {drillLabel && (
+        <TxDetailModal
+          title={`${drillLabel}${drillLabel === '기타' ? ' (미분류)' : ''} · ${drillTxs.length}건`}
+          subtitle="이번 달 거래 적요"
+          transactions={drillTxs}
+          // '기타(미분류)' 일 때만 관리자 요청 버튼 노출 — 다른 카테고리는 단순 조회
+          variant={drillLabel === '기타' ? 'category' : 'member'}
+          categoryLabel={drillLabel}
+          onClose={() => setDrillLabel(null)}
+        />
+      )}
     </div>
   );
 }

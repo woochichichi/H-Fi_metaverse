@@ -181,12 +181,12 @@ function CorpCardPageContent({ team }: { team: string }) {
 
       {stats && snapshot && (
         <>
-          {/* 1) Hero — "얼마 썼고/남았고/주로 어디에" 한 줄 답.
-                 좌: 사용/잔여 + 진행바 + 월/주/분기말 예상 chip. 우: 카테고리 도넛. */}
-          <div className="w-cc-hero-grid">
-            <CorpCardSummaryHero stats={stats} />
-            <CorpCardCategoryDonut transactions={stats.txThisMonth} />
-          </div>
+          {/* 1) Hero — "얼마 썼고/남았고" 한 줄 답. 가로 폭 단독 사용. */}
+          <CorpCardSummaryHero stats={stats} />
+
+          {/* 2) 주로 어디에 (도넛 좌 + 내역 리스트 우) — 가로 폭 전체 사용해
+                 갈색 잉여 공간 제거 + 내역이 시원하게 펼쳐짐 */}
+          <CorpCardCategoryDonut transactions={stats.txThisMonth} />
 
           {/* 2) 계정별 예산 — 카테고리별 잔여 세부 (식대/회의/교통) */}
           <CorpCardAccountList accounts={stats.accounts} capturedAt={snapshot.captured_at} />
@@ -237,7 +237,11 @@ function CorpCardPageContent({ team }: { team: string }) {
           />
 
           {/* 6) 팀원별 사용 — 일반 팀원은 본인 행만 (RLS 아닌 프론트 필터, 한계는 docs/BUDGET.md 참조) */}
-          <CorpCardMemberList activeMembers={visibleMembers} isPrivilegedView={isPrivileged} />
+          <CorpCardMemberList
+            activeMembers={visibleMembers}
+            transactions={transactions}
+            isPrivilegedView={isPrivileged}
+          />
 
           {/* 7) 용도별 일별 추이 — 분기 전체 (도넛이 메인, 일별 분포는 패턴 확인용) */}
           <CorpCardCategoryTrend
@@ -255,13 +259,25 @@ function CorpCardPageContent({ team }: { team: string }) {
 function AlertCard({ alerts }: { alerts: AlertItem[] }) {
   return (
     <div className="w-cc-card">
-      <div
-        className="w-cc-card-head"
-        title="계정별 사용률 + 월간 소진 페이스를 자동 모니터링.&#10;위험(80%↑)/주의(60~80%, 페이스 +10%↑)/여유(페이스 −30%↓)/정상 4단계로 분류.&#10;각 알림에 마우스를 올리면 발생 기준이 표시됩니다."
-        style={{ cursor: 'help' }}
-      >
-        <div className="w-cc-card-title">
+      <div className="w-cc-card-head">
+        <div className="w-cc-card-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           ⚠️ 주의 알림 <span className="w-cc-count">{alerts.length}</span>
+          <HelpDot
+            tip={
+              <>
+                <div style={{ fontWeight: 700, marginBottom: 6 }}>알림 발생 기준</div>
+                <div style={{ display: 'grid', gap: 4, fontSize: 11.5, lineHeight: 1.5 }}>
+                  <div><b style={{ color: 'var(--w-danger)' }}>🚨 위험</b> · 계정 사용률 ≥ 80%</div>
+                  <div><b style={{ color: 'var(--w-warning)' }}>⚠️ 주의</b> · 사용률 60~80% 또는 페이스 +10% 이상</div>
+                  <div><b style={{ color: 'var(--w-info)' }}>ℹ️ 여유</b> · 페이스 −30% 이하</div>
+                  <div><b style={{ color: 'var(--w-text-muted)' }}>ℹ️ 정상</b> · 위 조건 모두 미해당</div>
+                </div>
+                <div style={{ marginTop: 8, fontSize: 10.5, color: 'var(--w-text-muted)' }}>
+                  각 알림에 마우스를 올리면 그 알림의 기준이 표시됩니다.
+                </div>
+              </>
+            }
+          />
         </div>
       </div>
       <div className="w-cc-alert-list">
@@ -269,24 +285,102 @@ function AlertCard({ alerts }: { alerts: AlertItem[] }) {
           <div className="w-cc-empty">현재 주의가 필요한 항목이 없습니다 ✨</div>
         ) : (
           alerts.map((a, i) => (
-            <div
-              key={i}
-              className={`w-cc-alert ${a.kind}`}
-              title={a.tooltip}
-              style={{ cursor: 'help' }}
-            >
-              <div className="w-cc-alert-icon">
-                {a.kind === 'danger' ? '🚨' : a.kind === 'warn' ? '⚠️' : 'ℹ️'}
+            <Tip key={i} content={a.tooltip}>
+              <div className={`w-cc-alert ${a.kind}`} style={{ cursor: 'help' }}>
+                <div className="w-cc-alert-icon">
+                  {a.kind === 'danger' ? '🚨' : a.kind === 'warn' ? '⚠️' : 'ℹ️'}
+                </div>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div className="w-cc-alert-title">{a.title}</div>
+                  <div className="w-cc-alert-desc">{a.desc}</div>
+                </div>
               </div>
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <div className="w-cc-alert-title">{a.title}</div>
-                <div className="w-cc-alert-desc">{a.desc}</div>
-              </div>
-            </div>
+            </Tip>
           ))
         )}
       </div>
     </div>
+  );
+}
+
+/**
+ * 커스텀 hover 툴팁 — 브라우저 기본 title 보다 디자인 일치.
+ * children 을 wrapping 하고, hover 시 위로 popup 표시.
+ * 모달 아니라 hover-only — 클릭 인터랙션 필요하면 별도 컴포넌트로.
+ */
+function Tip({ content, children }: { content: string | React.ReactNode; children: React.ReactNode }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div
+      style={{ position: 'relative' }}
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}
+    >
+      {children}
+      {show && (
+        <div
+          style={{
+            position: 'absolute',
+            left: '50%',
+            bottom: 'calc(100% + 8px)',
+            transform: 'translateX(-50%)',
+            zIndex: 50,
+            minWidth: 240,
+            maxWidth: 320,
+            padding: '10px 14px',
+            background: 'var(--w-text)',
+            color: 'var(--w-bg)',
+            borderRadius: 8,
+            fontSize: 11.5,
+            lineHeight: 1.6,
+            whiteSpace: 'pre-line',
+            boxShadow: '0 4px 16px rgba(0,0,0,.18)',
+            pointerEvents: 'none',
+          }}
+        >
+          {content}
+          {/* 화살표 */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '100%',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: 0,
+              height: 0,
+              borderLeft: '5px solid transparent',
+              borderRight: '5px solid transparent',
+              borderTop: '5px solid var(--w-text)',
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** "?" 아이콘 — 헤더에 hover 시 툴팁으로 가이드 표시. */
+function HelpDot({ tip }: { tip: React.ReactNode }) {
+  return (
+    <Tip content={tip}>
+      <span
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: 16,
+          height: 16,
+          borderRadius: '50%',
+          background: 'var(--w-surface-2)',
+          color: 'var(--w-text-muted)',
+          fontSize: 10,
+          fontWeight: 700,
+          cursor: 'help',
+        }}
+      >
+        ?
+      </span>
+    </Tip>
   );
 }
 
