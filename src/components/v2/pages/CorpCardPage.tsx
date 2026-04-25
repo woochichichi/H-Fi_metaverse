@@ -13,16 +13,37 @@ import { useCorpCardLive } from '../../../hooks/useCorpCardLive';
 import { useQuarterCompare } from '../../../hooks/useQuarterCompare';
 import { useMyCardPending } from '../../../hooks/useMyCardPending';
 import { fmt, fmtKR, pct } from '../../../lib/corpCardMockData';
+import { formatKST } from '../../../lib/utils';
 
 const PRIVILEGED_ROLES = new Set(['admin', 'director', 'leader']);
 
 const WARN_PCT = 60;
 const DANGER_PCT = 80;
 
+/** KST 기준 오늘 (YYYY-MM-DD). 일별 차트의 "오늘" 마커와 미래일 판별에 사용. */
+function todayISO(): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date());
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? '';
+  return `${get('year')}-${get('month')}-${get('day')}`;
+}
+
+/** period_ym (예: "202604") → 분기 (1~4). */
+function quarterOf(periodYm: string): number {
+  const m = parseInt(periodYm.slice(4, 6), 10);
+  return Math.ceil(m / 3);
+}
+
 interface AlertItem {
   kind: 'danger' | 'warn' | 'info';
   title: string;
   desc: string;
+  /** 알림 발생 기준(hover tooltip) — 사용자가 "왜 이게 떴는지" 알 수 있게. */
+  tooltip: string;
 }
 
 /**
@@ -98,12 +119,14 @@ function CorpCardPageContent({ team }: { team: string }) {
           kind: 'danger',
           title: `${a.shortName} 잔여 ${(100 - usedPct).toFixed(0)}%`,
           desc: `예산 ${fmtKR(a.planned)} 중 ${fmtKR(a.used)} 사용. 남은 분기 동안 신중히 사용하세요.`,
+          tooltip: `🚨 위험 알림: 계정 사용률 ${DANGER_PCT}% 이상일 때 발생.\n남은 분기 예산이 부족할 수 있어요.`,
         });
       } else if (usedPct >= WARN_PCT) {
         list.push({
           kind: 'warn',
           title: `${a.shortName} 사용률 ${usedPct.toFixed(0)}%`,
           desc: '분기 중반 시점 정상 범위지만 추세를 살펴보세요.',
+          tooltip: `⚠️ 주의 알림: 계정 사용률 ${WARN_PCT}~${DANGER_PCT}% 일 때 발생.\n아직 위험은 아니지만 페이스를 점검하세요.`,
         });
       }
     });
@@ -112,12 +135,14 @@ function CorpCardPageContent({ team }: { team: string }) {
         kind: 'warn',
         title: `이번 달 소진 페이스 +${(stats.burnPct - 100).toFixed(0)}%`,
         desc: `현재 페이스 유지 시 월말 ${fmtKR(stats.projectedMonth)} 도달 예상.`,
+        tooltip: '⚠️ 페이스 알림: 이번 달 예상 소진 대비 +10% 이상 빠를 때 발생.\n현재 속도 유지 시 월간 예산을 초과할 수 있어요.',
       });
     } else if (stats.burnPct < 70 && stats.burnPct > 0) {
       list.push({
         kind: 'info',
         title: '여유 있는 페이스',
         desc: `예상 대비 ${(100 - stats.burnPct).toFixed(0)}% 적게 사용 중. 계획된 회식·회의 일정 점검.`,
+        tooltip: 'ℹ️ 여유 알림: 이번 달 예상 소진 대비 30% 이상 적게 쓸 때 발생.\n계획된 회식·회의 일정이 미뤄지지 않았는지 확인해보세요.',
       });
     }
 
@@ -128,6 +153,7 @@ function CorpCardPageContent({ team }: { team: string }) {
         kind: 'info',
         title: `${stats.paceDesc} · 소진 ${stats.burnPct.toFixed(0)}%`,
         desc: `이번 달 ${fmtKR(stats.monthUsed)} 사용 / 예상 ${fmtKR(stats.expectedByNow)}. 분기말 예상 ${stats.projectedQuarterPct.toFixed(0)}%.`,
+        tooltip: 'ℹ️ 정상 알림: 위험·주의·여유 조건이 모두 안 걸리는 일반 상태.\n현재 페이스가 적정 범위 내라는 뜻이에요.',
       });
     }
     return list;
@@ -165,12 +191,12 @@ function CorpCardPageContent({ team }: { team: string }) {
           {/* 2) 계정별 예산 — 카테고리별 잔여 세부 (식대/회의/교통) */}
           <CorpCardAccountList accounts={stats.accounts} capturedAt={snapshot.captured_at} />
 
-          {/* 3) 일별 바차트 + 주의 알림 */}
+          {/* 3) 일별 바차트(분기 90일) + 주의 알림 */}
           <div className="w-cc-main-grid">
             <CorpCardDailyChart
               dayMap={stats.dayMap}
-              today={stats.daysElapsed}
-              monthLabel={`${snapshot.period_ym.slice(0, 4)}.${snapshot.period_ym.slice(4, 6)}`}
+              todayDate={todayISO()}
+              quarterLabel={`${snapshot.period_ym.slice(0, 4)} ${quarterOf(snapshot.period_ym)}분기`}
               expectedByNow={stats.expectedByNow}
               monthUsed={stats.monthUsed}
               burnPct={stats.burnPct}
@@ -213,10 +239,10 @@ function CorpCardPageContent({ team }: { team: string }) {
           {/* 6) 팀원별 사용 — 일반 팀원은 본인 행만 (RLS 아닌 프론트 필터, 한계는 docs/BUDGET.md 참조) */}
           <CorpCardMemberList activeMembers={visibleMembers} isPrivilegedView={isPrivileged} />
 
-          {/* 7) 용도별 일별 추이 — 보조 (도넛이 메인, 일별 분포는 패턴 확인용) */}
+          {/* 7) 용도별 일별 추이 — 분기 전체 (도넛이 메인, 일별 분포는 패턴 확인용) */}
           <CorpCardCategoryTrend
-            transactions={stats.txThisMonth}
-            monthLabel={`${snapshot.period_ym.slice(0, 4)}.${snapshot.period_ym.slice(4, 6)}`}
+            transactions={transactions}
+            label={`${snapshot.period_ym.slice(0, 4)} ${quarterOf(snapshot.period_ym)}분기`}
           />
         </>
       )}
@@ -229,7 +255,11 @@ function CorpCardPageContent({ team }: { team: string }) {
 function AlertCard({ alerts }: { alerts: AlertItem[] }) {
   return (
     <div className="w-cc-card">
-      <div className="w-cc-card-head">
+      <div
+        className="w-cc-card-head"
+        title="계정별 사용률 + 월간 소진 페이스를 자동 모니터링.&#10;위험(80%↑)/주의(60~80%, 페이스 +10%↑)/여유(페이스 −30%↓)/정상 4단계로 분류.&#10;각 알림에 마우스를 올리면 발생 기준이 표시됩니다."
+        style={{ cursor: 'help' }}
+      >
         <div className="w-cc-card-title">
           ⚠️ 주의 알림 <span className="w-cc-count">{alerts.length}</span>
         </div>
@@ -239,7 +269,12 @@ function AlertCard({ alerts }: { alerts: AlertItem[] }) {
           <div className="w-cc-empty">현재 주의가 필요한 항목이 없습니다 ✨</div>
         ) : (
           alerts.map((a, i) => (
-            <div key={i} className={`w-cc-alert ${a.kind}`}>
+            <div
+              key={i}
+              className={`w-cc-alert ${a.kind}`}
+              title={a.tooltip}
+              style={{ cursor: 'help' }}
+            >
               <div className="w-cc-alert-icon">
                 {a.kind === 'danger' ? '🚨' : a.kind === 'warn' ? '⚠️' : 'ℹ️'}
               </div>
@@ -272,12 +307,8 @@ function SyncBadge({ capturedAt, periodYm }: { capturedAt: string; periodYm: str
   const year = periodYm.slice(0, 4);
   const month = parseInt(periodYm.slice(4, 6), 10);
   const quarter = Math.ceil(month / 3);
-  // MM/DD HH:mm 포맷
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  const hh = String(d.getHours()).padStart(2, '0');
-  const mi = String(d.getMinutes()).padStart(2, '0');
-  const exact = `${mm}/${dd} ${hh}:${mi}`;
+  // MM/DD HH:mm KST 포맷 — Asia/Seoul timezone 강제
+  const exact = formatKST(d);
 
   return (
     <div

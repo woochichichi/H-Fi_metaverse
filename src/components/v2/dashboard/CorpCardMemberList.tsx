@@ -97,11 +97,12 @@ export default function CorpCardMemberList({ activeMembers, isPrivilegedView }: 
               <div className="w-cc-avatar" style={{ background: avatarColor(m.name) }}>
                 {initial(m.name)}
               </div>
-              <div style={{ minWidth: 0 }}>
+              <div
+                style={{ minWidth: 0 }}
+                title={m.cardLast4 ? `카드 ****${m.cardLast4}` : undefined}
+              >
                 <div className="w-cc-mem-name">{m.name}</div>
-                <div className="w-cc-mem-sub">
-                  {m.count}건{m.cardLast4 ? ` · 카드 ****${m.cardLast4}` : ''}
-                </div>
+                <div className="w-cc-mem-sub">{m.count}건</div>
               </div>
               <div className="w-cc-mem-bar">
                 <span style={{ width: `${(m.used / maxUsed) * 100}%` }} />

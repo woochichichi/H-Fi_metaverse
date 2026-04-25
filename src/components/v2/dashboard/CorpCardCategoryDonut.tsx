@@ -112,8 +112,16 @@ export default function CorpCardCategoryDonut({ transactions }: Props) {
                       alignSelf: 'center',
                     }}
                   />
-                  <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--w-text)' }}>
+                  <span
+                    style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--w-text)' }}
+                    title={d.label === '기타' ? '키워드로 분류되지 않은 미분류 거래' : undefined}
+                  >
                     {d.label}
+                    {d.label === '기타' && (
+                      <span style={{ fontSize: 10.5, fontWeight: 500, color: 'var(--w-text-muted)', marginLeft: 4 }}>
+                        (미분류)
+                      </span>
+                    )}
                   </span>
                   <span
                     style={{

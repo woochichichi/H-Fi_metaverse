@@ -2,33 +2,36 @@ import { fmt } from '../../../lib/corpCardMockData';
 
 interface Props {
   dayMap: Record<string, number>;
-  today: number;
-  monthLabel: string;
+  /** ISO date string (YYYY-MM-DD) — 분기 90일 중 "오늘" 위치 식별용. */
+  todayDate: string;
+  /** 차트 라벨 — "2026 2분기" 같은 분기 라벨. */
+  quarterLabel: string;
   expectedByNow: number;
   monthUsed: number;
   burnPct: number;
 }
 
 /**
- * 일별 소진 바차트 — cash/project/charts.jsx 의 DailyBars 포팅 (외부 라이브러리 없이 div).
- * 미래일은 muted, 평균 70% 이상은 warn 컬러.
+ * 분기별 일자별 소진 바차트 — 분기 약 90일 막대.
+ * X축은 월 경계마다 "M월" 라벨, 그 외는 일자만.
+ * 미래일은 빈 셀, 평균 70% 이상은 warn 컬러.
  */
 export default function CorpCardDailyChart({
   dayMap,
-  today,
-  monthLabel,
+  todayDate,
+  quarterLabel,
   expectedByNow,
   monthUsed,
   burnPct,
 }: Props) {
-  const entries = Object.entries(dayMap);
+  const entries = Object.entries(dayMap).sort(([a], [b]) => a.localeCompare(b));
   const max = Math.max(...entries.map(([, v]) => v), 1);
 
   return (
     <div className="w-cc-card">
       <div className="w-cc-card-head">
         <div className="w-cc-card-title">
-          일별 소진 추이 <span className="w-cc-count">{monthLabel}</span>
+          일별 소진 추이 <span className="w-cc-count">{quarterLabel}</span>
         </div>
         <div className="w-cc-legend">
           <span>
@@ -43,12 +46,17 @@ export default function CorpCardDailyChart({
       </div>
 
       <div className="w-cc-bars">
-        {entries.map(([date, val]) => {
+        {entries.map(([date, val], idx) => {
           const day = parseInt(date.split('-')[2], 10);
-          const isFuture = day > today;
+          const month = parseInt(date.split('-')[1], 10);
+          const isFuture = date > todayDate;
           const heightPct = isFuture ? 0 : val === 0 ? 0 : Math.max(2, (val / max) * 100);
           const isHigh = val > max * 0.7;
-          const isToday = day === today;
+          const isToday = date === todayDate;
+          // 90일 막대라 매일 일자 라벨은 너무 빽빽 — 월 시작/오늘/매주 일요일에만 표시.
+          const showMonth = day === 1 || idx === 0;
+          // 매주 7일 단위로만 일자 라벨 (90/7≈13개)
+          const showDay = !showMonth && (day % 7 === 0 || isToday);
 
           return (
             <div key={date} className={`w-cc-bar-col${isToday ? ' is-today' : ''}`}>
@@ -64,9 +72,9 @@ export default function CorpCardDailyChart({
               </div>
               <div
                 className={`w-cc-bar-label${isToday ? ' today' : ''}`}
-                title={isToday ? '오늘' : undefined}
+                title={isToday ? '오늘' : `${month}월 ${day}일`}
               >
-                {day}
+                {showMonth ? `${month}월` : showDay ? day : ''}
               </div>
             </div>
           );

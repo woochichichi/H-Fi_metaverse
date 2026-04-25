@@ -1,35 +1,32 @@
 import { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { classifyByAcctCode, fmtKR, type CorpTransaction } from '../../../lib/corpCardMockData';
+import { classifyByPurpose, COLOR, fmtKR, type CorpTransaction, type PurposeLabel } from '../../../lib/corpCardMockData';
 
 interface Props {
   transactions: CorpTransaction[];
-  /** 월 레이블 (예: 2026.04) — 상단 뱃지용 */
-  monthLabel?: string;
+  /** 기간 라벨 — "2026 2분기" 같이 표시. */
+  label?: string;
 }
 
-const CATEGORY_ORDER = ['식대', '회의', '교통', '기타'] as const;
-const CATEGORY_COLOR: Record<string, string> = {
-  '식대': '#f59e0b',
-  '회의': '#6C5CE7',
-  '교통': '#3b82f6',
-  '기타': '#94a3b8',
-};
+// 도넛과 동일한 카테고리 / 색상 (식대 제거됨, 취소 제외).
+const CATEGORY_ORDER: PurposeLabel[] = [
+  '공용', '교통', '점검', '야근', '회식', '교육',
+  '간담회', '현업미팅', '팀원교류', '회의', '기타',
+];
 
 /**
- * 카테고리별 일별 사용 추이 (스택드 바).
- * 회계 데이터는 "거래가 있는 날만" 의미가 있어서 라인 차트로 보간하면 무거래일이 0~피크를
- * 부드럽게 잇거나(monotone) 단절적으로 보이는(stepAfter) 시각 왜곡 발생. 스택드 바는
- * 거래가 있는 날만 막대가 서고 카테고리 합도 그대로 보여서 가장 정확하고 직관적.
+ * 용도별 일별 추이 (분기 단위 스택드 바).
+ * 분류는 도넛과 동일한 classifyByPurpose 기반 — 적요 키워드로 12개 카테고리.
+ * x축은 "MM-DD" 단위지만 분기 90일이라 막대가 빽빽 — recharts 가 자동으로 라벨 thinning.
  */
-export default function CorpCardCategoryTrend({ transactions, monthLabel }: Props) {
+export default function CorpCardCategoryTrend({ transactions, label }: Props) {
   const chartData = useMemo(() => {
-    // day -> category -> sum
     const byDay = new Map<string, Record<string, number>>();
-    const seenCategories = new Set<string>();
+    const seenCategories = new Set<PurposeLabel>();
 
     transactions.forEach((t) => {
-      const c = classifyByAcctCode(t.acctCode);
+      const c = classifyByPurpose(t.memo, t.acctCode);
+      if (c.label === '취소') return; // 취소 거래 제외
       const day = t.regDate?.slice(5) ?? ''; // "MM-DD"
       if (!day) return;
       seenCategories.add(c.label);
@@ -48,7 +45,6 @@ export default function CorpCardCategoryTrend({ transactions, monthLabel }: Prop
       return out;
     });
 
-    // 실제 등장한 카테고리만 라인으로
     const categories = CATEGORY_ORDER.filter((c) => seenCategories.has(c));
     return { points, categories };
   }, [transactions]);
@@ -57,9 +53,9 @@ export default function CorpCardCategoryTrend({ transactions, monthLabel }: Prop
     return (
       <div className="w-cc-card">
         <div className="w-cc-card-head">
-          <div className="w-cc-card-title">용도별 일별 추이{monthLabel ? ` · ${monthLabel}` : ''}</div>
+          <div className="w-cc-card-title">용도별 일별 추이{label ? ` · ${label}` : ''}</div>
         </div>
-        <div className="w-cc-empty">이번 달 분류할 거래가 없습니다.</div>
+        <div className="w-cc-empty">분류할 거래가 없습니다.</div>
       </div>
     );
   }
@@ -69,7 +65,7 @@ export default function CorpCardCategoryTrend({ transactions, monthLabel }: Prop
       <div className="w-cc-card-head">
         <div className="w-cc-card-title">
           용도별 일별 추이
-          {monthLabel && <span className="w-cc-count">{monthLabel}</span>}
+          {label && <span className="w-cc-count">{label}</span>}
         </div>
       </div>
       <div style={{ padding: '8px 12px 12px' }}>
@@ -104,7 +100,7 @@ export default function CorpCardCategoryTrend({ transactions, monthLabel }: Prop
                 key={cat}
                 dataKey={cat}
                 stackId="day"
-                fill={CATEGORY_COLOR[cat]}
+                fill={COLOR[cat]}
                 radius={[2, 2, 0, 0]}
                 maxBarSize={32}
               />

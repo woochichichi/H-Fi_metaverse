@@ -100,12 +100,15 @@ export function classifyByAcctCode(acctCode: string): { account: string; icon: s
  *   9. 현업미팅: 고객사/타사/벤더/협력사/타금융사/외부/현업
  *   10. 팀원교류: 팀워크/팀빌딩/교류/네트워크/조직활성화/친목/면담/케어
  *   11. 회의: 회의/미팅/리뷰/타운홀/설명회/논의/MM
- *   12. 식대(acct=53001040 fallback)
- *   13. 기타
+ *   12. 기타: 위 키워드 매칭 다 실패한 거래(=미분류).
+ *
+ * 주의: 이전엔 fallback으로 '식대'(acct=53001040) 카테고리가 있었으나 제거.
+ *   회계계정상 식대지만 적요로 용도가 분류되지 않은 거래는 의미상 "미분류"이므로
+ *   별도 라벨로 분리하면 오히려 혼란 — 모두 '기타'로 흡수.
  */
 export type PurposeLabel =
   | '취소' | '공용' | '교통' | '점검' | '야근' | '회식' | '교육'
-  | '간담회' | '현업미팅' | '팀원교류' | '회의' | '식대' | '기타';
+  | '간담회' | '현업미팅' | '팀원교류' | '회의' | '기타';
 
 /**
  * 카테고리별 키워드 사전.
@@ -236,7 +239,7 @@ export function classifyByPurpose(memo: string, acctCode: string): { label: Purp
   if (RE.현업미팅.test(m)) return { label: '현업미팅', color: COLOR.현업미팅 };
   if (RE.팀원교류.test(m)) return { label: '팀원교류', color: COLOR.팀원교류 };
   if (RE.회의.test(m)) return { label: '회의', color: COLOR.회의 };
-  if (acctCode === '53001040') return { label: '식대', color: COLOR.식대 };
+  // 키워드 매칭 다 실패 → '기타'(미분류). acct=53001040 fallback 별도 처리 안 함.
   return { label: '기타', color: COLOR.기타 };
 }
 
@@ -244,7 +247,7 @@ export function classifyByPurpose(memo: string, acctCode: string): { label: Purp
 export const COLOR: Record<PurposeLabel, string> = {
   취소: '#94a3b8',
   공용: '#6366f1',      // 인디고
-  교통: '#3b82f6',      // 파랑 (기존 유지)
+  교통: '#3b82f6',      // 파랑
   점검: '#0ea5e9',      // 스카이
   야근: '#f97316',      // 진한 주황
   회식: '#ec4899',      // 분홍
@@ -252,9 +255,8 @@ export const COLOR: Record<PurposeLabel, string> = {
   간담회: '#8b5cf6',    // 보라
   현업미팅: '#06b6d4',  // 시안
   팀원교류: '#84cc16',  // 라임
-  회의: '#6C5CE7',      // 보라 (기존 유지)
-  식대: '#f59e0b',      // 주황 (기존 유지)
-  기타: '#94a3b8',      // 회색 (기존 유지)
+  회의: '#6C5CE7',      // 보라
+  기타: '#94a3b8',      // 회색 (미분류)
 };
 
 export function extractHeadcount(memo: string): number {

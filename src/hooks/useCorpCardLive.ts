@@ -228,11 +228,19 @@ function computeStats(
   else if (burnPct < 60) { paceStatus = 'info'; paceDesc = '여유 — 계획된 지출 점검'; }
   else { paceStatus = 'ok'; paceDesc = '정상 페이스'; }
 
+  // 분기 전체(약 90일) dayMap — 일별 소진 추이 차트가 분기 단위로 표시되도록.
+  // 분기 시작월: 4월→4, 5월→4, 6월→4, 7월→7 ... (Math.floor((month-1)/3)*3 + 1)
+  const quarterStartMonth = Math.floor((month - 1) / 3) * 3 + 1;
   const dayMap: Record<string, number> = {};
-  for (let d = 1; d <= daysInMonth; d++) {
-    dayMap[`${periodPrefix}-${String(d).padStart(2, '0')}`] = 0;
+  for (let qm = quarterStartMonth; qm < quarterStartMonth + 3; qm++) {
+    const dim = new Date(year, qm, 0).getDate();
+    const prefix = `${year}-${String(qm).padStart(2, '0')}`;
+    for (let d = 1; d <= dim; d++) {
+      dayMap[`${prefix}-${String(d).padStart(2, '0')}`] = 0;
+    }
   }
-  txThisMonth.forEach((t) => {
+  // 분기 전체 거래 반영 (txs 는 snapshot_id 기준 = 분기 전체).
+  txs.forEach((t) => {
     if (t.regDate && dayMap[t.regDate] != null) dayMap[t.regDate] += t.amount;
   });
 

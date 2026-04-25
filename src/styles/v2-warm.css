@@ -1493,14 +1493,17 @@
 
 /* ===== Member row (racing bar) ===== */
 .v2-warm .w-cc-mem-list,
-.v2-dark .w-cc-mem-list { padding: 4px 8px 12px; }
+.v2-dark .w-cc-mem-list { padding: 4px 8px 8px; }
 .v2-warm .w-cc-mem-row,
 .v2-dark .w-cc-mem-row {
   display: grid;
-  grid-template-columns: 24px 28px 1fr 60px auto;
+  /* 순위 / 아바타 / 이름(auto, 컴팩트) / 바(1fr 남는 공간 채움) / 금액
+     이전 1fr 60px auto 구조는 와이드 화면에서 이름 셀이 늘어나
+     이름↔금액 사이 빈 공간이 크게 발생. 1fr 을 바에 줘서 시각적 연결성 확보. */
+  grid-template-columns: 22px 26px auto 1fr auto;
   gap: 10px;
   align-items: center;
-  padding: 9px 10px;
+  padding: 6px 10px;
   border-radius: 8px;
   cursor: pointer;
 }
@@ -1534,6 +1537,12 @@
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--w-text);
+}
+/* 이름·건수 묶음 — 막대 시작점 정렬을 위해 최소 폭 확보 (한글 이름 3자 + 건수) */
+.v2-warm .w-cc-mem-row > div:nth-child(3),
+.v2-dark .w-cc-mem-row > div:nth-child(3) {
+  min-width: 80px;
+  max-width: 120px;
 }
 .v2-warm .w-cc-mem-sub,
 .v2-dark .w-cc-mem-sub {

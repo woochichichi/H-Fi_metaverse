@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { fmt, type CorpAccount } from '../../../lib/corpCardMockData';
+import { formatKST } from '../../../lib/utils';
 
 type AccountWithUsage = CorpAccount & { used: number; remaining: number };
 
@@ -58,24 +59,17 @@ export default function CorpCardAccountList({ accounts, capturedAt }: Props) {
               {visible.map((a) => {
                 const remainPct = a.planned === 0 ? 0 : (a.remaining / a.planned) * 100;
                 const tone = remainPct >= 80 ? 'ok' : remainPct >= 20 ? 'warn' : 'danger';
-                const toneBg =
-                  tone === 'ok'
-                    ? 'rgba(63,157,110,.12)'
-                    : tone === 'warn'
-                      ? 'rgba(208,138,46,.14)'
-                      : 'rgba(200,69,62,.14)';
                 const tonePct =
                   tone === 'ok'
-                    ? 'var(--w-text-muted)'
+                    ? 'var(--w-success)'
                     : tone === 'warn'
                       ? 'var(--w-warning)'
                       : 'var(--w-danger)';
                 return (
-                  <tr key={a.code}>
+                  <tr key={a.code} title={`${a.code} · ${a.name}`}>
                     <td style={{ ...tdStyle, textAlign: 'left' }}>
-                      <div style={{ fontWeight: 700, color: 'var(--w-text)' }}>{a.shortName}</div>
-                      <div style={{ fontSize: 10.5, color: 'var(--w-text-muted)', marginTop: 1 }}>
-                        {a.code} · {a.name}
+                      <div style={{ fontWeight: 700, color: 'var(--w-text)', fontSize: 13 }}>
+                        {a.shortName}
                       </div>
                     </td>
                     <td style={tdStyle}>{fmt(a.planned)}</td>
@@ -85,39 +79,24 @@ export default function CorpCardAccountList({ accounts, capturedAt }: Props) {
                     <td
                       style={{
                         ...tdStyle,
-                        position: 'relative',
-                        overflow: 'hidden',
                         fontWeight: 800,
                         fontSize: 13.5,
                         paddingRight: 12,
                       }}
                     >
-                      {/* 잔량 비율 background bar */}
-                      <div
+                      {/* 잔여 — 배경 게이지 제거, "% 남음" 텍스트만 컬러로 상태 신호 */}
+                      {fmt(a.remaining)}원
+                      <span
                         style={{
-                          position: 'absolute',
-                          left: 0,
-                          top: 0,
-                          bottom: 0,
-                          width: `${Math.max(0, Math.min(100, remainPct))}%`,
-                          background: toneBg,
-                          zIndex: 0,
+                          display: 'block',
+                          fontSize: 10.5,
+                          fontWeight: 700,
+                          color: tonePct,
+                          marginTop: 1,
                         }}
-                      />
-                      <div style={{ position: 'relative', zIndex: 1 }}>
-                        {fmt(a.remaining)}원
-                        <span
-                          style={{
-                            display: 'block',
-                            fontSize: 10.5,
-                            fontWeight: 600,
-                            color: tonePct,
-                            marginTop: 1,
-                          }}
-                        >
-                          {remainPct.toFixed(1)}% 남음
-                        </span>
-                      </div>
+                      >
+                        {remainPct.toFixed(1)}% 남음
+                      </span>
                     </td>
                   </tr>
                 );
@@ -143,16 +122,12 @@ function CapturedAtMini({ capturedAt }: { capturedAt: string }) {
         : diffMin < 60 * 24
           ? `${Math.floor(diffMin / 60)}시간 전`
           : `${Math.floor(diffMin / (60 * 24))}일 전`;
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  const hh = String(d.getHours()).padStart(2, '0');
-  const mi = String(d.getMinutes()).padStart(2, '0');
   return (
     <span
       style={{ fontSize: 11, color: 'var(--w-text-muted)', fontWeight: 500 }}
-      title={`수집 시각: ${d.toLocaleString('ko-KR')}`}
+      title={`수집 시각: ${d.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })} (KST)`}
     >
-      {mm}/{dd} {hh}:{mi} 수집 · {rel}
+      {formatKST(d)} 수집 · {rel}
     </span>
   );
 }

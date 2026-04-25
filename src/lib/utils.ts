@@ -1,5 +1,27 @@
 import { ALLOWED_EMAIL_DOMAINS } from './constants';
 
+/**
+ * 한국시간(KST, Asia/Seoul) 기준으로 'MM/DD HH:mm' 포맷.
+ * 사용자 PC가 KST 가 아니어도(해외 출장 등) 회사 데이터는 항상 KST 기준으로 표시.
+ */
+export function formatKST(date: string | Date): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  // toLocaleString 의 ko-KR 기본은 "2026. 04. 25. 오전 12:07" 형태라 직접 조립.
+  // Intl.DateTimeFormat.formatToParts 가 timezone 적용된 파트를 분리해서 줌.
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Seoul',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(d);
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? '';
+  // hour 가 hour12:false 인데도 가끔 '24'로 나오는 환경 버그 방어
+  const hh = get('hour') === '24' ? '00' : get('hour');
+  return `${get('month')}/${get('day')} ${hh}:${get('minute')}`;
+}
+
 /** 날짜를 'YYYY-MM-DD' 형식으로 변환 */
 export function formatDate(date: string | Date): string {
   return new Date(date).toLocaleDateString('ko-KR', {
