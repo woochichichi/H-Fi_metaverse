@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>계정별 예산 — SAP 표 구조 + 잔여 강조 (3안)</title>
+<style>
+  :root {
+    --w-bg: #FBF6EF;
+    --w-surface: #FFFFFF;
+    --w-surface-2: #F5EEE4;
+    --w-border: #E8DDCE;
+    --w-border-strong: #D9C9B2;
+    --w-text: #2A1F1A;
+    --w-text-soft: #5C4B42;
+    --w-text-muted: #8A776B;
+    --w-accent: #E8725C;
+    --w-success: #3F9D6E;
+    --w-warning: #D08A2E;
+    --w-danger: #C8453E;
+    --w-info: #3D7FA8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Pretendard', -apple-system, system-ui, sans-serif;
+    background: var(--w-bg);
+    color: var(--w-text);
+    padding: 32px;
+    margin: 0;
+    line-height: 1.5;
+  }
+  h1 { font-size: 18px; margin: 0 0 8px; }
+  h2 { font-size: 14px; margin: 32px 0 6px; color: var(--w-text-soft); }
+  .h2-desc { font-size: 12px; color: var(--w-text-muted); margin-bottom: 14px; line-height: 1.6; }
+  .h2-pro { color: var(--w-success); font-weight: 600; }
+  .h2-con { color: var(--w-danger); font-weight: 600; }
+  .subtitle { color: var(--w-text-muted); font-size: 12px; margin-bottom: 24px; }
+  .container { max-width: 1180px; margin: 0 auto; }
+  .card-section {
+    background: var(--w-surface);
+    border: 1px solid var(--w-border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+  .card-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--w-border);
+    margin-bottom: 12px;
+  }
+  .card-title { font-size: 14px; font-weight: 700; }
+  .count-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-left: 8px;
+    width: 22px; height: 22px;
+    background: var(--w-surface-2);
+    border-radius: 999px;
+    font-size: 11px; color: var(--w-text-muted);
+  }
+
+  /* ───────── 공통 표 스타일 ───────── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+  }
+  th, td {
+    padding: 10px 8px;
+    text-align: right;
+    vertical-align: middle;
+  }
+  th {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--w-text-muted);
+    border-bottom: 1px solid var(--w-border);
+    background: var(--w-surface-2);
+    white-space: nowrap;
+  }
+  th.left, td.left { text-align: left; }
+  td {
+    border-bottom: 1px solid var(--w-border);
+  }
+  tr:last-child td { border-bottom: 0; }
+  .acct-name { font-weight: 700; color: var(--w-text); }
+  .acct-code { font-size: 10.5px; color: var(--w-text-muted); }
+  .num-muted { color: var(--w-text-muted); }
+  .formula { font-size: 10.5px; font-weight: 500; color: var(--w-text-muted); }
+
+
+  /* ─────────── V1 : SAP 표 + 잔여 셀 강조 + 미니 막대 ─────────── */
+  .v1-remain-cell {
+    text-align: right;
+    font-weight: 800;
+    font-size: 13.5px;
+    padding-right: 12px !important;
+    background: rgba(63,157,110,.06);
+  }
+  .v1-remain-cell.warn { background: rgba(208,138,46,.08); }
+  .v1-remain-cell.danger { background: rgba(200,69,62,.08); }
+  .v1-remain-cell .pct {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--w-text-muted);
+    margin-top: 1px;
+  }
+  .v1-remain-cell.warn .pct { color: var(--w-warning); }
+  .v1-remain-cell.danger .pct { color: var(--w-danger); }
+  .v1-bar {
+    width: 90px;
+    height: 6px;
+    background: var(--w-surface-2);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-left: auto;
+    margin-top: 4px;
+  }
+  .v1-bar > span {
+    display: block; height: 100%;
+    border-radius: 999px;
+  }
+  .v1-bar > span.ok { background: var(--w-success); }
+  .v1-bar > span.warn { background: var(--w-warning); }
+  .v1-bar > span.danger { background: var(--w-danger); }
+
+
+  /* ─────────── V2 : 표 + 좌측 sticky 잔여 헤드라인 ─────────── */
+  .v2-row {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    border-bottom: 1px solid var(--w-border);
+  }
+  .v2-row:last-child { border-bottom: 0; }
+  .v2-head-cell {
+    padding: 16px;
+    border-right: 1px solid var(--w-border);
+    background: var(--w-surface-2);
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .v2-head-name { font-size: 13px; font-weight: 700; }
+  .v2-head-code { font-size: 10.5px; color: var(--w-text-muted); margin-top: 1px; margin-bottom: 8px; }
+  .v2-head-amt {
+    font-size: 22px; font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .v2-head-amt.ok { color: var(--w-success); }
+  .v2-head-amt.warn { color: var(--w-warning); }
+  .v2-head-amt.danger { color: var(--w-danger); }
+  .v2-head-unit { font-size: 12px; font-weight: 700; margin-left: 1px; color: inherit; }
+  .v2-head-lbl { font-size: 11px; color: var(--w-text-muted); margin-left: 4px; font-weight: 500; }
+  .v2-head-bar {
+    margin-top: 8px;
+    height: 4px;
+    background: var(--w-bg);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .v2-head-bar > span {
+    display: block; height: 100%;
+    border-radius: 999px;
+  }
+  .v2-head-bar > span.ok { background: var(--w-success); }
+  .v2-head-bar > span.warn { background: var(--w-warning); }
+  .v2-head-bar > span.danger { background: var(--w-danger); }
+  .v2-head-pct { font-size: 10.5px; color: var(--w-text-muted); margin-top: 4px; }
+
+  .v2-detail {
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px 14px;
+    align-items: center;
+  }
+  .v2-cell {
+    text-align: right;
+  }
+  .v2-cell .lbl {
+    font-size: 10.5px; color: var(--w-text-muted);
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .v2-cell .val {
+    font-size: 13.5px; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--w-text);
+  }
+  .v2-cell .val.muted { color: var(--w-text-muted); font-weight: 600; }
+  .v2-cell.first { text-align: left; }
+  .v2-cell .th {
+    font-size: 11px; font-weight: 600;
+    color: var(--w-text-muted);
+    white-space: nowrap;
+  }
+
+  /* 컬럼 헤더 행 */
+  .v2-header-row {
+    background: var(--w-surface-2);
+    border-bottom: 1px solid var(--w-border-strong);
+  }
+  .v2-head-cell-th {
+    padding: 8px 16px;
+    border-right: 1px solid var(--w-border);
+    font-size: 11px; font-weight: 600;
+    color: var(--w-text-muted);
+    display: flex; align-items: center;
+  }
+  .v2-header-row .v2-detail {
+    padding: 8px 16px;
+  }
+
+  /* 풀 금액(원 단위) — 만 단위 줄임 표기 대신 사용 */
+  .v2-head-amt-full {
+    font-size: 20px; font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .v2-head-amt-full.ok { color: var(--w-success); }
+  .v2-head-amt-full.warn { color: var(--w-warning); }
+  .v2-head-amt-full.danger { color: var(--w-danger); }
+  .v2-head-unit-won {
+    font-size: 12px; font-weight: 700; margin-left: 2px;
+    color: inherit;
+  }
+
+
+  /* ─────────── V3 : 통합 단일 막대 + 표 (한 행 안에 시각화) ─────────── */
+  .v3-row {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--w-border);
+  }
+  .v3-row:last-child { border: 0; padding-bottom: 0; }
+  .v3-row:first-child { padding-top: 4px; }
+  .v3-line1 {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .v3-name { font-size: 13.5px; font-weight: 700; }
+  .v3-code { font-size: 10.5px; color: var(--w-text-muted); margin-left: 6px; font-weight: 500; }
+  .v3-headline {
+    display: flex; align-items: baseline; gap: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .v3-headline .left {
+    font-size: 22px; font-weight: 800;
+    line-height: 1;
+  }
+  .v3-headline .left.ok { color: var(--w-success); }
+  .v3-headline .left.warn { color: var(--w-warning); }
+  .v3-headline .left.danger { color: var(--w-danger); }
+  .v3-headline .unit { font-size: 12px; font-weight: 700; color: inherit; }
+  .v3-headline .lbl { font-size: 11px; color: var(--w-text-muted); font-weight: 500; }
+  .v3-headline .total { font-size: 11px; color: var(--w-text-muted); }
+  .v3-headline .total b { color: var(--w-text-soft); font-weight: 700; }
+  .v3-bar {
+    height: 18px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--w-surface-2);
+    display: flex;
+    border: 1px solid var(--w-border);
+  }
+  .v3-saved   { background: #C7B299; }
+  .v3-pending { background: var(--w-warning); }
+  .v3-completed { background: var(--w-text-soft); }
+  .v3-bar > span {
+    height: 100%;
+    transition: width 0.6s;
+  }
+  .v3-bar > span:hover { filter: brightness(1.1); }
+  .v3-legend {
+    display: flex; gap: 14px;
+    margin-top: 6px;
+    font-size: 10.5px; color: var(--w-text-muted);
+    flex-wrap: wrap;
+  }
+  .v3-legend .dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+  .v3-legend b { color: var(--w-text-soft); font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>계정별 예산 — SAP 표 구조 + 잔여 강조 (3안)</h1>
+  <p class="subtitle">
+    기준: <b>"기존 SAP 표보다 못하면 안 됨"</b>. 컬럼 정렬·비교 가능성을 유지하면서 잔여 강조만 추가.<br>
+    SAP 라벨 그대로: 편성예산(A) / 저장(B) / 처리중(C) / 처리완료(D) / 잔여금액(A−B−C−D)
+  </p>
+
+  <!-- ===================== V1 ===================== -->
+  <h2>V1 — SAP 표 그대로 + 잔여 셀 색·굵기 강조 + 미니 막대</h2>
+  <p class="h2-desc">
+    <span class="h2-pro">✓ 익숙함 100%, 비교 그대로, 추가 학습 비용 0</span><br>
+    <span class="h2-con">△ "잔여를 다 봐야 우선순위가 보임" — 시각적 신호 약함 (셀 배경색만)</span>
+  </p>
+  <div class="card-section">
+    <div class="card-head">
+      <div class="card-title">계정별 예산 <span class="count-badge">3</span></div>
+      <div style="font-size:11px;color:var(--w-text-muted)">2026년 4월 · 분기 2</div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th class="left">계정과목</th>
+          <th>편성예산<span class="formula"> (A)</span></th>
+          <th>저장<span class="formula"> (B)</span></th>
+          <th>처리중<span class="formula"> (C)</span></th>
+          <th>처리완료<span class="formula"> (D)</span></th>
+          <th>잔여금액<span class="formula"> (A−B−C−D)</span></th>
+          <th>잔량</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="left">
+            <div class="acct-name">업무추진</div>
+            <div class="acct-code">53001040 · 복리후생비-업무추진식대</div>
+          </td>
+          <td>5,835,815</td>
+          <td class="num-muted">1,182,911</td>
+          <td class="num-muted">432,821</td>
+          <td class="num-muted">49,091</td>
+          <td class="v1-remain-cell">
+            4,170,992원
+            <span class="pct">71.5% 남음</span>
+          </td>
+          <td><div class="v1-bar"><span class="ok" style="width:71.5%"></span></div></td>
+        </tr>
+        <tr>
+          <td class="left">
+            <div class="acct-name">교통비</div>
+            <div class="acct-code">53401010 · 여비교통비-시내교통비</div>
+          </td>
+          <td>450,000</td>
+          <td class="num-muted">46,100</td>
+          <td class="num-muted">106,800</td>
+          <td class="num-muted">0</td>
+          <td class="v1-remain-cell warn">
+            297,100원
+            <span class="pct">66.0% 남음</span>
+          </td>
+          <td><div class="v1-bar"><span class="warn" style="width:66%"></span></div></td>
+        </tr>
+        <tr>
+          <td class="left">
+            <div class="acct-name">업무회의</div>
+            <div class="acct-code">53405010 · 회의비-업무회의비</div>
+          </td>
+          <td>2,929,882</td>
+          <td class="num-muted">288,273</td>
+          <td class="num-muted">29,818</td>
+          <td class="num-muted">0</td>
+          <td class="v1-remain-cell">
+            2,611,791원
+            <span class="pct">89.1% 남음</span>
+          </td>
+          <td><div class="v1-bar"><span class="ok" style="width:89.1%"></span></div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+  <!-- ===================== V2 ===================== -->
+  <h2>V2 — 좌측 잔여 카드(요약) + 우측 분해 (헤더 + 풀 금액)</h2>
+  <p class="h2-desc">
+    <span class="h2-pro">✓ "잔여" 정보가 가장 강하게 보임. 분해 수치도 그리드로 정렬 — 비교 가능</span><br>
+    <span class="h2-pro">✓ 상단 컬럼 헤더로 어느 값이 어느 항목인지 명시</span><br>
+    <span class="h2-con">△ SAP 표와 형태가 달라 익숙함은 살짝 떨어짐. 가로 폭 좀 더 씀</span>
+  </p>
+  <div class="card-section">
+    <div class="card-head">
+      <div class="card-title">계정별 예산 <span class="count-badge">3</span></div>
+      <div style="font-size:11px;color:var(--w-text-muted)">2026년 4월 · 분기 2</div>
+    </div>
+
+    <!-- 컬럼 헤더 -->
+    <div class="v2-row v2-header-row">
+      <div class="v2-head-cell-th">계정 / 잔여금액 (A−B−C−D)</div>
+      <div class="v2-detail">
+        <div class="v2-cell first"><div class="th">편성예산 (A)</div></div>
+        <div class="v2-cell"><div class="th">저장 (B)</div></div>
+        <div class="v2-cell"><div class="th">처리중 (C)</div></div>
+        <div class="v2-cell"><div class="th">처리완료 (D)</div></div>
+      </div>
+    </div>
+
+    <div class="v2-row">
+      <div class="v2-head-cell">
+        <div class="v2-head-name">업무추진</div>
+        <div class="v2-head-code">53001040 · 복리후생비-업무추진식대</div>
+        <div>
+          <span class="v2-head-amt-full ok">4,170,992<span class="v2-head-unit-won">원</span></span>
+          <span class="v2-head-lbl">남음</span>
+        </div>
+        <div class="v2-head-bar"><span class="ok" style="width:71.5%"></span></div>
+        <div class="v2-head-pct">71.5% 남음</div>
+      </div>
+      <div class="v2-detail">
+        <div class="v2-cell first"><div class="val muted">5,835,815</div></div>
+        <div class="v2-cell"><div class="val muted">1,182,911</div></div>
+        <div class="v2-cell"><div class="val muted">432,821</div></div>
+        <div class="v2-cell"><div class="val muted">49,091</div></div>
+      </div>
+    </div>
+
+    <div class="v2-row">
+      <div class="v2-head-cell">
+        <div class="v2-head-name">교통비</div>
+        <div class="v2-head-code">53401010 · 여비교통비-시내교통비</div>
+        <div>
+          <span class="v2-head-amt-full warn">297,100<span class="v2-head-unit-won">원</span></span>
+          <span class="v2-head-lbl">남음</span>
+        </div>
+        <div class="v2-head-bar"><span class="warn" style="width:66%"></span></div>
+        <div class="v2-head-pct">66.0% 남음</div>
+      </div>
+      <div class="v2-detail">
+        <div class="v2-cell first"><div class="val muted">450,000</div></div>
+        <div class="v2-cell"><div class="val muted">46,100</div></div>
+        <div class="v2-cell"><div class="val muted">106,800</div></div>
+        <div class="v2-cell"><div class="val muted">0</div></div>
+      </div>
+    </div>
+
+    <div class="v2-row">
+      <div class="v2-head-cell">
+        <div class="v2-head-name">업무회의</div>
+        <div class="v2-head-code">53405010 · 회의비-업무회의비</div>
+        <div>
+          <span class="v2-head-amt-full ok">2,611,791<span class="v2-head-unit-won">원</span></span>
+          <span class="v2-head-lbl">남음</span>
+        </div>
+        <div class="v2-head-bar"><span class="ok" style="width:89.1%"></span></div>
+        <div class="v2-head-pct">89.1% 남음</div>
+      </div>
+      <div class="v2-detail">
+        <div class="v2-cell first"><div class="val muted">2,929,882</div></div>
+        <div class="v2-cell"><div class="val muted">288,273</div></div>
+        <div class="v2-cell"><div class="val muted">29,818</div></div>
+        <div class="v2-cell"><div class="val muted">0</div></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ===================== V3 ===================== -->
+  <h2>V3 — 잔여 헤드라인 + 사용 분해를 한 막대에 시각화 (가장 압축)</h2>
+  <p class="h2-desc">
+    <span class="h2-pro">✓ "저장(B)·처리중(C)·처리완료(D)"가 막대 안에서 면적으로 비교됨. 시각·수치 통합</span><br>
+    <span class="h2-pro">✓ 한 화면에 더 많은 계정 들어감</span><br>
+    <span class="h2-con">△ 분해 수치는 막대 hover로 봐야 정확. (legend 텍스트로 보완)</span>
+  </p>
+  <div class="card-section">
+    <div class="card-head">
+      <div class="card-title">계정별 예산 <span class="count-badge">3</span></div>
+      <div style="font-size:11px;color:var(--w-text-muted)">2026년 4월 · 분기 2</div>
+    </div>
+
+    <div class="v3-row">
+      <div class="v3-line1">
+        <div>
+          <span class="v3-name">업무추진</span>
+          <span class="v3-code">53001040 · 복리후생비-업무추진식대</span>
+        </div>
+        <div class="v3-headline">
+          <span class="left ok">417<span class="unit">만</span></span>
+          <span class="lbl">남음</span>
+          <span class="total">/ 편성 <b>5,835,815원</b></span>
+        </div>
+      </div>
+      <div class="v3-bar">
+        <span class="v3-saved" style="width:20.3%" title="저장 1,182,911원"></span>
+        <span class="v3-pending" style="width:7.4%" title="처리중 432,821원"></span>
+        <span class="v3-completed" style="width:0.84%" title="처리완료 49,091원"></span>
+      </div>
+      <div class="v3-legend">
+        <span><span class="dot" style="background:#C7B299"></span>저장 <b>1,182,911</b></span>
+        <span><span class="dot" style="background:var(--w-warning)"></span>처리중 <b>432,821</b></span>
+        <span><span class="dot" style="background:var(--w-text-soft)"></span>처리완료 <b>49,091</b></span>
+        <span style="margin-left:auto">71.5% 남음</span>
+      </div>
+    </div>
+
+    <div class="v3-row">
+      <div class="v3-line1">
+        <div>
+          <span class="v3-name">교통비</span>
+          <span class="v3-code">53401010 · 여비교통비-시내교통비</span>
+        </div>
+        <div class="v3-headline">
+          <span class="left warn">29.7<span class="unit">만</span></span>
+          <span class="lbl">남음</span>
+          <span class="total">/ 편성 <b>450,000원</b></span>
+        </div>
+      </div>
+      <div class="v3-bar">
+        <span class="v3-saved" style="width:10.2%" title="저장 46,100원"></span>
+        <span class="v3-pending" style="width:23.7%" title="처리중 106,800원"></span>
+        <span class="v3-completed" style="width:0%"></span>
+      </div>
+      <div class="v3-legend">
+        <span><span class="dot" style="background:#C7B299"></span>저장 <b>46,100</b></span>
+        <span><span class="dot" style="background:var(--w-warning)"></span>처리중 <b>106,800</b></span>
+        <span><span class="dot" style="background:var(--w-text-soft)"></span>처리완료 <b>0</b></span>
+        <span style="margin-left:auto">66.0% 남음</span>
+      </div>
+    </div>
+
+    <div class="v3-row">
+      <div class="v3-line1">
+        <div>
+          <span class="v3-name">업무회의</span>
+          <span class="v3-code">53405010 · 회의비-업무회의비</span>
+        </div>
+        <div class="v3-headline">
+          <span class="left ok">261<span class="unit">만</span></span>
+          <span class="lbl">남음</span>
+          <span class="total">/ 편성 <b>2,929,882원</b></span>
+        </div>
+      </div>
+      <div class="v3-bar">
+        <span class="v3-saved" style="width:9.84%" title="저장 288,273원"></span>
+        <span class="v3-pending" style="width:1.02%" title="처리중 29,818원"></span>
+        <span class="v3-completed" style="width:0%"></span>
+      </div>
+      <div class="v3-legend">
+        <span><span class="dot" style="background:#C7B299"></span>저장 <b>288,273</b></span>
+        <span><span class="dot" style="background:var(--w-warning)"></span>처리중 <b>29,818</b></span>
+        <span><span class="dot" style="background:var(--w-text-soft)"></span>처리완료 <b>0</b></span>
+        <span style="margin-left:auto">89.1% 남음</span>
+      </div>
+    </div>
+  </div>
+
+  <h2 style="margin-top:36px">추천</h2>
+  <div class="card-section" style="background:#F0FDF4;border-color:#86EFAC">
+    <p style="margin:0 0 8px;font-size:13px;color:#166534">
+      <b>주된 사용 시나리오 = "지금 얼마 남았지?" 확인</b>이라면 <b>V2</b> 추천.
+    </p>
+    <ul style="margin:0;padding-left:20px;font-size:12px;color:var(--w-text-soft);line-height:1.8">
+      <li><b>V2 = 잔여 우선 + 분해 정보 보존</b>. SAP 표보다 잔여 가독성↑, 분해 수치는 그리드로 정렬되어 비교성 유지</li>
+      <li>V1 = 가장 안전한 선택(기존 표 그대로). 잔여 강조 약함</li>
+      <li>V3 = 시각화 가장 강함. 정확한 수치 비교는 약간 약함 (만원 단위 반올림)</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>

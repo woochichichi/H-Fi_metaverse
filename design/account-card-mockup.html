@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>계정별 예산 카드 — 재설계 목업</title>
+<style>
+  :root {
+    --w-bg: #FBF6EF;
+    --w-surface: #FFFFFF;
+    --w-surface-2: #F5EEE4;
+    --w-border: #E8DDCE;
+    --w-text: #2A1F1A;
+    --w-text-soft: #5C4B42;
+    --w-text-muted: #8A776B;
+    --w-accent: #E8725C;
+    --w-success: #3F9D6E;
+    --w-warning: #D08A2E;
+    --w-danger: #C8453E;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Pretendard', -apple-system, system-ui, sans-serif;
+    background: var(--w-bg);
+    color: var(--w-text);
+    padding: 32px;
+    margin: 0;
+    line-height: 1.5;
+  }
+  h1 { font-size: 18px; margin: 0 0 8px; }
+  h2 { font-size: 14px; margin: 24px 0 12px; color: var(--w-text-soft); }
+  .subtitle { color: var(--w-text-muted); font-size: 12px; margin-bottom: 24px; }
+  .container { max-width: 1100px; margin: 0 auto; }
+  .card-section {
+    background: var(--w-surface);
+    border: 1px solid var(--w-border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+  .card-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--w-border);
+    margin-bottom: 16px;
+  }
+  .card-title { font-size: 14px; font-weight: 700; }
+  .count-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-left: 8px;
+    width: 22px; height: 22px;
+    background: var(--w-surface-2);
+    border-radius: 999px;
+    font-size: 11px; color: var(--w-text-muted);
+  }
+
+  /* ─────────────────────────────────────
+     [안 A] 잔여 중심 — 단일 색 게이지 + 잔여 강조
+     ───────────────────────────────────── */
+  .a-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--w-border);
+  }
+  .a-row:last-child { border: 0; padding-bottom: 0; }
+  .a-row:first-child { padding-top: 0; }
+  .a-name { font-size: 14px; font-weight: 700; }
+  .a-code { font-size: 11px; color: var(--w-text-muted); margin-top: 2px; }
+  .a-gauge-wrap { margin-top: 10px; }
+  .a-gauge {
+    position: relative;
+    height: 8px;
+    background: var(--w-surface-2);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .a-gauge-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.6s;
+  }
+  .a-gauge-fill.ok { background: var(--w-success); }
+  .a-gauge-fill.warn { background: var(--w-warning); }
+  .a-gauge-fill.danger { background: var(--w-danger); }
+  .a-meta {
+    display: flex; gap: 12px;
+    margin-top: 6px;
+    font-size: 11px; color: var(--w-text-muted);
+  }
+  .a-meta .accent { color: var(--w-text-soft); font-weight: 600; }
+  .a-amt {
+    text-align: right;
+    min-width: 110px;
+  }
+  .a-amt .lbl { font-size: 10.5px; color: var(--w-text-muted); margin-bottom: 2px; }
+  .a-amt .val {
+    font-size: 22px; font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+  .a-amt .val .unit { font-size: 13px; font-weight: 600; color: var(--w-text-muted); margin-left: 1px; }
+  .a-amt .pct { font-size: 11px; color: var(--w-text-muted); margin-top: 4px; }
+
+  /* ─────────────────────────────────────
+     [안 B] 큰 숫자 카드 그리드 — 3개 옆으로
+     ───────────────────────────────────── */
+  .b-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .b-card {
+    border: 1px solid var(--w-border);
+    border-radius: 12px;
+    padding: 16px;
+    background: var(--w-bg);
+    position: relative;
+    overflow: hidden;
+  }
+  .b-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 4px;
+  }
+  .b-card.ok::before { background: var(--w-success); }
+  .b-card.warn::before { background: var(--w-warning); }
+  .b-card.danger::before { background: var(--w-danger); }
+  .b-name { font-size: 13px; font-weight: 700; }
+  .b-code { font-size: 10.5px; color: var(--w-text-muted); margin-top: 1px; }
+  .b-big {
+    margin-top: 10px;
+    font-size: 28px; font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.05;
+  }
+  .b-big .unit { font-size: 14px; font-weight: 600; color: var(--w-text-muted); margin-left: 2px; }
+  .b-lbl { font-size: 11px; color: var(--w-text-muted); margin-top: 2px; }
+  .b-status {
+    display: inline-flex;
+    align-items: center; gap: 4px;
+    margin-top: 10px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 10.5px; font-weight: 700;
+  }
+  .b-status.ok    { background: rgba(63,157,110,.12); color: var(--w-success); }
+  .b-status.warn  { background: rgba(208,138,46,.12); color: var(--w-warning); }
+  .b-status.danger{ background: rgba(200,69,62,.12); color: var(--w-danger); }
+  .b-foot {
+    margin-top: 8px;
+    font-size: 11px; color: var(--w-text-muted);
+  }
+
+  /* ─────────────────────────────────────
+     [안 C] 게이지 + 점진(완료/처리중) 분해 + 큰 잔여
+     ───────────────────────────────────── */
+  .c-row {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--w-border);
+  }
+  .c-row:last-child { border: 0; padding-bottom: 0; }
+  .c-row:first-child { padding-top: 0; }
+  .c-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 12px; margin-bottom: 10px;
+  }
+  .c-name { font-size: 14px; font-weight: 700; }
+  .c-code { font-size: 11px; color: var(--w-text-muted); margin-left: 8px; font-weight: 500; }
+  .c-amt {
+    font-size: 24px; font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .c-amt .lbl { font-size: 11px; color: var(--w-text-muted); font-weight: 500; margin-right: 6px; }
+  .c-amt .unit { font-size: 13px; font-weight: 600; color: var(--w-text-muted); margin-left: 2px; }
+  .c-bar {
+    position: relative;
+    height: 10px;
+    background: var(--w-surface-2);
+    border-radius: 999px;
+    overflow: hidden;
+    display: flex;
+  }
+  .c-bar > span {
+    height: 100%;
+    transition: width 0.6s;
+  }
+  .c-completed { background: var(--w-text-muted); }
+  .c-pending { background: var(--w-warning); opacity: 0.85; }
+  .c-bar-foot {
+    display: flex; justify-content: space-between;
+    margin-top: 6px;
+    font-size: 11px; color: var(--w-text-muted);
+  }
+  .c-bar-foot .legend { display: flex; gap: 12px; }
+  .c-bar-foot .dot {
+    display: inline-block; width: 8px; height: 8px;
+    border-radius: 2px; margin-right: 4px;
+    vertical-align: middle;
+  }
+  .c-pct {
+    font-weight: 700; color: var(--w-text-soft);
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>계정별 예산 카드 — 재설계 목업</h1>
+  <p class="subtitle">
+    핵심: <b>"각 영역별로 얼마 남았냐"</b>를 가장 강조. 잔여 금액 단위는 "약 N만/N백만"으로 짧게 표시.<br>
+    <b>샘플 데이터 (실데이터 기준)</b>:
+    업무추진식대 잔여 4,170,992원 / 시내교통비 잔여 297,100원 / 업무회의비 잔여 2,611,791원
+  </p>
+
+  <!-- ============ 안 A : 잔여 중심 단일 게이지 ============ -->
+  <h2>안 A — 잔여 중심 + 단일 색 게이지 (현재 디자인의 정보 우선순위만 뒤집음)</h2>
+  <div class="card-section">
+    <div class="card-head">
+      <div class="card-title">계정별 예산 <span class="count-badge">3</span></div>
+      <div style="font-size:11px;color:var(--w-text-muted)">2025년 4분기 · 4월</div>
+    </div>
+
+    <div class="a-row">
+      <div>
+        <div class="a-name">업무추진식대</div>
+        <div class="a-code">53001040 · 복리후생비-업무추진식대</div>
+        <div class="a-gauge-wrap">
+          <div class="a-gauge"><div class="a-gauge-fill ok" style="width:28.5%"></div></div>
+          <div class="a-meta">
+            <span><span class="accent">28.5%</span> 사용</span>
+            <span>·</span>
+            <span>예산 583만 중 166만 사용</span>
+          </div>
+        </div>
+      </div>
+      <div class="a-amt">
+        <div class="lbl">남은 예산</div>
+        <div class="val">417<span class="unit">만</span></div>
+        <div class="pct">71.5% 남음</div>
+      </div>
+    </div>
+
+    <div class="a-row">
+      <div>
+        <div class="a-name">시내교통비</div>
+        <div class="a-code">53401010 · 여비교통비-시내교통비</div>
+        <div class="a-gauge-wrap">
+          <div class="a-gauge"><div class="a-gauge-fill warn" style="width:34%"></div></div>
+          <div class="a-meta">
+            <span><span class="accent">34%</span> 사용</span>
+            <span>·</span>
+            <span>예산 45만 중 15만 사용</span>
+          </div>
+        </div>
+      </div>
+      <div class="a-amt">
+        <div class="lbl">남은 예산</div>
+        <div class="val">29.7<span class="unit">만</span></div>
+        <div class="pct">66% 남음</div>
+      </div>
+    </div>
+
+    <div class="a-row">
+      <div>
+        <div class="a-name">업무회의비</div>
+        <div class="a-code">53405010 · 회의비-업무회의비</div>
+        <div class="a-gauge-wrap">
+          <div class="a-gauge"><div class="a-gauge-fill ok" style="width:10.9%"></div></div>
+          <div class="a-meta">
+            <span><span class="accent">10.9%</span> 사용</span>
+            <span>·</span>
+            <span>예산 293만 중 32만 사용</span>
+          </div>
+        </div>
+      </div>
+      <div class="a-amt">
+        <div class="lbl">남은 예산</div>
+        <div class="val">261<span class="unit">만</span></div>
+        <div class="pct">89.1% 남음</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 안 B : 카드 그리드 (3장 옆으로) ============ -->
+  <h2>안 B — 카드 그리드 (한눈에 비교, "남은 예산"을 가장 크게)</h2>
+  <div class="card-section">
+    <div class="card-head">
+      <div class="card-title">계정별 예산 <span class="count-badge">3</span></div>
+      <div style="font-size:11px;color:var(--w-text-muted)">2025년 4분기 · 4월</div>
+    </div>
+    <div class="b-grid">
+      <div class="b-card ok">
+        <div class="b-name">업무추진식대</div>
+        <div class="b-code">53001040 · 식대</div>
+        <div class="b-big">417<span class="unit">만 원 남음</span></div>
+        <div class="b-lbl">예산 583만 / 사용 166만</div>
+        <div class="b-status ok">● 여유 (71% 남음)</div>
+      </div>
+      <div class="b-card warn">
+        <div class="b-name">시내교통비</div>
+        <div class="b-code">53401010 · 교통</div>
+        <div class="b-big">29.7<span class="unit">만 원 남음</span></div>
+        <div class="b-lbl">예산 45만 / 사용 15만</div>
+        <div class="b-status warn">● 보통 (66% 남음)</div>
+      </div>
+      <div class="b-card ok">
+        <div class="b-name">업무회의비</div>
+        <div class="b-code">53405010 · 회의</div>
+        <div class="b-big">261<span class="unit">만 원 남음</span></div>
+        <div class="b-lbl">예산 293만 / 사용 32만</div>
+        <div class="b-status ok">● 여유 (89% 남음)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 안 C : 잔여 큰 숫자 + 사용 분해 게이지 ============ -->
+  <h2>안 C — 잔여 큰 숫자 + 사용내역 분해 (현재 stacked 의도 살리되 색 단순화)</h2>
+  <div class="card-section">
+    <div class="card-head">
+      <div class="card-title">계정별 예산 <span class="count-badge">3</span></div>
+      <div style="font-size:11px;color:var(--w-text-muted)">2025년 4분기 · 4월</div>
+    </div>
+
+    <div class="c-row">
+      <div class="c-head">
+        <div>
+          <span class="c-name">업무추진식대</span>
+          <span class="c-code">53001040 · 복리후생비-업무추진식대</span>
+        </div>
+        <div class="c-amt">
+          <span class="lbl">남음</span>417<span class="unit">만</span>
+        </div>
+      </div>
+      <div class="c-bar">
+        <span class="c-completed" style="width:0.84%" title="완료 49,091"></span>
+        <span class="c-pending" style="width:7.4%" title="처리중 432,821"></span>
+      </div>
+      <div class="c-bar-foot">
+        <span class="legend">
+          <span><span class="dot" style="background:var(--w-text-muted)"></span>완료 4.9만</span>
+          <span><span class="dot" style="background:var(--w-warning)"></span>처리중 43만</span>
+        </span>
+        <span class="c-pct">71.5% 남음</span>
+      </div>
+    </div>
+
+    <div class="c-row">
+      <div class="c-head">
+        <div>
+          <span class="c-name">시내교통비</span>
+          <span class="c-code">53401010 · 여비교통비-시내교통비</span>
+        </div>
+        <div class="c-amt">
+          <span class="lbl">남음</span>29.7<span class="unit">만</span>
+        </div>
+      </div>
+      <div class="c-bar">
+        <span class="c-completed" style="width:0%"></span>
+        <span class="c-pending" style="width:23.7%" title="처리중 106,800"></span>
+      </div>
+      <div class="c-bar-foot">
+        <span class="legend">
+          <span><span class="dot" style="background:var(--w-text-muted)"></span>완료 0원</span>
+          <span><span class="dot" style="background:var(--w-warning)"></span>처리중 10.7만</span>
+        </span>
+        <span class="c-pct">66% 남음</span>
+      </div>
+    </div>
+
+    <div class="c-row">
+      <div class="c-head">
+        <div>
+          <span class="c-name">업무회의비</span>
+          <span class="c-code">53405010 · 회의비-업무회의비</span>
+        </div>
+        <div class="c-amt">
+          <span class="lbl">남음</span>261<span class="unit">만</span>
+        </div>
+      </div>
+      <div class="c-bar">
+        <span class="c-completed" style="width:0%"></span>
+        <span class="c-pending" style="width:1.0%"></span>
+      </div>
+      <div class="c-bar-foot">
+        <span class="legend">
+          <span><span class="dot" style="background:var(--w-text-muted)"></span>완료 0원</span>
+          <span><span class="dot" style="background:var(--w-warning)"></span>처리중 3만</span>
+        </span>
+        <span class="c-pct">89.1% 남음</span>
+      </div>
+    </div>
+  </div>
+
+  <h2 style="margin-top:36px">⚠️ 검토 필요</h2>
+  <div class="card-section" style="background:#FFF7ED;border-color:#FDBA74">
+    <p style="margin:0 0 8px;font-size:13px;color:#9A3412"><b>"잔여" 계산이 SAP 정의와 다를 가능성</b></p>
+    <p style="margin:0;font-size:12px;color:var(--w-text-soft)">
+      DB의 <code>rst_amt</code>(SAP 잔여) 컬럼이 따로 있는데, 현재 화면은 <code>base_amt - sin_bdget - mis_bdget - non_bdget</code>로 직접 계산하고 있음.
+      두 값이 크게 다름 (예: 식대 SAP=161만 vs 화면=417만).
+      → <code>sin_bdget</code>이 "사용액"인지 "잔액"인지 회계팀 확인 필요.
+    </p>
+  </div>
+
+</div>
+</body>
+</html>

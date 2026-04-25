@@ -158,7 +158,14 @@ function toTx(r: TxRow): CorpTransaction {
 }
 
 function shortenAcct(name: string): string {
-  return name.split('-').pop() ?? name;
+  // SAP 풀 이름(예: "복리후생비-업무추진식대") → 화면용 짧은 이름.
+  // dash 뒷부분 + "식대"/"비" 어미 정리.
+  const tail = name.split('-').pop() ?? name;
+  // "업무추진식대" → "업무추진", "업무회의비" → "업무회의", "시내교통비" → "교통비"
+  if (tail === '업무추진식대') return '업무추진';
+  if (tail === '업무회의비') return '업무회의';
+  if (tail === '시내교통비') return '교통비';
+  return tail;
 }
 
 function iconForAcct(code: string): string {

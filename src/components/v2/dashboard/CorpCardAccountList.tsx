@@ -1,80 +1,189 @@
-import { fmt, pct, type CorpAccount } from '../../../lib/corpCardMockData';
+import { useState } from 'react';
+import { fmt, type CorpAccount } from '../../../lib/corpCardMockData';
 
 type AccountWithUsage = CorpAccount & { used: number; remaining: number };
 
 interface Props {
   accounts: AccountWithUsage[];
+  capturedAt?: string;
 }
 
 /**
- * 계정별 예산 카드 — 행 단위 Stacked progress + 잔여/예산.
- * cash/project/app.jsx 의 .account-row 포팅.
+ * 계정별 예산 (SAP 통제예산조회 동일 컬럼 구조).
+ *
+ * 컬럼: 계정과목 | 편성예산(A) | 저장(B) | 처리중(C) | 처리완료(D) | 잔여금액(A−B−C−D)
+ *
+ * 잔여금액 셀은 background bar 게이지를 통합해 잔량 비율을 시각화 (C안).
+ * - 잔량 비율 = remaining/planned
+ * - 색: 80%↑ 여유(녹), 20~80% 보통(주황), 20%↓ 위험(적)
+ * - SAP 표 컬럼 순서·산식 그대로라 익숙함 유지하면서 잔량 직관 보강.
  */
-export default function CorpCardAccountList({ accounts }: Props) {
+export default function CorpCardAccountList({ accounts, capturedAt }: Props) {
   const visible = accounts.filter((a) => a.planned > 0);
 
   return (
     <div className="w-cc-card">
-      <div className="w-cc-card-head">
+      <div className="w-cc-card-head" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div className="w-cc-card-title">
           계정별 예산 <span className="w-cc-count">{visible.length}</span>
         </div>
+        {capturedAt && <CapturedAtMini capturedAt={capturedAt} />}
       </div>
       {visible.length === 0 ? (
         <div className="w-cc-empty">예산이 편성된 계정이 없습니다.</div>
       ) : (
-        visible.map((a) => {
-          const usedPct = pct(a.used, a.planned);
-          const total = a.planned;
-          const wc = total === 0 ? 0 : (a.completed / total) * 100;
-          const wp = total === 0 ? 0 : (a.pending / total) * 100;
-          const ws = total === 0 ? 0 : (a.saved / total) * 100;
-          return (
-            <div key={a.code} className="w-cc-acct-row">
-              <div className="w-cc-acct-icon">{a.icon}</div>
-              <div style={{ minWidth: 0 }}>
-                <div className="w-cc-acct-name">{a.shortName}</div>
-                <div className="w-cc-acct-code">
-                  {a.code} · {a.name}
-                </div>
-                <div style={{ marginTop: 7 }}>
-                  <div className="w-cc-stack">
-                    <span
-                      className="w-cc-stack-completed"
-                      style={{ width: `${wc}%` }}
-                      title={`완료 ${fmt(a.completed)}원`}
-                    />
-                    <span
-                      className="w-cc-stack-pending"
-                      style={{ width: `${wp}%` }}
-                      title={`처리중 ${fmt(a.pending)}원`}
-                    />
-                    <span
-                      className="w-cc-stack-saved"
-                      style={{ width: `${ws}%` }}
-                      title={`저장 ${fmt(a.saved)}원`}
-                    />
-                  </div>
-                  <div className="w-cc-acct-meta">
-                    <span>{usedPct}% 사용</span>
-                    <span>
-                      완료 {fmt(a.completed)} · 처리중 {fmt(a.pending)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="w-cc-acct-amt">
-                <div className="lbl">잔여</div>
-                <div className={`val${usedPct > 80 ? ' danger' : ''}`}>{fmt(a.remaining)}원</div>
-              </div>
-              <div className="w-cc-acct-amt">
-                <div className="lbl">예산</div>
-                <div className="val muted">{fmt(a.planned)}원</div>
-              </div>
-            </div>
-          );
-        })
+        <div style={{ overflowX: 'auto' }}>
+          <table style={tableStyle}>
+            <thead>
+              <tr>
+                <th style={{ ...thStyle, textAlign: 'left' }}>계정과목</th>
+                <th style={thStyle}>
+                  편성예산<span style={formulaStyle}> (A)</span>
+                </th>
+                <th style={thStyle}>
+                  저장<span style={formulaStyle}> (B)</span>
+                </th>
+                <th style={thStyle}>
+                  처리중<span style={formulaStyle}> (C)</span>
+                </th>
+                <th style={thStyle}>
+                  처리완료<span style={formulaStyle}> (D)</span>
+                </th>
+                <th style={{ ...thStyle, minWidth: 220 }}>
+                  잔여금액<span style={formulaStyle}> (A−B−C−D)</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {visible.map((a) => {
+                const remainPct = a.planned === 0 ? 0 : (a.remaining / a.planned) * 100;
+                const tone = remainPct >= 80 ? 'ok' : remainPct >= 20 ? 'warn' : 'danger';
+                const toneBg =
+                  tone === 'ok'
+                    ? 'rgba(63,157,110,.12)'
+                    : tone === 'warn'
+                      ? 'rgba(208,138,46,.14)'
+                      : 'rgba(200,69,62,.14)';
+                const tonePct =
+                  tone === 'ok'
+                    ? 'var(--w-text-muted)'
+                    : tone === 'warn'
+                      ? 'var(--w-warning)'
+                      : 'var(--w-danger)';
+                return (
+                  <tr key={a.code}>
+                    <td style={{ ...tdStyle, textAlign: 'left' }}>
+                      <div style={{ fontWeight: 700, color: 'var(--w-text)' }}>{a.shortName}</div>
+                      <div style={{ fontSize: 10.5, color: 'var(--w-text-muted)', marginTop: 1 }}>
+                        {a.code} · {a.name}
+                      </div>
+                    </td>
+                    <td style={tdStyle}>{fmt(a.planned)}</td>
+                    <td style={{ ...tdStyle, color: 'var(--w-text-muted)' }}>{fmt(a.saved)}</td>
+                    <td style={{ ...tdStyle, color: 'var(--w-text-muted)' }}>{fmt(a.pending)}</td>
+                    <td style={{ ...tdStyle, color: 'var(--w-text-muted)' }}>{fmt(a.completed)}</td>
+                    <td
+                      style={{
+                        ...tdStyle,
+                        position: 'relative',
+                        overflow: 'hidden',
+                        fontWeight: 800,
+                        fontSize: 13.5,
+                        paddingRight: 12,
+                      }}
+                    >
+                      {/* 잔량 비율 background bar */}
+                      <div
+                        style={{
+                          position: 'absolute',
+                          left: 0,
+                          top: 0,
+                          bottom: 0,
+                          width: `${Math.max(0, Math.min(100, remainPct))}%`,
+                          background: toneBg,
+                          zIndex: 0,
+                        }}
+                      />
+                      <div style={{ position: 'relative', zIndex: 1 }}>
+                        {fmt(a.remaining)}원
+                        <span
+                          style={{
+                            display: 'block',
+                            fontSize: 10.5,
+                            fontWeight: 600,
+                            color: tonePct,
+                            marginTop: 1,
+                          }}
+                        >
+                          {remainPct.toFixed(1)}% 남음
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
 }
+
+/** 카드 헤더 우측에 짧게 표시되는 수집 시각. */
+function CapturedAtMini({ capturedAt }: { capturedAt: string }) {
+  const [now] = useState<number>(() => Date.now());
+  const d = new Date(capturedAt);
+  const diffMin = Math.max(0, Math.floor((now - d.getTime()) / 60000));
+  const rel =
+    diffMin < 1
+      ? '방금'
+      : diffMin < 60
+        ? `${diffMin}분 전`
+        : diffMin < 60 * 24
+          ? `${Math.floor(diffMin / 60)}시간 전`
+          : `${Math.floor(diffMin / (60 * 24))}일 전`;
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mi = String(d.getMinutes()).padStart(2, '0');
+  return (
+    <span
+      style={{ fontSize: 11, color: 'var(--w-text-muted)', fontWeight: 500 }}
+      title={`수집 시각: ${d.toLocaleString('ko-KR')}`}
+    >
+      {mm}/{dd} {hh}:{mi} 수집 · {rel}
+    </span>
+  );
+}
+
+const tableStyle: React.CSSProperties = {
+  width: '100%',
+  borderCollapse: 'collapse',
+  fontSize: 12.5,
+  fontVariantNumeric: 'tabular-nums',
+};
+
+const thStyle: React.CSSProperties = {
+  padding: '10px 8px',
+  textAlign: 'right',
+  fontSize: 11,
+  fontWeight: 600,
+  color: 'var(--w-text-muted)',
+  background: 'var(--w-surface-2)',
+  borderBottom: '1px solid var(--w-border-strong)',
+  whiteSpace: 'nowrap',
+};
+
+const tdStyle: React.CSSProperties = {
+  padding: '12px 8px',
+  textAlign: 'right',
+  borderBottom: '1px solid var(--w-border)',
+  verticalAlign: 'middle',
+};
+
+const formulaStyle: React.CSSProperties = {
+  fontSize: 10.5,
+  fontWeight: 500,
+  color: 'var(--w-text-muted)',
+};

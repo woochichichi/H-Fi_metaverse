@@ -163,7 +163,7 @@ function CorpCardPageContent({ team }: { team: string }) {
           </div>
 
           {/* 2) 계정별 예산 — 카테고리별 잔여 세부 (식대/회의/교통) */}
-          <CorpCardAccountList accounts={stats.accounts} />
+          <CorpCardAccountList accounts={stats.accounts} capturedAt={snapshot.captured_at} />
 
           {/* 3) 일별 바차트 + 주의 알림 */}
           <div className="w-cc-main-grid">
@@ -272,6 +272,12 @@ function SyncBadge({ capturedAt, periodYm }: { capturedAt: string; periodYm: str
   const year = periodYm.slice(0, 4);
   const month = parseInt(periodYm.slice(4, 6), 10);
   const quarter = Math.ceil(month / 3);
+  // MM/DD HH:mm 포맷
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mi = String(d.getMinutes()).padStart(2, '0');
+  const exact = `${mm}/${dd} ${hh}:${mi}`;
 
   return (
     <div
@@ -297,7 +303,7 @@ function SyncBadge({ capturedAt, periodYm }: { capturedAt: string; periodYm: str
           boxShadow: stale ? 'none' : '0 0 0 3px var(--w-accent-soft)',
         }}
       />
-      {year} {quarter}분기 · 수집 {rel}
+      {year} {quarter}분기 · {exact} 수집 ({rel})
     </div>
   );
 }

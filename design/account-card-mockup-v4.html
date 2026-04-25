@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>계정별 예산 — V1 기반 변형 3종</title>
+<style>
+  :root {
+    --w-bg: #FBF6EF;
+    --w-surface: #FFFFFF;
+    --w-surface-2: #F5EEE4;
+    --w-border: #E8DDCE;
+    --w-border-strong: #D9C9B2;
+    --w-text: #2A1F1A;
+    --w-text-soft: #5C4B42;
+    --w-text-muted: #8A776B;
+    --w-accent: #E8725C;
+    --w-success: #3F9D6E;
+    --w-warning: #D08A2E;
+    --w-danger: #C8453E;
+    --w-info: #3D7FA8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Pretendard', -apple-system, system-ui, sans-serif;
+    background: var(--w-bg);
+    color: var(--w-text);
+    padding: 32px;
+    margin: 0;
+    line-height: 1.5;
+  }
+  h1 { font-size: 18px; margin: 0 0 8px; }
+  h2 { font-size: 14px; margin: 32px 0 6px; color: var(--w-text-soft); }
+  .h2-desc { font-size: 12px; color: var(--w-text-muted); margin-bottom: 14px; line-height: 1.6; }
+  .h2-pro { color: var(--w-success); font-weight: 600; }
+  .h2-con { color: var(--w-danger); font-weight: 600; }
+  .subtitle { color: var(--w-text-muted); font-size: 12px; margin-bottom: 24px; }
+  .container { max-width: 1180px; margin: 0 auto; }
+  .card-section {
+    background: var(--w-surface);
+    border: 1px solid var(--w-border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+  .card-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--w-border);
+    margin-bottom: 12px;
+  }
+  .card-title { font-size: 14px; font-weight: 700; }
+  .count-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-left: 8px;
+    width: 22px; height: 22px;
+    background: var(--w-surface-2);
+    border-radius: 999px;
+    font-size: 11px; color: var(--w-text-muted);
+  }
+
+  /* 공통 표 */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+  }
+  th, td {
+    padding: 10px 8px;
+    text-align: right;
+    vertical-align: middle;
+  }
+  th {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--w-text-muted);
+    border-bottom: 1px solid var(--w-border-strong);
+    background: var(--w-surface-2);
+    white-space: nowrap;
+  }
+  th.left, td.left { text-align: left; }
+  td {
+    border-bottom: 1px solid var(--w-border);
+  }
+  tr:last-child td { border-bottom: 0; }
+  .acct-name { font-weight: 700; color: var(--w-text); }
+  .acct-code { font-size: 10.5px; color: var(--w-text-muted); }
+  .num-muted { color: var(--w-text-muted); }
+  .formula { font-size: 10.5px; font-weight: 500; color: var(--w-text-muted); }
+
+
+  /* ─────────── A : V1 원안 (잔여 셀 색·굵기 + 미니 막대) ─────────── */
+  .a-remain-cell {
+    text-align: right;
+    font-weight: 800;
+    font-size: 13.5px;
+    padding-right: 12px !important;
+    background: rgba(63,157,110,.06);
+  }
+  .a-remain-cell.warn { background: rgba(208,138,46,.08); }
+  .a-remain-cell.danger { background: rgba(200,69,62,.08); }
+  .a-remain-cell .pct {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--w-text-muted);
+    margin-top: 1px;
+  }
+  .a-remain-cell.warn .pct { color: var(--w-warning); }
+  .a-remain-cell.danger .pct { color: var(--w-danger); }
+  .a-bar {
+    width: 90px;
+    height: 6px;
+    background: var(--w-surface-2);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-left: auto;
+    margin-top: 4px;
+  }
+  .a-bar > span {
+    display: block; height: 100%;
+    border-radius: 999px;
+  }
+  .a-bar > span.ok { background: var(--w-success); }
+  .a-bar > span.warn { background: var(--w-warning); }
+  .a-bar > span.danger { background: var(--w-danger); }
+
+
+  /* ─────────── B : 잔여 컬럼을 좌측으로 이동(시선 우선순위) ─────────── */
+  .b-remain-cell {
+    text-align: left;
+    font-weight: 800;
+    font-size: 14.5px;
+    padding-left: 12px !important;
+    border-left: 4px solid var(--w-success);
+    background: rgba(63,157,110,.05);
+  }
+  .b-remain-cell.warn {
+    border-left-color: var(--w-warning);
+    background: rgba(208,138,46,.05);
+  }
+  .b-remain-cell.danger {
+    border-left-color: var(--w-danger);
+    background: rgba(200,69,62,.05);
+  }
+  .b-remain-cell .meta {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--w-text-muted);
+    margin-top: 2px;
+  }
+  .b-remain-cell.warn .meta { color: var(--w-warning); }
+  .b-remain-cell.danger .meta { color: var(--w-danger); }
+
+
+  /* ─────────── C : 잔여를 background bar 채워서 표시 (한 셀 안에 게이지) ─────────── */
+  .c-remain-cell {
+    text-align: right;
+    font-weight: 800;
+    font-size: 13.5px;
+    padding-right: 12px !important;
+    position: relative;
+    overflow: hidden;
+    min-width: 200px;
+  }
+  .c-remain-bar {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    z-index: 0;
+    border-radius: 0;
+  }
+  .c-remain-bar.ok    { background: rgba(63,157,110,.12); }
+  .c-remain-bar.warn  { background: rgba(208,138,46,.14); }
+  .c-remain-bar.danger{ background: rgba(200,69,62,.14); }
+  .c-remain-content {
+    position: relative;
+    z-index: 1;
+  }
+  .c-remain-content .pct {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--w-text-muted);
+    margin-top: 1px;
+  }
+  .c-remain-cell.warn .pct { color: var(--w-warning); }
+  .c-remain-cell.danger .pct { color: var(--w-danger); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>계정별 예산 — V1 기반 변형 3종</h1>
+  <p class="subtitle">
+    SAP 표 구조 유지(컬럼 정렬·산식·풀 금액). <b>잔여 표현 방식만 다르게</b>.<br>
+    SAP 라벨: 편성예산(A) / 저장(B) / 처리중(C) / 처리완료(D) / 잔여금액(A−B−C−D)
+  </p>
+
+  <!-- ===================== A : 원안 ===================== -->
+  <h2>A — V1 원안: 잔여 셀 색배경 + 굵게 + 미니 막대 (별도 컬럼)</h2>
+  <p class="h2-desc">
+    <span class="h2-pro">✓ 표 구조 그대로, 미니 막대로 잔량 직관 보강</span><br>
+    <span class="h2-con">△ 막대가 별도 컬럼이라 가로 폭 추가 필요</span>
+  </p>
+  <div class="card-section">
+    <div class="card-head">
+      <div class="card-title">계정별 예산 <span class="count-badge">3</span></div>
+      <div style="font-size:11px;color:var(--w-text-muted)">2026년 4월 · 분기 2</div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th class="left">계정과목</th>
+          <th>편성예산<span class="formula"> (A)</span></th>
+          <th>저장<span class="formula"> (B)</span></th>
+          <th>처리중<span class="formula"> (C)</span></th>
+          <th>처리완료<span class="formula"> (D)</span></th>
+          <th>잔여금액<span class="formula"> (A−B−C−D)</span></th>
+          <th>잔량</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="left">
+            <div class="acct-name">업무추진</div>
+            <div class="acct-code">53001040 · 복리후생비-업무추진식대</div>
+          </td>
+          <td>5,835,815</td>
+          <td class="num-muted">1,182,911</td>
+          <td class="num-muted">432,821</td>
+          <td class="num-muted">49,091</td>
+          <td class="a-remain-cell">
+            4,170,992원
+            <span class="pct">71.5% 남음</span>
+          </td>
+          <td><div class="a-bar"><span class="ok" style="width:71.5%"></span></div></td>
+        </tr>
+        <tr>
+          <td class="left">
+            <div class="acct-name">교통비</div>
+            <div class="acct-code">53401010 · 여비교통비-시내교통비</div>
+          </td>
+          <td>450,000</td>
+          <td class="num-muted">46,100</td>
+          <td class="num-muted">106,800</td>
+          <td class="num-muted">0</td>
+          <td class="a-remain-cell warn">
+            297,100원
+            <span class="pct">66.0% 남음</span>
+          </td>
+          <td><div class="a-bar"><span class="warn" style="width:66%"></span></div></td>
+        </tr>
+        <tr>
+          <td class="left">
+            <div class="acct-name">업무회의</div>
+            <div class="acct-code">53405010 · 회의비-업무회의비</div>
+          </td>
+          <td>2,929,882</td>
+          <td class="num-muted">288,273</td>
+          <td class="num-muted">29,818</td>
+          <td class="num-muted">0</td>
+          <td class="a-remain-cell">
+            2,611,791원
+            <span class="pct">89.1% 남음</span>
+          </td>
+          <td><div class="a-bar"><span class="ok" style="width:89.1%"></span></div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+  <!-- ===================== B : 잔여 컬럼을 좌측으로 ===================== -->
+  <h2>B — 잔여 컬럼을 계정 옆으로 이동 (시선 좌→우 순서대로)</h2>
+  <p class="h2-desc">
+    <span class="h2-pro">✓ 사용자가 가장 먼저 보는 정보를 좌측에 배치 (좌→우 시선 흐름과 일치)</span><br>
+    <span class="h2-pro">✓ 좌측 컬러 보더로 카테고리별 상태(여유/주의/위험) 한눈에</span><br>
+    <span class="h2-con">△ SAP 표와 컬럼 순서가 달라짐 (산식 A−B−C−D는 헤더에만 명시)</span>
+  </p>
+  <div class="card-section">
+    <div class="card-head">
+      <div class="card-title">계정별 예산 <span class="count-badge">3</span></div>
+      <div style="font-size:11px;color:var(--w-text-muted)">2026년 4월 · 분기 2</div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th class="left">계정과목</th>
+          <th class="left">잔여금액<span class="formula"> (A−B−C−D)</span></th>
+          <th>편성예산<span class="formula"> (A)</span></th>
+          <th>저장<span class="formula"> (B)</span></th>
+          <th>처리중<span class="formula"> (C)</span></th>
+          <th>처리완료<span class="formula"> (D)</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="left">
+            <div class="acct-name">업무추진</div>
+            <div class="acct-code">53001040 · 복리후생비-업무추진식대</div>
+          </td>
+          <td class="b-remain-cell">
+            4,170,992원
+            <span class="meta">71.5% 남음</span>
+          </td>
+          <td>5,835,815</td>
+          <td class="num-muted">1,182,911</td>
+          <td class="num-muted">432,821</td>
+          <td class="num-muted">49,091</td>
+        </tr>
+        <tr>
+          <td class="left">
+            <div class="acct-name">교통비</div>
+            <div class="acct-code">53401010 · 여비교통비-시내교통비</div>
+          </td>
+          <td class="b-remain-cell warn">
+            297,100원
+            <span class="meta">66.0% 남음</span>
+          </td>
+          <td>450,000</td>
+          <td class="num-muted">46,100</td>
+          <td class="num-muted">106,800</td>
+          <td class="num-muted">0</td>
+        </tr>
+        <tr>
+          <td class="left">
+            <div class="acct-name">업무회의</div>
+            <div class="acct-code">53405010 · 회의비-업무회의비</div>
+          </td>
+          <td class="b-remain-cell">
+            2,611,791원
+            <span class="meta">89.1% 남음</span>
+          </td>
+          <td>2,929,882</td>
+          <td class="num-muted">288,273</td>
+          <td class="num-muted">29,818</td>
+          <td class="num-muted">0</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+  <!-- ===================== C : 잔여 셀에 background bar 통합 ===================== -->
+  <h2>C — 잔여 셀에 게이지를 background로 통합 (별도 컬럼 없이 시각화)</h2>
+  <p class="h2-desc">
+    <span class="h2-pro">✓ SAP 표 컬럼 순서·구조 100% 동일 — 익숙함 최대</span><br>
+    <span class="h2-pro">✓ 잔여 셀 자체가 게이지 역할 (색면 너비 = 잔량 비율)</span><br>
+    <span class="h2-con">△ 잔량 시각화가 셀 안이라 막대 자체는 작음 (잘 보이긴 함)</span>
+  </p>
+  <div class="card-section">
+    <div class="card-head">
+      <div class="card-title">계정별 예산 <span class="count-badge">3</span></div>
+      <div style="font-size:11px;color:var(--w-text-muted)">2026년 4월 · 분기 2</div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th class="left">계정과목</th>
+          <th>편성예산<span class="formula"> (A)</span></th>
+          <th>저장<span class="formula"> (B)</span></th>
+          <th>처리중<span class="formula"> (C)</span></th>
+          <th>처리완료<span class="formula"> (D)</span></th>
+          <th>잔여금액<span class="formula"> (A−B−C−D)</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="left">
+            <div class="acct-name">업무추진</div>
+            <div class="acct-code">53001040 · 복리후생비-업무추진식대</div>
+          </td>
+          <td>5,835,815</td>
+          <td class="num-muted">1,182,911</td>
+          <td class="num-muted">432,821</td>
+          <td class="num-muted">49,091</td>
+          <td class="c-remain-cell">
+            <div class="c-remain-bar ok" style="width:71.5%"></div>
+            <div class="c-remain-content">
+              4,170,992원
+              <span class="pct">71.5% 남음</span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="left">
+            <div class="acct-name">교통비</div>
+            <div class="acct-code">53401010 · 여비교통비-시내교통비</div>
+          </td>
+          <td>450,000</td>
+          <td class="num-muted">46,100</td>
+          <td class="num-muted">106,800</td>
+          <td class="num-muted">0</td>
+          <td class="c-remain-cell warn">
+            <div class="c-remain-bar warn" style="width:66%"></div>
+            <div class="c-remain-content">
+              297,100원
+              <span class="pct">66.0% 남음</span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="left">
+            <div class="acct-name">업무회의</div>
+            <div class="acct-code">53405010 · 회의비-업무회의비</div>
+          </td>
+          <td>2,929,882</td>
+          <td class="num-muted">288,273</td>
+          <td class="num-muted">29,818</td>
+          <td class="num-muted">0</td>
+          <td class="c-remain-cell">
+            <div class="c-remain-bar ok" style="width:89.1%"></div>
+            <div class="c-remain-content">
+              2,611,791원
+              <span class="pct">89.1% 남음</span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 style="margin-top:36px">비교 요약</h2>
+  <div class="card-section">
+    <table>
+      <thead>
+        <tr>
+          <th class="left">기준</th>
+          <th class="left">A 원안</th>
+          <th class="left">B 좌측 이동</th>
+          <th class="left">C background bar</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="left">SAP 컬럼 순서 일치</td>
+          <td class="left">✓ 일치 + 잔량 컬럼 추가</td>
+          <td class="left">✗ 잔여를 2번째로 이동</td>
+          <td class="left"><b>✓ 100% 동일</b></td>
+        </tr>
+        <tr>
+          <td class="left">잔여 식별 속도</td>
+          <td class="left">중간 (오른쪽 끝)</td>
+          <td class="left"><b>빠름 (왼쪽 두 번째)</b></td>
+          <td class="left">중간 (오른쪽 + 게이지)</td>
+        </tr>
+        <tr>
+          <td class="left">시각적 잔량 비교</td>
+          <td class="left">미니 막대 (별도 컬럼)</td>
+          <td class="left">색 보더 (정성적)</td>
+          <td class="left"><b>색면 게이지 (정량적)</b></td>
+        </tr>
+        <tr>
+          <td class="left">가로 폭 사용</td>
+          <td class="left">+1컬럼</td>
+          <td class="left">기존 동일</td>
+          <td class="left"><b>기존 동일</b></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>계정별 예산 카드 — 안 B 변형 3종</title>
+<style>
+  :root {
+    --w-bg: #FBF6EF;
+    --w-surface: #FFFFFF;
+    --w-surface-2: #F5EEE4;
+    --w-border: #E8DDCE;
+    --w-text: #2A1F1A;
+    --w-text-soft: #5C4B42;
+    --w-text-muted: #8A776B;
+    --w-accent: #E8725C;
+    --w-success: #3F9D6E;
+    --w-warning: #D08A2E;
+    --w-danger: #C8453E;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Pretendard', -apple-system, system-ui, sans-serif;
+    background: var(--w-bg);
+    color: var(--w-text);
+    padding: 32px;
+    margin: 0;
+    line-height: 1.5;
+  }
+  h1 { font-size: 18px; margin: 0 0 8px; }
+  h2 { font-size: 14px; margin: 28px 0 6px; color: var(--w-text-soft); }
+  .h2-desc { font-size: 12px; color: var(--w-text-muted); margin-bottom: 14px; }
+  .subtitle { color: var(--w-text-muted); font-size: 12px; margin-bottom: 24px; }
+  .container { max-width: 1100px; margin: 0 auto; }
+  .card-section {
+    background: var(--w-surface);
+    border: 1px solid var(--w-border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+  .card-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--w-border);
+    margin-bottom: 16px;
+  }
+  .card-title { font-size: 14px; font-weight: 700; }
+  .count-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-left: 8px;
+    width: 22px; height: 22px;
+    background: var(--w-surface-2);
+    border-radius: 999px;
+    font-size: 11px; color: var(--w-text-muted);
+  }
+  .grid3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  /* ───────── 안 B-1 : "X중 Y남음" 슬래시 표기 + 도넛형 미니 게이지 ───────── */
+  .b1-card {
+    border: 1px solid var(--w-border);
+    border-radius: 12px;
+    padding: 18px 18px 16px;
+    background: var(--w-bg);
+    position: relative;
+    overflow: hidden;
+  }
+  .b1-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  }
+  .b1-card.ok::before { background: var(--w-success); }
+  .b1-card.warn::before { background: var(--w-warning); }
+  .b1-card.danger::before { background: var(--w-danger); }
+
+  .b1-name { font-size: 13px; font-weight: 700; }
+  .b1-code { font-size: 10.5px; color: var(--w-text-muted); margin-top: 1px; }
+
+  .b1-formula {
+    margin-top: 14px;
+    display: flex; align-items: baseline; gap: 4px;
+    flex-wrap: wrap;
+  }
+  .b1-formula .total {
+    font-size: 14px; font-weight: 700;
+    color: var(--w-text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .b1-formula .of { font-size: 13px; color: var(--w-text-muted); }
+  .b1-formula .left {
+    font-size: 30px; font-weight: 800;
+    color: var(--w-text);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .b1-formula .left-unit {
+    font-size: 14px; font-weight: 600; color: var(--w-text-soft);
+    margin-left: 1px;
+  }
+  .b1-formula .left-lbl {
+    font-size: 12px; color: var(--w-text-muted); margin-left: 4px;
+  }
+  .b1-help {
+    font-size: 11px; color: var(--w-text-muted);
+    margin-top: 4px;
+  }
+  .b1-foot {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--w-border);
+    font-size: 11px; color: var(--w-text-muted);
+  }
+  .b1-foot .pct {
+    font-weight: 700;
+  }
+  .b1-foot .pct.ok { color: var(--w-success); }
+  .b1-foot .pct.warn { color: var(--w-warning); }
+  .b1-foot .pct.danger { color: var(--w-danger); }
+
+
+  /* ───────── 안 B-2 : 큰 분수형 — "남음 / 편성" 위아래 ───────── */
+  .b2-card {
+    border: 1px solid var(--w-border);
+    border-radius: 14px;
+    padding: 20px;
+    background: var(--w-surface);
+    text-align: left;
+  }
+  .b2-name { font-size: 13px; font-weight: 700; color: var(--w-text-soft); }
+  .b2-code { font-size: 10.5px; color: var(--w-text-muted); margin-top: 1px; margin-bottom: 14px; }
+  .b2-stack {
+    display: flex; align-items: baseline;
+    gap: 6px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .b2-left {
+    font-size: 36px; font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+  .b2-left.ok { color: var(--w-success); }
+  .b2-left.warn { color: var(--w-warning); }
+  .b2-left.danger { color: var(--w-danger); }
+  .b2-unit { font-size: 16px; font-weight: 700; color: var(--w-text-soft); }
+  .b2-lbl-남음 { font-size: 13px; color: var(--w-text-muted); margin-left: 4px; font-weight: 500; }
+  .b2-of {
+    margin-top: 8px;
+    font-size: 12px; color: var(--w-text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .b2-of b { color: var(--w-text-soft); font-weight: 700; }
+  .b2-bar {
+    margin-top: 12px;
+    height: 6px;
+    background: var(--w-surface-2);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .b2-bar > span {
+    display: block; height: 100%;
+    border-radius: 999px;
+    transition: width 0.6s;
+  }
+  .b2-bar > span.ok { background: var(--w-success); }
+  .b2-bar > span.warn { background: var(--w-warning); }
+  .b2-bar > span.danger { background: var(--w-danger); }
+  .b2-detail {
+    margin-top: 10px;
+    display: flex; gap: 10px;
+    font-size: 10.5px; color: var(--w-text-muted);
+    flex-wrap: wrap;
+  }
+  .b2-detail span b { color: var(--w-text-soft); font-weight: 600; }
+
+
+  /* ───────── 안 B-3 : 시각적 잔량 비교 — 사용/잔여 막대를 좌우로 ───────── */
+  .b3-card {
+    border: 1px solid var(--w-border);
+    border-radius: 12px;
+    padding: 18px;
+    background: var(--w-surface);
+  }
+  .b3-name { font-size: 13px; font-weight: 700; }
+  .b3-code { font-size: 10.5px; color: var(--w-text-muted); margin-top: 1px; }
+  .b3-headline {
+    margin-top: 12px;
+    display: flex; align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .b3-budget {
+    font-size: 11px;
+    color: var(--w-text-muted);
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+  }
+  .b3-of {
+    font-size: 11px;
+    color: var(--w-text-muted);
+  }
+  .b3-left-amt {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--w-text);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .b3-left-unit {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--w-text-soft);
+    margin-left: 1px;
+  }
+  .b3-left-suffix {
+    font-size: 13px;
+    color: var(--w-text-muted);
+    font-weight: 500;
+    margin-left: 2px;
+  }
+  .b3-vis {
+    display: flex;
+    margin-top: 14px;
+    height: 28px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--w-border);
+  }
+  .b3-used {
+    background: repeating-linear-gradient(
+      45deg,
+      var(--w-surface-2) 0,
+      var(--w-surface-2) 6px,
+      #ECDFCB 6px,
+      #ECDFCB 12px
+    );
+    display: flex; align-items: center; justify-content: flex-start;
+    padding-left: 8px;
+    font-size: 10.5px; font-weight: 700; color: var(--w-text-muted);
+  }
+  .b3-left {
+    flex: 1;
+    display: flex; align-items: center; justify-content: flex-end;
+    padding-right: 10px;
+    font-size: 11px; font-weight: 700; color: white;
+  }
+  .b3-left.ok { background: var(--w-success); }
+  .b3-left.warn { background: var(--w-warning); }
+  .b3-left.danger { background: var(--w-danger); }
+  .b3-foot {
+    margin-top: 10px;
+    font-size: 10.5px; color: var(--w-text-muted);
+    display: flex; gap: 12px;
+    flex-wrap: wrap;
+  }
+  .b3-foot b { color: var(--w-text-soft); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>계정별 예산 카드 — 안 B 변형 3종</h1>
+  <p class="subtitle">
+    핵심: <b>"얼마 중에 얼마 남음"</b> — 편성예산과 잔여를 함께 보여줘 비교 직관성.<br>
+    SAP 엑셀 라벨 그대로: <b>편성예산 / 저장 / 처리중 / 처리완료 / 잔여금액</b>
+  </p>
+
+  <!-- ============ B-1 : "583만 중 417만 남음" 인라인 표기 ============ -->
+  <h2>B-1 — 슬래시 분수 인라인</h2>
+  <p class="h2-desc">"편성 583만 중 <b>417만 남음</b>" — 잔여만 키우고 편성은 작게. 한 줄로 읽힘.</p>
+  <div class="card-section">
+    <div class="card-head">
+      <div class="card-title">계정별 예산 <span class="count-badge">3</span></div>
+      <div style="font-size:11px;color:var(--w-text-muted)">2026년 4월 · 분기 2</div>
+    </div>
+    <div class="grid3">
+      <div class="b1-card ok">
+        <div class="b1-name">업무추진</div>
+        <div class="b1-code">53001040 · 복리후생비-업무추진</div>
+        <div class="b1-formula">
+          <span class="total">편성 583만</span><span class="of">중</span>
+        </div>
+        <div class="b1-formula" style="margin-top:2px">
+          <span class="left">417<span class="left-unit">만</span></span>
+          <span class="left-lbl">남음</span>
+        </div>
+        <div class="b1-help">사용 166만 (저장 118 · 처리중 43 · 완료 4.9)</div>
+        <div class="b1-foot">
+          <span>편성 5,835,815원</span>
+          <span class="pct ok">71.5%</span>
+        </div>
+      </div>
+
+      <div class="b1-card warn">
+        <div class="b1-name">교통비</div>
+        <div class="b1-code">53401010 · 여비교통비-교통비</div>
+        <div class="b1-formula">
+          <span class="total">편성 45만</span><span class="of">중</span>
+        </div>
+        <div class="b1-formula" style="margin-top:2px">
+          <span class="left">29.7<span class="left-unit">만</span></span>
+          <span class="left-lbl">남음</span>
+        </div>
+        <div class="b1-help">사용 15.3만 (저장 4.6 · 처리중 10.7)</div>
+        <div class="b1-foot">
+          <span>편성 450,000원</span>
+          <span class="pct warn">66.0%</span>
+        </div>
+      </div>
+
+      <div class="b1-card ok">
+        <div class="b1-name">업무회의</div>
+        <div class="b1-code">53405010 · 회의비-업무회의</div>
+        <div class="b1-formula">
+          <span class="total">편성 293만</span><span class="of">중</span>
+        </div>
+        <div class="b1-formula" style="margin-top:2px">
+          <span class="left">261<span class="left-unit">만</span></span>
+          <span class="left-lbl">남음</span>
+        </div>
+        <div class="b1-help">사용 31.8만 (저장 28.8 · 처리중 3.0)</div>
+        <div class="b1-foot">
+          <span>편성 2,929,882원</span>
+          <span class="pct ok">89.1%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ============ B-2 : 큰 잔여 + 작은 of-전체 ============ -->
+  <h2>B-2 — 잔여 메가 숫자 + 하단 progress</h2>
+  <p class="h2-desc">잔여를 36px 큰 숫자로. 그 아래 "/ 편성예산" 작게. 사용 분해는 최하단 한 줄.</p>
+  <div class="card-section">
+    <div class="card-head">
+      <div class="card-title">계정별 예산 <span class="count-badge">3</span></div>
+      <div style="font-size:11px;color:var(--w-text-muted)">2026년 4월 · 분기 2</div>
+    </div>
+    <div class="grid3">
+      <div class="b2-card">
+        <div class="b2-name">업무추진</div>
+        <div class="b2-code">53001040 · 복리후생비-업무추진</div>
+        <div class="b2-stack">
+          <span class="b2-left ok">417<span class="b2-unit">만</span></span>
+          <span class="b2-lbl-남음">남음</span>
+        </div>
+        <div class="b2-of"><b>5,835,815원</b> 중 <b>4,170,992원</b></div>
+        <div class="b2-bar"><span class="ok" style="width:71.5%"></span></div>
+        <div class="b2-detail">
+          <span>저장 <b>118만</b></span>
+          <span>처리중 <b>43만</b></span>
+          <span>처리완료 <b>4.9만</b></span>
+        </div>
+      </div>
+
+      <div class="b2-card">
+        <div class="b2-name">교통비</div>
+        <div class="b2-code">53401010 · 여비교통비-교통비</div>
+        <div class="b2-stack">
+          <span class="b2-left warn">29.7<span class="b2-unit">만</span></span>
+          <span class="b2-lbl-남음">남음</span>
+        </div>
+        <div class="b2-of"><b>450,000원</b> 중 <b>297,100원</b></div>
+        <div class="b2-bar"><span class="warn" style="width:66%"></span></div>
+        <div class="b2-detail">
+          <span>저장 <b>4.6만</b></span>
+          <span>처리중 <b>10.7만</b></span>
+          <span>처리완료 <b>0</b></span>
+        </div>
+      </div>
+
+      <div class="b2-card">
+        <div class="b2-name">업무회의</div>
+        <div class="b2-code">53405010 · 회의비-업무회의</div>
+        <div class="b2-stack">
+          <span class="b2-left ok">261<span class="b2-unit">만</span></span>
+          <span class="b2-lbl-남음">남음</span>
+        </div>
+        <div class="b2-of"><b>2,929,882원</b> 중 <b>2,611,791원</b></div>
+        <div class="b2-bar"><span class="ok" style="width:89.1%"></span></div>
+        <div class="b2-detail">
+          <span>저장 <b>28.8만</b></span>
+          <span>처리중 <b>3.0만</b></span>
+          <span>처리완료 <b>0</b></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ============ B-3 : 좌우 막대 시각화 (사용 영역 vs 잔여 영역) ============ -->
+  <h2>B-3 — 좌우 막대로 "사용된 만큼 / 남은 만큼" 시각 비교</h2>
+  <p class="h2-desc">막대를 사용/잔여로 양분. 사용 영역은 빗금(쓴 양), 잔여는 색면(남은 양). 한눈에 잔량 직관.</p>
+  <div class="card-section">
+    <div class="card-head">
+      <div class="card-title">계정별 예산 <span class="count-badge">3</span></div>
+      <div style="font-size:11px;color:var(--w-text-muted)">2026년 4월 · 분기 2</div>
+    </div>
+    <div class="grid3">
+      <div class="b3-card">
+        <div class="b3-name">업무추진</div>
+        <div class="b3-code">53001040 · 복리후생비-업무추진</div>
+        <div class="b3-headline">
+          <span class="b3-left-amt">417<span class="b3-left-unit">만</span></span>
+          <span class="b3-left-suffix">남음</span>
+          <span class="b3-of">·</span>
+          <span class="b3-budget">편성 583만</span>
+        </div>
+        <div class="b3-vis">
+          <div class="b3-used" style="width:28.5%">사용 166만</div>
+          <div class="b3-left ok">잔여 417만</div>
+        </div>
+        <div class="b3-foot">
+          <span>저장 <b>118만</b></span>
+          <span>처리중 <b>43만</b></span>
+          <span>처리완료 <b>4.9만</b></span>
+        </div>
+      </div>
+
+      <div class="b3-card">
+        <div class="b3-name">교통비</div>
+        <div class="b3-code">53401010 · 여비교통비-교통비</div>
+        <div class="b3-headline">
+          <span class="b3-left-amt">29.7<span class="b3-left-unit">만</span></span>
+          <span class="b3-left-suffix">남음</span>
+          <span class="b3-of">·</span>
+          <span class="b3-budget">편성 45만</span>
+        </div>
+        <div class="b3-vis">
+          <div class="b3-used" style="width:34%">사용 15.3만</div>
+          <div class="b3-left warn">잔여 29.7만</div>
+        </div>
+        <div class="b3-foot">
+          <span>저장 <b>4.6만</b></span>
+          <span>처리중 <b>10.7만</b></span>
+          <span>처리완료 <b>0</b></span>
+        </div>
+      </div>
+
+      <div class="b3-card">
+        <div class="b3-name">업무회의</div>
+        <div class="b3-code">53405010 · 회의비-업무회의</div>
+        <div class="b3-headline">
+          <span class="b3-left-amt">261<span class="b3-left-unit">만</span></span>
+          <span class="b3-left-suffix">남음</span>
+          <span class="b3-of">·</span>
+          <span class="b3-budget">편성 293만</span>
+        </div>
+        <div class="b3-vis">
+          <div class="b3-used" style="width:10.9%">사용 32만</div>
+          <div class="b3-left ok">잔여 261만</div>
+        </div>
+        <div class="b3-foot">
+          <span>저장 <b>28.8만</b></span>
+          <span>처리중 <b>3.0만</b></span>
+          <span>처리완료 <b>0</b></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
