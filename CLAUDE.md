@@ -77,6 +77,7 @@ supabase/migrations/ — 001_init.sql, 002_rls.sql, 003_triggers.sql
 | `docs/ARCHITECTURE.md` | 기술 스택, 디렉토리 구조 상세, DB 테이블/RLS/트리거, Storage, 인증, 배포 |
 | `docs/DESIGN.md` | 디자인 시스템(색상/폰트/호버), 적응형 UX, 코딩 규칙(SHOULD/PRACTICE) |
 | `docs/FEATURES.md` | 13개 핵심 기능 상세, DB 스키마(CREATE TABLE), 게임/모임/캐릭터 커스텀, 평가 포인트 |
+| `docs/BUDGET.md` | 팀 예산(법인카드) 페이지 개편 기록 — 의도·섹션 구성·권한 매트릭스·이름 마스킹 정책·제거된 섹션 사유 |
 | `docs/ROADMAP.md` | Phase 1(완료)/2/3, Sprint 0~11 체크리스트, 텔레그램 봇 확장 설계 |
 | `ITO_METAVERSE_PLAN.md` | 마스터 기획서 (의사결정 히스토리, 전체 맥락) |
 | `OPERATIONS.md` | 관리자 운영 매뉴얼 |
