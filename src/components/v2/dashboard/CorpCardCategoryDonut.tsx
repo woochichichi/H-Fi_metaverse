@@ -56,8 +56,8 @@ export default function CorpCardCategoryDonut({ transactions }: Props) {
           용도별 사용 비중 <span className="w-cc-count">{data.length}개 카테고리</span>
         </div>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: '8px 12px 12px', gap: 12, flexWrap: 'wrap' }}>
-        <div style={{ position: 'relative', width: 180, height: 180, flexShrink: 0 }}>
+      <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: '8px 16px 14px', gap: 16, flexWrap: 'wrap' }}>
+        <div style={{ position: 'relative', width: 160, height: 160, flexShrink: 0 }}>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -106,38 +106,65 @@ export default function CorpCardCategoryDonut({ transactions }: Props) {
           </div>
         </div>
 
-        <div style={{ flex: 1, minWidth: 180, display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {/* 와이드 화면에서 라벨·금액·% 가 화면 양 끝으로 흩어지지 않도록 maxWidth 캡 + 바 시각화 */}
+        <div style={{ flex: '1 1 280px', maxWidth: 420, display: 'flex', flexDirection: 'column', gap: 10 }}>
           {data.map((d) => {
             const pct = total === 0 ? 0 : (d.amount / total) * 100;
             return (
-              <div key={d.label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span
+              <div key={d.label} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                  <span
+                    style={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: 2,
+                      background: d.color,
+                      flexShrink: 0,
+                      alignSelf: 'center',
+                    }}
+                  />
+                  <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--w-text)' }}>
+                    {d.icon} {d.label}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 11.5,
+                      fontWeight: 700,
+                      color: d.color,
+                      fontVariantNumeric: 'tabular-nums',
+                      marginLeft: 'auto',
+                    }}
+                  >
+                    {pct.toFixed(0)}%
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 11,
+                      color: 'var(--w-text-muted)',
+                      fontVariantNumeric: 'tabular-nums',
+                    }}
+                  >
+                    {fmt(d.amount)}원
+                  </span>
+                </div>
+                <div
                   style={{
-                    width: 10,
-                    height: 10,
-                    borderRadius: 3,
-                    background: d.color,
-                    flexShrink: 0,
-                  }}
-                />
-                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--w-text)', minWidth: 48 }}>
-                  {d.icon} {d.label}
-                </span>
-                <span style={{ flex: 1, fontSize: 11, color: 'var(--w-text-muted)', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
-                  {fmt(d.amount)}원
-                </span>
-                <span
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 700,
-                    color: 'var(--w-accent-hover)',
-                    minWidth: 40,
-                    textAlign: 'right',
-                    fontVariantNumeric: 'tabular-nums',
+                    height: 4,
+                    background: 'var(--w-surface-2)',
+                    borderRadius: 999,
+                    overflow: 'hidden',
                   }}
                 >
-                  {pct.toFixed(0)}%
-                </span>
+                  <div
+                    style={{
+                      height: '100%',
+                      width: `${pct}%`,
+                      background: d.color,
+                      borderRadius: 999,
+                      transition: 'width 0.4s',
+                    }}
+                  />
+                </div>
               </div>
             );
           })}

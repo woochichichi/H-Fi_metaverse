@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { classifyByAcctCode, fmtKR, type CorpTransaction } from '../../../lib/corpCardMockData';
 
 interface Props {
@@ -17,8 +17,10 @@ const CATEGORY_COLOR: Record<string, string> = {
 };
 
 /**
- * 카테고리별 일별 사용 추이 (멀티 라인).
- * X축 일(day), Y축 금액, 각 카테고리별 색상 라인.
+ * 카테고리별 일별 사용 추이 (스택드 바).
+ * 회계 데이터는 "거래가 있는 날만" 의미가 있어서 라인 차트로 보간하면 무거래일이 0~피크를
+ * 부드럽게 잇거나(monotone) 단절적으로 보이는(stepAfter) 시각 왜곡 발생. 스택드 바는
+ * 거래가 있는 날만 막대가 서고 카테고리 합도 그대로 보여서 가장 정확하고 직관적.
  */
 export default function CorpCardCategoryTrend({ transactions, monthLabel }: Props) {
   const chartData = useMemo(() => {
@@ -72,8 +74,8 @@ export default function CorpCardCategoryTrend({ transactions, monthLabel }: Prop
       </div>
       <div style={{ padding: '8px 12px 12px' }}>
         <ResponsiveContainer width="100%" height={220}>
-          <LineChart data={chartData.points} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="2 4" stroke="var(--w-border)" />
+          <BarChart data={chartData.points} margin={{ top: 8, right: 8, left: 0, bottom: 0 }} barGap={2}>
+            <CartesianGrid strokeDasharray="2 4" stroke="var(--w-border)" vertical={false} />
             <XAxis
               dataKey="day"
               stroke="var(--w-text-muted)"
@@ -87,6 +89,7 @@ export default function CorpCardCategoryTrend({ transactions, monthLabel }: Prop
               width={44}
             />
             <Tooltip
+              cursor={{ fill: 'var(--w-surface-2)', opacity: 0.4 }}
               contentStyle={{
                 background: 'var(--w-surface)',
                 border: '1px solid var(--w-border)',
@@ -95,21 +98,18 @@ export default function CorpCardCategoryTrend({ transactions, monthLabel }: Prop
               }}
               formatter={(value) => (typeof value === 'number' ? `${fmtKR(value)}` : String(value))}
             />
-            <Legend wrapperStyle={{ fontSize: 11, paddingTop: 4 }} iconType="circle" />
+            <Legend wrapperStyle={{ fontSize: 11, paddingTop: 4 }} iconType="square" />
             {chartData.categories.map((cat) => (
-              <Line
+              <Bar
                 key={cat}
-                /* step: 무거래일에 부드러운 곡선이 값이 있는 듯한 착시를 줘서 회계 데이터엔
-                   계단형이 더 정확. monotone 으로 되돌리려면 'monotone'. */
-                type="stepAfter"
                 dataKey={cat}
-                stroke={CATEGORY_COLOR[cat]}
-                strokeWidth={2}
-                dot={{ r: 2 }}
-                activeDot={{ r: 4 }}
+                stackId="day"
+                fill={CATEGORY_COLOR[cat]}
+                radius={[2, 2, 0, 0]}
+                maxBarSize={32}
               />
             ))}
-          </LineChart>
+          </BarChart>
         </ResponsiveContainer>
       </div>
     </div>
