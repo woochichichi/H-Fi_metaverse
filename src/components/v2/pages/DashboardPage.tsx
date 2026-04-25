@@ -192,7 +192,7 @@ export default function DashboardPage() {
       },
       {
         icon: MessageSquareHeart,
-        label: '내 팀 VOC 진행중',
+        label: '내 팀 바라는점 진행중',
         value: counts.vocOpenMyTeam,
         sub: '접수·검토·처리중',
         tone: 'todo',
@@ -264,10 +264,10 @@ export default function DashboardPage() {
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button className="w-btn w-btn-ghost" onClick={() => setPage('voc')}>
-            VOC 올리기
+            바라는점 올리기
           </button>
           <button className="w-btn w-btn-primary" onClick={() => setPage('idea')}>
-            제안 올리기
+            아이디어 올리기
           </button>
         </div>
       </div>
@@ -354,7 +354,7 @@ function buildSummary(counts: Counts | null, scope: string): string {
   const items: string[] = [];
   if (counts.urgentUnread > 0) items.push(`미확인 긴급 공지 ${counts.urgentUnread}건`);
   else if (counts.noticeUnread > 0) items.push(`미확인 공지 ${counts.noticeUnread}건`);
-  if (counts.vocOpenMyTeam > 0) items.push(`VOC 진행중 ${counts.vocOpenMyTeam}건`);
+  if (counts.vocOpenMyTeam > 0) items.push(`바라는점 진행중 ${counts.vocOpenMyTeam}건`);
   if (counts.anonNotesWaiting > 0) items.push(`답변 대기 쪽지 ${counts.anonNotesWaiting}건`);
   if (items.length === 0) return `${scope} 처리 대기 항목이 없어요. 깔끔한 하루 보내세요.`;
   return `오늘 ${scope}에 ${items.join(' · ')} 이 있어요.`;
@@ -743,8 +743,8 @@ function MemberHints() {
         </div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 8 }}>
-        <HintButton label="VOC 올리기" onClick={() => setPage('voc')} />
-        <HintButton label="제안 올리기" onClick={() => setPage('idea')} />
+        <HintButton label="바라는점 올리기" onClick={() => setPage('voc')} />
+        <HintButton label="아이디어 올리기" onClick={() => setPage('idea')} />
         <HintButton label="쪽지 보내기" onClick={() => setPage('anon-note')} />
         <HintButton label="소모임 구경하기" onClick={() => setPage('gathering')} />
       </div>

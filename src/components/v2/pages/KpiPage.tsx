@@ -171,7 +171,7 @@ export default function KpiPage() {
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', fontSize: 11, color: 'var(--w-text-muted)' }}>
-                        <span>VOC {m.vocCount}</span>
+                        <span>바라는점 {m.vocCount}</span>
                         <span>아이디어 {m.ideaCount}</span>
                         <span>이벤트 {m.eventJoinCount}</span>
                         <span>교류 {m.exchangeJoinCount}</span>

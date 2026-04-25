@@ -23,14 +23,14 @@ const PERIODS = [
 ] as const;
 
 const BASE_COLS = [
-  { key: 'voc_submit', label: 'VOC' },
+  { key: 'voc_submit', label: '바라는점' },
   { key: 'idea_submit', label: '아이디어' },
   { key: 'notice_read', label: '공지읽음' },
   { key: 'event_join', label: '이벤트' },
 ] as const;
 
 const TYPE_LABELS: Record<string, string> = {
-  voc_submit: 'VOC',
+  voc_submit: '바라는점',
   idea_submit: '아이디어',
   idea_vote: '투표',
   notice_read: '공지읽음',
@@ -127,7 +127,7 @@ export default function AdminEvalDashboardPage() {
     const relevant = customEvalItems.filter((ci) => allTeams.includes(ci.team));
 
     const headers = [
-      '이름', '팀', 'VOC', '아이디어', '투표', '공지읽음', '이벤트', '쪽지', '인적교류',
+      '이름', '팀', '바라는점', '아이디어', '투표', '공지읽음', '이벤트', '쪽지', '인적교류',
       ...relevant.map((ci) => `${ci.name}(${ci.team})`),
       '총포인트',
     ];
@@ -162,7 +162,7 @@ export default function AdminEvalDashboardPage() {
           },
         ]}
         title="평가 대시보드"
-        description="VOC·아이디어·공지 확인·이벤트 참여 등 구성원 활동이 자동 누적됩니다. 기간과 팀을 바꿔가며 확인하고 CSV로 내보낼 수 있어요."
+        description="바라는점·아이디어·공지 확인·이벤트 참여 등 구성원 활동이 자동 누적됩니다. 기간과 팀을 바꿔가며 확인하고 CSV로 내보낼 수 있어요."
         actions={
           <>
             <button className="w-btn w-btn-ghost" onClick={reload} disabled={loading}>
@@ -543,7 +543,7 @@ function UserActivityCardV2({
     teamCustom.reduce((sum, ci) => sum + (stat.customCounts[ci.id] || 0), 0);
 
   const badges: { key: string; icon: string; label: string; count: number }[] = [
-    { key: 'voc', icon: '📞', label: 'VOC', count: stat.voc_submit },
+    { key: 'voc', icon: '📞', label: '바라는점', count: stat.voc_submit },
     { key: 'idea', icon: '💡', label: '아이디어', count: stat.idea_submit },
     { key: 'vote', icon: '👍', label: '투표', count: stat.idea_vote },
     { key: 'notice', icon: '📋', label: '공지읽음', count: stat.notice_read },

@@ -8,8 +8,8 @@ interface BottomTabBarProps {
 }
 
 const TABS: { id: MobileTab; label: string; icon: typeof Phone }[] = [
-  { id: 'voc', label: 'VOC', icon: Phone },
-  { id: 'idea', label: '제안', icon: Lightbulb },
+  { id: 'voc', label: '바라는점', icon: Phone },
+  { id: 'idea', label: '아이디어', icon: Lightbulb },
   { id: 'notice', label: '공지', icon: ClipboardList },
   { id: 'note', label: '쪽지', icon: Mail },
   { id: 'more', label: '더보기', icon: Coffee },

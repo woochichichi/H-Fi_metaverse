@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import { MessageSquareHeart, Plus, AlertTriangle, ShieldCheck, Users } from 'lucide-react';
+import { MessageSquareHeart, Plus, AlertTriangle, ShieldCheck, Users, X } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
-import Modal from '../ui/Modal';
 import { StatusPicker, type StatusTone } from '../ui/DetailShell';
 import {
   PostHeaderCard,
@@ -16,13 +15,7 @@ import MasterDetail, { MasterListCard, MasterListItem } from '../ui/MasterDetail
 import { useAuthStore } from '../../../stores/authStore';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useVocs } from '../../../hooks/useVocs';
-import {
-  VOC_CATEGORIES,
-  VOC_STATUSES,
-  VOC_SUB_CATEGORIES,
-  VOC_SEVERITY_LEVELS,
-  VOC_SEVERITY_LABELS,
-} from '../../../lib/constants';
+import { VOC_CATEGORIES, VOC_STATUSES } from '../../../lib/constants';
 import type { VocCategory, VocStatus } from '../../../lib/constants';
 import { formatRelativeTime } from '../../../lib/utils';
 import { useV2Toast } from '../ui/Toast';
@@ -89,26 +82,32 @@ export default function VocPage() {
 
       {loading ? (
         <LoadingCard />
-      ) : vocs.length === 0 ? (
-        <div className="w-card">
-          <EmptyState
-            icon={MessageSquareHeart}
-            title="아직 등록된 바라는점이 없어요"
-            description="첫 번째 목소리가 되어보세요 🙋"
-          />
-        </div>
       ) : (
         <MasterDetail
-          hasSelection={!!detail}
-          onBackMobile={() => setDetail(null)}
-          emptyTitle="바라는점을 선택하세요"
-          emptyDescription="왼쪽 목록에서 하나를 선택하면 내용과 처리 영역이 여기에 표시됩니다."
+          hasSelection={showCreate || !!detail}
+          onBackMobile={() => {
+            setShowCreate(false);
+            setDetail(null);
+          }}
+          emptyTitle={vocs.length === 0 ? '아직 등록된 바라는점이 없어요' : '바라는점을 선택하세요'}
+          emptyDescription={
+            vocs.length === 0
+              ? '"바라는점 올리기" 로 첫 글을 남겨보세요 🙋'
+              : '왼쪽 목록에서 하나를 선택하면 내용과 처리 영역이 여기에 표시됩니다.'
+          }
           master={
             <MasterListCard>
               {vocs.map((v) => {
-                const selected = detail?.id === v.id;
+                const selected = !showCreate && detail?.id === v.id;
                 return (
-                  <MasterListItem key={v.id} selected={selected} onClick={() => setDetail(v)}>
+                  <MasterListItem
+                    key={v.id}
+                    selected={selected}
+                    onClick={() => {
+                      setShowCreate(false);
+                      setDetail(v);
+                    }}
+                  >
                     <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                       <StatusBadge status={v.status} />
                       <span className="w-badge w-badge-muted">{v.category}</span>
@@ -135,7 +134,25 @@ export default function VocPage() {
             </MasterListCard>
           }
           detail={
-            detail && user && (
+            showCreate && profile && user ? (
+              <CreateVocPanel
+                defaultTeam={profile.team}
+                onClose={() => setShowCreate(false)}
+                onSubmit={async (input) => {
+                  const { error } = await createVoc({
+                    ...input,
+                    author_id: input.anonymous ? null : user.id,
+                  });
+                  if (error) {
+                    showToast(`등록 실패: ${error}`, 'error');
+                    return;
+                  }
+                  setShowCreate(false);
+                  await fetchVocs({ status, category, team: teamFilter });
+                  showToast('바라는점이 등록되었습니다', 'success');
+                }}
+              />
+            ) : detail && user ? (
               <VocDetailPanel
                 key={detail.id}
                 voc={detail}
@@ -153,33 +170,15 @@ export default function VocPage() {
                   else setDetail({ ...detail, resolution: r });
                 }}
                 onDelete={async () => {
-                  const ok = await confirm({ title: 'VOC 삭제', message: '정말 삭제하시겠어요?' });
+                  const ok = await confirm({ title: '바라는점 삭제', message: '정말 삭제하시겠어요?' });
                   if (!ok) return;
                   const { error } = await deleteVoc(detail.id);
                   if (error) showToast(`삭제 실패: ${error}`, 'error');
                   else setDetail(null);
                 }}
               />
-            )
+            ) : null
           }
-        />
-      )}
-
-      {showCreate && profile && user && (
-        <CreateVocModal
-          open={showCreate}
-          onClose={() => setShowCreate(false)}
-          defaultTeam={profile.team}
-          onSubmit={async (input) => {
-            const { error } = await createVoc({
-              ...input,
-              author_id: input.anonymous ? null : user.id,
-            });
-            if (!error) {
-              setShowCreate(false);
-              await fetchVocs({ status, category, team: teamFilter });
-            } else showToast(`등록 실패: ${error}`, 'error');
-          }}
         />
       )}
     </>
@@ -367,13 +366,16 @@ function VocDetailPanel({
   );
 }
 
-function CreateVocModal({
-  open,
+/**
+ * 사이드 패널 작성 폼 — Master-Detail 의 detail 자리에 렌더.
+ * 입력은 카테고리(고르게)+제목+내용+익명만. 세부항목·심각도는 default 로 등록 후
+ * 리더가 처리 단계에서 분류·우선순위를 매김.
+ */
+function CreateVocPanel({
   onClose,
   onSubmit,
   defaultTeam,
 }: {
-  open: boolean;
   onClose: () => void;
   defaultTeam: string;
   onSubmit: (input: {
@@ -387,81 +389,78 @@ function CreateVocModal({
   }) => Promise<void>;
 }) {
   const [category, setCategory] = useState<VocCategory>('개선');
-  const [subCategory, setSubCategory] = useState<string>(VOC_SUB_CATEGORIES['개선'][0]);
-  const [severity, setSeverity] = useState<number>(3);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [anonymous, setAnonymous] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const subOptions = VOC_SUB_CATEGORIES[category] ?? [];
-
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title="바라는점 올리기"
-      width={560}
-      footer={
-        <>
-          <button className="w-btn w-btn-ghost" onClick={onClose} disabled={submitting}>취소</button>
-          <button
-            className="w-btn w-btn-primary"
-            disabled={!title.trim() || !content.trim() || submitting}
-            onClick={async () => {
-              setSubmitting(true);
-              try {
-                await onSubmit({
-                  anonymous,
-                  category,
-                  title: title.trim(),
-                  content: content.trim(),
-                  team: defaultTeam,
-                  severity,
-                  sub_category: subCategory,
-                });
-              } finally {
-                setSubmitting(false);
-              }
-            }}
-          >
-            {submitting ? '등록 중...' : '등록'}
-          </button>
-        </>
-      }
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 14,
+        background: 'var(--w-surface)',
+        border: '1px solid var(--w-border)',
+        borderRadius: 12,
+      }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
-          <Field label="카테고리">
-            <select
-              value={category}
-              onChange={(e) => {
-                const c = e.target.value as VocCategory;
-                setCategory(c);
-                setSubCategory(VOC_SUB_CATEGORIES[c]?.[0] ?? '');
-              }}
-            >
-              {VOC_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </Field>
-          <Field label="세부항목">
-            <select value={subCategory} onChange={(e) => setSubCategory(e.target.value)}>
-              {subOptions.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
-          </Field>
-          <Field label="심각도">
-            <select value={severity} onChange={(e) => setSeverity(Number(e.target.value))}>
-              {VOC_SEVERITY_LEVELS.map((s) => (
-                <option key={s} value={s}>{s} · {VOC_SEVERITY_LABELS[s]}</option>
-              ))}
-            </select>
-          </Field>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '14px 18px',
+          borderBottom: '1px solid var(--w-border)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Plus size={16} style={{ color: 'var(--w-accent)' }} />
+          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--w-text)' }}>바라는점 올리기</span>
         </div>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="닫기"
+          style={{
+            width: 28,
+            height: 28,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'transparent',
+            color: 'var(--w-text-muted)',
+            border: 0,
+            borderRadius: 6,
+            cursor: 'pointer',
+          }}
+        >
+          <X size={16} />
+        </button>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '0 18px' }}>
+        <Field label="카테고리">
+          <select value={category} onChange={(e) => setCategory(e.target.value as VocCategory)}>
+            {VOC_CATEGORIES.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        </Field>
         <Field label="제목">
-          <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} placeholder="예) 회의실 예약이 너무 복잡해요 / 커피머신 자주 고장나요" />
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            maxLength={120}
+            placeholder="예) 회의실 예약이 너무 복잡해요 / 커피머신 자주 고장나요"
+          />
         </Field>
         <Field label="내용">
-          <textarea rows={5} value={content} onChange={(e) => setContent(e.target.value)} placeholder="자세한 상황과 의견을 적어주세요" />
+          <textarea
+            rows={6}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="자세한 상황과 의견을 적어주세요"
+          />
         </Field>
         <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--w-text-soft)' }}>
           <input
@@ -473,7 +472,44 @@ function CreateVocModal({
           익명으로 제출 — 작성자 식별 정보가 DB에 저장되지 않아요 (리더·팀장·관리자 누구도 작성자 조회 불가)
         </label>
       </div>
-    </Modal>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          gap: 8,
+          padding: '12px 18px',
+          borderTop: '1px solid var(--w-border)',
+          background: 'var(--w-surface-2)',
+          borderRadius: '0 0 12px 12px',
+        }}
+      >
+        <button className="w-btn w-btn-ghost" onClick={onClose} disabled={submitting}>
+          취소
+        </button>
+        <button
+          className="w-btn w-btn-primary"
+          disabled={!title.trim() || !content.trim() || submitting}
+          onClick={async () => {
+            setSubmitting(true);
+            try {
+              await onSubmit({
+                anonymous,
+                category,
+                title: title.trim(),
+                content: content.trim(),
+                team: defaultTeam,
+                severity: null,
+                sub_category: null,
+              });
+            } finally {
+              setSubmitting(false);
+            }
+          }}
+        >
+          {submitting ? '등록 중...' : '등록'}
+        </button>
+      </div>
+    </div>
   );
 }
 

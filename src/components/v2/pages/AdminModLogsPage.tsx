@@ -17,7 +17,7 @@ interface ModerationLog {
 
 const CHANNEL_LABEL: Record<string, string> = {
   note: '쪽지',
-  voc: 'VOC',
+  voc: '바라는점',
   thread: '대화',
 };
 

@@ -42,7 +42,7 @@ export default function V2Sidebar() {
   const { urgent } = useUrgentUnread(user?.id ?? null);
   const urgentCount = urgent.length;
 
-  // 1) 소통 - 매일 쓰는 핵심 (공지/VOC/제안/KPI/팀 예산)
+  // 1) 워크스페이스 - 매일 쓰는 핵심 (공지/바라는점/아이디어/KPI/팀 예산/조직 활동)
   const coreItems = useMemo<MenuItem[]>(() => [
     { id: 'dashboard', label: BOARD_LABELS.dashboard, icon: LayoutDashboard, visible: true },
     {
@@ -61,6 +61,7 @@ export default function V2Sidebar() {
       icon: CreditCard,
       visible: profile?.team === '증권ITO',
     },
+    { id: 'unit-activities', label: '조직 활동', icon: Building2, visible: true },
   ], [urgentCount, profile?.team]);
 
   // 2) 사내 활동 - 가끔 쓰는 (쪽지/소모임)
@@ -69,17 +70,19 @@ export default function V2Sidebar() {
     { id: 'gathering', label: BOARD_LABELS.gathering, icon: PartyPopper, visible: true },
   ], []);
 
-  // 3) 참고 (피플/조직)
-  const referenceItems = useMemo<MenuItem[]>(() => [
-    { id: 'directory', label: '피플 목록', icon: Users2, visible: true },
-    { id: 'unit-activities', label: '조직 활동', icon: Building2, visible: true },
-  ], []);
-
   const helpItems = useMemo<MenuItem[]>(() => [
     { id: 'site-report', label: '사이트 제보', icon: Bug, visible: true },
   ], []);
 
   const adminItems = useMemo<MenuItem[]>(() => [
+    {
+      id: 'directory',
+      label: '피플 목록',
+      icon: Users2,
+      scope: '전체',
+      visible: perm.isAdmin,
+      adminOnly: true,
+    },
     {
       id: 'admin-users',
       label: '사용자 관리',
@@ -180,17 +183,6 @@ export default function V2Sidebar() {
 
         <SidebarSection label="사내 소통">
           {socialItems.map((item) => (
-            <SidebarItem
-              key={item.id}
-              item={item}
-              active={page === item.id}
-              onClick={() => setPage(item.id)}
-            />
-          ))}
-        </SidebarSection>
-
-        <SidebarSection label="참고">
-          {referenceItems.map((item) => (
             <SidebarItem
               key={item.id}
               item={item}

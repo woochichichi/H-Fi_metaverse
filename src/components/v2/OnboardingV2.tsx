@@ -44,15 +44,15 @@ interface QuickAction {
 
 const FEATURES: FeatureCard[] = [
   { icon: Megaphone, tone: 'todo', label: '공지', desc: '팀 전체가 알아야 할 소식. 긴급·할일·참고 시급성별로 표시.' },
-  { icon: MessageSquareHeart, tone: 'accent', label: 'VOC', desc: '팀원·팀장·회사에 바라는 점. 익명 제출 가능, 리더가 처리.' },
-  { icon: Lightbulb, tone: 'success', label: '제안', desc: '업무를 더 낫게 만들 아이디어. 공감 투표로 우선순위.' },
+  { icon: MessageSquareHeart, tone: 'accent', label: '바라는점', desc: '팀원·팀장·회사에 바라는 점. 익명 제출 시 작성자 식별 정보가 DB에 저장되지 않음. 유닛 리더+팀장이 함께 처리.' },
+  { icon: Lightbulb, tone: 'success', label: '아이디어', desc: '업무를 더 낫게 만들 아이디어. 공감 투표로 우선순위.' },
   { icon: Mail, tone: 'info', label: '쪽지', desc: '리더·관리자에게 한 줄 전하기. 발신자 완전 익명.' },
 ];
 
 const QUICK_ACTIONS: QuickAction[] = [
   { page: 'dashboard', icon: Target, label: '대시보드 보기', desc: '오늘 처리할 일 한눈에' },
-  { page: 'voc', icon: MessageSquareHeart, label: 'VOC 올리기', desc: '의견을 바로 전달하기' },
-  { page: 'idea', icon: Lightbulb, label: '제안 올리기', desc: '개선 아이디어 공유하기' },
+  { page: 'voc', icon: MessageSquareHeart, label: '바라는점 올리기', desc: '의견을 바로 전달하기' },
+  { page: 'idea', icon: Lightbulb, label: '아이디어 올리기', desc: '개선 아이디어 공유하기' },
   { page: 'gathering', icon: PartyPopper, label: '소모임 구경', desc: '관심 모임에 참여하기' },
 ];
 
@@ -494,7 +494,7 @@ function StepWorkflow() {
         }}
       >
         <Bullet>
-          <b>대시보드</b>에서 오늘의 미확인 공지·진행중 VOC·신규 아이디어를 한눈에 확인
+          <b>대시보드</b>에서 오늘의 미확인 공지·진행중 바라는점·신규 아이디어를 한눈에 확인
         </Bullet>
         <Bullet>
           상단 검색과 알림 종, 우상단 메뉴에서 <b>테마(웜/다크)</b> 변경 가능
