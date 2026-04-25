@@ -63,10 +63,13 @@ export default function V2ConfirmHost() {
   const confirmBg = tone === 'danger' ? 'var(--w-danger)' : 'var(--w-accent)';
 
   return createPortal(
-    <div className={themeClass} style={{ position: 'fixed', inset: 0, zIndex: 600 }}>
+    <div
+      className={themeClass}
+      style={{ position: 'fixed', inset: 0, zIndex: 600, background: 'transparent', pointerEvents: 'none' }}
+    >
       <div
         onClick={() => close(false)}
-        style={{ position: 'absolute', inset: 0, background: 'transparent' }}
+        style={{ position: 'absolute', inset: 0, background: 'transparent', pointerEvents: 'auto' }}
       />
       <div
         role="alertdialog"
@@ -82,6 +85,7 @@ export default function V2ConfirmHost() {
           borderRadius: 'var(--w-radius-lg)',
           boxShadow: '0 4px 12px rgba(42,31,26,.10), 0 1px 3px rgba(42,31,26,.08)',
           overflow: 'hidden',
+          pointerEvents: 'auto',
         }}
       >
         <div style={{ padding: '20px 22px 14px', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
