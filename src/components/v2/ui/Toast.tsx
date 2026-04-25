@@ -49,7 +49,9 @@ export default function V2ToastHost() {
         top: 16,
         left: '50%',
         transform: 'translateX(-50%)',
-        zIndex: 500,
+        // z-index 정책: Toast(700) > Confirm(600) > Modal(400) > Drawer(300).
+        // 토스트는 시스템 메시지라 모든 모달 위에 떠야 사용자가 결과를 확인 가능.
+        zIndex: 700,
         display: 'flex',
         flexDirection: 'column',
         gap: 8,

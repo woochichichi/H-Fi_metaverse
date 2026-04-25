@@ -54,6 +54,10 @@ function prevQuarterPeriodYm(periodYm: string): string {
   return `${py}${String(pStartMonth).padStart(2, '0')}`;
 }
 
+function parts2num(parts: Intl.DateTimeFormatPart[], type: string): number {
+  return parseInt(parts.find((p) => p.type === type)?.value ?? '0', 10);
+}
+
 function fmtDate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
@@ -175,14 +179,18 @@ export function useQuarterCompare(team: string, periodYm: string | null = null):
         }
         const prevPeriod = prevQuarterPeriodYm(curPeriod);
 
-        // 현재 분기는 오늘까지만 그림
+        // 현재 분기는 오늘까지만 그림.
+        // KST(Asia/Seoul) 기준으로 "오늘" 을 계산해 사용자 PC 타임존과 무관하게 일관된 결과.
         const info = quarterInfo(curPeriod);
-        const today = new Date();
-        const todayDay = Math.floor(
-          (new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime() -
-            info.start.getTime()) /
-            86400000,
-        );
+        const kstParts = new Intl.DateTimeFormat('en-CA', {
+          timeZone: 'Asia/Seoul',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+        }).formatToParts(new Date());
+        const getPart = (t: string) => parts2num(kstParts, t);
+        const todayKst = new Date(getPart('year'), getPart('month') - 1, getPart('day'));
+        const todayDay = Math.floor((todayKst.getTime() - info.start.getTime()) / 86400000);
         const isCurrentQuarter = todayDay >= 0 && todayDay < info.days;
         const untilDayForCurrent = isCurrentQuarter ? todayDay : null; // 완료된 분기면 끝까지
 

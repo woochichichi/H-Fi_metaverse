@@ -87,7 +87,8 @@ export function useCorpCardLive(team: string, periodYm: string | null = null): C
         const snap = snapRows[0] as SnapshotRow;
 
         // 2) 계정 + 거래
-        const [{ data: accountRows, error: accErr }, { data: txRows, error: txErr }] = await Promise.all([
+        // 계정은 필수(예산 정보 없으면 의미 없음), 거래는 부분 실패 시 빈 배열로 폴백.
+        const [accSettled, txSettled] = await Promise.allSettled([
           supabase
             .from('corp_card_accounts')
             .select('acct_code, acct_name, base_amt, sin_bdget, mis_bdget, non_bdget, rst_amt')
@@ -98,8 +99,18 @@ export function useCorpCardLive(team: string, periodYm: string | null = null): C
             .eq('snapshot_id', snap.id)
             .order('add_date', { ascending: false }),
         ]);
-        if (accErr) throw accErr;
-        if (txErr) throw txErr;
+
+        if (accSettled.status === 'rejected') throw accSettled.reason;
+        if (accSettled.value.error) throw accSettled.value.error;
+        const accountRows = accSettled.value.data;
+
+        // 거래 쿼리는 실패해도 계정 정보로 부분 표시 가능하게 폴백
+        let txRows: TxRow[] | null = [];
+        if (txSettled.status === 'fulfilled' && !txSettled.value.error) {
+          txRows = txSettled.value.data as TxRow[];
+        } else {
+          console.warn('[useCorpCardLive] transactions 로드 실패 — 빈 배열로 폴백', txSettled);
+        }
 
         const accounts = (accountRows as AccountRow[] ?? []).map(toAccount);
         const txs = (txRows as TxRow[] ?? []).map(toTx);
@@ -111,7 +122,16 @@ export function useCorpCardLive(team: string, periodYm: string | null = null): C
           setTransactions(txs);
         }
       } catch (e: any) {
-        if (!cancelled) setError(e?.message ?? '법인카드 데이터 로드 실패');
+        if (!cancelled) {
+          // RLS 정책 위반 / 권한 문제는 명시적 메시지로
+          const msg = String(e?.message ?? '');
+          const code = String(e?.code ?? '');
+          if (code === 'PGRST116' || code === '42501' || msg.includes('row-level security') || msg.includes('permission denied')) {
+            setError('팀 예산 데이터 접근 권한이 없습니다. 관리자에게 문의해주세요.');
+          } else {
+            setError(e?.message ?? '법인카드 데이터 로드 실패');
+          }
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }

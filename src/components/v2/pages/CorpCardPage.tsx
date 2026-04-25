@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CreditCard, Loader2, Inbox, AlertTriangle, Clock } from 'lucide-react';
 import { Tip, HelpDot } from '../ui/Tip';
 import PageHeader from '../ui/PageHeader';
@@ -104,8 +104,18 @@ function CorpCardPageContent({ team }: { team: string }) {
   const { loading, error, snapshot, stats, transactions } = useCorpCardLive(team, selectedPeriod);
   const quarterCmp = useQuarterCompare(team, selectedPeriod);
   const myPending = useMyCardPending();
-  // 예정 지출 — 선택 분기 (또는 snapshot.period_ym) 기준
-  const activePeriod = snapshot?.period_ym ?? selectedPeriod ?? null;
+
+  // 첫 로드: quarters 도착하면 가장 최근 분기를 selectedPeriod 로 셋팅 → QuarterPicker 가 비어 보이지 않게.
+  useEffect(() => {
+    if (selectedPeriod === null && quarters.length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSelectedPeriod(quarters[0].period_ym);
+    }
+  }, [quarters, selectedPeriod]);
+
+  // 예정 지출 — selectedPeriod 가 가장 신뢰 가능한 사용자 의도. snapshot 은 fallback.
+  // (selectedPeriod 가 변경되면 useCorpCardLive 가 새 snapshot 을 가져오는 동안 잠시 stale 한 snapshot 이 남아있을 수 있어 우선순위 명시)
+  const activePeriod = selectedPeriod ?? snapshot?.period_ym ?? null;
   const planned = usePlannedExpenses(team, activePeriod);
 
   // 항목 E: 일반 팀원은 팀원별 랭킹에서 본인 행만 표시.

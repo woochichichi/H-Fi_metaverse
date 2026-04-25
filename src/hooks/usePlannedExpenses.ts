@@ -68,9 +68,11 @@ export function usePlannedExpenses(team: string | null, periodYm: string | null)
     }
   }, [team, periodYm]);
 
+  // fetchItems 가 [team, periodYm] 의존이지만, 의존성 명시화로 의도 분명하게.
   useEffect(() => {
     void fetchItems();
-  }, [fetchItems]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [team, periodYm]);
 
   const create = useCallback(
     async (input: PlannedExpenseInput, author: { id: string; name: string }) => {
