@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Plus, Copy, ToggleLeft, ToggleRight, RefreshCw, Trash2, KeyRound } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
+import PermissionGuard from '../ui/PermissionGuard';
 import DataTable, { type Column } from '../ui/DataTable';
 import Modal from '../ui/Modal';
 import ConfirmDialog from '../ui/ConfirmDialog';
@@ -192,6 +193,19 @@ export default function AdminInvitesPage() {
       ),
     },
   ];
+
+  if (!perm.canManageInvites) {
+    return (
+      <PermissionGuard
+        allowed={false}
+        title="초대 코드"
+        crumbs={[{ label: '한울타리' }, { label: '관리' }, { label: '초대 코드' }]}
+        requireDesc="초대 코드는 관리자만 발급·관리할 수 있습니다."
+      >
+        {null}
+      </PermissionGuard>
+    );
+  }
 
   return (
     <>

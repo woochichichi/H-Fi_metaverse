@@ -1,11 +1,24 @@
 /**
  * v2 권한 헬퍼
  *
- * 기존 메타버스와 동일한 권한 취급 유지:
- * - admin === director (동일 isAdmin 플래그)
- * - admin만 접근: 초대 코드, 차단 로그
- * - leader: 관리 섹션 노출하되 자기 팀(profile.team)만
- * - member: 관리 섹션 비노출
+ * 4단계 역할별 권한 정책:
+ *
+ *                              member  leader  director  admin
+ *   사이드바 관리 섹션 노출        ✗       ✓       ✓        ✓
+ *   전사 데이터 조회               ✗       ✗       ✓        ✓
+ *   실명 조회                      ✗       ✗       ✓        ✓
+ *   초대 코드 / 차단 로그          ✗       ✗       ✗        ✓
+ *   사용자/평가 관리 (자기 팀)     ✗       ✓       ✓        ✓
+ *   VOC/아이디어 상태 변경         ✗       ✓       ✓        ✓
+ *   익명 쪽지 수신/답변            ✗       ✓       ✓        ✓
+ *
+ * 핵심 차이:
+ * - **director vs admin**: director 는 admin 의 모든 데이터 권한을 가지지만
+ *   초대 코드 / 차단 로그(시스템 운영) 는 admin 만. 즉 director 는 "조직 운영자",
+ *   admin 은 "시스템 관리자".
+ * - **leader vs director**: 둘 다 관리 섹션 보지만 leader 는 자기 팀(profile.team)
+ *   으로 자동 필터, director 는 전사.
+ * - **leader vs member**: member 는 관리 섹션 자체 비노출.
  *
  * 이 헬퍼는 UI 가드용이며, 실제 데이터 접근은 기존 RLS가 최종 방어선이다.
  */

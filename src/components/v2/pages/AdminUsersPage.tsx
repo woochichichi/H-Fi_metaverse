@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Search, UserX, ChevronDown } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
+import PermissionGuard from '../ui/PermissionGuard';
 import DataTable, { type Column } from '../ui/DataTable';
 import ConfirmDialog from '../ui/ConfirmDialog';
 import { supabase } from '../../../lib/supabase';
@@ -91,9 +92,14 @@ export default function AdminUsersPage() {
 
   if (!perm.canManageUsers) {
     return (
-      <div className="w-card" style={{ padding: 40, textAlign: 'center', color: 'var(--w-text-muted)' }}>
-        접근 권한이 없습니다.
-      </div>
+      <PermissionGuard
+        allowed={false}
+        title="사용자 관리"
+        crumbs={[{ label: '한울타리' }, { label: '관리' }, { label: '사용자 관리' }]}
+        requireDesc="사용자 관리는 리더·담당·관리자만 접근할 수 있습니다."
+      >
+        {null}
+      </PermissionGuard>
     );
   }
 

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Plus, Download, RefreshCw, ChevronRight, GaugeCircle } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
+import PermissionGuard from '../ui/PermissionGuard';
 import EmptyState from '../ui/EmptyState';
 import Modal from '../ui/Modal';
 import { useAuthStore } from '../../../stores/authStore';
@@ -86,9 +87,14 @@ export default function AdminEvalDashboardPage() {
 
   if (!perm.canAccessEvalDashboard) {
     return (
-      <div className="w-card" style={{ padding: 40, textAlign: 'center', color: 'var(--w-text-muted)' }}>
-        접근 권한이 없습니다.
-      </div>
+      <PermissionGuard
+        allowed={false}
+        title="평가 대시보드"
+        crumbs={[{ label: '한울타리' }, { label: '관리' }, { label: '평가 대시보드' }]}
+        requireDesc="평가 대시보드는 리더·담당·관리자만 접근할 수 있습니다."
+      >
+        {null}
+      </PermissionGuard>
     );
   }
 

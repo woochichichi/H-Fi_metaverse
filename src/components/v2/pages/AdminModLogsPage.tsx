@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { RefreshCw, ShieldAlert } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
+import PermissionGuard from '../ui/PermissionGuard';
 import EmptyState from '../ui/EmptyState';
 import { supabase } from '../../../lib/supabase';
 import { withTimeout } from '../../../lib/utils';
@@ -49,9 +50,14 @@ export default function AdminModLogsPage() {
 
   if (!perm.canSeeModLogs) {
     return (
-      <div className="w-card" style={{ padding: 40, textAlign: 'center', color: 'var(--w-text-muted)' }}>
-        ADMIN 권한이 필요합니다.
-      </div>
+      <PermissionGuard
+        allowed={false}
+        title="차단 로그"
+        crumbs={[{ label: '한울타리' }, { label: '관리' }, { label: '차단 로그' }]}
+        requireDesc="차단 로그는 관리자만 조회할 수 있습니다."
+      >
+        {null}
+      </PermissionGuard>
     );
   }
 

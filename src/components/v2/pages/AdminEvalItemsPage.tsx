@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Plus, Trash2, RefreshCw, ListChecks } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
+import PermissionGuard from '../ui/PermissionGuard';
 import DataTable, { type Column } from '../ui/DataTable';
 import Modal from '../ui/Modal';
 import ConfirmDialog from '../ui/ConfirmDialog';
@@ -36,9 +37,14 @@ export default function AdminEvalItemsPage() {
 
   if (!perm.canManageEvalItems) {
     return (
-      <div className="w-card" style={{ padding: 40, textAlign: 'center', color: 'var(--w-text-muted)' }}>
-        접근 권한이 없습니다.
-      </div>
+      <PermissionGuard
+        allowed={false}
+        title="평가 항목"
+        crumbs={[{ label: '한울타리' }, { label: '관리' }, { label: '평가 항목' }]}
+        requireDesc="평가 항목은 리더·담당·관리자만 관리할 수 있습니다."
+      >
+        {null}
+      </PermissionGuard>
     );
   }
 

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Search, Users2 } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
+import PermissionGuard from '../ui/PermissionGuard';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
 import { supabase } from '../../../lib/supabase';
@@ -60,6 +61,19 @@ export default function DirectoryPage() {
     });
     return Array.from(map.entries());
   }, [filtered]);
+
+  if (!perm.isAdmin) {
+    return (
+      <PermissionGuard
+        allowed={false}
+        title="피플 목록"
+        crumbs={[{ label: '한울타리' }, { label: '피플' }]}
+        requireDesc="피플 목록은 관리자·담당자만 조회할 수 있습니다."
+      >
+        {null}
+      </PermissionGuard>
+    );
+  }
 
   return (
     <>
