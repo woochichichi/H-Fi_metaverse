@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Lightbulb, Plus, ThumbsUp } from 'lucide-react';
+import { Lightbulb, Plus, ThumbsUp, Sprout, Heart, Workflow } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
 import PanelShell, { PanelFoot } from '../ui/PanelShell';
+import IntroNotice from '../ui/IntroNotice';
 import { StatusPicker, type StatusTone } from '../ui/DetailShell';
 import {
   PostHeaderCard,
@@ -50,6 +51,44 @@ export default function IdeaPage() {
             <span>아이디어 올리기</span>
           </button>
         }
+      />
+
+      <IntroNotice
+        items={[
+          {
+            icon: Sprout,
+            iconColor: 'var(--w-success)',
+            title: '작은 아이디어도 환영',
+            body: (
+              <>
+                "이러면 좋겠다" 정도의 가벼운 생각도 OK. 완성된 기획서일 필요 없습니다. 배경 한 줄 +
+                바라는 변화 한 줄이면 충분해요. 같은 고민을 하는 동료가 의외로 많습니다.
+              </>
+            ),
+          },
+          {
+            icon: Heart,
+            iconColor: 'var(--w-accent)',
+            title: '공감으로 우선순위가 정해져요',
+            body: (
+              <>
+                좋은 아이디어에 <b>공감</b>(❤️) 눌러주세요. 공감 수가 많은 안건부터 리더가 검토합니다.
+                "내 아이디어가 아니어도" 응원 의사 표현이라 생각하고 적극 눌러주세요.
+              </>
+            ),
+          },
+          {
+            icon: Workflow,
+            iconColor: 'var(--w-info)',
+            title: '제안 → 검토 → 채택 → 진행 → 완료',
+            body: (
+              <>
+                상태 단계별로 진행 상황을 추적합니다. 채택된 아이디어는 누가 언제 진행하는지 함께
+                노출돼요. 반려된 경우 사유도 우측 상세에서 확인할 수 있습니다.
+              </>
+            ),
+          },
+        ]}
       />
 
       <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginBottom: 14 }}>

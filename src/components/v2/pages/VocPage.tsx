@@ -18,6 +18,7 @@ import { VOC_CATEGORIES, VOC_STATUSES } from '../../../lib/constants';
 import type { VocCategory, VocStatus } from '../../../lib/constants';
 import { formatRelativeTime } from '../../../lib/utils';
 import { useV2Toast } from '../ui/Toast';
+import IntroNotice from '../ui/IntroNotice';
 import { confirm } from '../ui/dialog';
 import type { Voc } from '../../../types';
 
@@ -523,55 +524,43 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function AnonymityNotice() {
   return (
-    <div
-      className="w-card"
-      style={{
-        padding: 14,
-        marginBottom: 14,
-        display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: 14,
-        background: 'var(--w-surface)',
-        border: '1px solid var(--w-border)',
-      }}
-    >
-      <div style={{ display: 'flex', gap: 10 }}>
-        <Users size={18} style={{ color: 'var(--w-accent)', flexShrink: 0, marginTop: 2 }} />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--w-text)' }}>
-            유닛 리더 + 팀장이 함께 봅니다
-          </div>
-          <div style={{ fontSize: 12, color: 'var(--w-text-soft)', lineHeight: 1.5 }}>
-            접수된 내용은 해당 유닛 리더와 팀장이 함께 검토해 처리 방향을 정합니다.
-            처리 진행 단계(접수 → 검토중 → 처리중 → 완료)는 우측 상세에서 확인할 수 있어요.
-          </div>
-        </div>
-      </div>
-      <div style={{ display: 'flex', gap: 10 }}>
-        <ShieldCheck size={18} style={{ color: 'var(--w-success)', flexShrink: 0, marginTop: 2 }} />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--w-text)' }}>
-            익명 제출은 정말 익명입니다
-          </div>
-          <div style={{ fontSize: 12, color: 'var(--w-text-soft)', lineHeight: 1.5 }}>
-            익명 체크 시 작성자 ID가 DB에 <b>NULL</b>로 저장되며, 활동 로그에도 기록되지 않습니다.
-            관리자·리더·팀장 누구도 누가 썼는지 알 수 없고, 추후에도 조회·복원할 방법이 없습니다.
-          </div>
-        </div>
-      </div>
-      <div style={{ display: 'flex', gap: 10 }}>
-        <Sparkles size={18} style={{ color: 'var(--w-warn, #d97706)', flexShrink: 0, marginTop: 2 }} />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--w-text)' }}>
-            마음 편히, 다만 서로를 향한 예의는 지켜요
-          </div>
-          <div style={{ fontSize: 12, color: 'var(--w-text-soft)', lineHeight: 1.5 }}>
-            평소엔 말 꺼내기 어려웠던 불편·아쉬움·바람을 풀어서 적어주세요.
-            상황·맥락·바라는 변화를 함께 적어주시면 처리에 큰 도움이 됩니다.
-            특정 인물을 겨냥한 인신공격이나 비난성 표현은 지양해 주세요 — 같은 내용도 사실과 감정을 나눠 적으면 더 잘 전달됩니다.
-          </div>
-        </div>
-      </div>
-    </div>
+    <IntroNotice
+      items={[
+        {
+          icon: Users,
+          iconColor: 'var(--w-accent)',
+          title: '유닛 리더 + 팀장이 함께 봅니다',
+          body: (
+            <>
+              접수된 내용은 해당 유닛 리더와 팀장이 함께 검토해 처리 방향을 정합니다.
+              처리 진행 단계(접수 → 검토중 → 처리중 → 완료)는 우측 상세에서 확인할 수 있어요.
+            </>
+          ),
+        },
+        {
+          icon: ShieldCheck,
+          iconColor: 'var(--w-success)',
+          title: '익명 제출은 정말 익명입니다',
+          body: (
+            <>
+              익명 체크 시 작성자 ID가 DB에 <b>NULL</b>로 저장되며, 활동 로그에도 기록되지 않습니다.
+              관리자·리더·팀장 누구도 누가 썼는지 알 수 없고, 추후에도 조회·복원할 방법이 없습니다.
+            </>
+          ),
+        },
+        {
+          icon: Sparkles,
+          iconColor: 'var(--w-warning)',
+          title: '마음 편히, 다만 서로를 향한 예의는 지켜요',
+          body: (
+            <>
+              평소엔 말 꺼내기 어려웠던 불편·아쉬움·바람을 풀어서 적어주세요.
+              상황·맥락·바라는 변화를 함께 적어주시면 처리에 큰 도움이 됩니다.
+              특정 인물을 겨냥한 인신공격이나 비난성 표현은 지양해 주세요 — 같은 내용도 사실과 감정을 나눠 적으면 더 잘 전달됩니다.
+            </>
+          ),
+        },
+      ]}
+    />
   );
 }

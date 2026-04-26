@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Building2 } from 'lucide-react';
+import { Building2, Activity, Clock, Eye } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
+import IntroNotice from '../ui/IntroNotice';
 import { useAuthStore } from '../../../stores/authStore';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useUnitActivities } from '../../../hooks/useUnitActivities';
@@ -42,6 +43,44 @@ export default function UnitActivitiesPage() {
         ]}
         title="조직 활동"
         description="팀·유닛 단위 진행 활동 요약입니다. 편집은 v1 클래식에서 가능합니다."
+      />
+
+      <IntroNotice
+        items={[
+          {
+            icon: Activity,
+            iconColor: 'var(--w-accent)',
+            title: '팀이 지금 뭘 하는지 한눈에',
+            body: (
+              <>
+                팀·유닛이 진행 중인 굵직한 활동(프로젝트·이벤트·캠페인 등)을 모았습니다.
+                <b> 계획 → 진행중 → 완료</b> 흐름으로 보여서, 신규 합류자도 맥락을 빠르게 파악할 수 있어요.
+              </>
+            ),
+          },
+          {
+            icon: Clock,
+            iconColor: 'var(--w-warning)',
+            title: '상태로 우선순위 파악',
+            body: (
+              <>
+                <b>진행중</b>은 지금 누가 하고 있는 일, <b>보류</b>는 잠깐 멈춰있는 일,
+                <b> 계획</b>은 곧 시작될 일이에요. 상태 필터로 관심 있는 단계만 추려볼 수 있습니다.
+              </>
+            ),
+          },
+          {
+            icon: Eye,
+            iconColor: 'var(--w-info)',
+            title: '읽기 전용 페이지',
+            body: (
+              <>
+                v2 에선 조회만 가능합니다. 새 활동 등록·수정은 v1 클래식 화면에서 진행해주세요.
+                담당자/관리자 분들이 v1에서 입력한 내용이 여기에 자동 반영됩니다.
+              </>
+            ),
+          },
+        ]}
       />
 
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 14 }}>

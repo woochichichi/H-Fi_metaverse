@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Megaphone, Pin, Plus } from 'lucide-react';
+import { Megaphone, Pin, Plus, AlertCircle, Eye, Bell } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
 import PanelShell, { PanelFoot } from '../ui/PanelShell';
+import IntroNotice from '../ui/IntroNotice';
 import { PostHeaderCard, DescriptionCard } from '../ui/PostDetail';
 import MasterDetail, { MasterListCard, MasterListItem } from '../ui/MasterDetail';
 import { useAuthStore } from '../../../stores/authStore';
@@ -66,6 +67,44 @@ export default function NoticePage() {
             </button>
           )
         }
+      />
+
+      <IntroNotice
+        items={[
+          {
+            icon: AlertCircle,
+            iconColor: 'var(--w-danger)',
+            title: '시급성 표기를 꼭 봐주세요',
+            body: (
+              <>
+                <b>긴급</b>은 즉시 확인이 필요한 사안, <b>할일</b>은 본인 액션이 필요한 안내,
+                <b> 참고</b>는 알아두면 좋은 정보예요. 헤더의 시급성 필터로 빠르게 추릴 수 있습니다.
+              </>
+            ),
+          },
+          {
+            icon: Eye,
+            iconColor: 'var(--w-success)',
+            title: '읽음 표시는 자동입니다',
+            body: (
+              <>
+                목록에서 공지를 열면 자동으로 "읽음"으로 처리됩니다. 미확인 공지에는 좌측에 작은
+                <b> 빨간 점</b>이 보이니, 그것만 따라가도 놓치는 게 없어요.
+              </>
+            ),
+          },
+          {
+            icon: Bell,
+            iconColor: 'var(--w-accent)',
+            title: '작성은 리더·관리자',
+            body: (
+              <>
+                작성 권한은 리더·담당·관리자 전용. 작성 시 <b>대상</b>과 <b>시급성</b>을 신중히 정해주세요.
+                긴급 남발은 알림 피로를 키워 정작 중요한 공지가 묻힙니다.
+              </>
+            ),
+          },
+        ]}
       />
 
       <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginBottom: 14 }}>
