@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Mail, Plus, Send, MessageCircle, ShieldOff, UserCheck } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Mail, Plus, Send, MessageCircle, ShieldOff, UserCheck, Check } from 'lucide-react';
+import { supabase } from '../../../lib/supabase';
 import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
@@ -232,6 +233,7 @@ export default function AnonNotePage() {
             showCreate && user && profile ? (
               <CreateNotePanel
                 myTeam={profile.team}
+                myUserId={user.id}
                 onClose={() => setShowCreate(false)}
                 onSubmit={async (input) => {
                   const { error } = await createNote({ ...input, sender_id: user.id });
@@ -397,13 +399,17 @@ function CreateNotePanel({
   onClose,
   onSubmit,
   myTeam,
+  myUserId,
 }: {
   onClose: () => void;
   myTeam: string;
+  /** 본인 ID — 본인 팀 팀원 목록에서 본인 제외용 */
+  myUserId: string;
   onSubmit: (input: {
     anonymous: boolean;
     recipient_role: NoteRecipient;
     recipient_team: string | null;
+    recipient_id: string | null;
     category: NoteCategory;
     title: string;
     content: string;
@@ -417,12 +423,54 @@ function CreateNotePanel({
   const [content, setContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // 'specific' 선택 시 본인 팀 팀원 목록 + 선택된 ID
+  const [teamMembers, setTeamMembers] = useState<Array<{ id: string; name: string; role: string | null }>>([]);
+  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+  const [memberSearch, setMemberSearch] = useState('');
+
+  useEffect(() => {
+    // specific 선택 시 한 번만 로드
+    if (recipient !== 'specific' || teamMembers.length > 0) return;
+    let cancelled = false;
+    void (async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, name, role')
+        .eq('team', myTeam)
+        .neq('id', myUserId)
+        .neq('status', '퇴사')
+        .order('name');
+      if (!cancelled) setTeamMembers((data ?? []) as Array<{ id: string; name: string; role: string | null }>);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [recipient, myTeam, myUserId, teamMembers.length]);
+
+  const filteredMembers = useMemo(() => {
+    const q = memberSearch.trim().toLowerCase();
+    if (!q) return teamMembers;
+    return teamMembers.filter((m) => m.name.toLowerCase().includes(q));
+  }, [teamMembers, memberSearch]);
+
+  const isReady =
+    title.trim() &&
+    content.trim() &&
+    (recipient !== 'specific' || selectedMemberId);
+
   return (
     <PanelShell title="쪽지 보내기" onClose={onClose}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '0 18px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <Field label="수신 대상">
-            <select value={recipient} onChange={(e) => setRecipient(e.target.value as NoteRecipient)}>
+            <select
+              value={recipient}
+              onChange={(e) => {
+                setRecipient(e.target.value as NoteRecipient);
+                setSelectedMemberId(null);
+              }}
+            >
+              <option value="specific">특정 팀원 ({myTeam})</option>
               <option value="team_leaders">내 팀 리더</option>
               <option value="leader">전체 리더</option>
               <option value="admin">관리자</option>
@@ -434,6 +482,68 @@ function CreateNotePanel({
             </select>
           </Field>
         </div>
+
+        {recipient === 'specific' && (
+          <Field label="받는 사람">
+            <input
+              value={memberSearch}
+              onChange={(e) => setMemberSearch(e.target.value)}
+              placeholder="이름 검색"
+              style={{ marginBottom: 6 }}
+            />
+            <div
+              style={{
+                maxHeight: 180,
+                overflowY: 'auto',
+                border: '1px solid var(--w-border)',
+                borderRadius: 6,
+                background: 'var(--w-surface)',
+              }}
+            >
+              {filteredMembers.length === 0 ? (
+                <div style={{ padding: '14px 12px', fontSize: 12, color: 'var(--w-text-muted)', textAlign: 'center' }}>
+                  {teamMembers.length === 0 ? '팀원 목록을 불러오는 중...' : '검색 결과가 없어요'}
+                </div>
+              ) : (
+                filteredMembers.map((m) => {
+                  const active = selectedMemberId === m.id;
+                  return (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => setSelectedMemberId(m.id)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        width: '100%',
+                        padding: '8px 12px',
+                        background: active ? 'var(--w-accent-soft)' : 'transparent',
+                        border: 0,
+                        borderBottom: '1px solid var(--w-border)',
+                        cursor: 'pointer',
+                        fontSize: 13,
+                        color: active ? 'var(--w-accent-hover)' : 'var(--w-text)',
+                        fontWeight: active ? 700 : 500,
+                        textAlign: 'left',
+                        fontFamily: 'inherit',
+                      }}
+                    >
+                      <span style={{ flex: 1 }}>{m.name}</span>
+                      {m.role && m.role !== 'member' && (
+                        <span className="w-badge w-badge-muted" style={{ fontSize: 10 }}>
+                          {m.role === 'admin' ? '관리자' : m.role === 'director' ? '담당' : '리더'}
+                        </span>
+                      )}
+                      {active && <Check size={13} />}
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </Field>
+        )}
+
         <Field label="제목">
           <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} placeholder="예) 어제 도와주셔서 감사했어요" />
         </Field>
@@ -454,14 +564,16 @@ function CreateNotePanel({
         <button className="w-btn w-btn-ghost" onClick={onClose} disabled={submitting}>취소</button>
         <button
           className="w-btn w-btn-primary"
-          disabled={!title.trim() || !content.trim() || submitting}
+          disabled={!isReady || submitting}
           onClick={async () => {
             setSubmitting(true);
             try {
               await onSubmit({
                 anonymous,
                 recipient_role: recipient,
-                recipient_team: recipient === 'team_leaders' ? myTeam : null,
+                recipient_team:
+                  recipient === 'team_leaders' || recipient === 'specific' ? myTeam : null,
+                recipient_id: recipient === 'specific' ? selectedMemberId : null,
                 category,
                 title: title.trim(),
                 content: content.trim(),
