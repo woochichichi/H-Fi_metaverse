@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
+import { useThemeStore } from '../../../stores/themeStore';
 
 interface Props {
   /** 선택된 날짜 (YYYY-MM-DD) */
@@ -21,16 +23,26 @@ interface Props {
  *
  * 디자인: v2 토큰. 토요일 파랑, 일요일 빨강.
  */
+const POPUP_HEIGHT = 360; // 빠른 칩 + 헤더 + 6주 그리드 대략
+const POPUP_WIDTH = 280;
+
 export default function DatePicker({ value, onChange, min, max, quickPicks, placeholder = '날짜 선택' }: Props) {
   const [open, setOpen] = useState(false);
   const [viewMonth, setViewMonth] = useState(() => firstDayOf(value || max || todayStr()));
   const wrapRef = useRef<HTMLDivElement>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
+  const [popupPos, setPopupPos] = useState<{ top: number; left: number } | null>(null);
+  const themeClass = useThemeStore((s) => (s.version === 'dark' ? 'v2-dark' : 'v2-warm'));
 
-  // 바깥 클릭 닫기
+  // 바깥 클릭 닫기 — popup 도 wrap 외부에 있으니 popup 안 클릭은 허용해야 함
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
+      const t = e.target as Node;
+      if (
+        wrapRef.current && !wrapRef.current.contains(t) &&
+        popupRef.current && !popupRef.current.contains(t)
+      ) {
         setOpen(false);
       }
     };
@@ -42,6 +54,33 @@ export default function DatePicker({ value, onChange, min, max, quickPicks, plac
     return () => {
       document.removeEventListener('mousedown', onDown);
       document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  // 팝업 위치 계산 — 입력 아래 공간 부족하면 위로 flip, 화면 우측 밖으로 나가면 좌측 정렬
+  useLayoutEffect(() => {
+    if (!open || !wrapRef.current) return;
+    const update = () => {
+      const r = wrapRef.current!.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const vw = window.innerWidth;
+      const margin = 8;
+      const spaceBelow = vh - r.bottom - margin;
+      const spaceAbove = r.top - margin;
+      // 아래 공간 부족 + 위에 더 많은 공간 → 위로 flip
+      const placeAbove = spaceBelow < POPUP_HEIGHT && spaceAbove > spaceBelow;
+      const top = placeAbove ? Math.max(margin, r.top - POPUP_HEIGHT - 4) : Math.min(vh - POPUP_HEIGHT - margin, r.bottom + 4);
+      // 좌측 정렬 기본, 우측 넘치면 좌측으로 당김
+      const desiredLeft = r.left;
+      const left = Math.min(Math.max(margin, desiredLeft), vw - POPUP_WIDTH - margin);
+      setPopupPos({ top, left });
+    };
+    update();
+    window.addEventListener('resize', update);
+    window.addEventListener('scroll', update, true);
+    return () => {
+      window.removeEventListener('resize', update);
+      window.removeEventListener('scroll', update, true);
     };
   }, [open]);
 
@@ -97,19 +136,23 @@ export default function DatePicker({ value, onChange, min, max, quickPicks, plac
         </span>
       </button>
 
-      {open && (
+      {open && popupPos && createPortal(
         <div
+          ref={popupRef}
+          className={themeClass}
           style={{
-            position: 'absolute',
-            top: 'calc(100% + 4px)',
-            left: 0,
-            zIndex: 50,
+            // body 로 portal — 부모 모달 overflow:hidden 영향 없이 항상 보임
+            position: 'fixed',
+            top: popupPos.top,
+            left: popupPos.left,
+            // Modal(zIndex 400) 위에 떠야 함
+            zIndex: 500,
             background: 'var(--w-surface)',
             border: '1px solid var(--w-border)',
             borderRadius: 10,
             boxShadow: '0 8px 24px rgba(42,31,26,.18)',
             padding: 12,
-            width: 280,
+            width: POPUP_WIDTH,
           }}
         >
           {/* 빠른 선택 칩 */}
@@ -243,7 +286,8 @@ export default function DatePicker({ value, onChange, min, max, quickPicks, plac
               );
             })}
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );

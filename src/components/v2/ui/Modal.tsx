@@ -35,8 +35,8 @@ export default function Modal({ open, onClose, title, children, width = 520, foo
     // 크림색으로 칠해 뒤 페이지가 가려지는 현상 방지. 모달 자식만 색을 가짐.
     <div className={themeClass} style={{ position: 'fixed', inset: 0, zIndex: 400, background: 'transparent', pointerEvents: 'none' }}>
       <div
-        // backdrop: 클릭 시 닫기 위해 pointer-events 살림 (wrapper 는 none).
-        style={{ position: 'absolute', inset: 0, background: 'transparent', pointerEvents: 'auto' }}
+        // backdrop: 살짝만 불투명 — 뒤 페이지 보이되 모달이 페이지 위로 떠있는 컨텍스트 유지.
+        style={{ position: 'absolute', inset: 0, background: 'rgba(42,31,26,.10)', pointerEvents: 'auto' }}
         onClick={onClose}
       />
       <div

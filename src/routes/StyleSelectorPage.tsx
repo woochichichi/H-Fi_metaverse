@@ -17,10 +17,13 @@ export default function StyleSelectorPage() {
   const previewMeta = previewOf ? UI_VERSIONS.find((v) => v.id === previewOf) : null;
 
   const handlePick = (id: UiVersion) => {
-    if (id === currentVersion) return;
     const meta = UI_VERSIONS.find((v) => v.id === id)!;
-    setVersion(id);
-    addToast(`'${meta.name}'로 바뀌었어요`, 'success');
+    if (id !== currentVersion) {
+      setVersion(id);
+      addToast(`'${meta.name}'로 바뀌었어요`, 'success');
+    }
+    // 테마 적용 후 즉시 메인으로 이동 — 사용자가 적용 결과를 바로 봄
+    navigate('/');
   };
 
   return (

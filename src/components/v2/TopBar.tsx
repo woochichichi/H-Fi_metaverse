@@ -7,6 +7,7 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { useNotices } from '../../hooks/useNotices';
 import { useInbox } from '../../hooks/useInbox';
 import { useV2Nav } from '../../stores/v2NavStore';
+import { confirm } from './ui/dialog';
 import { useThemeStore } from '../../stores/themeStore';
 import InboxPanel from '../inbox/InboxPanel';
 
@@ -135,7 +136,18 @@ export default function V2TopBar() {
           </div>
         )}
 
-        <IconButton title="로그아웃" onClick={logout}>
+        <IconButton
+          title="로그아웃"
+          onClick={async () => {
+            const ok = await confirm({
+              title: '로그아웃',
+              message: '정말 로그아웃 하시겠어요?',
+              confirmLabel: '로그아웃',
+              tone: 'danger',
+            });
+            if (ok) logout();
+          }}
+        >
           <LogOut size={16} />
         </IconButton>
       </div>
