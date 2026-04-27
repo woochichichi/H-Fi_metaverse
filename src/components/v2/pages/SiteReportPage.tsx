@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Bug, Plus, X } from 'lucide-react';
+import { Bug, Plus, X, Wrench, Lightbulb, ClipboardList } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import EmptyState from '../ui/EmptyState';
+import IntroNotice from '../ui/IntroNotice';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSiteReports } from '../../../hooks/useSiteReports';
 import { formatRelativeTime } from '../../../lib/utils';
@@ -40,6 +41,44 @@ export default function SiteReportPage() {
             <span>제보하기</span>
           </button>
         }
+      />
+
+      <IntroNotice
+        items={[
+          {
+            icon: Wrench,
+            iconColor: 'var(--w-danger)',
+            title: '버그 · 오류는 여기로',
+            body: (
+              <>
+                "버튼을 눌러도 안 됨", "이 화면이 깨져 보임" 같은 동작 문제를 알려주세요.
+                <b> 어떤 화면에서 / 무엇을 했더니 / 어떻게 됐는지</b> 적어주시면 더 빠르게 고칠 수 있어요.
+              </>
+            ),
+          },
+          {
+            icon: Lightbulb,
+            iconColor: 'var(--w-warning)',
+            title: '개선 아이디어도 환영',
+            body: (
+              <>
+                "여기에 이런 기능 있으면 좋겠어요" 같은 의견도 OK. 사이트 자체에 대한 제안이라
+                일반 <b>아이디어</b> 메뉴와 구분돼요. 자주 쓰는 화면일수록 작은 불편도 기록해주세요.
+              </>
+            ),
+          },
+          {
+            icon: ClipboardList,
+            iconColor: 'var(--w-info)',
+            title: '환경 정보가 자동 첨부',
+            body: (
+              <>
+                제출 시 현재 <b>URL · 화면 크기 · 브라우저 · 콘솔 로그</b>가 자동으로 함께 전송됩니다.
+                별도로 캡쳐·정보 정리하지 않아도 돼요. 하루 <b>3건</b>까지 제출할 수 있습니다.
+              </>
+            ),
+          },
+        ]}
       />
 
       {/* 인라인 작성 폼 — 목록 위에 펼침 */}

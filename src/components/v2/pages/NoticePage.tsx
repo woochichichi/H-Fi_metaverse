@@ -29,6 +29,7 @@ export default function NoticePage() {
     fetchMyReads,
     markAsRead,
     createNotice,
+    updateNotice,
     deleteNotice,
   } = useNotices();
 
@@ -229,8 +230,10 @@ export default function NoticePage() {
               />
             ) : detail ? (
               <NoticeDetailPanel
+                key={detail.id}
                 notice={detail}
                 canDelete={perm.isAdmin || detail.author_id === user?.id}
+                canEdit={canWrite}
                 onClose={() => setDetail(null)}
                 onDelete={async () => {
                   const ok = await confirm({ title: '공지 삭제', message: '공지를 삭제하시겠어요?' });
@@ -238,6 +241,15 @@ export default function NoticePage() {
                   const { error } = await deleteNotice(detail.id);
                   if (error) showToast(`삭제 실패: ${error}`, 'error');
                   else setDetail(null);
+                }}
+                onSaveEdit={async (patch) => {
+                  const { error } = await updateNotice(detail.id, patch);
+                  if (error) {
+                    showToast(`수정 실패: ${error}`, 'error');
+                    return;
+                  }
+                  setDetail({ ...detail, ...patch });
+                  showToast('공지가 수정되었습니다', 'success');
                 }}
               />
             ) : null
@@ -251,15 +263,122 @@ export default function NoticePage() {
 function NoticeDetailPanel({
   notice,
   canDelete,
+  canEdit,
   onDelete,
+  onSaveEdit,
 }: {
   notice: Notice;
   canDelete: boolean;
+  canEdit: boolean;
   onDelete: () => void;
+  onSaveEdit: (patch: { title?: string; content?: string; urgency?: UrgencyLevel; category?: NoticeCategory; pinned?: boolean }) => Promise<void>;
   onClose: () => void; // 시그니처 호환
 }) {
+  const [editing, setEditing] = useState(false);
+  const [eTitle, setETitle] = useState(notice.title);
+  const [eContent, setEContent] = useState(notice.content);
+  const [eUrgency, setEUrgency] = useState<UrgencyLevel>(notice.urgency);
+  const [eCategory, setECategory] = useState<NoticeCategory>(notice.category);
+  const [ePinned, setEPinned] = useState(notice.pinned);
+  const [saving, setSaving] = useState(false);
+
+  const dirty =
+    eTitle !== notice.title ||
+    eContent !== notice.content ||
+    eUrgency !== notice.urgency ||
+    eCategory !== notice.category ||
+    ePinned !== notice.pinned;
+
+  const handleSave = async () => {
+    if (!eTitle.trim() || !eContent.trim()) return;
+    setSaving(true);
+    try {
+      await onSaveEdit({
+        title: eTitle.trim(),
+        content: eContent.trim(),
+        urgency: eUrgency,
+        category: eCategory,
+        pinned: ePinned,
+      });
+      setEditing(false);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setETitle(notice.title);
+    setEContent(notice.content);
+    setEUrgency(notice.urgency);
+    setECategory(notice.category);
+    setEPinned(notice.pinned);
+    setEditing(false);
+  };
+
   const tone =
-    notice.urgency === '긴급' ? 'crit' : notice.urgency === '할일' ? 'todo' : 'info';
+    (editing ? eUrgency : notice.urgency) === '긴급'
+      ? 'crit'
+      : (editing ? eUrgency : notice.urgency) === '할일'
+        ? 'todo'
+        : 'info';
+
+  if (editing) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: 18, background: 'var(--w-surface)', border: '1px solid var(--w-border)', borderRadius: 12 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--w-text)' }}>공지 수정</div>
+        <Field label="제목">
+          <input
+            value={eTitle}
+            onChange={(e) => setETitle(e.target.value)}
+            placeholder="공지 제목"
+            maxLength={120}
+          />
+        </Field>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+          <Field label="시급성">
+            <select value={eUrgency} onChange={(e) => setEUrgency(e.target.value as UrgencyLevel)}>
+              {URGENCY_LEVELS.map((u) => <option key={u} value={u}>{u}</option>)}
+            </select>
+          </Field>
+          <Field label="카테고리">
+            <select value={eCategory} onChange={(e) => setECategory(e.target.value as NoticeCategory)}>
+              {NOTICE_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </Field>
+          <Field label="고정">
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--w-text-soft)', height: '100%' }}>
+              <input
+                type="checkbox"
+                checked={ePinned}
+                onChange={(e) => setEPinned(e.target.checked)}
+                style={{ width: 'auto', padding: 0 }}
+              />
+              <Pin size={12} /> 상단 고정
+            </label>
+          </Field>
+        </div>
+        <Field label="내용">
+          <textarea
+            value={eContent}
+            onChange={(e) => setEContent(e.target.value)}
+            rows={8}
+            placeholder="공지 내용을 작성해주세요"
+          />
+        </Field>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 4 }}>
+          <button className="w-btn w-btn-ghost" onClick={handleCancel} disabled={saving}>취소</button>
+          <button
+            className="w-btn w-btn-primary"
+            onClick={() => { void handleSave(); }}
+            disabled={!dirty || !eTitle.trim() || !eContent.trim() || saving}
+          >
+            {saving ? '저장 중...' : '저장'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <PostHeaderCard
@@ -288,6 +407,27 @@ function NoticeDetailPanel({
             <span>{formatRelativeTime(notice.created_at)}</span>
             <span>·</span>
             <span>조회 {notice.view_count}</span>
+            {canEdit && (
+              <>
+                <span>·</span>
+                <button
+                  type="button"
+                  onClick={() => setEditing(true)}
+                  style={{
+                    background: 'transparent',
+                    border: 0,
+                    color: 'var(--w-accent)',
+                    fontSize: 11.5,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    padding: 0,
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  수정
+                </button>
+              </>
+            )}
           </>
         }
         canDelete={canDelete}
