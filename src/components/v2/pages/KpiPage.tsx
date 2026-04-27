@@ -383,8 +383,12 @@ function ScoreCell({
       return;
     }
     setSaving(true);
-    await onCommit(n);
-    setSaving(false);
+    try {
+      await onCommit(n);
+    } finally {
+      // onCommit 이 throw 하더라도 saving 고착 방지 — 입력 영구 disabled 되는 버그 차단.
+      setSaving(false);
+    }
   };
 
   return (
