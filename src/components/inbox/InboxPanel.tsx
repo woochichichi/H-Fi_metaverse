@@ -10,9 +10,14 @@ import type { Notification } from '../../types';
 
 interface InboxPanelProps {
   onClose: () => void;
+  /**
+   * v2 워크스페이스에서 호출 시 — 항목 클릭 시 v2 페이지로 이동.
+   * 미지정이면 v1 메타버스 zone modal 로 fallback (classic 모드).
+   */
+  onNavigate?: (page: string) => void;
 }
 
-export default function InboxPanel({ onClose }: InboxPanelProps) {
+export default function InboxPanel({ onClose, onNavigate }: InboxPanelProps) {
   const { openModal } = useUiStore();
   const { profile, user } = useAuthStore();
   const { items, loading, error, markAsRead, markAllAsRead, fetchInbox } = useInbox(user?.id ?? null);
@@ -27,21 +32,27 @@ export default function InboxPanel({ onClose }: InboxPanelProps) {
       markAsRead(notification.id);
     }
 
-    // link 필드로 해당 기능 이동
-    if (notification.link) {
-      const match = notification.link.match(/^\/(voc|note|notice|idea|site-report)\//);
-      if (match) {
-        let modalId = match[1];
-        // notice → 팀별 zone ID로 변환 (예: stock-notice)
-        if (modalId === 'notice' && profile?.team) {
-          const roomId = TEAM_TO_ROOM[profile.team as keyof typeof TEAM_TO_ROOM];
-          if (roomId) modalId = `${roomId}-notice`;
-        }
-        // VOC/사이트건의 → 특정 항목 ID를 context로 전달
-        const itemId = notification.link.split('/').pop();
-        openModal(modalId, itemId ? { itemId } : undefined);
-      }
+    if (!notification.link) return;
+    const match = notification.link.match(/^\/(voc|note|notice|idea|site-report)\//);
+    if (!match) return;
+    const kind = match[1];
+
+    // v2 모드: useV2Nav.setPage 로 v2 페이지 라우팅. note → anon-note 매핑.
+    if (onNavigate) {
+      const v2Page = kind === 'note' ? 'anon-note' : kind;
+      onNavigate(v2Page);
+      onClose();
+      return;
     }
+
+    // v1 classic: 기존 zone modal 호출 (fallback).
+    let modalId = kind;
+    if (modalId === 'notice' && profile?.team) {
+      const roomId = TEAM_TO_ROOM[profile.team as keyof typeof TEAM_TO_ROOM];
+      if (roomId) modalId = `${roomId}-notice`;
+    }
+    const itemId = notification.link.split('/').pop();
+    openModal(modalId, itemId ? { itemId } : undefined);
   };
 
   return (

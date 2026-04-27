@@ -123,6 +123,42 @@ export function useInbox(userId: string | null) {
           setUnreadCount((prev) => prev + 1);
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          // UPDATE 도 구독 — 다른 hook 인스턴스(InboxPanel)에서 read=true 로 바꾸면
+          // TopBar 의 본 인스턴스도 자동 동기화되어 unread 배지가 새로고침 없이 사라짐.
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          const updated = payload.new as Notification;
+          const before = payload.old as Partial<Notification>;
+          // items 갱신
+          setItems((prev) => {
+            const idx = prev.findIndex((n) => n.id === updated.id);
+            if (idx < 0) return prev;
+            const next = prev.slice();
+            next[idx] = { ...next[idx], ...updated };
+            return next;
+          });
+          // read 토글이 일어난 경우만 카운트 조정 (다른 컬럼 UPDATE 영향 없음).
+          // payload.old 가 REPLICA IDENTITY 설정에 따라 일부만 올 수 있어 'before.read' 가
+          // undefined 일 수 있음 — 그 경우 fetchInbox 로 안전하게 재계산.
+          if (typeof before.read === 'boolean') {
+            if (before.read === false && updated.read === true) {
+              setUnreadCount((c) => Math.max(0, c - 1));
+            } else if (before.read === true && updated.read === false) {
+              setUnreadCount((c) => c + 1);
+            }
+          } else {
+            // payload.old 에 read 가 없으면 안전하게 재계산.
+            void fetchInbox();
+          }
+        }
+      )
       .subscribe((status) => {
         if (status === 'CHANNEL_ERROR') {
           console.error('Inbox Realtime 구독 에러 — 자동 재연결 시도');
@@ -132,6 +168,7 @@ export function useInbox(userId: string | null) {
     return () => {
       supabase.removeChannel(channel);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, channelSuffix]);
 
   return { items, loading, error, unreadCount, fetchInbox, markAsRead, markAllAsRead };

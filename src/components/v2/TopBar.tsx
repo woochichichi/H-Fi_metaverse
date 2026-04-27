@@ -167,7 +167,10 @@ export default function V2TopBar() {
             animation: 'slideInRight .25s ease-out',
           }}
         >
-          <InboxPanel onClose={() => setShowInbox(false)} />
+          <InboxPanel
+            onClose={() => setShowInbox(false)}
+            onNavigate={(page) => setPage(page as Parameters<typeof setPage>[0])}
+          />
         </div>
       </div>,
       document.body,
