@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Mail, Plus, Send } from 'lucide-react';
+import { Mail, Plus, Send, MessageCircle, ShieldOff, UserCheck } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import FilterBar from '../ui/FilterBar';
 import EmptyState from '../ui/EmptyState';
 import PanelShell, { PanelFoot } from '../ui/PanelShell';
+import IntroNotice from '../ui/IntroNotice';
 import { StatusPicker, type StatusTone } from '../ui/DetailShell';
 import {
   PostHeaderCard,
@@ -72,6 +73,44 @@ export default function AnonNotePage() {
             <span>쪽지 보내기</span>
           </button>
         }
+      />
+
+      <IntroNotice
+        items={[
+          {
+            icon: MessageCircle,
+            iconColor: 'var(--w-accent)',
+            title: '1:1 사적인 대화 공간',
+            body: (
+              <>
+                바라는점이 <b>공식 접수</b>라면, 쪽지는 <b>가벼운 한마디</b>예요.
+                칭찬·감사·고민·궁금한 점 — 평소 말 꺼내기 애매한 이야기를 부담 없이 전해보세요.
+              </>
+            ),
+          },
+          {
+            icon: ShieldOff,
+            iconColor: 'var(--w-success)',
+            title: '익명 옵션 — 정말 익명',
+            body: (
+              <>
+                "익명으로 보내기" 체크 시 <b>발신자 ID 가 DB 에 저장되지 않아요</b>. 받는 사람·관리자
+                누구도 누가 썼는지 알 수 없습니다. 마음 편히 적되 인신공격은 피해주세요.
+              </>
+            ),
+          },
+          {
+            icon: UserCheck,
+            iconColor: 'var(--w-info)',
+            title: '받는 사람을 직접 고를 수 있어요',
+            body: (
+              <>
+                내 팀 리더 / 전체 리더 / 관리자뿐 아니라 <b>특정 팀원</b>에게도 쪽지를 보낼 수 있어요.
+                칭찬·감사를 동료에게 전할 때 가장 편한 통로입니다.
+              </>
+            ),
+          },
+        ]}
       />
 
       {perm.canReceiveAnonNotes && (

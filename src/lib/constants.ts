@@ -72,7 +72,11 @@ export const NOTE_CATEGORIES = ['건의', '질문', '감사', '불편', '기타'
 export type NoteCategory = (typeof NOTE_CATEGORIES)[number];
 
 // 쪽지 수신 대상
-export const NOTE_RECIPIENTS = ['leader', 'admin', 'team_leaders'] as const;
+//   specific: 특정 팀원 1명 (recipient_id 사용)
+//   team_leaders: 보낸이의 내 팀 리더 그룹
+//   leader: 전체 팀의 리더
+//   admin: 관리자
+export const NOTE_RECIPIENTS = ['specific', 'team_leaders', 'leader', 'admin'] as const;
 export type NoteRecipient = (typeof NOTE_RECIPIENTS)[number];
 
 // 쪽지 상태

@@ -99,68 +99,9 @@ export default function SiteReportPage() {
         />
       )}
 
-      {loading ? (
-        <div className="w-card" style={{ padding: 40, textAlign: 'center', color: 'var(--w-text-muted)' }}>
-          불러오는 중...
-        </div>
-      ) : reports.length === 0 ? (
-        <div className="w-card">
-          <EmptyState icon={Bug} title="제보가 없어요" />
-        </div>
-      ) : (
-        <div className="w-card" style={{ padding: 0, overflow: 'hidden' }}>
-          {reports.map((r, i) => (
-            <button
-              key={r.id}
-              onClick={() => setDetail(r)}
-              style={{
-                display: 'flex',
-                gap: 12,
-                padding: '14px 16px',
-                width: '100%',
-                textAlign: 'left',
-                background: 'transparent',
-                borderTop: i === 0 ? 'none' : '1px solid var(--w-border)',
-                cursor: 'pointer',
-                alignItems: 'flex-start',
-              }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'var(--w-surface-2)')}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'transparent')}
-            >
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 4 }}>
-                  <ReportStatusBadge status={r.status} />
-                  {perm.isSuperAdmin && authorNames[r.author_id] && (
-                    <span className="w-badge w-badge-muted">{authorNames[r.author_id]}</span>
-                  )}
-                </div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--w-text)', marginBottom: 3 }}>
-                  {r.title}
-                </div>
-                <div
-                  style={{
-                    fontSize: 12,
-                    color: 'var(--w-text-soft)',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 1,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                  }}
-                >
-                  {r.content}
-                </div>
-                <div style={{ fontSize: 11, color: 'var(--w-text-muted)', marginTop: 4 }}>
-                  {formatRelativeTime(r.created_at)}
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* 상세 — 모달 대신 페이지 안에 인라인으로 펼침 */}
+      {/* 상세 — 목록 위에 인라인으로 펼침 (목록 아래에 두면 스크롤 필요해 안 보임) */}
       {detail && (
-        <div className="w-card" style={{ marginTop: 12, padding: 18, position: 'relative' }}>
+        <div className="w-card" style={{ marginBottom: 12, padding: 18, position: 'relative', border: '2px solid var(--w-accent)' }}>
           <button
             type="button"
             onClick={() => setDetail(null)}
@@ -224,6 +165,66 @@ export default function SiteReportPage() {
           )}
         </div>
       )}
+
+      {loading ? (
+        <div className="w-card" style={{ padding: 40, textAlign: 'center', color: 'var(--w-text-muted)' }}>
+          불러오는 중...
+        </div>
+      ) : reports.length === 0 ? (
+        <div className="w-card">
+          <EmptyState icon={Bug} title="제보가 없어요" />
+        </div>
+      ) : (
+        <div className="w-card" style={{ padding: 0, overflow: 'hidden' }}>
+          {reports.map((r, i) => (
+            <button
+              key={r.id}
+              onClick={() => setDetail(r)}
+              style={{
+                display: 'flex',
+                gap: 12,
+                padding: '14px 16px',
+                width: '100%',
+                textAlign: 'left',
+                background: 'transparent',
+                borderTop: i === 0 ? 'none' : '1px solid var(--w-border)',
+                cursor: 'pointer',
+                alignItems: 'flex-start',
+              }}
+              onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'var(--w-surface-2)')}
+              onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'transparent')}
+            >
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 4 }}>
+                  <ReportStatusBadge status={r.status} />
+                  {perm.isSuperAdmin && authorNames[r.author_id] && (
+                    <span className="w-badge w-badge-muted">{authorNames[r.author_id]}</span>
+                  )}
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--w-text)', marginBottom: 3 }}>
+                  {r.title}
+                </div>
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: 'var(--w-text-soft)',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 1,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                  }}
+                >
+                  {r.content}
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--w-text-muted)', marginTop: 4 }}>
+                  {formatRelativeTime(r.created_at)}
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+
     </>
   );
 }
