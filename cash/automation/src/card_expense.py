@@ -21,12 +21,12 @@ import random
 import re
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timedelta, timezone
-
-KST = timezone(timedelta(hours=9))
 from pathlib import Path
 from playwright.async_api import Page
 
 from .config import load_selectors, Env
+
+KST = timezone(timedelta(hours=9))
 
 SEL = load_selectors()
 MENU_OPEN_PATH = "/FW/account/corporationCardExpense.do"

@@ -20,7 +20,9 @@ probe_live / probe_autologin 디렉토리 전체를 스캔해서
 from __future__ import annotations
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
+
+KST = timezone(timedelta(hours=9))
 from pathlib import Path
 from collections import defaultdict
 
@@ -98,7 +100,7 @@ def main():
         sys.exit(1)
 
     target_team = Env.TARGET_TEAM
-    now_iso = datetime.now().isoformat()
+    now_iso = datetime.now(KST).isoformat()
     print()
 
     for period_ym, bundle in sorted(groups.items()):

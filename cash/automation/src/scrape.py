@@ -23,11 +23,11 @@ import json
 import re
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timezone, timedelta
-
-KST = timezone(timedelta(hours=9))
 from pathlib import Path
 from typing import Optional
 from playwright.async_api import Page, Response, Locator
+
+KST = timezone(timedelta(hours=9))
 
 from .config import load_selectors, Env
 from .stealth import human_delay

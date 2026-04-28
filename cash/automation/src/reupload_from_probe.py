@@ -13,7 +13,9 @@ probe_live.py 로 캡처한 실제 API 응답을 (수정된 파서로) 재파싱
 from __future__ import annotations
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
+
+KST = timezone(timedelta(hours=9))
 from pathlib import Path
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -70,7 +72,7 @@ def main():
         dept_cd = Env.DEPT_CD
 
     snap = BudgetSnapshot(
-        captured_at=datetime.now().isoformat(),
+        captured_at=datetime.now(KST).isoformat(),
         dept_cd=dept_cd,
         period_ym=period_ym,
         accounts=accounts,
