@@ -22,7 +22,9 @@ import asyncio
 import json
 import re
 from dataclasses import dataclass, field, asdict
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+
+KST = timezone(timedelta(hours=9))
 from pathlib import Path
 from typing import Optional
 from playwright.async_api import Page, Response, Locator
@@ -333,7 +335,7 @@ async def collect_snapshot(erp_page: Page, *, dept_cd: str = "M110301",
                     transactions.append(BudgetHistRow.from_json(item, rtn))
 
     return BudgetSnapshot(
-        captured_at=datetime.now().isoformat(),
+        captured_at=datetime.now(KST).isoformat(),
         dept_cd=dept_cd,
         period_ym=period_ym,
         accounts=accounts,

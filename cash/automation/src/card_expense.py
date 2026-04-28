@@ -20,7 +20,9 @@ import json
 import random
 import re
 from dataclasses import dataclass, field, asdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+KST = timezone(timedelta(hours=9))
 from pathlib import Path
 from playwright.async_api import Page
 
@@ -90,7 +92,7 @@ class CardExpenseSnapshot:
 
 
 async def _open_menu(erp_page: Page) -> None:
-    """메뉴 진입 호출 — 본조회 전 선행."""
+    """메뉴 진입 호출 — 본조회 전 선행. 400 이어도 List 가 성공하는 경우 있어 경고만."""
     host = SEL["api"]["host"]
     result = await erp_page.evaluate(
         """async ({host, path}) => {
@@ -104,7 +106,7 @@ async def _open_menu(erp_page: Page) -> None:
         {"host": host, "path": MENU_OPEN_PATH},
     )
     if not result.get("ok"):
-        raise RuntimeError(f"카드메뉴 진입 실패: status={result.get('status')}")
+        print(f"  [warn] 카드메뉴 진입 status={result.get('status')} — List 로 직접 시도")
 
 
 async def _fetch_list(erp_page: Page, emp_no: str, date_from: str, date_to: str,
@@ -173,7 +175,7 @@ async def collect_card_expense(erp_page: Page, *, emp_no: str,
 
     rows = [CardExpenseRow.from_json(r) for r in (rows_json or [])]
     return CardExpenseSnapshot(
-        captured_at=datetime.now().isoformat(),
+        captured_at=datetime.now(KST).isoformat(),
         emp_no=emp_no,
         date_from=date_from,
         date_to=date_to,

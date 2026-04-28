@@ -217,6 +217,31 @@ const useDeviceMode = () => {
 
 ## 트러블슈팅 & 시행착오
 
+### 법인카드 수집시각이 +9시간 어긋남 — naive datetime → UTC 오해석 (2026-04-28)
+**증상:** 09:00 KST 에 크롤링 배치를 돌렸는데, 팀 예산 페이지의 `SyncBadge` 가 `04/28 17:57 수집` 으로 표시. 사용자가 "배치 돌린 시간으로 보여지게 해줘 (지금 17:57)" 요청.
+**원인 추적:**
+1. `corp_card_snapshots.captured_at` 컬럼은 `timestamp with time zone`. 프론트 [formatKST](src/lib/utils.ts#L7) 는 `Asia/Seoul` 강제로 정확함.
+2. DB 실제 값 확인 → `2026-04-28 08:57:05.74998+00` 으로 저장돼 있었음. **즉 KST 08:57 을 UTC 08:57 로 기록한 상태.** Postgres가 다시 +9 변환해 화면이 17:57.
+3. 업로더 [scrape.py:336](cash/automation/src/scrape.py) / [card_expense.py:176](cash/automation/src/card_expense.py) 의 `datetime.now().isoformat()` 추적 → 출력은 `"2026-04-28T08:57:05.749980"` (오프셋 없음 = naive). PostgREST/Postgres 는 timezone 없는 timestamptz 입력을 **세션 timezone(UTC)** 으로 가정 → 어긋남 확정.
+**해결:** 두 파일 모두 `datetime.now(KST).isoformat()` 으로 교체 (KST = `timezone(timedelta(hours=9))`). 결과 ISO 문자열이 `"2026-04-28T09:06:58.849570+09:00"` 로 오프셋 포함 → DB 가 UTC 로 정규화하면서도 KST 의미 보존, 프론트 KST 변환 시 정확히 `09:06`.
+**교훈:**
+- **`datetime.now().isoformat()` 는 절대 timestamptz 컬럼에 직접 보내지 말 것.** 항상 `datetime.now(tz)` 로 tz-aware 객체를 만들어야 ISO 문자열에 오프셋이 붙음.
+- DB 값과 화면 표시값의 시차가 정확히 시간대 오프셋(+9, -5 등)이면 거의 100% 직렬화 단계의 naive 문자열 문제. timezone 변환 로직보다 **입력 직렬화**를 먼저 의심할 것.
+- 자동/수동 어느 쪽으로 돌리든, 사용자가 보고 싶은 건 "지금 몇 시에 돌렸는지" 라는 KST wallclock — 서버 timezone 가정에 의존하지 말고 명시적 tz 부여.
+
+### 멀티 chat 동시 작업 시 push 누락 점검 (2026-04-25)
+**증상:** 한 chat에서 9개 파일을 수정·"배포"했다고 보고했는데, 사용자 화면(캡처)에는 옛날 UI가 그대로. 같은 시점에 다른 chat이 budget 관련 커밋을 여러 건 push 중이었음.
+**원인 추적 과정:**
+1. `git status` 단독으로는 신뢰 불가 — 워킹트리에 modified로 살아있다는 사실만 알려줌. "이미 푸시됐는지"는 알려주지 않음.
+2. `git log --oneline` 으로 최근 커밋만 봐도 부족 — 다른 chat이 커밋 메시지를 다르게 썼을 수 있어서 키워드 grep이 빗나감.
+3. **결정적 점검:** `git log -p --all -S "<신규 도입 문자열>"` — 이번 작업에서 새로 도입한 한글 문자열("바라는점")을 전체 히스토리에서 -S 옵션으로 검색. 0건이면 = 어떤 커밋·어떤 브랜치에도 안 들어간 것 = push 누락 확정.
+4. 추가 확인: `git rev-list --left-right --count origin/main...HEAD` 로 로컬·원격 divergence 0/0 인지 → 동기화 자체는 정상이지만 신규 작업이 아예 stage조차 안 됐던 상태였음을 식별.
+**해결:** 9개 파일 명시적 `git add`(파일명 나열, `-A`/`.` 금지 — untracked design/cash/docs 폴더가 함께 들어가는 것 방지) → commit → push.
+**교훈:**
+- **"수정했다"와 "푸시됐다"는 다른 사실** — modified 워킹트리는 push의 증거가 아님.
+- **여러 chat이 동시에 작업할 때**는 작업 종료 시점에 신규 도입 고유 문자열로 `git log -S` 검증을 한 번 더 거칠 것.
+- `git stash list`에 다른 chat 작업물이 남아있을 수 있음 — 모르는 stash는 절대 pop·drop 하지 말고 컨텍스트 보존.
+
 ### Supabase 쿼리 무한 대기 (2026-03-30)
 **증상:** 모든 패널(VOC/공지/쪽지 등)에서 "로딩에 실패했습니다" 표시 — loading이 영원히 true로 남음
 **원인:** 커밋 `7e270d1`에서 빌드 호환성 문제로 `abortSignal`을 전체 hooks에서 제거 → 네트워크 지연 시 쿼리가 무한 대기
